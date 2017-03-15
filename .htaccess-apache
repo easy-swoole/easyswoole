@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  #RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]  fcgi下无效
+  RewriteRule ^(.*)$  http://127.0.0.1:9501/$1 [QSA,P,L]
+   #请开启 proxy_mod proxy_http_mod requset_mod
+</IfModule>
