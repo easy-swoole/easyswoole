@@ -27,14 +27,6 @@ class Event extends AbstractEvent
     function beforeWorkerStart(\swoole_http_server $server)
     {
         // TODO: Implement beforeWorkerStart() method.
-        $udp = $server->addlistener("0.0.0.0",9502,SWOOLE_UDP);
-        $udp->on('receive',function(\swoole_server $server, $clientIp, $clientPort, $data){
-            var_dump($data);
-            var_dump(long2ip($clientIp));
-            var_dump($clientIp);
-            var_dump($clientPort);
-
-        });
     }
 
     function onStart(\swoole_http_server $server)
