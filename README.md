@@ -23,6 +23,7 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
 - php: 5.6.30
 - Swoole: 1.8.13-stable
 - 测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>""easyPHP"
+- ab -c 500 -n 500000 http://127.0.0.1:9501/ 测试结果如下
 ````
 Server Software:        easyPHP
 Server Hostname:        127.0.0.1
@@ -141,6 +142,13 @@ Percentage of the requests served within a certain time (ms)
    - onWorkerError
    - onWorkerFatalError
  ### 控制器
- 
+   控制器名称空间前缀统一为 "App\Controller"。控制器搜索规则为优先完整匹配。示例代码请看 example /conrollerUsage_01下面的代码。 
  ### 服务启动
+ 框架Server需要以cli模式执行启动。实例代码如下：
+ ```php
+ <?php
+    require_once 'Core/Core.php';
+    \Core\Core::getInstance()->frameWorkInitialize()->run();
+ ```
+ > 若希望不启动Server时，如需要做单元测试时，则仅需执行frameWorkInitialize()即可。则可以在后续代码中写入测试代码。frameWorkInitialize()仅仅实现了框架的初始化，如配置的初始化和自动加载注册。
  
