@@ -145,64 +145,64 @@ Percentage of the requests served within a certain time (ms)
  
  ## 进阶
  ### 事件回调   
-  事件回调注册全部位于Conf/Event.php.以下为常用回调事件，更多Swoole回调事件请看[事件回调](https://wiki.swoole.com/wiki/page/41.html)
-    - frameInitialize   
-        系统初始化事件，该回调函数在被执行时，已经完成的工作有：
-         + 系统常量ROOT的定义
-         + AutoLoader对象的实例化
-    - beforeWorkerStart  
-        Swoole Worker启动前执行事件，该回调函数被执行时，已经完成的工作有：
-        + frameInitialize 回调事件
-        + swoole_http_server 实例已经创建，且设置了启动参数。
-    - onStart  
-        Server启动在主进程的主线程时回调此函数，该回调函数被执行时，已经完成的工作有：
-        + frameInitialize
-        + beforeWorkerStart
-        + 已创建了manager进程，worker子进程，监听了所有TCP/UDP端口，定时器
-         >onStart回调中，仅允许echo、打印Log、修改进程名称。不得执行其他操作。onWorkerStart和onStart回调是在不同进程中并行执行的，不存在先后顺序。可以在onStart回调中，将$serv->master_pid和$serv->manager_pid的值保存到一个文件中。这样可以编写脚本，向这两个PID发送信号来实现关闭和重启的操作。在onStart中创建的全局资源对象不能在worker进程中被使用，因为发生onStart调用时，worker进程已经创建好了。
+ 事件回调注册全部位于Conf/Event.php.以下为常用回调事件，更多Swoole回调事件请看[事件回调](https://wiki.swoole.com/wiki/page/41.html)
+- frameInitialize   
+  系统初始化事件，该回调函数在被执行时，已经完成的工作有：
+  + 系统常量ROOT的定义
+  + AutoLoader对象的实例化
+- beforeWorkerStart  
+  Swoole Worker启动前执行事件，该回调函数被执行时，已经完成的工作有：
+  + frameInitialize 回调事件
+  + swoole_http_server 实例已经创建，且设置了启动参数。
+- onStart  
+  Server启动在主进程的主线程时回调此函数，该回调函数被执行时，已经完成的工作有：
+  + frameInitialize
+  + beforeWorkerStart
+  + 已创建了manager进程，worker子进程，监听了所有TCP/UDP端口，定时器
+  > onStart回调中，仅允许echo、打印Log、修改进程名称。不得执行其他操作。onWorkerStart和onStart回调是在不同进程中并行执行的，不存在先后顺序。可以在onStart回调中，将$serv->master_pid和$serv->manager_pid的值保存到一个文件中。这样可以编写脚本，向这两个PID发送信号来实现关闭和重启的操作。在onStart中创建的全局资源对象不能在worker进程中被使用，因为发生onStart调用时，worker进程已经创建好了。
   新创建的对象在主进程内，worker进程无法访问到此内存区域。因此全局对象创建的代码需要放置在swoole_server_start之前。
-    - onShutdown  
-       此事件在Server结束时发生,该函数执行时，已经完成的工作有:
-       + 已关闭所有线程
-       + 已关闭所有worker进程
-       + 已close所有TCP/UDP监听端口
-       + 已关闭主Rector
-       > 强制kill进程不会回调onShutdown，如kill -9 需要使用kill -15来发送SIGTREM信号到主进程才能按照正常的流程终止
-    - onWorkerStart  
-    此事件在worker进程/task进程启动时发生。这里创建的对象可以在进程生命周期内使用。在执行该回调时,已经完成的工作有：
-      + frameInitialize
-      + beforeWorkerStart
-      > 发生PHP致命错误或者代码中主动调用exit时，Worker/Task进程会退出，管理进程会重新创建新的进程 onWorkerStart/onStart是并发执行的，没有先后顺序
-    - onWorkerStop   
-      此事件在worker进程终止时发生。在此函数中可以回收worker进程申请的各类资源。
-    - onRequest  
-    此事件在接受到Http请求时被执行，此刻已经完成的工作有：
-      + frameInitialize
-      + beforeWorkerStart
-      + onWorkerStart
-      + onStart
-    - onDispatcher  
-    此事件在接受到Http请求且请求能够匹配到对应控制器时被执行，此刻已经完成的工作有：
-         + frameInitialize
-         + beforeWorkerStart
-         + onWorkerStart
-         + onStart
-         + onRequest
-    - afterResponse  
-    此事件在接受到Http请求并结束对客户端做请求相应时被执行，此刻已经完成的工作有：
-        + frameInitialize
-        + beforeWorkerStart
-        + onWorkerStar  
-        + onStart
-        + onRequest
-        + onDispatcher
-    - onTask  
-     此事件在投递了异步任务，且异步任务即将被执行前发生。此刻已经完成的工作有：
-     + frameInitialize
-     + beforeWorkerStart
-     + onWorkerStar  
-     + onStart
-    - onFinish
-    - onWorkerError
-    - onWorkerFatalError
+- onShutdown  
+  此事件在Server结束时发生,该函数执行时，已经完成的工作有:
+  + 已关闭所有线程
+  + 已关闭所有worker进程
+  + 已close所有TCP/UDP监听端口
+  + 已关闭主Rector
+  > 强制kill进程不会回调onShutdown，如kill -9 需要使用kill -15来发送SIGTREM信号到主进程才能按照正常的流程终止
+- onWorkerStart  
+  此事件在worker进程/task进程启动时发生。这里创建的对象可以在进程生命周期内使用。在执行该回调时,已经完成的工作有：
+  + frameInitialize
+  + beforeWorkerStart
+  > 发生PHP致命错误或者代码中主动调用exit时，Worker/Task进程会退出，管理进程会重新创建新的进程 onWorkerStart/onStart是并发执行的，没有先后顺序
+- onWorkerStop   
+  此事件在worker进程终止时发生。在此函数中可以回收worker进程申请的各类资源。
+- onRequest  
+  此事件在接受到Http请求时被执行，此刻已经完成的工作有：
+  + frameInitialize
+  + beforeWorkerStart
+  + onWorkerStart
+  + onStart
+- onDispatcher  
+  此事件在接受到Http请求且请求能够匹配到对应控制器时被执行，此刻已经完成的工作有：
+  + frameInitialize
+  + beforeWorkerStart
+  + onWorkerStart
+  + onStart
+  + onRequest
+- afterResponse  
+  此事件在接受到Http请求并结束对客户端做请求相应时被执行，此刻已经完成的工作有：
+ + frameInitialize
+ + beforeWorkerStart
+ + onWorkerStar  
+ + onStart
+ + onRequest
+ + onDispatcher
+- onTask  
+  此事件在投递了异步任务，且异步任务即将被执行前发生。此刻已经完成的工作有：
+  + frameInitialize
+  + beforeWorkerStart
+  + onWorkerStar  
+  + onStart
+- onFinish
+- onWorkerError
+- onWorkerFatalError
  
