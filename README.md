@@ -133,8 +133,8 @@ Percentage of the requests served within a certain time (ms)
     + 用户可以自定义添加配置信息。
  
  ### 控制器
- 
-   控制器名称空间前缀统一为 "App\Controller"。控制器搜索规则为优先完整匹配。示例代码请看 example /conrollerUsage_01下面的代码。 
+ - URL访问规则  
+   easyPHP-Swoole 仅支持 pathInfo 模式的 URL,且与控制器名称(方法)保持一致。控制器名称空间前缀统一为 "App\Controller ,控制器搜索规则为优先完整匹配,例如访问 http://domain/api/index.html 则默认尝试优先搜索 App\Controller\Api\Index 控制器，若无对应控制器则尝试搜索，App\Controller\Api 控制器，以上actionName均为 index ，再若无则尝试搜索 App\Controller\Index 控制器，而此时，actionName 则为 api 。具体示例代码请看 example /conrollerUsage_01下面的代码，跑一遍便知。 
  ### 服务启动
  框架Server需要以cli模式执行启动。实例代码如下：
  ```php
