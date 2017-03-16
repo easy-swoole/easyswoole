@@ -23,8 +23,44 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
 - php: 5.6.30
 - Swoole: 1.8.13-stable
 - 测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>""easyPHP"
+````
+Server Software:        easyPHP
+Server Hostname:        127.0.0.1
 
-![](example/abTest/ab.png)
+Server Port:            9501
+Document Path:          /
+Document Length:        20 bytes
+
+Concurrency Level:      500
+Time taken for tests:   30.268 seconds
+Complete requests:      500000
+Failed requests:        0
+Write errors:           0
+Total transferred:      97500000 bytes
+HTML transferred:       10000000 bytes
+Requests per second:    16519.16 [#/sec] (mean)
+Time per request:       30.268 [ms] (mean)
+Time per request:       0.061 [ms] (mean, across all concurrent requests)
+Transfer rate:          3145.74 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   15   1.0     15      25
+Processing:     2   15   1.3     15      37
+Waiting:        1   12   2.0     12      31
+Total:         17   30   1.2     30      52
+
+Percentage of the requests served within a certain time (ms)
+  50%     30
+  66%     30
+  75%     31
+  80%     31
+  90%     31
+  95%     31
+  98%     33
+  99%     34
+ 100%     52 (longest request)
+``````
 
 ## 主要特性:
 
