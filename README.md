@@ -116,9 +116,12 @@ Percentage of the requests served within a certain time (ms)
     + Request与Response对象存在于整个Http的请求-响应周期中，收到用户请求自动创建，响应结束后自动销毁，请勿自行创建，若需获取对应实例，请用Response::getInstance()或Request()::getInstance()获取对应实例。
     + AutoLoader 当执行了框架初始化后，AutoLoader实例将会一直存在直至整个Server关闭,请勿自行创建。需要获取AutoLoader实例请以 AutoLoader::getInstance()方式获得。
     + Config 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建，需要获取对应实例请以Config::getInstance()方式获得。
-    + Event
+    + Event 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建。
     
 ## 基础入门
+ ### 系统常量
+ - ROOT
+ - SysConst对象
  ### 配置文件
  所有配置均在Conf/Config.php init()方法 中以数组的形式存在于系统中。获取配置请用Config实例的get()方法实现。
   - 系统配置($sysConf)
@@ -126,22 +129,9 @@ Percentage of the requests served within a certain time (ms)
     + DEBUG : ENABLE 是否开启Debug模式。LOG 是否记录日志。DISPLAY_ERROR 是否显示错误。
   - 用户配置($userConf)
     + 用户可以自定义添加配置信息。
- ### 事件回调
- 以下为常用回调事件，更多Swoole回调事件请看[事件回调](https://wiki.swoole.com/wiki/page/41.html)
-   - frameInitialize
-   - beforeWorkerStart
-   - onStart
-   - onShutdown
-   - onWorkerStart
-   - onWorkerStop
-   - onRequest
-   - onDispatcher
-   - afterResponse
-   - onTask
-   - onFinish
-   - onWorkerError
-   - onWorkerFatalError
+ 
  ### 控制器
+ 
    控制器名称空间前缀统一为 "App\Controller"。控制器搜索规则为优先完整匹配。示例代码请看 example /conrollerUsage_01下面的代码。 
  ### 服务启动
  框架Server需要以cli模式执行启动。实例代码如下：
@@ -151,4 +141,68 @@ Percentage of the requests served within a certain time (ms)
     \Core\Core::getInstance()->frameWorkInitialize()->run();
  ```
  > 若希望不启动Server时，如需要做单元测试时，则仅需执行frameWorkInitialize()即可。则可以在后续代码中写入测试代码。frameWorkInitialize()仅仅实现了框架的初始化，如配置的初始化和自动加载注册。
+ 
+ 
+ ## 进阶
+ ### 事件回调   
+  事件回调注册全部位于Conf/Event.php.以下为常用回调事件，更多Swoole回调事件请看[事件回调](https://wiki.swoole.com/wiki/page/41.html)
+    - frameInitialize   
+        系统初始化事件，该回调函数在被执行时，已经完成的工作有：
+         + 系统常量ROOT的定义
+         + AutoLoader对象的实例化
+    - beforeWorkerStart  
+        Swoole Worker启动前执行事件，该回调函数被执行时，已经完成的工作有：
+        + frameInitialize 回调事件
+        + swoole_http_server 实例已经创建，且设置了启动参数。
+    - onStart  
+        Server启动在主进程的主线程时回调此函数，该回调函数被执行时，已经完成的工作有：
+        + frameInitialize
+        + beforeWorkerStart
+        + 已创建了manager进程，worker子进程，监听了所有TCP/UDP端口，定时器
+         >onStart回调中，仅允许echo、打印Log、修改进程名称。不得执行其他操作。onWorkerStart和onStart回调是在不同进程中并行执行的，不存在先后顺序。可以在onStart回调中，将$serv->master_pid和$serv->manager_pid的值保存到一个文件中。这样可以编写脚本，向这两个PID发送信号来实现关闭和重启的操作。在onStart中创建的全局资源对象不能在worker进程中被使用，因为发生onStart调用时，worker进程已经创建好了。
+  新创建的对象在主进程内，worker进程无法访问到此内存区域。因此全局对象创建的代码需要放置在swoole_server_start之前。
+    - onShutdown  
+       此事件在Server结束时发生,该函数执行时，已经完成的工作有:
+       + 已关闭所有线程
+       + 已关闭所有worker进程
+       + 已close所有TCP/UDP监听端口
+       + 已关闭主Rector
+       > 强制kill进程不会回调onShutdown，如kill -9 需要使用kill -15来发送SIGTREM信号到主进程才能按照正常的流程终止
+    - onWorkerStart  
+    此事件在worker进程/task进程启动时发生。这里创建的对象可以在进程生命周期内使用。在执行该回调时,已经完成的工作有：
+      + frameInitialize
+      + beforeWorkerStart
+      > 发生PHP致命错误或者代码中主动调用exit时，Worker/Task进程会退出，管理进程会重新创建新的进程 onWorkerStart/onStart是并发执行的，没有先后顺序
+    - onWorkerStop   
+      此事件在worker进程终止时发生。在此函数中可以回收worker进程申请的各类资源。
+    - onRequest  
+    此事件在接受到Http请求时被执行，此刻已经完成的工作有：
+      + frameInitialize
+      + beforeWorkerStart
+      + onWorkerStart
+      + onStart
+    - onDispatcher  
+    此事件在接受到Http请求且请求能够匹配到对应控制器时被执行，此刻已经完成的工作有：
+         + frameInitialize
+         + beforeWorkerStart
+         + onWorkerStart
+         + onStart
+         + onRequest
+    - afterResponse  
+    此事件在接受到Http请求并结束对客户端做请求相应时被执行，此刻已经完成的工作有：
+        + frameInitialize
+        + beforeWorkerStart
+        + onWorkerStar  
+        + onStart
+        + onRequest
+        + onDispatcher
+    - onTask  
+     此事件在投递了异步任务，且异步任务即将被执行前发生。此刻已经完成的工作有：
+     + frameInitialize
+     + beforeWorkerStart
+     + onWorkerStar  
+     + onStart
+    - onFinish
+    - onWorkerError
+    - onWorkerFatalError
  
