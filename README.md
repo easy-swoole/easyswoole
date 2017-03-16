@@ -120,8 +120,10 @@ Percentage of the requests served within a certain time (ms)
     
 ## 基础入门
  ### 系统常量
- - ROOT
- - SysConst对象
+ - ROOT  
+ 根目录。若当前目录为""project"，Core.php文件存在于project/Core/Core.php，则project为ROOT
+ - SysConst 对象  
+ Core\Component\SysConst.php 定义了几个系统常用关键字。
  ### 配置文件
  所有配置均在Conf/Config.php init()方法 中以数组的形式存在于系统中。获取配置请用Config实例的get()方法实现。
   - 系统配置($sysConf)
