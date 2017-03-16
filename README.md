@@ -4,7 +4,7 @@
 ##### [easyPHP](https://github.com/kiss291323003/easyPHP): https://github.com/kiss291323003/easyPHP
 ##### [Swoole](http://www.swoole.com/): http://www.swoole.com/
 
-easyPHP-Swoole 专为API而生，支持多层级(组模式)控制器访问与多种事件回调,高度封装了Swolle Server 而依旧维持Swoole Server原有特性，支持在 Server 中监听自定义的TCP、UDP协议，让开发者可以最低的学习成本和精力，编写出多进程，可定时，可异步，高可用的应用服务。
+easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，摆脱传统PHP运行模式在进程唤起和文件加载上带来的性能损失，自带服务器功能，无需依赖Apache或Nginx运行。在web服务器模式下，支持多层级(组模式)控制器访问与多种事件回调,高度封装了Swolle Server 而依旧维持Swoole Server原有特性，支持在 Server 中监听自定义的TCP、UDP协议，让开发者可以最低的学习成本和精力，编写出多进程，可定时，可异步，高可用的应用服务。
 
 #### 关于ab基准测试：
 
@@ -69,10 +69,33 @@ easyPHP-Swoole 专为API而生，支持多层级(组模式)控制器访问与多
     + Dispatcher 实例生命周期与对应所在的Worker生命周期一致，请勿在业务代码中尝试手动创建。
     + Request与Response对象存在于整个Http的请求-响应周期中，收到用户请求自动创建，响应结束后自动销毁，请勿自行创建，若需获取对应实例，请用Response::getInstance()或Request()::getInstance()获取对应实例。
     + AutoLoader 当执行了框架初始化后，AutoLoader实例将会一直存在直至整个Server关闭,请勿自行创建。需要获取AutoLoader实例请以 AutoLoader::getInstance()方式获得。
+    + Config 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建，需要获取对应实例请以Config::getInstance()方式获得。
+    + Event
     
 ## 基础入门
- ### 框架配置
+ ### 配置文件
+ 所有配置均在Conf/Config.php init()方法 中以数组的形式存在于系统中。获取配置请用Config实例的get()方法实现。
+  - 系统配置($sysConf)
+    + SERVER : Swoole配置选项，详情请见[配置](https://wiki.swoole.com/wiki/page/274.html)
+    + DEBUG : ENABLE 是否开启Debug模式。LOG 是否记录日志。DISPLAY_ERROR 是否显示错误。
+  - 用户配置($userConf)
+    + 用户可以自定义添加配置信息。
  ### 事件回调
+ 以下为常用回调事件，更多Swoole回调事件请看[事件回调](https://wiki.swoole.com/wiki/page/41.html)
+   - frameInitialize
+   - beforeWorkerStart
+   - onStart
+   - onShutdown
+   - onWorkerStart
+   - onWorkerStop
+   - onRequest
+   - onDispatcher
+   - afterResponse
+   - onTask
+   - onFinish
+   - onWorkerError
+   - onWorkerFatalError
  ### 控制器
+ 
  ### 服务启动
  
