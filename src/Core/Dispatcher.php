@@ -9,6 +9,7 @@
 namespace Core;
 
 
+use Conf\Event;
 use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
@@ -154,6 +155,7 @@ class Dispatcher
             $actionName = $actionName ? $actionName : "index";
             $controller = new $finalClass;
             if($controller instanceof AbstractController){
+                Event::getInstance()->onDispatcher(Request::getInstance(),Response::getInstance(),$finalClass,$actionName);
                 //预防在进控制器之前已经被拦截处理
                 if(!Response::getInstance()->isEndResponse()){
                     $controller->actionName($actionName);

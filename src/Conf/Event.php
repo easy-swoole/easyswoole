@@ -54,6 +54,11 @@ class Event extends AbstractEvent
         // TODO: Implement onRequest() method.
     }
 
+    function onDispatcher(Request $request, Response $response, $targetControllerClass, $targetAction)
+    {
+        // TODO: Implement onDispatcher() method.
+    }
+
     function afterResponse(Request $request)
     {
         // TODO: Implement afterResponse() method.
