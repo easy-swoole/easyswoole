@@ -212,5 +212,12 @@ Percentage of the requests served within a certain time (ms)
 
 ### 容器服务
  easyPHP-Swoole提供了容器服务(Core\Component\Di) ,该容器在服务启动时即被创建，服务启动前，所注入内容可以在各个进程中共享使用，服务启动后所注入内容则在进程间相互独立。
- 
+### 路由
+
+### 请求拦截
+
+
+### 自动加载
+# 示例代码
+ ## 控制器
 # 剩余文档正在完善中
