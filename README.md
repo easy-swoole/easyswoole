@@ -109,7 +109,7 @@ Percentage of the requests served within a certain time (ms)
 - 项目中类名称与类文件(文件夹)命名，均为大驼峰，变量与类方法为小驼峰。
 - 若用easyPHP-Swoole写HTTP API(网页)服务，控制器搜索路径(名称空间前缀)为""App/Controller"。
 - easyPHP-SWoole中类文件全部为自动加载，支持动态名称空间加载与文件引入。若需添加第三方包(项目)，可以在Conf/Event中的frameInitialize方法获取AutoLoader实例引入,或在对应的业务逻辑代码中引入。
-- 在HTTP相应中，于业务逻辑代码中echo $var 并不会将$var内容输出至相应内容中，请调用Response实例中的wirte()方法实现。
+- 在HTTP响应中，于业务逻辑代码中echo $var 并不会将$var内容输出至相应内容中，请调用Response实例中的wirte()方法实现。
 - 框架核心对象生命周期(单例对象)：
     + Core 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建或获取使用。
     + Dispatcher 实例生命周期与对应所在的Worker生命周期一致，请勿在业务代码中尝试手动创建。
@@ -117,6 +117,7 @@ Percentage of the requests served within a certain time (ms)
     + AutoLoader 当执行了框架初始化后，AutoLoader实例将会一直存在直至整个Server关闭,请勿自行创建。需要获取AutoLoader实例请以 AutoLoader::getInstance()方式获得。
     + Config 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建，需要获取对应实例请以Config::getInstance()方式获得。
     + Event 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建。
+    + Di 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建。如需获取对应实例，请以Di::getInstance()获取。
     
 ## 基础入门
  ### 系统常量
@@ -204,8 +205,12 @@ Percentage of the requests served within a certain time (ms)
   + beforeWorkerStart
   + onWorkerStar  
   + onStart
-- onFinish
+- onFinish  
+  此事件发生在完成了异步任务后且设置执行了异步回调。
 - onWorkerError
 - onWorkerFatalError
+
+### 容器服务
+ easyPHP-Swoole提供了容器服务(Core\Component\Di) ,该容器在服务启动时即被创建，服务启动前，所注入内容可以在各个进程中共享使用，服务启动后所注入内容则在进程间相互独立。
  
 # 剩余文档正在完善中
