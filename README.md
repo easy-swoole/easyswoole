@@ -132,7 +132,7 @@ Percentage of the requests served within a certain time (ms)
     + DEBUG : ENABLE 是否开启Debug模式。LOG 是否记录日志。DISPLAY_ERROR 是否显示错误。
   - 用户配置($userConf)
     + 用户可以自定义添加配置信息。
- 
+ ### 自动加载
  ### 控制器
  - URL访问规则  
    easyPHP-Swoole 仅支持 pathInfo 模式的 URL,且与控制器名称(方法)保持一致。控制器名称空间前缀统一为 "App\Controller ,控制器搜索规则为优先完整匹配,例如访问 http://domain/api/index.html 则默认尝试优先搜索 App\Controller\Api\Index 控制器，若无对应控制器则尝试搜索，App\Controller\Api 控制器，以上actionName均为 index ，再若无则尝试搜索 App\Controller\Index 控制器，而此时，actionName 则为 api 。具体示例代码请看 example /conrollerUsage_01下面的代码，跑一遍便知。 
@@ -210,14 +210,17 @@ Percentage of the requests served within a certain time (ms)
 - onWorkerError
 - onWorkerFatalError
 
-### 容器服务
- easyPHP-Swoole提供了容器服务(Core\Component\Di) ,该容器在服务启动时即被创建，服务启动前，所注入内容可以在各个进程中共享使用，服务启动后所注入内容则在进程间相互独立。
-### 路由
+### 系统组件
 
-### 请求拦截
-
-
-### 自动加载
+ - 系统常量
+ - 容器服务
+ - 日志
+ - 错误处理
+ - 超级闭包
+ - 快速路由
+ - 对象ORM
+ - 单例
+ 
 # 示例代码
  ## 控制器
 # 剩余文档正在完善中
