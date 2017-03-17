@@ -112,6 +112,7 @@ Percentage of the requests served within a certain time (ms)
 - 在HTTP响应中，于业务逻辑代码中echo $var 并不会将$var内容输出至相应内容中，请调用Response实例中的wirte()方法实现。
 - 框架核心对象生命周期(单例对象)：
     + Core 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建或获取使用。
+    + SwooleHttpServer 实例生命周期与Server生命周期一致，请勿在业务代码中尝试手动创建，如需获取请以SwooleHttpServer::getInstance()方式获得。
     + Dispatcher 实例生命周期与对应所在的Worker生命周期一致，请勿在业务代码中尝试手动创建。
     + Request与Response对象存在于整个Http的请求-响应周期中，收到用户请求自动创建，响应结束后自动销毁，请勿自行创建，若需获取对应实例，请用Response::getInstance()或Request()::getInstance()获取对应实例。
     + AutoLoader 当执行了框架初始化后，AutoLoader实例将会一直存在直至整个Server关闭,请勿自行创建。需要获取AutoLoader实例请以 AutoLoader::getInstance()方式获得。
@@ -133,6 +134,9 @@ Percentage of the requests served within a certain time (ms)
   - 用户配置($userConf)
     + 用户可以自定义添加配置信息。
  ### 自动加载
+
+ ### 常用对象
+ 
  ### 控制器
  - URL访问规则  
    easyPHP-Swoole 仅支持 pathInfo 模式的 URL,且与控制器名称(方法)保持一致。控制器名称空间前缀统一为 "App\Controller ,控制器搜索规则为优先完整匹配,例如访问 http://domain/api/index.html 则默认尝试优先搜索 App\Controller\Api\Index 控制器，若无对应控制器则尝试搜索，App\Controller\Api 控制器，以上actionName均为 index ，再若无则尝试搜索 App\Controller\Index 控制器，而此时，actionName 则为 api 。具体示例代码请看 example /conrollerUsage_01下面的代码，跑一遍便知。 
