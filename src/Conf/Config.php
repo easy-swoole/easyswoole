@@ -29,6 +29,7 @@ class Config
                 "SERVER_NAME"=>"",
                 "NODE_NAME"=>"",
                 "PORT"=>9501,
+                "WS_SUPPORT"=>false,
                 "CONFIG"=>array(
                     'task_worker_num' => 4, //异步任务进程
                     "task_max_request"=>10,

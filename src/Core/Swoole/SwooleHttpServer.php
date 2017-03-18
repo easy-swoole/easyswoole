@@ -31,9 +31,14 @@ class SwooleHttpServer
         }
         return self::$instance;
     }
+
     function __construct()
     {
-        $this->swooleServer = new \swoole_http_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        if(Config::getInstance()->wsSupport()){
+            $this->swooleServer = new \swoole_websocket_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        }else{
+            $this->swooleServer = new \swoole_http_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        }
     }
 
     function isStart(){

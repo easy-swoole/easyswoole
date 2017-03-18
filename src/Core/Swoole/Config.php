@@ -44,4 +44,8 @@ class Config
     function serverName(){
         return $this->conf['SERVER_NAME'];
     }
+    function wsSupport(){
+        return $this->conf['WS_SUPPORT'];
+    }
+
 }
