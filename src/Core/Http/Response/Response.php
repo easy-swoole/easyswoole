@@ -2,22 +2,23 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/1/22
- * Time: 下午11:12
+ * Date: 2017/3/19
+ * Time: 上午9:29
  */
 
-namespace Core\Http;
+namespace Core\Http\Response;
 
 
 use Conf\Event;
 use Core\Dispatcher;
+use Core\Http\Request\Request;
+use Core\Http\Status;
 
 class Response
 {
     private static $instance;
     private $isEndResponse = 0;
     private $swoole_http_response = null;
-
     static function getInstance(\swoole_http_response $response = null){
         if($response !== null){
             self::$instance = new Response($response);
@@ -76,23 +77,17 @@ class Response
     function forward($pathTo,array $get = array(),array $post = array(),array $cookies = array()){
         $serverData = Request::getInstance()->getServer();
         $serverData['path_info'] = $pathTo;
-        Request::getInstance()->setRequestProperty("server",$serverData);
-        Request::getInstance()->setRequestProperty("get",$get+ Request::getInstance()->getGet());
-        Request::getInstance()->setRequestProperty("post",$post+ Request::getInstance()->getPost());
-        Request::getInstance()->setRequestProperty("cookie",$cookies+ Request::getInstance()->getCookie());
+        Request::getInstance()->setSwooleRequestProperty("server",$serverData);
+        Request::getInstance()->setSwooleRequestProperty("get",$get+ Request::getInstance()->getGet());
+        Request::getInstance()->setSwooleRequestProperty("post",$post+ Request::getInstance()->getPost());
+        Request::getInstance()->setSwooleRequestProperty("cookie",$cookies+ Request::getInstance()->cookie()->getCookie());
         Event::getInstance()->onRequest(Request::getInstance(),Response::getInstance());
         Dispatcher::getInstance()->dispatch();
     }
-    /*
-     * expire 为null的时候  则被浏览器理解为会话模式
-     */
-    function setCookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httpOnly = null){
-        $this->swoole_http_response->cookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
-    }
-    function unsetCookie($name){
-        $this->setCookie($name,null,time()-3600);
-    }
     function sendHeader($key,$val){
         $this->swoole_http_response->header($key,$val);
+    }
+    function getSwooleResponse(){
+        return $this->swoole_http_response;
     }
 }

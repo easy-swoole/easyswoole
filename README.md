@@ -213,17 +213,43 @@ Percentage of the requests served within a certain time (ms)
   此事件发生在完成了异步任务后且设置执行了异步回调。
 - onWorkerError
 - onWorkerFatalError
-
-### 系统组件
-
+### 系统接口类
+系统接口类在名称空间 Core\AbstractInterface 下提供的各种抽象类与接口。
+ - AbstractEvent
+ - AbstractRouter
+ - AbstractController 
+ - AbstractAsyncTask
+ - AbstractErrorHandler
+ - ExceptionHandlerInterface
+ - LoggerWriterInterface
+### 系统组件  
+   系统组件指在名称空间 Core\Component 下提供的组件。
  - 系统常量
- - 容器服务
+ - 容器服务  
+    Di,一个以单例状态存在于系统之中的容器服务。  
+    + set()
+    + get()
+    + delete()
+    + clear()
  - 日志
- - 错误处理
- - 超级闭包
- - 快速路由
- - 对象ORM
- - 单例
+    Logger,提供系统日志记录。
+    + log()
+    + console()
+ - 错误处理  
+    ErrorHandler(AbstractErrorHandler)，提供系统错误处理。
+    + handler()
+    + display()
+    + log()
+ - 超级闭包  
+    SuperClosure，
+    + __construct()
+ - 快速路由  
+    RouteCollector(\FastRoute\RouteCollector)，
+    
+ - 对象ORM  
+    AbstractORM
+ - 单例   
+    Singleton
  
 # 示例代码
  ## 控制器

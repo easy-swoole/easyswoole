@@ -10,12 +10,8 @@ namespace Conf;
 
 
 use Core\AbstractInterface\AbstractEvent;
-use Core\AutoLoader;
-use Core\Component\Logger;
-use Core\Http\Request;
-use Core\Http\Response;
-use Core\Swoole\SwooleHttpServer;
-use Swoole\Timer;
+use Core\Http\Request\Request;
+use Core\Http\Response\Response;
 
 class Event extends AbstractEvent
 {

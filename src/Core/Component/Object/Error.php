@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/2/5
- * Time: 下午7:40
+ * Date: 2017/3/19
+ * Time: 上午9:45
  */
 
-namespace Core\Component\Error;
+namespace Core\Component\Object;
 
 
 class Error
@@ -136,44 +136,6 @@ class Error
     function __toString()
     {
         // TODO: Implement __toString() method.
-        return "errorType:{$this->errorTypeInString} \nerrorCode:{$this->errorCode} \nmessage:{$this->description} \nfile:{$this->file} \nline:{$this->line} \ntrace:{$this->traceToString()}";
-    }
-    function setTrace($trace = null){
-        $this->trace = $trace;
-    }
-    function getTrace(){
-        if(empty($this->trace)){
-            $this->trace = debug_backtrace();
-        }
-        return $this->trace;
-    }
-    function traceToString($delimiter = null){
-        if($delimiter === null){
-            $delimiter = "\n";
-        }
-        $trace = $this->getTrace();
-        $log = '';
-        foreach ($trace as $i => $t)
-        {
-            if (!isset($t['file']))
-            {
-                $t['file'] = 'unknown';
-            }
-            if (!isset($t['line']))
-            {
-                $t['line'] = 0;
-            }
-            if (!isset($t['function']))
-            {
-                $t['function'] = 'unknown';
-            }
-            $log .= "#$i {$t['file']}({$t['line']}): ";
-            if (isset($t['object']) and is_object($t['object']))
-            {
-                $log .= get_class($t['object']) . '->';
-            }
-            $log .= "{$t['function']}(){$delimiter}";
-        }
-        return $log;
+        return "errorType:{$this->errorTypeInString} \nerrorCode:{$this->errorCode} \nmessage:{$this->description} \nfile:{$this->file} \nline:{$this->line} \n";
     }
 }

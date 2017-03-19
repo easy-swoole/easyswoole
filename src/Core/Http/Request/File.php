@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/1/26
- * Time: 下午11:37
+ * Date: 2017/3/19
+ * Time: 上午9:29
  */
 
-namespace Core\Http;
+namespace Core\Http\Request;
 
 
 class File
@@ -20,7 +20,7 @@ class File
      */
     function __construct()
     {
-        $this->files = Request::getInstance()->getRequestProperty('files');
+        $this->files = Request::getInstance()->getSwooleRequestProperty('files');
     }
 
     function select($filed){

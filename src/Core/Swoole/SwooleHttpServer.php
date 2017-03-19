@@ -13,8 +13,8 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
 use Core\Dispatcher;
-use Core\Http\Request;
-use Core\Http\Response;
+use Core\Http\Request\Request;
+use Core\Http\Response\Response;
 
 class SwooleHttpServer
 {

@@ -11,11 +11,10 @@ namespace Core;
 
 use Conf\Config;
 use Conf\Event;
-use Core\AbstractInterface\AbstractController;
-use Core\AbstractInterface\AbstractShutdownHandler;
-use Core\AbstractInterface\ExceptionHandlerInterface;
+use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Di;
-use Core\Component\Error\ErrorHandler;
+use Core\Component\ErrorHandler;
+use Core\Component\Object\Error;
 use Core\Component\SysConst;
 use Core\Swoole\SwooleHttpServer;
 
@@ -46,8 +45,6 @@ class Core
         $this->registerAutoLoader();
         Event::getInstance()->frameInitialize();
         $this->registerErrorHandler();
-        $this->registerExceptionHandler();
-        $this->registerShutDownHandler();
         return $this;
     }
 
@@ -73,31 +70,20 @@ class Core
     private function registerErrorHandler(){
         $conf = Config::getInstance()->getConf("DEBUG");
         if($conf['ENABLE'] == true){
-            $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
-            if($errorHandler instanceof AbstractController){
-            }else{
-                /*
-                 * default handler
-                 */
-                $errorHandler = new ErrorHandler();
-            }
-            set_error_handler(array($errorHandler,'handlerRegister'));
-        }
-    }
-    private function registerShutDownHandler(){
-        $handler = Di::getInstance()->get(SysConst::DI_SHUTDOWN_HANDLER);
-        if($handler instanceof AbstractShutdownHandler){
-            register_shutdown_function(array(
-                $handler,"handler"
-            ));
-        }
-    }
-    private function registerExceptionHandler(){
-        $handler = Di::getInstance()->get(SysConst::DI_EXCEPTION_HANDLER);
-        if($handler instanceof ExceptionHandlerInterface){
-            set_exception_handler(array(
-                $handler,"handler"
-            ));
+            set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
+                $error = new Error($errorCode, $description, $file, $line, $context);
+                $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
+                if(!is_a($errorHandler,ErrorHandlerInterface::class)){
+                    $errorHandler = new ErrorHandler();
+                }
+                $errorHandler->handler($error);
+                if($conf['DISPLAY_ERROR'] == true){
+                    $errorHandler->display($error);
+                }
+                if($conf['LOG'] == true){
+                    $errorHandler->log($error);
+                }
+            });
         }
     }
 }
