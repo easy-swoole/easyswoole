@@ -1,23 +1,24 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: yf
- * Date: 2017/3/15
- * Time: 下午8:21
+ * User: YF
+ * Date: 2017/2/8
+ * Time: 11:51
  */
 
-namespace App\Controller\Api;
+namespace App\Controller;
 
 
 use Core\AbstractInterface\AbstractController;
+use Core\Component\Logger;
+use Core\Swoole\Timer;
 
 class Index extends AbstractController
 {
-
     function index()
     {
         // TODO: Implement index() method.
-        $this->response()->write("this is api index");/*  url:domain/api/index.html  domain/api/  */
+        $this->response()->write("this is index");/*  url:domain/index.html  domain/   domain  */
     }
 
     function onRequest($actionName)
@@ -34,7 +35,15 @@ class Index extends AbstractController
     {
         // TODO: Implement afterResponse() method.
     }
-    function test(){
-        $this->response()->write("this is api index");/*  url:domain/api/test/index.html  domain/api/test    */
+    function loop(){
+        Timer::loop(8000,function (){
+            Logger::console("loop timmer add by controller action");
+        });
+    }
+    function after(){
+        //8秒后执行
+        Timer::delay(8000,function (){
+            Logger::console("delay timmer add by controller action");
+        });
     }
 }

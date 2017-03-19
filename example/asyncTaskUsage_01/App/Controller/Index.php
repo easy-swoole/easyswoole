@@ -36,9 +36,6 @@ class Index extends AbstractController
     {
         // TODO: Implement afterResponse() method.
     }
-    function test(){
-        $this->response()->write("this is index test");/*  url:domain/test/index.html  domain/test/   domain/test  */
-    }
     function async1(){
         AsyncTaskManager::getInstance()->add(new AsyncTask());
     }
