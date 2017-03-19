@@ -10,6 +10,7 @@ namespace Core\Swoole;
 
 
 
+use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
 
 class AsyncTaskManager
@@ -39,8 +40,24 @@ class AsyncTaskManager
      * @return bool
      */
     function add($callable, $workerId = self::TASK_DISPATCHER_TYPE_RANDOM, $finishCallBack = null){
-        if($callable instanceof \Closure){
+        if(is_string($callable)){
+            if(class_exists($callable)){
+                $callable = new $callable();
+                if(!is_a($callable,AbstractAsyncTask::class)){
+                    trigger_error("async task {$callable} illegal");
+                    return false;
+                }
+            }else{
+                trigger_error("async task {$callable} illegal");
+                return false;
+            }
+        }else if($callable instanceof \Closure){
             $callable = new SuperClosure($callable);
+        }else{
+            if(!is_a($callable,AbstractAsyncTask::class)){
+                trigger_error("async task {$callable} illegal");
+                return false;
+            }
         }
         return SwooleHttpServer::getInstance()->getServer()->task($callable,$workerId,$finishCallBack);
     }
