@@ -81,9 +81,9 @@ Percentage of the requests served within a certain time (ms)
     + 仅支持Linux,FreeBSD,MacOS 这三类操作系统。
     + Linux内核版本2.3.32以上
     + 若在 CygWin环境(Windows)下使用，请务必关闭Swoole配置文件的 daemonize 选项
-    
-> 建议使用Ubuntu14/CentOS 6.5或更高版本操作系统
-
+     
+> 建议使用Ubuntu14/CentOS 6.5或更高版本操作系统  
+  拓展安装教程[envInstall.md](example/envInstall.md)
 ## 编程须知
 
 ### 注意事项
