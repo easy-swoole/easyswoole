@@ -6,15 +6,7 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
 ##### [easyPHP](https://github.com/kiss291323003/easyPHP): https://github.com/kiss291323003/easyPHP
 ##### [Swoole](http://www.swoole.com/): http://www.swoole.com/
 
-#### 优势:
 
-   - 简单易用开发效率高
-   - 并发百万TCP连接
-   - TCP/UDP/UnixSock
-   - 支持异步/同步/协程
-   - 支持多进程/多线程
-   - CPU亲和性/守护进程
-   
 ## 主要特性:
 
 #### 维持了Swoole Server中的全部特性：
@@ -24,6 +16,16 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
 #### 维持了easyPHP中的全部特性
  - 高度全局化请求对象与响应对象封装，方便二次开发。
  - 支持快速路由,请求拦截,多种事件回调，容器托管服务。   
+ 
+#### 优势:
+
+   - 简单易用开发效率高
+   - 并发百万TCP连接
+   - TCP/UDP/UnixSock
+   - 支持异步/同步/协程
+   - 支持多进程/多线程
+   - CPU亲和性/守护进程
+    
 #### 关于ab基准测试：
 
 - 系统: CentOS 7.1 桌面版
