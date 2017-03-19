@@ -137,12 +137,22 @@ Percentage of the requests served within a certain time (ms)
   - 用户配置($userConf)
     + 用户可以自定义添加配置信息。
  ### 自动加载
+   easyPHP-Swoole提供了一个AutoLoader对象，该对象以单例的形式存在于整个Server生命周期中。需要引入第三方包或文件时，可以在框架初始化事件或者对应的业务逻辑代码中执行引入。
+   - 名称空间引入  
+   addNamespace($prefix,$base_dir)方法,$prefix 为所需要引入的（第三方包）名称空间（前缀），$base_dir为对应的为（第三方包）对应名称空间文件存在的主目录文件夹。具体实例请参考 [Core](src/Core/Core.php)文件中registerAutoLoader方法引入第三方包的代码片段。
+   - 单文件引入 
+   requireFile($file)方法，$file 为相对于ROOT的文件路径。若文件可以被正确加载，返回true,否则返回false。
 
- ### 常用对象
- 
  ### 控制器
+ 
+ - 控制器抽象类
+   + actionName
+   + onRequest
+   + index
+   + actionNotFount
+   + afterResponse
  - URL访问规则  
-   easyPHP-Swoole 仅支持 pathInfo 模式的 URL,且与控制器名称(方法)保持一致。控制器名称空间前缀统一为 "App\Controller ,控制器搜索规则为优先完整匹配,例如访问 http://domain/api/index.html 则默认尝试优先搜索 App\Controller\Api\Index 控制器，若无对应控制器则尝试搜索，App\Controller\Api 控制器，以上actionName均为 index ，再若无则尝试搜索 App\Controller\Index 控制器，而此时，actionName 则为 api 。具体示例代码请看 example /conrollerUsage_01下面的代码，跑一遍便知。 
+    easyPHP-Swoole 仅支持 pathInfo 模式的 URL,且与控制器名称(方法)保持一致。控制器名称空间前缀统一为 "App\Controller ,控制器搜索规则为优先完整匹配,例如访问 http://domain/api/index.html 则默认尝试优先搜索 App\Controller\Api\Index 控制器，若无对应控制器则尝试搜索，App\Controller\Api 控制器，以上actionName均为 index ，再若无则尝试搜索 App\Controller\Index 控制器，而此时，actionName 则为 api 。具体示例代码请看 example /conrollerUsage_01下面的代码，跑一遍便知。 
  ### 服务启动
  框架Server需要以cli模式执行启动。实例代码如下：
  ```php
