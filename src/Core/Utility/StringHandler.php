@@ -73,4 +73,21 @@
 			return $result;
 		}
 
+        static  function utf8ToUnicode($raw){
+            $raw = iconv('UTF-8', 'UCS-2', $raw);
+            $len  = strlen($raw);
+            $str  = '';
+            for ($i = 0; $i < $len - 1; $i = $i + 2){
+                $c  = $raw[$i];
+                $c2 = $raw[$i + 1];
+                if (ord($c) > 0){   //两个字节的文字
+                    $str .= '\u'.base_convert(ord($c), 10, 16).str_pad(base_convert(ord($c2), 10, 16), 2, 0, STR_PAD_LEFT);
+                } else {
+                    $str .= '\u'.str_pad(base_convert(ord($c2), 10, 16), 4, 0, STR_PAD_LEFT);
+                }
+            }
+            $str = strtoupper($str);//转换为大写
+            return $str;
+        }
+
 	}
