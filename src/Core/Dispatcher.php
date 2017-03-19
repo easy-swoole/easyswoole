@@ -96,19 +96,19 @@ class Dispatcher
                 case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                     $allowedMethods = $routeInfo[1];
                     Response::getInstance()->sendHttpStatus(Status::CODE_METHOD_NOT_ALLOWED);
-                    return;
                     break;
                 case \FastRoute\Dispatcher::FOUND:
                     $handler = $routeInfo[1];
                     $vars = $routeInfo[2];
                     if(is_callable($handler)){
                         call_user_func_array($handler,$vars);
-                        return;
                     }
                     break;
             }
         }
-
+        if(Response::getInstance()->isEndResponse()){
+            return;
+        }
         //去除为fastRouter预留的左边斜杠
         $pathInfo = ltrim($pathInfo,"/");
         $list = explode("/",$pathInfo);
