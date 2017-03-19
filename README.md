@@ -215,12 +215,11 @@ Percentage of the requests served within a certain time (ms)
 - onWorkerFatalError
 ### 系统接口类
 系统接口类在名称空间 Core\AbstractInterface 下提供的各种抽象类与接口。
- - AbstractEvent
+ - AbstractEvent  
  - AbstractRouter
  - AbstractController 
  - AbstractAsyncTask
- - AbstractErrorHandler
- - ExceptionHandlerInterface
+ - ErrorHandlerInterface
  - LoggerWriterInterface
 ### 系统组件  
    系统组件指在名称空间 Core\Component 下提供的组件。

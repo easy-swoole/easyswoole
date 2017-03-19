@@ -23,10 +23,12 @@ class ErrorHandler implements ErrorHandlerInterface
     function display(Error $error)
     {
         // TODO: Implement display() method.
+        Logger::console($error,0);
     }
 
     function log(Error $error)
     {
         // TODO: Implement log() method.
+        Logger::log($error);
     }
 }
