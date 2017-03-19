@@ -216,11 +216,17 @@ Percentage of the requests served within a certain time (ms)
 ### 系统接口类
 系统接口类在名称空间 Core\AbstractInterface 下提供的各种抽象类与接口。
  - AbstractEvent  
- - AbstractRouter
- - AbstractController 
- - AbstractAsyncTask
- - ErrorHandlerInterface
+ 该抽象类定义了各种系统事件，在Conf/Event.php被继承实现。
+ - AbstractRouter  
+ 该抽象类实现了对FastRouter的封装，若系统中需要调用路由，则在App/Router.php被继承实现。
+ - AbstractController   
+ 该抽象类规定了控制器的方法和调用属性。所有的控制器必须继承实现该类。
+ - AbstractAsyncTask  
+ 该抽象类定义了一个异步任务对象，异步任务可以选择性的继承实现该类。
+ - ErrorHandlerInterface  
+ 该接口定义了错误处理接口。
  - LoggerWriterInterface
+ 该接口定义了系统日志处理接口。
 ### 系统组件  
    系统组件指在名称空间 Core\Component 下提供的组件。
  - 系统常量

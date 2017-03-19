@@ -99,7 +99,7 @@ class SwooleHttpServer
             $this->getServer()->on("task",function (\swoole_http_server $server, $taskId, $fromId,$taskObj){
                 Event::getInstance()->onTask($server, $taskId, $fromId,$taskObj);
                 if($taskObj instanceof AbstractAsyncTask){
-                    return $taskObj->handler($server, $taskId, $fromId,$taskObj->taskData());
+                    return $taskObj->handler($server, $taskId, $fromId);
                 }else if($taskObj instanceof SuperClosure){
                     return $taskObj($server, $taskId);
                 }
@@ -119,7 +119,6 @@ class SwooleHttpServer
                         if($reflection){
                             $instance = $reflection->newInstance();
                             if($instance instanceof AbstractAsyncTask){
-                                $instance->taskData($obj['taskData']);
                                 $instance->taskResultData($obj['taskResultData']);
                                 $instance->finishCallBack($server, $taskId,$obj['taskResultData']);
                             }
