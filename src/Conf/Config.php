@@ -27,7 +27,6 @@ class Config
             "SERVER"=>array(
                 "LISTEN"=>"0.0.0.0",
                 "SERVER_NAME"=>"",
-                "NODE_NAME"=>"",
                 "PORT"=>9501,
                 "WS_SUPPORT"=>false,
                 "CONFIG"=>array(

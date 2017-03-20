@@ -38,9 +38,6 @@ class Config
     function allTaskWorkerNum(){
         return $this->conf['CONFIG']['task_worker_num'];
     }
-    function nodeName(){
-        return $this->conf['NODE_NAME'];
-    }
     function serverName(){
         return $this->conf['SERVER_NAME'];
     }
