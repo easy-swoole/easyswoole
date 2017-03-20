@@ -35,15 +35,4 @@ class Index extends AbstractController
     {
         // TODO: Implement afterResponse() method.
     }
-    function loop(){
-        Timer::loop(8000,function (){
-            Logger::console("loop timmer add by controller action");
-        });
-    }
-    function after(){
-        //8秒后执行
-        Timer::delay(8000,function (){
-            Logger::console("delay timmer add by controller action");
-        });
-    }
 }
