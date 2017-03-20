@@ -59,8 +59,8 @@ class Response
 
     function writeJson($httpCode,$result = null,$msg = null,$autoJsonHeader = 1){
         if($autoJsonHeader){
-            self::sendHttpStatus($httpCode);
-            self::sendHeader("Content-type","application/json;charset=utf-8");
+            $this->sendHttpStatus($httpCode);
+            $this->sendHeader("Content-type","application/json;charset=utf-8");
         }
         $data = Array(
             "code"=>$httpCode,
@@ -71,8 +71,8 @@ class Response
     }
     function redirect($url){
         //仅支持header重定向  不做meta定向
-        self::sendHttpStatus(Status::CODE_MOVED_TEMPORARILY);
-        self::sendHeader("Location",$url);
+        $this->sendHttpStatus(Status::CODE_MOVED_TEMPORARILY);
+        $this->sendHeader("Location",$url);
     }
     function forward($pathTo,array $get = array(),array $post = array(),array $cookies = array()){
         $serverData = Request::getInstance()->getServer();
