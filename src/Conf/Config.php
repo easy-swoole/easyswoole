@@ -39,8 +39,8 @@ class Config
 //						'task_ipc_mode'=>2,
                     "open_cpu_affinity"=>1,
                     "daemonize"=>false,
-                    "user"=>"yf",
-                    "group"=>"root",
+//                    "user"=>"yf",
+//                    "group"=>"root",
                     "log_file"=>ROOT.'/swoole_log.txt'
                 ),
             ),
