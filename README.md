@@ -32,5 +32,5 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
  
 # bug反馈
 
- 如果您在使用过程中有任何的疑问，请联系作者 admin@robindata.com
+ 如果您在使用过程中有任何的疑问，请联系作者 admin@robindata.cn
 # 剩余文档正在完善中
