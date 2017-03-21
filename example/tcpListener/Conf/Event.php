@@ -25,11 +25,17 @@ class Event extends AbstractEvent
     function beforeWorkerStart(\swoole_http_server $server)
     {
         // TODO: Implement beforeWorkerStart() method.
-        $listener = $server->addlistener("0.0,0,0",9502,SWOOLE_TCP);
+        $listener = $server->addlistener("0.0.0.0",9502,SWOOLE_TCP);
+        //混合监听tcp时    要重新设置包解析规则  才不会被HTTP覆盖
+        $listener->set(array(
+            "open_eof_check"=>false,
+            "package_max_length"=>2048,
+        ));
         $listener->on("connect",function(\swoole_server $server,$fd){
             Logger::console("client connect");
         });
         $listener->on("receive",function(\swoole_server $server,$fd,$from_id,$data){
+            Logger::console("received connect");
             $server->send($fd,"swoole ".$data);
             $server->close($fd);
         });

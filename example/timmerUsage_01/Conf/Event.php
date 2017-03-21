@@ -20,6 +20,7 @@ class Event extends AbstractEvent
     function frameInitialize()
     {
         // TODO: Implement frameInitialize() method.
+        date_default_timezone_set('Asia/Shanghai');
     }
 
     function beforeWorkerStart(\swoole_http_server $server)
