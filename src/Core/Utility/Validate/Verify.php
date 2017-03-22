@@ -33,6 +33,7 @@ class Verify
         "boolean"=>"isBoolean",
         "timestamp"=>"timestamp",
         "regex"=>"regex",
+        "notEmpty"=>"notEmpty"
     );
     function __construct(array $data,Rules $rules)
     {
@@ -205,6 +206,22 @@ class Verify
             return true;
         }else{
             return false;
+        }
+    }
+    private function notEmpty($key,$args){
+        $data = $this->getData($key);
+        if(is_object($data)){
+            if(empty($data)){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            if(strlen($data) != 0){
+                return true;
+            }else{
+                return false;
+            }
         }
     }
 }
