@@ -27,7 +27,7 @@ class Rules
     const RULE_REGEX = 'regex';
 
     protected $rules = array();
-    function add($column,$rule = null,$params = null,$alertMsg = null){
+    function add($column,$rule = null,$alertMsg = null,$params = null){
         if($rule == null){
             $this->rules[$column] = null;
         }else{
