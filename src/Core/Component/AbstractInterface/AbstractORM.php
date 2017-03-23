@@ -105,4 +105,14 @@ abstract class AbstractORM{
         // TODO: Implement __toString() method.
         return json_encode($this);
     }
+    /*
+     * @param $arr multi array for array($propertyName=>value)
+     */
+    static function multiArrayToObject(array $arr){
+        $data = array();
+        foreach($arr as $item){
+            array_push($data,new static($item));
+        }
+        return $data;
+    }
 }
