@@ -10,8 +10,8 @@ namespace App;
 
 
 use Core\AbstractInterface\AbstractRouter;
-use Core\Component\RouteCollector;
 use Core\Http\Response\Response;
+use FastRoute\RouteCollector;
 
 class Router extends AbstractRouter
 {
