@@ -7,15 +7,19 @@
  */
 
 namespace Core\AbstractInterface;
-use Core\Component\RouteCollector;
+use FastRoute\DataGenerator\GroupCountBased;
+use FastRoute\RouteCollector;
+use FastRoute\RouteParser\Std;
 
 abstract class AbstractRouter
 {
     protected $isCache = false;
     protected $cacheFile;
+    private $routeCollector;
     function __construct()
     {
-        $this->addRouter(RouteCollector::getInstance());
+        $this->routeCollector = new RouteCollector(new Std(),new GroupCountBased());
+        $this->addRouter($this->routeCollector);
     }
 
     abstract function addRouter(RouteCollector $routeCollector);
@@ -46,5 +50,8 @@ abstract class AbstractRouter
         }else{
             return false;
         }
+    }
+    function getRouteCollector(){
+        return $this->routeCollector;
     }
 }

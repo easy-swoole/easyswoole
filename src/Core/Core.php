@@ -50,6 +50,7 @@ class Core
         $this->defineSysConst();
         $this->registerAutoLoader();
         Event::getInstance()->frameInitialize();
+        $this->setDefaultAppDirectory();
         $this->registerErrorHandler();
         return $this;
     }
@@ -69,8 +70,6 @@ class Core
         $loader->addNamespace("FastRoute","Core/Vendor/FastRoute");
         $loader->addNamespace("SuperClosure","Core/Vendor/SuperClosure");
         $loader->addNamespace("PhpParser","Core/Vendor/PhpParser");
-        //添加应用目录
-        $loader->addNamespace("App","App");
     }
 
     private function registerErrorHandler(){
@@ -91,5 +90,14 @@ class Core
                 }
             });
         }
+    }
+    private function setDefaultAppDirectory(){
+        $dir = Di::getInstance()->get(SysConst::APPLICATION_DIR);
+        if(empty($dir)){
+            $dir = "App";
+            Di::getInstance()->set(SysConst::APPLICATION_DIR,$dir);
+        }
+        $prefix = $dir;
+        AutoLoader::getInstance()->addNamespace($prefix,$dir);
     }
 }
