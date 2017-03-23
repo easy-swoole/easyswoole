@@ -73,7 +73,7 @@ class Di
                 $this->set($key,$ins);
                 return $ins;
             }else{
-                return $result;
+                return $result['obj'];
             }
         }else{
             return null;
