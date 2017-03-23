@@ -9,61 +9,100 @@
 namespace Core\Component\AbstractInterface;
 
 
-abstract class AbstractORM
-{
+abstract class AbstractORM{
+    /*
+     * 注意   若想实现类似 json_encode(class) 自动转数组
+     *    在继承类中   对应的变量名称请为public属性或者直接不定义，MAP会自动定义
+     */
     private $ORMMap = array();
-    function __construct()
+    /*
+        * $data must bu array($propertyName=>value)
+    */
+    function __construct(array $data = array())
     {
         $this->setORM($this->ORMMap);
+        $this->ORMMapHandler();
+        if(!empty($data)){
+            $this->arrayToObject($data);
+        }
     }
-	 /*
-     * $orm must bu array(key(columnName)=>valName)
-     */
+    /*
+     * $orm must bu like  array(propertyName =>columnName,propertyName2=>array(columnName2,defaultValue))
+    */
     abstract protected function setORM(array &$orm);
-	function objectToArray(array $columns = null){
+    /*
+     * @return array   array(propertyName => value);
+     */
+    function objectToArray(array $columns = null){
         $data = array();
         if(!empty($columns)){
-            foreach ($columns as $column){
-                if(isset($this->ORMMap[$column])){
-                    $valName = $this->ORMMap[$column];
-                    $data[$column] = $this->$valName;
+            foreach ($this->ORMMap as $propertyName => $columnName){
+                if(in_array($columnName,$columns)){
+                    $data[$propertyName] = $this->$propertyName;
                 }
             }
         }else{
-            foreach ($this->ORMMap as $key => $value){
-                $data[$key] = $this->$value;
+            foreach ($this->ORMMap as $propertyName => $columnName){
+                $data[$propertyName] = $this->$propertyName;
             }
         }
         return $data;
     }
+    /*
+     * $data must bu array($propertyName=>value)
+     */
     function arrayToObject(array $data){
-        foreach ($this->ORMMap as $key => $value){
-            if(isset($data[$key])){
-                $this->$value = $data[$key];
+        foreach ($this->ORMMap as $propertyName => $columnName){
+            if(isset($data[$propertyName])){
+                $this->$propertyName = $data[$propertyName];
             }
         }
         return $this;
     }
-    function mappingKeys(){
-        return array_keys($this->ORMMap);
-    }
-    function mappingVariableList(){
+    function mappingColumns(){
         $data = array();
-        foreach ($this->ORMMap as $key => $value){
-            $data[] = $value;
+        foreach ($this->ORMMap as $propertyName => $columnName){
+            $data[] = $columnName;
         }
         return $data;
     }
-    function mappingVariableValue($key){
-        if(isset($this->ORMMap[$key])){
-            $var = $this->ORMMap[$key];
-            return $this->$var;
-        }else{
-            return null;
+    function mappingVariableList(){
+        return array_keys($this->ORMMap);
+    }
+    function getMappingColumnValue($columnName){
+        foreach ($this->ORMMap as $propertyName => $columnName2){
+            if($columnName === $columnName2){
+                return $this->$propertyName;
+            }
+        }
+        return null;
+    }
+    function addMapping($propertyName,$columnName){
+        $this->ORMMap[$propertyName] = $columnName;
+        return $this;
+    }
+    function getPropertyMappingColumn($propertyName){
+        if(isset($propertyName)){
+            return $this->ORMMap[$propertyName];
+        }
+        return null;
+    }
+    function getPropertyValue($propertyName){
+        return $this->$propertyName;
+    }
+    private function ORMMapHandler(){
+        foreach ($this->ORMMap as $propertyName => $item){
+            if(is_array($item)){
+                $this->ORMMap[$propertyName] = $item[0];
+                $this->$propertyName = $item[1];;
+            }else{
+                $this->$propertyName = null;
+            }
         }
     }
-    function addMapping($key,$variableName){
-        $this->ORMMap[$key] = $variableName;
-		return $this;
+    function __toString()
+    {
+        // TODO: Implement __toString() method.
+        return json_encode($this);
     }
 }
