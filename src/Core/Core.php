@@ -49,8 +49,8 @@ class Core
         }
         $this->defineSysConst();
         $this->registerAutoLoader();
-        Event::getInstance()->frameInitialize();
         $this->setDefaultAppDirectory();
+        Event::getInstance()->frameInitialize();
         $this->registerErrorHandler();
         return $this;
     }
