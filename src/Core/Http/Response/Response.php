@@ -31,14 +31,17 @@ class Response
     }
 
     /**
-     * @param string $str
+     * @param mixed $obj
      */
-    function write($str){
-        if(!empty($str)){
-            /*
-             * 禁止输出空字符串
-             */
-            $this->swoole_http_response->write($str);
+    function write($obj){
+        if(is_object($obj)){
+            $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        }
+        /*
+          * 禁止输出空字符串
+       */
+        if(isset($obj) && strlen($obj)){
+            $this->swoole_http_response->write($obj);
         }
     }
     function end(){
