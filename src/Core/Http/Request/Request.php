@@ -97,9 +97,9 @@ class Request
     function getRequestParamsWithVerify(Rules $rules){
         return new Verify($this->getRequestParam(),$rules);
     }
-    function getSwooleRequestProperty($property){
-        if(isset($this->swoole_http_request->$property)){
-            return $this->swoole_http_request->$property;
+    function getSwooleRequestProperty($propertyName){
+        if(isset($this->swoole_http_request->$propertyName)){
+            return $this->swoole_http_request->$propertyName;
         }else{
             return null;
         }
