@@ -93,4 +93,7 @@ class Response
     function getSwooleResponse(){
         return $this->swoole_http_response;
     }
+    function cookie(){
+        return Cookie::getInstance();
+    }
 }
