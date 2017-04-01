@@ -16,6 +16,11 @@ class SplString
     {
         $this->rawString = $rawString;
     }
+
+    function setString($string){
+        $this->rawString = (String)$string;
+    }
+
     function split($length = 1){
         return str_split($this->rawString,$length);
     }
