@@ -16,11 +16,9 @@ class SplString
     {
         $this->rawString = $rawString;
     }
-
     function setString($string){
         $this->rawString = (String)$string;
     }
-
     function split($length = 1){
         return str_split($this->rawString,$length);
     }
@@ -42,19 +40,7 @@ class SplString
     }
 
     function toUtf8(){
-        $fileType = mb_detect_encoding ( $this->rawString, array (
-            'UTF-8',
-            'GBK',
-            'GB2312',
-            'LATIN1',
-            'BIG5',
-            "UCS-2"
-        ) );
-        if ($fileType != 'UTF-8') {
-            return mb_convert_encoding ( $this->rawString, 'UTF-8', $fileType );
-        }else{
-            return $this->rawString;
-        }
+        return $this->encodingConvert("UTF-8");
     }
     function toUnicode(){
         $fileType = mb_detect_encoding ( $this->rawString, array (
@@ -130,4 +116,5 @@ class SplString
         // TODO: Implement __toString() method.
         return (String)$this->rawString;
     }
+
 }

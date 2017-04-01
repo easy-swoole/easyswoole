@@ -34,13 +34,15 @@ class Response
      * @param mixed $obj
      */
     function write($obj){
-        if(is_object($obj)){
+        if( is_array($obj) || ($obj instanceof \stdClass)){
             $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        }else{
+            $obj = (String)$obj;
         }
         /*
           * 禁止输出空字符串
        */
-        if(isset($obj) && strlen($obj)){
+        if(strlen($obj)){
             $this->swoole_http_response->write($obj);
         }
     }

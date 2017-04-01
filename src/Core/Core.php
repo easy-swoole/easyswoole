@@ -14,7 +14,7 @@ use Conf\Event;
 use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Di;
 use Core\Component\ErrorHandler;
-use Core\Component\Object\Error;
+use Core\Component\Spl\Error;
 use Core\Component\SysConst;
 use Core\Swoole\SwooleHttpServer;
 
