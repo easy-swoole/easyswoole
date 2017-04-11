@@ -10,19 +10,19 @@ namespace Core\Component;
 
 
 use Core\AbstractInterface\ErrorHandlerInterface;
-use Core\Component\Spl\Error;
+use Core\Component\Spl\SplError;
 use Core\Http\Request\Request;
 use Core\Http\Response\Response;
 
 class ErrorHandler implements ErrorHandlerInterface
 {
 
-    function handler(Error $error)
+    function handler(SplError $error)
     {
         // TODO: Implement handler() method.
     }
 
-    function display(Error $error)
+    function display(SplError $error)
     {
         // TODO: Implement display() method.
         if(Request::getInstance()->isInRequest()){
@@ -33,7 +33,7 @@ class ErrorHandler implements ErrorHandlerInterface
 
     }
 
-    function log(Error $error)
+    function log(SplError $error)
     {
         // TODO: Implement log() method.
         Logger::log($error);

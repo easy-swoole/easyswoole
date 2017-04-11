@@ -9,7 +9,7 @@
 namespace Core\Component\Spl;
 
 
-class Error
+class SplError
 {
     protected $errorCode;
     protected $errorType;
