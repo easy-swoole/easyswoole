@@ -110,7 +110,4 @@ class Request
     function getSwooleRequest(){
         return $this->swoole_http_request;
     }
-    function isInRequest(){
-        return isset($this->swoole_http_request);
-    }
 }

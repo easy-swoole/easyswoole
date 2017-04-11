@@ -25,7 +25,7 @@ class ErrorHandler implements ErrorHandlerInterface
     function display(SplError $error)
     {
         // TODO: Implement display() method.
-        if(Request::getInstance()->isInRequest()){
+        if(Request::getInstance()){
             Response::getInstance()->write($error);
         }else{
             Logger::console($error,0);
