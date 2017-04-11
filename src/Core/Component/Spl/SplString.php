@@ -23,15 +23,16 @@ class SplString
         return str_split($this->rawString,$length);
     }
 
-    function encodingConvert($desEncoding){
-        $fileType = mb_detect_encoding ( $this->rawString, array (
-            'UTF-8',
-            'GBK',
-            'GB2312',
-            'LATIN1',
-            'BIG5',
-            "UCS-2"
-        ) );
+    function encodingConvert($desEncoding,$detectList = array(
+        'UTF-8',
+        'ASCII',
+        'GBK',
+        'GB2312',
+        'LATIN1',
+        'BIG5',
+        "UCS-2"
+    )){
+        $fileType = mb_detect_encoding ( $this->rawString,$detectList);
         if ($fileType != $desEncoding) {
             return mb_convert_encoding ( $this->rawString, $desEncoding , $fileType );
         }else{
@@ -42,32 +43,21 @@ class SplString
     function toUtf8(){
         return $this->encodingConvert("UTF-8");
     }
+
     function toUnicode(){
-        $fileType = mb_detect_encoding ( $this->rawString, array (
-            'UTF-8',
-            'GBK',
-            'GB2312',
-            'LATIN1',
-            'BIG5',
-            "UCS-2"
-        ) );
-        if($fileType != "UCS-2"){
-            $raw = mb_convert_encoding( $this->rawString, 'UCS-2',$fileType);
-            $len  = strlen($raw);
-            $str  = '';
-            for ($i = 0; $i < $len - 1; $i = $i + 2){
-                $c  = $raw[$i];
-                $c2 = $raw[$i + 1];
-                if (ord($c) > 0){   //两个字节的文字
-                    $str .= '\u'.base_convert(ord($c), 10, 16).str_pad(base_convert(ord($c2), 10, 16), 2, 0, STR_PAD_LEFT);
-                } else {
-                    $str .= '\u'.str_pad(base_convert(ord($c2), 10, 16), 4, 0, STR_PAD_LEFT);
-                }
+        $raw = $this->encodingConvert("UCS-2");
+        $len  = strlen($raw);
+        $str  = '';
+        for ($i = 0; $i < $len - 1; $i = $i + 2){
+            $c  = $raw[$i];
+            $c2 = $raw[$i + 1];
+            if (ord($c) > 0){   //两个字节的文字
+                $str .= '\u'.base_convert(ord($c), 10, 16).str_pad(base_convert(ord($c2), 10, 16), 2, 0, STR_PAD_LEFT);
+            } else {
+                $str .= '\u'.str_pad(base_convert(ord($c2), 10, 16), 4, 0, STR_PAD_LEFT);
             }
-            return strtoupper($str);//转换为大写
-        }else{
-            return $this->rawString;
         }
+        return strtoupper($str);//转换为大写
     }
 
     function explode($separator){
