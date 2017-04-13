@@ -44,8 +44,7 @@ class SplString
     }
 
     function toUtf8(){
-        $this->rawString =  $this->encodingConvert("UTF-8");
-        return $this;
+        return  $this->encodingConvert("UTF-8");
     }
 
     function toUnicode(){
