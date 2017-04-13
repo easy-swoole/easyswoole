@@ -113,11 +113,6 @@ class SplString
         $this->rawString =  strtolower($this->rawString);
         return $this;
     }
-    function __toString()
-    {
-        // TODO: Implement __toString() method.
-        return (String)$this->rawString;
-    }
     function stripTags($allowable_tags = null){
         $this->rawString =  strip_tags($this->rawString,$allowable_tags);
         return $this;
@@ -126,5 +121,19 @@ class SplString
         $this->rawString = str_replace($find,$replaceTo,$this->rawString);
         return $this;
     }
+    function exist($find,$ignoreCase = true){
+        if($ignoreCase){
+            $label = stripos($this->rawString,$find);
+        }else{
+            $label = strpos($this->rawString,$find);
+        }
+        return $label === false ? false : true;
+    }
+    function __toString()
+    {
+        // TODO: Implement __toString() method.
+        return (String)$this->rawString;
+    }
+
 
 }
