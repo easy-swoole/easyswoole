@@ -66,8 +66,7 @@ class SplString
     }
 
     function explode($separator){
-        return explode($separator,$this->rawString);
-
+        return new SplArray(explode($separator,$this->rawString));
     }
     function subString($start,$length){
         $this->rawString =  substr($this->rawString,$start,$length);
@@ -104,8 +103,7 @@ class SplString
     }
 
     function length(){
-        $this->rawString =  strlen($this->rawString);
-        return $this;
+        return strlen($this->rawString);
     }
 
     function toUpper(){
