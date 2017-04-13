@@ -48,7 +48,7 @@ class SplString
     }
 
     function toUnicode(){
-        $raw = $this->encodingConvert("UCS-2");
+        $raw = (string)$this->encodingConvert("UCS-2");
         $len  = strlen($raw);
         $str  = '';
         for ($i = 0; $i < $len - 1; $i = $i + 2){
