@@ -14,13 +14,15 @@ class SplString
     private $rawString;
     function __construct($rawString = null)
     {
-        $this->rawString = $rawString;
+        $this->rawString = (string)$rawString;
     }
     function setString($string){
         $this->rawString = (String)$string;
+        return $this;
     }
     function split($length = 1){
-        return str_split($this->rawString,$length);
+        $this->rawString =  str_split($this->rawString,$length);
+        return $this;
     }
 
     function encodingConvert($desEncoding,$detectList = array(
@@ -34,14 +36,16 @@ class SplString
     )){
         $fileType = mb_detect_encoding ( $this->rawString,$detectList);
         if ($fileType != $desEncoding) {
-            return mb_convert_encoding ( $this->rawString, $desEncoding , $fileType );
+            $this->rawString =  mb_convert_encoding ( $this->rawString, $desEncoding , $fileType );
+            return $this;
         }else{
-            return $this->rawString;
+            return $this;
         }
     }
 
     function toUtf8(){
-        return $this->encodingConvert("UTF-8");
+        $this->rawString =  $this->encodingConvert("UTF-8");
+        return $this;
     }
 
     function toUnicode(){
@@ -57,14 +61,17 @@ class SplString
                 $str .= '\u'.str_pad(base_convert(ord($c2), 10, 16), 4, 0, STR_PAD_LEFT);
             }
         }
-        return strtoupper($str);//转换为大写
+        $this->rawString =  strtoupper($str);//转换为大写
+        return $this;
     }
 
     function explode($separator){
         return explode($separator,$this->rawString);
+
     }
     function subString($start,$length){
-        return substr($this->rawString,$start,$length);
+        $this->rawString =  substr($this->rawString,$start,$length);
+        return $this;
     }
     function compare($str,$ignoreCase = 0){
         if($ignoreCase){
@@ -75,36 +82,52 @@ class SplString
     }
 
     function lTrim($charList = null){
-        return ltrim($this->rawString,$charList);
+        $this->rawString =  ltrim($this->rawString,$charList);
+        return $this;
     }
     function rTrim($charList = null){
-        return rtrim($this->rawString,$charList);
+        $this->rawString =  rtrim($this->rawString,$charList);
+        return $this;
     }
     function trim($charList = null){
-        return trim($this->rawString,$charList);
+        $this->rawString =  trim($this->rawString,$charList);
+        return $this;
     }
 
     function pad($length,$padString = null,$pad_type = STR_PAD_RIGHT ){
-        return str_pad($this->rawString,$length,$padString,$pad_type);
+        $this->rawString =  str_pad($this->rawString,$length,$padString,$pad_type);
+        return $this;
     }
     function repeat($times){
-        return str_repeat($this->rawString,$times);
+        $this->rawString =  str_repeat($this->rawString,$times);
+        return $this;
     }
 
     function length(){
-        return strlen($this->rawString);
+        $this->rawString =  strlen($this->rawString);
+        return $this;
     }
 
     function toUpper(){
-        return strtoupper($this->rawString);
+        $this->rawString =  strtoupper($this->rawString);
+        return $this;
     }
     function toLower(){
-        return strtolower($this->rawString);
+        $this->rawString =  strtolower($this->rawString);
+        return $this;
     }
     function __toString()
     {
         // TODO: Implement __toString() method.
         return (String)$this->rawString;
+    }
+    function stripTags($allowable_tags = null){
+        $this->rawString =  strip_tags($this->rawString,$allowable_tags);
+        return $this;
+    }
+    function replace($find,$replaceTo){
+        $this->rawString = str_replace($find,$replaceTo,$this->rawString);
+        return $this;
     }
 
 }
