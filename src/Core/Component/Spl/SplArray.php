@@ -20,7 +20,11 @@ class SplArray extends \ArrayObject
     {
         // TODO: Implement __get() method.
         if(isset($this[$name])){
-            return $this[$name];
+            if(is_array($this[$name])){
+                return new SplString($this[$name]);
+            }else{
+                return $this[$name];
+            }
         }else{
             return null;
         }
