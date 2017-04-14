@@ -52,4 +52,21 @@ class Request
     function getOpt(){
         return $this->curlOPt;
     }
+
+    function exec($autoDebug = 1){
+        $curl = curl_init();
+        curl_setopt_array($curl,$this->getOpt());
+        $result = curl_exec($curl);
+        if($autoDebug){
+            $info = curl_getinfo($curl);
+            $curl_error = curl_error($curl);
+            $curl_errorNo = curl_errno($curl);
+        }else{
+            $info = null;
+            $curl_error = null;
+            $curl_errorNo = null;
+        }
+        curl_close($curl);
+        return new Response($result,$info,$curl_error,$curl_errorNo);
+    }
 }
