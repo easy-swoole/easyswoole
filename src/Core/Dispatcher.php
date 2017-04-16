@@ -80,7 +80,7 @@ class Dispatcher
             }
             if(class_exists($controllerNameSpacePrefix.$className)){
                 //尝试获取该class后的actionName
-                $actionName = @$list[$i];
+                $actionName = isset($list[$i]) ? $list[$i] : '';
                 $finalClass = $controllerNameSpacePrefix.$className;
                 break;
             }else{
@@ -89,7 +89,7 @@ class Dispatcher
                 if(class_exists($controllerNameSpacePrefix.$temp)){
                     $finalClass = $controllerNameSpacePrefix.$temp;
                     //尝试获取该class后的actionName
-                    $actionName = @$list[$i];
+                    $actionName = isset($list[$i]) ? $list[$i] : '';
                     break;
                 }
             }
@@ -102,7 +102,7 @@ class Dispatcher
         }
         if(class_exists($finalClass)){
             if($isIndexController){
-                $actionName = @$list[0];
+                $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
             $controller = new $finalClass;
