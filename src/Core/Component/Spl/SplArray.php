@@ -54,5 +54,6 @@ class SplArray extends \ArrayObject
                 }
             }
         }
+        return $temp;
     }
 }
