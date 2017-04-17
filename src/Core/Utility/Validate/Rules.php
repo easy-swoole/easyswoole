@@ -25,9 +25,10 @@ class Rules
     const RULE_IS_BOOLEAN = 'boolean';
     const RULE_IS_TIMESTAMP = 'timestamp';
     const RULE_REGEX = 'regex';
+    const RULE_NOT_EMPTY = 'notEmpty';
 
     protected $rules = array();
-    function add($column,$rule = null,$params = null,$alertMsg = null){
+    function add($column,$rule = null,$alertMsg = null,$params = null){
         if($rule == null){
             $this->rules[$column] = null;
         }else{

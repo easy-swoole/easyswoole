@@ -13,8 +13,8 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
 use Core\Dispatcher;
-use Core\Http\Request;
-use Core\Http\Response;
+use Core\Http\Request\Request;
+use Core\Http\Response\Response;
 
 class SwooleHttpServer
 {
@@ -31,9 +31,14 @@ class SwooleHttpServer
         }
         return self::$instance;
     }
+
     function __construct()
     {
-        $this->swooleServer = new \swoole_http_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        if(Config::getInstance()->wsSupport()){
+            $this->swooleServer = new \swoole_websocket_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        }else{
+            $this->swooleServer = new \swoole_http_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        }
     }
 
     function isStart(){
@@ -94,7 +99,7 @@ class SwooleHttpServer
             $this->getServer()->on("task",function (\swoole_http_server $server, $taskId, $fromId,$taskObj){
                 Event::getInstance()->onTask($server, $taskId, $fromId,$taskObj);
                 if($taskObj instanceof AbstractAsyncTask){
-                    return $taskObj->handler($server, $taskId, $fromId,$taskObj->taskData());
+                    return $taskObj->handler($server, $taskId, $fromId);
                 }else if($taskObj instanceof SuperClosure){
                     return $taskObj($server, $taskId);
                 }
@@ -114,7 +119,6 @@ class SwooleHttpServer
                         if($reflection){
                             $instance = $reflection->newInstance();
                             if($instance instanceof AbstractAsyncTask){
-                                $instance->taskData($obj['taskData']);
                                 $instance->taskResultData($obj['taskResultData']);
                                 $instance->finishCallBack($server, $taskId,$obj['taskResultData']);
                             }

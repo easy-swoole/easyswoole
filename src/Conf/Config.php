@@ -27,8 +27,8 @@ class Config
             "SERVER"=>array(
                 "LISTEN"=>"0.0.0.0",
                 "SERVER_NAME"=>"",
-                "NODE_NAME"=>"",
                 "PORT"=>9501,
+                "WS_SUPPORT"=>false,
                 "CONFIG"=>array(
                     'task_worker_num' => 4, //异步任务进程
                     "task_max_request"=>10,
@@ -38,8 +38,8 @@ class Config
 //						'task_ipc_mode'=>2,
                     "open_cpu_affinity"=>1,
                     "daemonize"=>false,
-                    "user"=>"yf",
-                    "group"=>"root",
+//                    "user"=>"yf",
+//                    "group"=>"root",
                     "log_file"=>ROOT.'/swoole_log.txt'
                 ),
             ),

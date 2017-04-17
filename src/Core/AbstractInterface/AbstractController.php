@@ -8,11 +8,8 @@
 
 namespace Core\AbstractInterface;
 
-
-use Conf\Event;
-use Core\Dispatcher;
-use Core\Http\Request;
-use Core\Http\Response;
+use Core\Http\Request\Request;
+use Core\Http\Response\Response;
 
 abstract class AbstractController
 {
@@ -39,6 +36,9 @@ abstract class AbstractController
     {
         // TODO: Implement __call() method.
         $this->actionNotFount($actionName, $arguments);
+    }
+    function session(){
+
     }
 
 }

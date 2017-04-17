@@ -15,18 +15,6 @@ abstract class AbstractAsyncTask
 {
     protected $resultData;
     protected $taskData;
-
-    /**避免资源类型传递
-     * @param null $data
-     * @return mixed
-     */
-    function taskData($data = null){
-        if($data === null){
-            return $this->taskData;
-        }else{
-            $this->taskData = $data;
-        }
-    }
     /**避免资源类型传递
      * @param null $data
      * @return mixed
@@ -42,7 +30,7 @@ abstract class AbstractAsyncTask
     /*
      * 注意   server为task进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
-    abstract function handler(\swoole_http_server $server,$taskId,$fromId,$taskData);
+    abstract function handler(\swoole_http_server $server,$taskId,$fromId);
     /*
      * 注意   server为主worker进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
@@ -54,7 +42,6 @@ abstract class AbstractAsyncTask
         //为何不用$this传递   避免handler中有释放资源类型被序列化出错
         SwooleHttpServer::getInstance()->getServer()->finish(array(
             "taskClassName"=>static::class,
-            "taskData"=>$this->taskData,
             "taskResultData"=>$this->resultData,
         ));
     }

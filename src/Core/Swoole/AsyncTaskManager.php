@@ -10,11 +10,13 @@ namespace Core\Swoole;
 
 
 
+use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
 
 class AsyncTaskManager
 {
     private static $instance;
+    const TASK_DISPATCHER_TYPE_RANDOM = -1;
     static function getInstance(){
         if(!isset(self::$instance)){
             self::$instance = new static();
@@ -37,13 +39,29 @@ class AsyncTaskManager
      * @param null $finishCallBack
      * @return bool
      */
-    function add($callable, $workerId = -1, $finishCallBack = null){
-        if($callable instanceof \Closure){
+    function add($callable, $workerId = self::TASK_DISPATCHER_TYPE_RANDOM, $finishCallBack = null){
+        if(is_string($callable)){
+            if(class_exists($callable)){
+                $callable = new $callable();
+                if(!is_a($callable,AbstractAsyncTask::class)){
+                    trigger_error("async task {$callable} illegal");
+                    return false;
+                }
+            }else{
+                trigger_error("async task {$callable} illegal");
+                return false;
+            }
+        }else if($callable instanceof \Closure){
             $callable = new SuperClosure($callable);
+        }else{
+            if(!is_a($callable,AbstractAsyncTask::class)){
+                trigger_error("async task {$callable} illegal");
+                return false;
+            }
         }
         return SwooleHttpServer::getInstance()->getServer()->task($callable,$workerId,$finishCallBack);
     }
-    function addSyncTask($callable,$timeout = 0.5,$workerId = null){
+    function addSyncTask($callable,$timeout = 0.5,$workerId = self::TASK_DISPATCHER_TYPE_RANDOM){
         if($callable instanceof \Closure){
             $callable = new SuperClosure($callable);
         }

@@ -14,9 +14,9 @@ use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
 use Core\Component\SysConst;
-use Core\Http\Request;
-use Core\Http\Response;
 use Core\Component\SuperClosure;
+use Core\Http\Request\Request;
+use Core\Http\Response\Response;
 use Core\Http\Status;
 use FastRoute\Dispatcher\GroupCountBased;
 use Core\Component\RouteCollector;
@@ -25,6 +25,7 @@ class Dispatcher
 {
     protected static $selfInstance;
     protected $fastRouterDispatcher;
+    protected $currentApplicationDirectory;
     static function getInstance(){
         if(!isset(self::$selfInstance)){
             self::$selfInstance = new Dispatcher();
@@ -32,57 +33,8 @@ class Dispatcher
         return self::$selfInstance;
     }
 
-    function __construct()
-    {
-        /*
-            *initialize fast router
-            * single try for new  Router in per Dispatcher instance
-         */
-        try{
-            /*
-                    * if exit Router class in App directory
-               */
-            $ref = new \ReflectionClass("App\\Router");
-            $router = $ref->newInstance();
-            if($router instanceof AbstractRouter){
-                $is = $router->isCache();
-                if($is){
-                    if(file_exists($is)){
-                        $dispatcherData = require_once "{$is}";
-                        $dispatcherData = unserialize($dispatcherData);
-                    }else{
-                        $dispatcherData =  RouteCollector::getInstance()->getData();
-                        $cache =  $dispatcherData;
-                        /*
-                         * to support closure
-                         */
-                        array_walk_recursive($cache,function(&$item,$key){
-                            if($item instanceof \Closure){
-                                $item = new SuperClosure($item);
-                            }
-                        });
-                        file_put_contents(
-                            $is,
-                            "<?php return '" . serialize($cache) . "';"
-                        );
-                    }
-                    $this->fastRouterDispatcher = new GroupCountBased($dispatcherData);
-                }else{
-                    $this->fastRouterDispatcher = new GroupCountBased(RouteCollector::getInstance()->getData());
-                }
-            }
-        }catch(\Exception $exception){
-
-        }
-    }
-    private function doFastRouter($pathInfo,$requestMethod){
-        if($this->fastRouterDispatcher instanceof GroupCountBased){
-            return $this->fastRouterDispatcher->dispatch($requestMethod,$pathInfo);
-        }else{
-            return false;
-        }
-    }
     function dispatch(){
+        $this->currentApplicationDirectory = Di::getInstance()->get(SysConst::APPLICATION_DIR);
         if(Response::getInstance()->isEndResponse()){
             return;
         }
@@ -96,23 +48,23 @@ class Dispatcher
                 case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                     $allowedMethods = $routeInfo[1];
                     Response::getInstance()->sendHttpStatus(Status::CODE_METHOD_NOT_ALLOWED);
-                    return;
                     break;
                 case \FastRoute\Dispatcher::FOUND:
                     $handler = $routeInfo[1];
                     $vars = $routeInfo[2];
                     if(is_callable($handler)){
                         call_user_func_array($handler,$vars);
-                        return;
                     }
                     break;
             }
         }
-
+        if(Response::getInstance()->isEndResponse()){
+            return;
+        }
         //去除为fastRouter预留的左边斜杠
         $pathInfo = ltrim($pathInfo,"/");
         $list = explode("/",$pathInfo);
-        $controllerNameSpacePrefix = "App\\Controller";
+        $controllerNameSpacePrefix = "{$this->currentApplicationDirectory}\\Controller";
         $actionName = null;
         $finalClass = null;
         $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
@@ -128,7 +80,7 @@ class Dispatcher
             }
             if(class_exists($controllerNameSpacePrefix.$className)){
                 //尝试获取该class后的actionName
-                $actionName = @$list[$i];
+                $actionName = isset($list[$i]) ? $list[$i] : '';
                 $finalClass = $controllerNameSpacePrefix.$className;
                 break;
             }else{
@@ -137,7 +89,7 @@ class Dispatcher
                 if(class_exists($controllerNameSpacePrefix.$temp)){
                     $finalClass = $controllerNameSpacePrefix.$temp;
                     //尝试获取该class后的actionName
-                    $actionName = @$list[$i];
+                    $actionName = isset($list[$i]) ? $list[$i] : '';
                     break;
                 }
             }
@@ -150,7 +102,7 @@ class Dispatcher
         }
         if(class_exists($finalClass)){
             if($isIndexController){
-                $actionName = @$list[0];
+                $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
             $controller = new $finalClass;
@@ -175,4 +127,60 @@ class Dispatcher
             trigger_error("default controller Index not implement");
         }
     }
+
+    private function intRouterInstance(){
+        try{
+            /*
+                * if exit Router class in App directory
+             */
+            $ref = new \ReflectionClass("{$this->currentApplicationDirectory}\\Router");
+            $router = $ref->newInstance();
+            if($router instanceof AbstractRouter){
+                $is = $router->isCache();
+                if($is){
+                    $is = $is.".{$this->currentApplicationDirectory}";
+                    if(file_exists($is)){
+                        $dispatcherData = require_once "{$is}";
+                        $dispatcherData = unserialize($dispatcherData);
+                    }else{
+                        $dispatcherData =  $router->getRouteCollector()->getData();
+                        $cache =  $dispatcherData;
+                        /*
+                         * to support closure
+                         */
+                        array_walk_recursive($cache,function(&$item,$key){
+                            if($item instanceof \Closure){
+                                $item = new SuperClosure($item);
+                            }
+                        });
+                        file_put_contents(
+                            $is,
+                            "<?php return '" . serialize($cache) . "';"
+                        );
+                    }
+                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
+                }else{
+                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
+                }
+            }
+        }catch(\Exception $exception){
+            //没有设置路由
+            $this->fastRouterDispatcher[$this->currentApplicationDirectory] = false;
+        }
+    }
+
+    private function doFastRouter($pathInfo,$requestMethod){
+        //判断是否建立过当前应用目录的快速路由
+        if(!isset($this->fastRouterDispatcher[$this->currentApplicationDirectory])){
+            $this->intRouterInstance();
+        }
+        $dispatcher = $this->fastRouterDispatcher[$this->currentApplicationDirectory];
+        if($dispatcher instanceof GroupCountBased){
+            return $dispatcher->dispatch($requestMethod,$pathInfo);
+        }else{
+            return false;
+        }
+    }
+
+
 }

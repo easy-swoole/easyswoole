@@ -2,23 +2,28 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/2/5
- * Time: 下午7:40
+ * Date: 2017/4/1
+ * Time: 下午8:58
  */
 
-namespace Core\Component\Error;
+namespace Core\Component\Spl;
 
 
-class Error
+class SplError
 {
     protected $errorCode;
-    protected $errorTypeInString;
+    protected $errorType;
     protected $errorLevel;
     protected $description;
     protected $file;
     protected $line;
     protected $context;
     protected $trace;
+    const ERROR_TYPE_FATAL_ERROR = 'FATAL ERROR';
+    const ERROR_TYPE_WARING = 'WARING';
+    const ERROR_TYPE_NOTICE = 'NOTICE';
+    const ERROR_TYPE_STRICT = 'STRICT';
+    const ERROR_TYPE_DEPRECATED = 'DEPRECATED';
     /**
      * @param $errorCode
      * @param string $description 错误描述
@@ -33,7 +38,7 @@ class Error
         $this->file = $file;
         $this->line = $line;
         $this->context = $context;
-        list($this->errorTypeInString,$this->errorLevel) = $this->mapErrorCode($this->errorCode);
+        list($this->errorType,$this->errorLevel) = $this->mapErrorCode($this->errorCode);
     }
 
     /**
@@ -47,9 +52,9 @@ class Error
     /**
      * @return mixed
      */
-    public function getErrorTypeInString()
+    public function getErrorType()
     {
-        return $this->errorTypeInString;
+        return $this->errorType;
     }
 
     /**
@@ -97,83 +102,46 @@ class Error
      * @return array
      */
     private function mapErrorCode($code) {
-        $errorType = $log = null;
+        $errorType = $errorLevel = null;
         switch ($code) {
             case E_PARSE:
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
             case E_USER_ERROR:
-                $errorType = 'Fatal Error';
-                $log = LOG_ERR;
+                $errorType = self::ERROR_TYPE_FATAL_ERROR;
+                $errorLevel = LOG_ERR;
                 break;
             case E_WARNING:
             case E_USER_WARNING:
             case E_COMPILE_WARNING:
             case E_RECOVERABLE_ERROR:
-                $errorType = 'Warning';
-                $log = LOG_WARNING;
+                $errorType = self::ERROR_TYPE_WARING;
+                $errorLevel = LOG_WARNING;
                 break;
             case E_NOTICE:
             case E_USER_NOTICE:
-                $errorType = 'Notice';
-                $log = LOG_NOTICE;
+                $errorType = self::ERROR_TYPE_NOTICE;
+                $errorLevel = LOG_NOTICE;
                 break;
             case E_STRICT:
-                $errorType = 'Strict';
-                $log = LOG_NOTICE;
+                $errorType = self::ERROR_TYPE_STRICT;
+                $errorLevel = LOG_NOTICE;
                 break;
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
-                $errorType = 'Deprecated';
-                $log = LOG_NOTICE;
+                $errorType = self::ERROR_TYPE_DEPRECATED;
+                $errorLevel = LOG_NOTICE;
                 break;
             default :
                 break;
         }
-        return array($errorType, $log);
+        return array($errorType, $errorLevel);
     }
+
     function __toString()
     {
         // TODO: Implement __toString() method.
-        return "errorType:{$this->errorTypeInString} \nerrorCode:{$this->errorCode} \nmessage:{$this->description} \nfile:{$this->file} \nline:{$this->line} \ntrace:{$this->traceToString()}";
-    }
-    function setTrace($trace = null){
-        $this->trace = $trace;
-    }
-    function getTrace(){
-        if(empty($this->trace)){
-            $this->trace = debug_backtrace();
-        }
-        return $this->trace;
-    }
-    function traceToString($delimiter = null){
-        if($delimiter === null){
-            $delimiter = "\n";
-        }
-        $trace = $this->getTrace();
-        $log = '';
-        foreach ($trace as $i => $t)
-        {
-            if (!isset($t['file']))
-            {
-                $t['file'] = 'unknown';
-            }
-            if (!isset($t['line']))
-            {
-                $t['line'] = 0;
-            }
-            if (!isset($t['function']))
-            {
-                $t['function'] = 'unknown';
-            }
-            $log .= "#$i {$t['file']}({$t['line']}): ";
-            if (isset($t['object']) and is_object($t['object']))
-            {
-                $log .= get_class($t['object']) . '->';
-            }
-            $log .= "{$t['function']}(){$delimiter}";
-        }
-        return $log;
+        return "{$this->errorType} : {$this->description} in file {$this->file} in line {$this->line}";
     }
 }

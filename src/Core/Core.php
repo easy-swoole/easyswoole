@@ -11,11 +11,10 @@ namespace Core;
 
 use Conf\Config;
 use Conf\Event;
-use Core\AbstractInterface\AbstractController;
-use Core\AbstractInterface\AbstractShutdownHandler;
-use Core\AbstractInterface\ExceptionHandlerInterface;
+use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Di;
-use Core\Component\Error\ErrorHandler;
+use Core\Component\ErrorHandler;
+use Core\Component\Spl\SplError;
 use Core\Component\SysConst;
 use Core\Swoole\SwooleHttpServer;
 
@@ -29,6 +28,9 @@ class Core
         return self::$instance;
     }
     function run(){
+        if(phpversion("swoole") < 1.8){
+            die("swoole version must >= 1.8.0");
+        }
         SwooleHttpServer::getInstance()->startServer();
     }
     function __construct(callable $preHandler = null)
@@ -42,12 +44,14 @@ class Core
      * initialize frameWork
      */
     function frameWorkInitialize(){
+        if(phpversion() < 5.6){
+            die("php version must >= 5.6");
+        }
         $this->defineSysConst();
         $this->registerAutoLoader();
+        $this->setDefaultAppDirectory();
         Event::getInstance()->frameInitialize();
         $this->registerErrorHandler();
-        $this->registerExceptionHandler();
-        $this->registerShutDownHandler();
         return $this;
     }
 
@@ -66,38 +70,34 @@ class Core
         $loader->addNamespace("FastRoute","Core/Vendor/FastRoute");
         $loader->addNamespace("SuperClosure","Core/Vendor/SuperClosure");
         $loader->addNamespace("PhpParser","Core/Vendor/PhpParser");
-        //添加应用目录
-        $loader->addNamespace("App","App");
     }
 
     private function registerErrorHandler(){
         $conf = Config::getInstance()->getConf("DEBUG");
         if($conf['ENABLE'] == true){
-            $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
-            if($errorHandler instanceof AbstractController){
-            }else{
-                /*
-                 * default handler
-                 */
-                $errorHandler = new ErrorHandler();
-            }
-            set_error_handler(array($errorHandler,'handlerRegister'));
+            set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
+                $error = new SplError($errorCode, $description, $file, $line, $context);
+                $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
+                if(!is_a($errorHandler,ErrorHandlerInterface::class)){
+                    $errorHandler = new ErrorHandler();
+                }
+                $errorHandler->handler($error);
+                if($conf['DISPLAY_ERROR'] == true){
+                    $errorHandler->display($error);
+                }
+                if($conf['LOG'] == true){
+                    $errorHandler->log($error);
+                }
+            });
         }
     }
-    private function registerShutDownHandler(){
-        $handler = Di::getInstance()->get(SysConst::DI_SHUTDOWN_HANDLER);
-        if($handler instanceof AbstractShutdownHandler){
-            register_shutdown_function(array(
-                $handler,"handler"
-            ));
+    private function setDefaultAppDirectory(){
+        $dir = Di::getInstance()->get(SysConst::APPLICATION_DIR);
+        if(empty($dir)){
+            $dir = "App";
+            Di::getInstance()->set(SysConst::APPLICATION_DIR,$dir);
         }
-    }
-    private function registerExceptionHandler(){
-        $handler = Di::getInstance()->get(SysConst::DI_EXCEPTION_HANDLER);
-        if($handler instanceof ExceptionHandlerInterface){
-            set_exception_handler(array(
-                $handler,"handler"
-            ));
-        }
+        $prefix = $dir;
+        AutoLoader::getInstance()->addNamespace($prefix,$dir);
     }
 }

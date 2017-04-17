@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/1/22
- * Time: 下午11:26
+ * Date: 2017/3/19
+ * Time: 上午9:29
  */
 
-namespace Core\Http;
+namespace Core\Http\Request;
 
 
 use Core\Utility\Validate\Rules;
@@ -66,22 +66,9 @@ class Request
     function file(){
         return new File();
     }
-    function getCookie($key = null){
-        if($key === null){
-            //不一定是带有cookie
-            if(isset($this->swoole_http_request->cookie)){
-                return $this->swoole_http_request->cookie;
-            }else{
-                return array();
-            }
-        }
-        if(isset($this->swoole_http_request->cookie[$key])){
-            return $this->swoole_http_request->cookie[$key];
-        }else{
-            return null;
-        }
+    function cookie(){
+        return Cookie::getInstance();
     }
-
     function getServer($key = null){
         if(empty($key)){
             return $this->swoole_http_request->server;
@@ -107,21 +94,20 @@ class Request
             }
         }
     }
-
-    function swooleRequest(){
-        return $this->swoole_http_request;
+    function getRequestParamsWithVerify(Rules $rules){
+        return new Verify($this->getRequestParam(),$rules);
     }
-    function getRequestProperty($property){
-        if(isset($this->swoole_http_request->$property)){
-            return $this->swoole_http_request->$property;
+    function getSwooleRequestProperty($propertyName){
+        if(isset($this->swoole_http_request->$propertyName)){
+            return $this->swoole_http_request->$propertyName;
         }else{
             return null;
         }
     }
-    function setRequestProperty($property,$data){
-        $this->swoole_http_request->$property = $data;
+    function setSwooleRequestProperty($key,$val){
+        $this->swoole_http_request->$key = $val;
     }
-    function getRequestParamsWithVerify(Rules $rules){
-        return new Verify($this->getRequestParam(),$rules);
+    function getSwooleRequest(){
+        return $this->swoole_http_request;
     }
 }
