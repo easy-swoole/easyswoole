@@ -29,6 +29,8 @@ easyPHP-Swoole 专为API而生，是一款常驻内存化的PHP开发框架，�
 # 项目文档
 
 项目文档已经移至[https://kiss291323003.gitbooks.io/easyphp-swoole/content/](https://kiss291323003.gitbooks.io/easyphp-swoole/content/)
+
+QQ交流群 ： 193282943
  
 # bug反馈
 
