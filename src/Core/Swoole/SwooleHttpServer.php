@@ -112,15 +112,13 @@ class SwooleHttpServer
             $this->getServer()->on("finish",
                 function (\swoole_http_server $server, $taskId,$obj){
                     Event::getInstance()->onFinish($server, $taskId, $taskId,$obj);
-                    //非AbstractAsyncTask对象无执行回调需求
-                    if($obj instanceof AbstractAsyncTask){
+                    if(isset($obj['taskClassName'])){
                         $taskClassName = $obj['taskClassName'];
                         $reflection = new \ReflectionClass ( $taskClassName );
                         if($reflection){
                             $instance = $reflection->newInstance();
                             if($instance instanceof AbstractAsyncTask){
-                                $instance->taskResultData($obj['taskResultData']);
-                                $instance->finishCallBack($server, $taskId,$obj['taskResultData']);
+                                $instance->finishCallBack($server, $taskId,$obj['dataForFinishCallBack']);
                             }
                             unset($instance);
                         }

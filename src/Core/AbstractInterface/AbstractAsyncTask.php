@@ -13,20 +13,15 @@ use Core\Swoole\SwooleHttpServer;
 
 abstract class AbstractAsyncTask
 {
-    protected $resultData;
-    protected $taskData;
-    /**避免资源类型传递
-     * @param null $data
+    private $dataForFinishCallBack;
+
+    /**
      * @return mixed
      */
-    function taskResultData($data = null){
-        if($data === null){
-            return $this->resultData;
-        }else{
-            $this->resultData = $data;
-        }
+    public function getDataForFinishCallBack()
+    {
+        return $this->dataForFinishCallBack;
     }
-
     /*
      * 注意   server为task进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
@@ -35,14 +30,14 @@ abstract class AbstractAsyncTask
      * 注意   server为主worker进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
     abstract function finishCallBack(\swoole_http_server $server, $task_id,$resultData);
-    protected function doFinish($taskResultData = null){
-        if($taskResultData !== null){
-            $this->taskResultData($taskResultData);
+    protected function doFinish($dataForFinishCallBack = null){
+        if($dataForFinishCallBack !== null){
+            $this->dataForFinishCallBack = $dataForFinishCallBack;
         }
         //为何不用$this传递   避免handler中有释放资源类型被序列化出错
         SwooleHttpServer::getInstance()->getServer()->finish(array(
             "taskClassName"=>static::class,
-            "taskResultData"=>$this->resultData,
+            "dataForFinishCallBack"=>$this->dataForFinishCallBack,
         ));
     }
 }
