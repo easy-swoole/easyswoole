@@ -14,6 +14,27 @@ use Core\Swoole\SwooleHttpServer;
 abstract class AbstractAsyncTask
 {
     private $dataForFinishCallBack;
+    private $dataForTask;
+    function __construct($dataForTask = null)
+    {
+        $this->dataForTask = $dataForTask;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDataForTask()
+    {
+        return $this->dataForTask;
+    }
+
+    /**
+     * @param mixed $dataForTask
+     */
+    public function setDataForTask($dataForTask)
+    {
+        $this->dataForTask = $dataForTask;
+    }
 
     /**
      * @return mixed
