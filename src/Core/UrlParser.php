@@ -13,7 +13,7 @@ use Core\Http\Request;
 
 class UrlParser
 {
-    static public function parser(){
+    static public function pathInfo(){
         $httpRequest = Request\Request::getInstance();
         //优先检测pathinfo模式  否则用uri路径覆盖
         $pathInfo = $httpRequest->getServer("PATH_INFO") ? $httpRequest->getServer("PATH_INFO") : "/";
