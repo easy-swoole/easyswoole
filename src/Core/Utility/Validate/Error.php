@@ -1,9 +1,9 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: YF
- * Date: 2017/2/8
- * Time: 14:51
+ * User: yf
+ * Date: 2017/4/27
+ * Time: 下午12:42
  */
 
 namespace Core\Utility\Validate;
@@ -11,55 +11,22 @@ namespace Core\Utility\Validate;
 
 class Error
 {
-    protected $errorMsg;
-    protected $errorColumn;
-    protected $errorRule;
-    protected $errorData;
-    function __construct($errorColumn,$errorData,$errorRule,$errorMsg)
+    private $error;
+    function __construct($error)
     {
-        // TODO: Implement __destruct() method.
-        $this->errorColumn = $errorColumn;
-        $this->errorMsg = $errorMsg;
-        $this->errorRule = $errorRule;
-        $this->errorData = $errorData;
+        $this->error = $error;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getErrorMsg()
-    {
-        return $this->errorMsg;
+    function allErrorColumns(){
+        return array_keys($this->error);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getErrorColumn()
-    {
-        return $this->errorColumn;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getErrorRule()
-    {
-        return $this->errorRule;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getErrorData()
-    {
-        return $this->errorData;
-    }
-
-    function __toString()
-    {
-        // TODO: Implement __toString() method.
-        return (string)$this->errorMsg;
+    function column($col){
+        if(isset($this->error[$col])){
+            return $this->error[$col];
+        }else{
+            return null;
+        }
     }
 
 }
