@@ -17,8 +17,23 @@ class Validate
     private $ruleMap = array();
     private $dataForValidate;
     private $resultError =  null;
-    const RULE_REQUIRE = 'required';
     private $funcMap;
+
+
+    const RULE_REQUIRE = 'required';
+    const RULE_ARRAY = 'array';
+    const RULE_BETWEEN = 'between';
+    const RULE_MAX_LEN = 'maxLen';
+    const RULE_MIN_LEN = 'minLen';
+    const RULE_ALPHA = 'alpha';
+    const RULE_BOOLEAN = 'boolean';
+    const RULE_NUMERIC = 'numeric';
+    const RULE_INT = 'int';
+    const RULE_MIN = 'min';
+    const RULE_MAX = 'max';
+    const RULE_TIMESTAMP = 'timestamp';
+    const RULE_REGEX = "regex";
+    const RULE_FLOAT = 'float';
 
     /**
      * Validate constructor.
@@ -140,35 +155,74 @@ class Validate
                     return false;
                 }
             },
-            'maxLen'=>function(){
-
+            'maxLen'=>function($data,$args){
+                if(is_array($data)){
+                    $len = count($data);
+                }else{
+                    $len = strlen($data);
+                }
+                return $len <= $args[0] ? true : false;
             },
-            "minLen"=>function(){
-
+            "minLen"=>function($data,$args){
+                if(is_array($data)){
+                    $len = count($data);
+                }else{
+                    $len = strlen($data);
+                }
+                return $len >= $args[0] ? true : false;
             },
-            "alpha"=>function(){
-
+            "alpha"=>function($data){
+                if(preg_match('/^[a-zA-Z]+$/',$data)){
+                    return true;
+                }else{
+                    return false;
+                }
             },
-            "boolean"=>function(){
-
+            "boolean"=>function($data){
+                if(($data == 1) || ($data == 0)){
+                    return true;
+                }else{
+                    return false;
+                }
             },
-            "minNum"=>function(){
-
+            "numeric"=>function($data){
+                return is_numeric($data);
             },
-            "maxNum"=>function(){
-
+            "int"=>function($data) {
+                return is_int($data);
             },
-            "timestamp"=>function(){
-
+            "min"=>function($data,$args){
+                if(is_numeric($data)){
+                    return $data >= $args[0] ? true : false;
+                }else{
+                    return false;
+                }
             },
-            "regex"=>function(){
-
+            "max"=>function($data,$args){
+                if(is_numeric($data)){
+                    return $data <= $args[0] ? true : false;
+                }else{
+                    return false;
+                }
             },
-            "decimal"=>function(){
-
+            "timestamp"=>function($data){
+                if(strtotime(date("d-m-Y H:i:s",$data)) === (int)$data){
+                    return true;
+                }else{
+                    return false;
+                }
+            },
+            "regex"=>function($data,$args){
+                $regex = $args[0];
+                if(preg_match($regex,$data)){
+                    return true;
+                }else{
+                    return false;
+                }
+            },
+            "float"=>function($data){
+                return is_float($data);
             }
-
-
         );
     }
 }

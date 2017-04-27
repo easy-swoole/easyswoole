@@ -18,7 +18,11 @@ class Error
     }
 
     function allErrorColumns(){
-        return array_keys($this->error);
+        if(!empty($this->error)){
+            return array_keys($this->error);
+        }else{
+            return null;
+        }
     }
 
     function column($col){
