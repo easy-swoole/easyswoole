@@ -8,9 +8,7 @@
 
 namespace Core\Http\Request;
 
-
-use Core\Utility\Validate\Rules;
-use Core\Utility\Validate\Verify;
+use Core\Utility\Validate\Validate;
 
 class Request
 {
@@ -94,8 +92,8 @@ class Request
             }
         }
     }
-    function getRequestParamsWithVerify(Rules $rules){
-        return new Verify($this->getRequestParam(),$rules);
+    function getRequestParamsWithVerify(array $rules){
+        return (new Validate($this->getRequestParam(),$rules))->validate();
     }
     function getSwooleRequestProperty($propertyName){
         if(isset($this->swoole_http_request->$propertyName)){
