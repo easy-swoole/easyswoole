@@ -15,7 +15,7 @@ class SplArray extends \ArrayObject
     {
         // TODO: Implement __get() method.
         if(!isset($this[$name])){
-            $this[$name] = new SplArray();
+            return null;
         }
         return $this[$name];
     }
