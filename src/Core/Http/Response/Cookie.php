@@ -22,9 +22,19 @@ class Cookie
      * expire 为null的时候  则被浏览器理解为会话模式
      */
     function setCookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httpOnly = null){
-        Response::getInstance()->getSwooleResponse()->cookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
+        if(Response::getInstance()->isEndResponse()){
+            return false;
+        }else{
+            Response::getInstance()->getSwooleResponse()->cookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
+            return true;
+        }
     }
     function unsetCookie($name){
-        $this->setCookie($name,null,time()-3600);
+        if(Response::getInstance()->isEndResponse()){
+            return false;
+        }else{
+            $this->setCookie($name,null,time()-3600);
+            return true;
+        }
     }
 }

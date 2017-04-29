@@ -30,18 +30,20 @@ class Response
         $this->swoole_http_response = $response;
     }
 
-    /**
-     * @param mixed $obj
-     */
     function write($obj){
-        if( is_array($obj) || is_object($obj)){
-            $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-        }
-        /*
-          * 禁止输出空字符串
-       */
-        if(strlen($obj)){
-            $this->swoole_http_response->write($obj);
+        if($this->isEndResponse){
+            return false;
+        }else{
+            if( is_array($obj) || is_object($obj)){
+                $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+            }
+            /*
+              * 禁止输出空字符串
+           */
+            if(strlen($obj)){
+                $this->swoole_http_response->write($obj);
+            }
+            return true;
         }
     }
     function end(){
@@ -61,34 +63,54 @@ class Response
     }
 
     function writeJson($httpCode,$result = null,$msg = null,$autoJsonHeader = 1){
-        if($autoJsonHeader){
-            $this->sendHttpStatus($httpCode);
-            $this->sendHeader("Content-type","application/json;charset=utf-8");
+        if($this->isEndResponse){
+            return false;
+        }else{
+            if($autoJsonHeader){
+                $this->sendHttpStatus($httpCode);
+                $this->sendHeader("Content-type","application/json;charset=utf-8");
+            }
+            $data = Array(
+                "code"=>$httpCode,
+                "result"=>$result,
+                "msg"=>$msg
+            );
+            $this->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+            return true;
         }
-        $data = Array(
-            "code"=>$httpCode,
-            "result"=>$result,
-            "msg"=>$msg
-        );
-        $this->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
     }
     function redirect($url){
-        //仅支持header重定向  不做meta定向
-        $this->sendHttpStatus(Status::CODE_MOVED_TEMPORARILY);
-        $this->sendHeader("Location",$url);
+        if($this->isEndResponse){
+            return false;
+        }else{
+            //仅支持header重定向  不做meta定向
+            $this->sendHttpStatus(Status::CODE_MOVED_TEMPORARILY);
+            $this->sendHeader("Location",$url);
+            return true;
+        }
     }
     function forward($pathTo,array $get = array(),array $post = array(),array $cookies = array()){
-        $serverData = Request::getInstance()->getServer();
-        $serverData['path_info'] = $pathTo;
-        Request::getInstance()->setSwooleRequestProperty("server",$serverData);
-        Request::getInstance()->setSwooleRequestProperty("get",$get+ Request::getInstance()->getGet());
-        Request::getInstance()->setSwooleRequestProperty("post",$post+ Request::getInstance()->getPost());
-        Request::getInstance()->setSwooleRequestProperty("cookie",$cookies+ Request::getInstance()->cookie()->getCookie());
-        Event::getInstance()->onRequest(Request::getInstance(),Response::getInstance());
-        Dispatcher::getInstance()->dispatch();
+        if($this->isEndResponse){
+            return false;
+        }else{
+            $serverData = Request::getInstance()->getServer();
+            $serverData['path_info'] = $pathTo;
+            Request::getInstance()->setSwooleRequestProperty("server",$serverData);
+            Request::getInstance()->setSwooleRequestProperty("get",$get+ Request::getInstance()->getGet());
+            Request::getInstance()->setSwooleRequestProperty("post",$post+ Request::getInstance()->getPost());
+            Request::getInstance()->setSwooleRequestProperty("cookie",$cookies+ Request::getInstance()->cookie()->getCookie());
+            Event::getInstance()->onRequest(Request::getInstance(),Response::getInstance());
+            Dispatcher::getInstance()->dispatch();
+            return true;
+        }
     }
     function sendHeader($key,$val){
-        $this->swoole_http_response->header($key,$val);
+        if($this->isEndResponse){
+            return false;
+        }else{
+            $this->swoole_http_response->header($key,$val);
+            return true;
+        }
     }
     function getSwooleResponse(){
         return $this->swoole_http_response;
