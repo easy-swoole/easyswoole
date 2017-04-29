@@ -34,10 +34,8 @@ class Response
      * @param mixed $obj
      */
     function write($obj){
-        if( is_array($obj) || ($obj instanceof \stdClass)){
+        if( is_array($obj) || is_object($obj)){
             $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-        }else{
-            $obj = (String)$obj;
         }
         /*
           * 禁止输出空字符串
