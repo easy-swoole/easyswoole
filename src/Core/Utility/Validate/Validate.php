@@ -63,12 +63,14 @@ class Validate
             $data = $this->accessData($column);
             $hasError = false;
             foreach ($columnInfo['rules'] as $rule => $args){
-                $isValidate = $this->callFunc($data,$rule,$args);
-                if(!$isValidate){
-                    $this->resultError[$column]['failRules'][] = $rule;
-                    $this->resultError[$column]['data'] = $data;
-                    $this->resultError[$column]['errorMsg'] = $columnInfo['errorMsg'];
-                    $hasError = true;
+                if(!empty($rule)){
+                    $isValidate = $this->callFunc($data,$rule,$args);
+                    if(!$isValidate){
+                        $this->resultError[$column]['failRules'][] = $rule;
+                        $this->resultError[$column]['data'] = $data;
+                        $this->resultError[$column]['errorMsg'] = $columnInfo['errorMsg'];
+                        $hasError = true;
+                    }
                 }
             }
             if(!$hasError){
