@@ -12,8 +12,8 @@ namespace Core\Component;
 class Invoker
 {
     /*
-  *   when you call exec,please surround with try catch
-  */
+       when you call exec,please surround with try catch
+    */
     static function exec(callable $callable, array $arguments = array(), $timeout = 1){
         if(phpversion() >= '7.1'){
             // support from php  7.1
@@ -30,8 +30,7 @@ class Invoker
         pcntl_alarm($timeout);
         try {
             $result = call_user_func_array($callable, $arguments);
-        }
-        catch (\Exception $t) {
+        }catch (\Exception $t) {
             pcntl_alarm(0);
             throw $t;
         }
