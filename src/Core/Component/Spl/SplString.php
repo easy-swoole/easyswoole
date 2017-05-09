@@ -47,6 +47,21 @@ class SplString
         return  $this->encodingConvert("UTF-8");
     }
 
+    /*
+     * special function for unicode
+     */
+    function unicodeToUtf8(){
+        $this->rawString =  preg_replace_callback(
+            '/\\\\u([0-9a-f]{4})/i',
+            create_function(
+                '$matches',
+                'return mb_convert_encoding(pack("H*", $matches[1]), "UTF-8", "UCS-2BE");'
+            ),
+            $this->rawString
+        );
+        return $this;
+    }
+
     function toUnicode(){
         $raw = (string)$this->encodingConvert("UCS-2");
         $len  = strlen($raw);
@@ -63,6 +78,9 @@ class SplString
         $this->rawString =  strtoupper($str);//转换为大写
         return $this;
     }
+    /*
+     * special function for unicode end
+    */
 
     function explode($separator){
         return new SplArray(explode($separator,$this->rawString));
