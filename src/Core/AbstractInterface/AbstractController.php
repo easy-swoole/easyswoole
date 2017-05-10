@@ -37,8 +37,4 @@ abstract class AbstractController
         // TODO: Implement __call() method.
         $this->actionNotFount($actionName, $arguments);
     }
-    function session(){
-
-    }
-
 }
