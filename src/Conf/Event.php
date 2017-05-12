@@ -13,6 +13,8 @@ use Core\AbstractInterface\AbstractEvent;
 use Core\Component\Logger;
 use Core\Http\Request\Request;
 use Core\Http\Response\Response;
+use Core\Swoole\AsyncTaskManager;
+use Core\Swoole\Timer;
 
 class Event extends AbstractEvent
 {
@@ -77,9 +79,5 @@ class Event extends AbstractEvent
         // TODO: Implement onWorkerError() method.
     }
 
-    function onWorkerFatalError(\swoole_http_server $server)
-    {
-        // TODO: Implement onWorkerFatalError() method.
-    }
 
 }
