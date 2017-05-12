@@ -76,5 +76,4 @@ abstract class AbstractEvent
     abstract function onTask(\swoole_http_server $server, $taskId, $fromId,$taskObj);
     abstract function onFinish(\swoole_http_server $server, $taskId, $fromId,$taskObj);
     abstract function onWorkerError(\swoole_http_server $server,$worker_id,$worker_pid,$exit_code);
-    abstract function onWorkerFatalError(\swoole_http_server $server);
 }
