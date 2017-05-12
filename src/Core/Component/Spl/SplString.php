@@ -97,15 +97,15 @@ class SplString
         }
     }
 
-    function lTrim($charList = null){
+    function lTrim($charList = " \t\n\r\0\x0B"){
         $this->rawString =  ltrim($this->rawString,$charList);
         return $this;
     }
-    function rTrim($charList = null){
+    function rTrim($charList = " \t\n\r\0\x0B"){
         $this->rawString =  rtrim($this->rawString,$charList);
         return $this;
     }
-    function trim($charList = null){
+    function trim($charList = " \t\n\r\0\x0B"){
         $this->rawString =  trim($this->rawString,$charList);
         return $this;
     }
