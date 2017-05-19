@@ -43,5 +43,5 @@ QQ交流群 ： 633921431
    
    支付宝捐赠二维码：
    
-   ![image](https://kiss291323003.gitbooks.io/easyphp-swoole/donate.png)
+   ![image](donate.png)
 
