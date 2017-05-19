@@ -35,4 +35,13 @@ QQ交流群 ： 633921431
 # bug反馈
 
  如果您在使用过程中有任何的疑问，请联系作者 admin@robindata.cn
-# 剩余文档正在完善中
+# 捐赠
+  您的捐赠是对 easyPHP-Swoole 项目开发组最大的鼓励和支持。我们会坚持开发维护下去。 您的捐赠将被用于：
+  
+   - 持续和深入地开发
+   - 文档和社区的建设和维护
+   
+   支付宝捐赠二维码：
+   
+   ![image](https://kiss291323003.gitbooks.io/easyphp-swoole/donate.png)
+
