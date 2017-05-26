@@ -28,9 +28,6 @@ class Core
         return self::$instance;
     }
     function run(){
-        if(phpversion("swoole") < 1.8){
-            die("swoole version must >= 1.8.0");
-        }
         SwooleHttpServer::getInstance()->startServer();
     }
     function __construct(callable $preHandler = null)

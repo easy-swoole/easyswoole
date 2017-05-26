@@ -8,13 +8,16 @@
  */
 namespace Conf;
 
+use Core\Component\Spl\SplArray;
+
 class Config
 {
     private static $instance;
     protected $conf;
     function __construct()
     {
-        $this->init();
+        $conf = $this->sysConf()+$this->userConf();
+        $this->conf = new SplArray($conf);
     }
     static function getInstance(){
         if(!isset(self::$instance)){
@@ -22,8 +25,18 @@ class Config
         }
         return self::$instance;
     }
-    private function init(){
-        $sysConf = array(
+    function getConf($keyPath){
+        return $this->conf->get($keyPath);
+    }
+    /*
+            * 在server启动以后，无法动态的去添加，修改配置信息（进程数据独立）
+    */
+    function setConf($keyPath,$data){
+        $this->conf->set($keyPath,$data);
+    }
+
+    private function sysConf(){
+        return array(
             "SERVER"=>array(
                 "LISTEN"=>"0.0.0.0",
                 "SERVER_NAME"=>"",
@@ -36,33 +49,23 @@ class Config
                     'worker_num'=>4,
 //                    "dispatch_model"=>1,//3为抢占模式 不对繁忙进程发送任务
 //						'task_ipc_mode'=>2,
-                    "open_cpu_affinity"=>1,
-                    "daemonize"=>false,
+//                    "open_cpu_affinity"=>1,
+//                    "daemonize"=>false,
 //                    "user"=>"yf",
 //                    "group"=>"root",
-                    "log_file"=>ROOT.'/swoole_log.txt'
+                    "log_file"=>ROOT.'/swoole_log.txt',
+                    'pid_file'=>ROOT."/server.pid",
                 ),
             ),
             "DEBUG"=>array(
-                "LOG"=>0,
-                "DISPLAY_ERROR"=>0,
+                "LOG"=>1,
+                "DISPLAY_ERROR"=>1,
                 "ENABLE"=>false,
             ),
         );
-        $userConf = array();
-        $this->conf = $sysConf+$userConf;
     }
-    function getConf($key){
-        if(isset($this->conf[$key])){
-            return $this->conf[$key];
-        }else{
-            return null;
-        }
-    }
-    /*
-         * 在server启动以后，无法动态的去添加，修改配置信息（进程数据独立）
-    */
-    function setConf($key,$data){
-        $this->conf[$key] = $data;
+
+    private function userConf(){
+        return array();
     }
 }
