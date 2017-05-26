@@ -166,7 +166,7 @@ function help($options){
     switch ($opName){
         case 'start':{
             echo "------------easyPHP-Swoole 启动命令------------\n";
-            echo "执行php server.php 即可启动服务。启动可选参数为:\n";
+            echo "执行php server.php start 即可启动服务。启动可选参数为:\n";
             echo "--daemonize-boolean       是否以系统守护模式运行\n";
             echo "--port-portNumber         指定服务监听端口\n";
             echo "--pidFile-fileName        指定服务PID存储文件\n";
