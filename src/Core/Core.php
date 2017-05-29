@@ -78,6 +78,7 @@ class Core
                 $error->setDescription($description);
                 $error->setFile($file);
                 $error->setLine($line);
+                $error->setContext($context);
                 $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
                 if(!is_a($errorHandler,ErrorHandlerInterface::class)){
                     $errorHandler = new ErrorHandler();
