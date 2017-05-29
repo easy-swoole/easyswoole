@@ -10,6 +10,7 @@ namespace App\Controller;
 
 
 use Core\AbstractInterface\AbstractController;
+use Core\Swoole\SwooleHttpServer;
 
 class Index extends AbstractController
 {
@@ -47,6 +48,9 @@ class Index extends AbstractController
     }
     function test(){
         $this->response()->write("this is index test");/*  url:domain/test/index.html  domain/test/   domain/test  */
+    }
+    function shutdown(){
+        SwooleHttpServer::getInstance()->getServer()->shutdown();
     }
 
 }
