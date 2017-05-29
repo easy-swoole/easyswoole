@@ -9,7 +9,7 @@
 namespace Core\Component\Spl;
 
 
-class SplError
+class SplError extends SplBean
 {
     protected $errorCode;
     protected $errorType;
@@ -18,28 +18,12 @@ class SplError
     protected $file;
     protected $line;
     protected $context;
-    protected $trace;
+
     const ERROR_TYPE_FATAL_ERROR = 'FATAL ERROR';
     const ERROR_TYPE_WARING = 'WARING';
     const ERROR_TYPE_NOTICE = 'NOTICE';
     const ERROR_TYPE_STRICT = 'STRICT';
     const ERROR_TYPE_DEPRECATED = 'DEPRECATED';
-    /**
-     * @param $errorCode
-     * @param string $description 错误描述
-     * @param null $file
-     * @param null $line
-     * @param null $context
-     */
-    function __construct($errorCode, $description, $file = null, $line = null, $context = null)
-    {
-        $this->errorCode = $errorCode;
-        $this->description = $description;
-        $this->file = $file;
-        $this->line = $line;
-        $this->context = $context;
-        list($this->errorType,$this->errorLevel) = $this->mapErrorCode($this->errorCode);
-    }
 
     /**
      * @return mixed
@@ -47,6 +31,14 @@ class SplError
     public function getErrorCode()
     {
         return $this->errorCode;
+    }
+
+    /**
+     * @param mixed $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
     }
 
     /**
@@ -58,6 +50,14 @@ class SplError
     }
 
     /**
+     * @param mixed $errorType
+     */
+    public function setErrorType($errorType)
+    {
+        $this->errorType = $errorType;
+    }
+
+    /**
      * @return mixed
      */
     public function getErrorLevel()
@@ -66,7 +66,15 @@ class SplError
     }
 
     /**
-     * @return string
+     * @param mixed $errorLevel
+     */
+    public function setErrorLevel($errorLevel)
+    {
+        $this->errorLevel = $errorLevel;
+    }
+
+    /**
+     * @return mixed
      */
     public function getDescription()
     {
@@ -74,7 +82,15 @@ class SplError
     }
 
     /**
-     * @return null
+     * @param mixed $description
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return mixed
      */
     public function getFile()
     {
@@ -82,7 +98,15 @@ class SplError
     }
 
     /**
-     * @return null
+     * @param mixed $file
+     */
+    public function setFile($file)
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * @return mixed
      */
     public function getLine()
     {
@@ -90,12 +114,31 @@ class SplError
     }
 
     /**
-     * @return null
+     * @param mixed $line
+     */
+    public function setLine($line)
+    {
+        $this->line = $line;
+    }
+
+    /**
+     * @return mixed
      */
     public function getContext()
     {
         return $this->context;
     }
+
+    /**
+     * @param mixed $context
+     */
+    public function setContext($context)
+    {
+        $this->context = $context;
+    }
+
+
+
 
     /**
      * @param int $code 错误代码
@@ -142,6 +185,13 @@ class SplError
     function __toString()
     {
         // TODO: Implement __toString() method.
+        list($this->errorType,$this->errorLevel) = $this->mapErrorCode($this->errorCode);
         return "{$this->errorType} : {$this->description} in file {$this->file} in line {$this->line}";
     }
+
+    protected function initialize()
+    {
+        // TODO: Implement initialize() method.
+    }
+
 }

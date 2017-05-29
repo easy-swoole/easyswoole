@@ -26,7 +26,7 @@ class ErrorHandler implements ErrorHandlerInterface
     {
         // TODO: Implement display() method.
         if(Request::getInstance()){
-            Response::getInstance()->write($error);
+            Response::getInstance()->write($error->__toString());
         }else{
             Logger::console($error,0);
         }

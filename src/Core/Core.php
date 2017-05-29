@@ -73,7 +73,11 @@ class Core
         $conf = Config::getInstance()->getConf("DEBUG");
         if($conf['ENABLE'] == true){
             set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
-                $error = new SplError($errorCode, $description, $file, $line, $context);
+                $error = new SplError();
+                $error->setErrorCode($errorCode);
+                $error->setDescription($description);
+                $error->setFile($file);
+                $error->setLine($line);
                 $errorHandler = Di::getInstance()->get(SysConst::DI_ERROR_HANDLER);
                 if(!is_a($errorHandler,ErrorHandlerInterface::class)){
                     $errorHandler = new ErrorHandler();

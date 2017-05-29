@@ -14,7 +14,7 @@ abstract class SplBean implements \JsonSerializable
     private $beanColumns = array();
     private $propertyList = array();
 
-    abstract function initialize();
+    abstract protected function initialize();
     final function __construct(array $data = array())
     {
         $this->initialize();
