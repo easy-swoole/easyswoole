@@ -72,7 +72,7 @@ abstract class SplBean implements \JsonSerializable
         return $result;
     }
 
-    final function __toString()
+    function __toString()
     {
         // TODO: Implement __toString() method.
         return json_encode($this->jsonSerialize(),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
