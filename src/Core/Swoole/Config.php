@@ -7,16 +7,11 @@
  */
 
 namespace Core\Swoole;
-
+use Conf\Config as GlobalConf;
 
 class Config
 {
     protected static $instance;
-    protected $conf;
-    function __construct()
-    {
-        $this->conf = \Conf\Config::getInstance()->getConf("SERVER");
-    }
     static function getInstance(){
         if(!isset(self::$instance)){
             self::$instance = new static();
@@ -24,25 +19,24 @@ class Config
         return self::$instance;
     }
     function listenIp(){
-        return $this->conf['LISTEN'];
+        return GlobalConf::getInstance()->getConf("SERVER.LISTEN");
     }
     function listenPort(){
-        return $this->conf['PORT'];
+        return GlobalConf::getInstance()->getConf("SERVER.PORT");
     }
     function workerSetting(){
-        return $this->conf['CONFIG'];
+        return GlobalConf::getInstance()->getConf("SERVER.CONFIG");
     }
     function allWorkerNum(){
-        return $this->conf['CONFIG']['worker_num'];
+        return GlobalConf::getInstance()->getConf("SERVER.CONFIG.worker_num");
     }
     function allTaskWorkerNum(){
-        return $this->conf['CONFIG']['task_worker_num'];
+        return GlobalConf::getInstance()->getConf("SERVER.CONFIG.task_worker_num");
     }
     function serverName(){
-        return $this->conf['SERVER_NAME'];
+        return GlobalConf::getInstance()->getConf("SERVER.SERVER_NAME");
     }
     function wsSupport(){
-        return $this->conf['WS_SUPPORT'];
+        return GlobalConf::getInstance()->getConf("SERVER.WS_SUPPORT");
     }
-
 }
