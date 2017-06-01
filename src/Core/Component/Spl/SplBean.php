@@ -55,6 +55,7 @@ abstract class SplBean implements \JsonSerializable
                                 $temp[$key] = $item;
                             }
                         }
+                        $data = $temp;
                     }elseif ($data instanceof SplBean){
                         $data = $data->jsonSerialize();
                     }else{
