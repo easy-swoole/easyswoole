@@ -20,6 +20,9 @@ class ShareMemory
     private $lockFileFp;
     private $isTransaction = false;
     private $isGetLock = false;
+    /*
+     * 通过文件+锁的方式来实现数据共享，建议将文件设置到/dev/shm下
+     */
     function __construct()
     {
         $file = Di::getInstance()->get(SysConst::SHARE_MEMORY_FILE);
@@ -42,8 +45,7 @@ class ShareMemory
 
     function startTransaction(){
         if($this->isTransaction){
-            trigger_error("transaction has start");
-            return false;
+            return true;
         }
         if($this->lock()){
             $this->isTransaction = true;
@@ -56,14 +58,13 @@ class ShareMemory
             }
             return true;
         }else{
-            trigger_error("start transaction error");
+            trigger_error("start transaction error:get lock fail");
             return false;
         }
     }
 
     function commit(){
         if(!$this->isTransaction){
-            trigger_error("not in transaction");
             return false;
         }
         $this->isTransaction = false;
@@ -76,7 +77,6 @@ class ShareMemory
             $spl->set($key,$data);
             return $this->saveFile($spl->getArrayCopy());
         }else{
-            trigger_error("set data fail:get file lock fail");
             return false;
         }
     }
@@ -86,8 +86,7 @@ class ShareMemory
             $spl = new SplArray($this->readFile());
             return $spl->get($key);
         }else{
-            trigger_error("get data fail:get file lock fail");
-            return false;
+            return null;
         }
     }
 
@@ -95,7 +94,6 @@ class ShareMemory
         if($this->lock()){
             return $this->saveFile(array());
         }else{
-            trigger_error("set data fail:get file lock fail");
             return false;
         }
     }
