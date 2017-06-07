@@ -150,6 +150,7 @@ class ShareMemory
             return false;
         }
     }
+
     private function unlock(){
         if(!$this->isGetLock){
             return true;
@@ -166,7 +167,6 @@ class ShareMemory
                 }else{
                     $this->isGetLock = false;
                     fclose($this->lockFileFp);
-                    echo "UN\n";
                     return true;
                 }
             }
