@@ -48,12 +48,25 @@ class Core
         $this->registerAutoLoader();
         $this->setDefaultAppDirectory();
         Event::getInstance()->frameInitialize();
+        $this->createTempDirectory();
         $this->registerErrorHandler();
         return $this;
     }
 
     private function defineSysConst(){
         define("ROOT",realpath(__DIR__.'/../'));
+    }
+    private function createTempDirectory(){
+        $tempDir = Di::getInstance()->get(SysConst::TEMP_DIRECTORY);
+        if(empty($tempDir)){
+            $tempDir = ROOT."/Temp";
+            Di::getInstance()->set(SysConst::TEMP_DIRECTORY,$tempDir);
+        }
+        if(!is_dir($tempDir)){
+            if(!mkdir($tempDir,0755,true)){
+                die("create Temp Directory:{$tempDir} fail");
+            }
+        }
     }
 
     private static function registerAutoLoader(){
