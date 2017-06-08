@@ -30,7 +30,8 @@ class Response
      */
     public function getBody()
     {
-        return Utility::trimHeader($this->rawResponse);
+        $ret =  Utility::trimHeader($this->rawResponse);
+        return empty($ret) ? '' : $ret;
     }
 
     /**
