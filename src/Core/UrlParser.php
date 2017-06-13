@@ -9,30 +9,22 @@
 namespace Core;
 
 
+use Core\Component\Logger;
 use Core\Http\Request;
 
 class UrlParser
 {
     static public function pathInfo(){
-        $httpRequest = Request\Request::getInstance();
-        //优先检测pathinfo模式  否则用uri路径覆盖
-        $pathInfo = $httpRequest->getServer("PATH_INFO") ? $httpRequest->getServer("PATH_INFO") : "/";
-        //反编码
-        $pathInfo = rawurldecode($pathInfo);
-        //去除尾缀   如.html .do
-        $post = strripos($pathInfo,'.');
-        if($post !== false){
-            $pathInfo = substr($pathInfo,0,$post);
+        $pathInfo = Request\Request::getInstance()->getServer('PATH_INFO');
+        $basePath = dirname($pathInfo);
+        $info = pathInfo($pathInfo);
+        if($info['filename'] != 'index'){
+            if($basePath == '/'){
+                $basePath = $basePath.$info['filename'];
+            }else{
+                $basePath = $basePath.'/'.$info['filename'];
+            }
         }
-        //去除右边 index
-        if(substr($pathInfo,-6) == '/index'){
-            $pathInfo = substr($pathInfo,0,-5);
-        }
-        //去除右边 /    在空路径时   请勿去除
-        if(strlen($pathInfo) > 1){
-            $pathInfo = rtrim($pathInfo,"/");
-        }
-        return $pathInfo;
+        return $basePath;
     }
-
 }
