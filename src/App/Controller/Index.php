@@ -17,7 +17,19 @@ class Index extends AbstractController
     function index()
     {
         // TODO: Implement index() method.
-        $this->response()->write(file_get_contents(ROOT."/test.html"));
+        $this->response()->withHeader("Content-type","text/html;charset=utf-8");
+        $this->response()->write('
+    <style type="text/css">
+        *{ padding: 0; margin: 0; } 
+        div{ padding: 4px 48px;} 
+        body{ background: #fff; font-family: "微软雅黑"; color: #333;font-size:24px} 
+        h1{ font-size: 100px; font-weight: normal; margin-bottom: 12px; } 
+        p{ line-height: 1.8em; font-size: 36px } a,a:hover{color:blue;}
+    </style>
+    <div style="padding: 24px 48px;">
+        <h1>:)</h1><p>欢迎使用<b> easyPHP-Swoole</b></p><br/>
+    </div>
+ ');/*  url:domain/index.html  domain/   domain  */
     }
 
     function onRequest($actionName)
