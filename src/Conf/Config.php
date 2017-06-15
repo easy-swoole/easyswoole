@@ -55,6 +55,8 @@ class Config
 //                    "group"=>"root",
                     "log_file"=>ROOT.'/swoole_log.txt',
                     'pid_file'=>ROOT."/server.pid",
+//                    "upload_tmp_dir"=>ROOT."/Temp/"
+
                 ),
             ),
             "DEBUG"=>array(

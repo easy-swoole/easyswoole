@@ -11,10 +11,8 @@ namespace Conf;
 
 use Core\AbstractInterface\AbstractEvent;
 use Core\Component\Logger;
-use Core\Http\Request\Request;
-use Core\Http\Response\Response;
-use Core\Swoole\AsyncTaskManager;
-use Core\Swoole\Timer;
+use Core\Http\Request;
+use Core\Http\Response;
 
 class Event extends AbstractEvent
 {
@@ -22,6 +20,7 @@ class Event extends AbstractEvent
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
+
     }
 
     function beforeWorkerStart(\swoole_http_server $server)

@@ -9,8 +9,8 @@
 namespace Core\AbstractInterface;
 
 
-use Core\Http\Request\Request;
-use Core\Http\Response\Response;
+use Core\Http\Request;
+use Core\Http\Response;
 
 abstract class AbstractEvent
 {

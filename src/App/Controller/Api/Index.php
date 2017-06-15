@@ -10,6 +10,7 @@ namespace App\Controller\Api;
 
 
 use Core\AbstractInterface\AbstractController;
+use Core\Http\Message\UploadFile;
 
 class Index extends AbstractController
 {
@@ -17,7 +18,8 @@ class Index extends AbstractController
     function index()
     {
         // TODO: Implement index() method.
-        $this->response()->write("this is api index");/*  url:domain/api/index.html  domain/api/  */
+//        $this->response()->write("this is api index");/*  url:domain/api/index.html  domain/api/  */
+        $this->response()->write('');
     }
 
     function onRequest($actionName)
@@ -35,6 +37,9 @@ class Index extends AbstractController
         // TODO: Implement afterResponse() method.
     }
     function test(){
-        $this->response()->write("this is api index");/*  url:domain/api/test/index.html  domain/api/test    */
+        $file = $this->request()->getUploadedFile("a");
+        if($file instanceof UploadFile){
+            $file->moveTo(ROOT."/Temp/a.json");
+        }
     }
 }

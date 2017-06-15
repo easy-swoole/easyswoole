@@ -15,11 +15,10 @@ use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
 use Core\Component\SysConst;
 use Core\Component\SuperClosure;
-use Core\Http\Request\Request;
-use Core\Http\Response\Response;
-use Core\Http\Status;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Http\Message\Status;
 use FastRoute\Dispatcher\GroupCountBased;
-use Core\Component\RouteCollector;
 
 class Dispatcher
 {
@@ -39,7 +38,7 @@ class Dispatcher
             return;
         }
         $pathInfo = UrlParser::pathInfo();
-        $routeInfo = $this->doFastRouter($pathInfo,Request::getInstance()->getServer("REQUEST_METHOD"));
+        $routeInfo = $this->doFastRouter($pathInfo,Request::getInstance()->getMethod());
         if($routeInfo !== false){
             switch ($routeInfo[0]) {
                 case \FastRoute\Dispatcher::NOT_FOUND:
@@ -119,11 +118,11 @@ class Dispatcher
                     }
                 }
             }else{
-                Response::getInstance()->sendHttpStatus(Status::CODE_NOT_FOUND);
+                Response::getInstance()->withStatus(Status::CODE_NOT_FOUND);
                 trigger_error("controller {$finalClass} is not a instance of AbstractController");
             }
         }else{
-            Response::getInstance()->sendHttpStatus(Status::CODE_NOT_FOUND);
+            Response::getInstance()->withStatus(Status::CODE_NOT_FOUND);
             trigger_error("default controller Index not implement");
         }
     }

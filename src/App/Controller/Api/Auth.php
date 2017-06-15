@@ -35,6 +35,6 @@ class Auth extends AbstractController
         // TODO: Implement afterResponse() method.
     }
     function test(){
-        $this->response()->write("this is api auth test");/*  url:domain/api/auth/test/index.html  domain/api/auth/test   */
+      var_dump($this->request()->getUploadedFiles());
     }
 }

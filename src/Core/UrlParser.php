@@ -15,7 +15,7 @@ use Core\Http\Request;
 class UrlParser
 {
     static public function pathInfo(){
-        $pathInfo = Request\Request::getInstance()->getServer('PATH_INFO');
+        $pathInfo = Request::getInstance()->getUri()->getPath();
         $basePath = dirname($pathInfo);
         $info = pathInfo($pathInfo);
         if($info['filename'] != 'index'){

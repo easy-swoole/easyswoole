@@ -11,8 +11,8 @@ namespace Core\Component;
 
 use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Spl\SplError;
-use Core\Http\Request\Request;
-use Core\Http\Response\Response;
+use Core\Http\Request;
+use Core\Http\Response;
 
 class ErrorHandler implements ErrorHandlerInterface
 {
