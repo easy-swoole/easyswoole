@@ -1,0 +1,2 @@
+请把App与Conf目录放置于你的项目目录下，记住，与Core目录同级。
+运行数据库测试时，请检查Conf/Config.php中的MYSQL配置项
