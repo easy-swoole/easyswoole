@@ -13,6 +13,7 @@ use Core\Http\Message\ServerRequest;
 use Core\Http\Message\Stream;
 use Core\Http\Message\UploadFile;
 use Core\Http\Message\Uri;
+use Core\Utility\Validate\Validate;
 
 class Request extends ServerRequest
 {
@@ -46,6 +47,9 @@ class Request extends ServerRequest
         }else{
             return array_merge($this->getParsedBody(),$this->getQueryParams());
         }
+    }
+    function requestParamsValidate(Validate $validate){
+        return $validate->validate($this->getRequestParam());
     }
     function getSwooleRequest(){
         return $this->swoole_http_request;
