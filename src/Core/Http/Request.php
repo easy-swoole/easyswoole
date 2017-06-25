@@ -33,7 +33,7 @@ class Request extends ServerRequest
         $uri = $this->initUri();
         $files = $this->initFiles();
         $method = $this->swoole_http_request->server['request_method'];
-        parent::__construct($method, $uri, null, $body, $protocol, $_SERVER);
+        parent::__construct($method, $uri, null, $body, $protocol, $this->swoole_http_request->server);
         $this->withCookieParams($this->initCookie())->withQueryParams($this->initGet())->withParsedBody($this->initPost())->withUploadedFiles($files);
     }
     function getRequestParam($key = null){
