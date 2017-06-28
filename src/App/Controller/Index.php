@@ -27,7 +27,7 @@ class Index extends AbstractController
         p{ line-height: 1.8em; font-size: 36px } a,a:hover{color:blue;}
     </style>
     <div style="padding: 24px 48px;">
-        <h1>:)</h1><p>欢迎使用<b> easyPHP-Swoole</b></p><br/>
+        <h1>:)</h1><p>欢迎使用<b> easySwoole</b></p><br/>
     </div>
  ');/*  url:domain/index.html  domain/   domain  */
     }
