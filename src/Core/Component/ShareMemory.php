@@ -30,6 +30,10 @@ class ShareMemory
             $file = Di::getInstance()->get(SysConst::TEMP_DIRECTORY)."/shareMemory.men";
         }
         $this->saveFile = $file;
+        if(!file_exists($this->saveFile)){
+            file_put_contents($this->saveFile,'');
+            file_put_contents($this->saveFile.".lock",'');
+        }
     }
 
     static function getInstance(){
