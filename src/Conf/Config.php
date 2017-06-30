@@ -54,7 +54,7 @@ class Config
 //                    "user"=>"yf",
 //                    "group"=>"root",
                     "log_file"=>ROOT.'/swoole_log.txt',
-                    'pid_file'=>ROOT."/server.pid",
+                    'pid_file'=>ROOT."/pid.pid",
 //                    "upload_tmp_dir"=>ROOT."/Temp/"
 
                 ),
