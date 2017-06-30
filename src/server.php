@@ -57,6 +57,8 @@ function startServer($options){
     if(isset($options['daemonize'])){
         $boolean = $options['daemonize'] ? true : false;
         $conf->setConf("SERVER.CONFIG.daemonize",$boolean);
+    }else{
+        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
     }
     if(isset($options['port'])){
         $conf->setConf("SERVER.PORT",$options['port']);
@@ -67,6 +69,7 @@ function startServer($options){
     if(isset($options['pidFile'])){
         if(!empty($options['pidFile'])){
             $pidFile = $options['pidFile'];
+            \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
         }
     }
     if(isset($options['SwooleLog'])){
