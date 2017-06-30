@@ -13,6 +13,7 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
+use Core\Component\Logger;
 use Core\Component\SysConst;
 use Core\Component\SuperClosure;
 use Core\Http\Request;
@@ -46,7 +47,7 @@ class Dispatcher
                     break;
                 case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                     $allowedMethods = $routeInfo[1];
-                    Response::getInstance()->sendHttpStatus(Status::CODE_METHOD_NOT_ALLOWED);
+                    Response::getInstance()->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
                     break;
                 case \FastRoute\Dispatcher::FOUND:
                     $handler = $routeInfo[1];
@@ -139,7 +140,7 @@ class Dispatcher
                 if($is){
                     $is = $is.".{$this->currentApplicationDirectory}";
                     if(file_exists($is)){
-                        $dispatcherData = require_once "{$is}";
+                        $dispatcherData = file_get_contents($is);
                         $dispatcherData = unserialize($dispatcherData);
                     }else{
                         $dispatcherData =  $router->getRouteCollector()->getData();
@@ -154,10 +155,10 @@ class Dispatcher
                         });
                         file_put_contents(
                             $is,
-                            "<?php return '" . serialize($cache) . "';"
+                            serialize($cache)
                         );
                     }
-                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
+                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($dispatcherData);
                 }else{
                     $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
                 }
@@ -180,6 +181,4 @@ class Dispatcher
             return false;
         }
     }
-
-
 }

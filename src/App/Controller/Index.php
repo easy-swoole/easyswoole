@@ -52,5 +52,7 @@ class Index extends AbstractController
     function shutdown(){
         SwooleHttpServer::getInstance()->getServer()->shutdown();
     }
-
+    function router(){
+        $this->response()->write("your router not end");
+    }
 }
