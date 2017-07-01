@@ -39,7 +39,7 @@ class Request extends ServerRequest
     }
     function getRequestParam($key = null){
         if($key !== null){
-            $this->getParsedBody($key);
+            $ret = $this->getParsedBody($key);
             if(empty($ret)){
                 $ret = $this->getQueryParam($key);
             }
