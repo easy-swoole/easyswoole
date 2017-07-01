@@ -35,11 +35,11 @@ class Rule
     const MIN_LEN = 'MIN_LEN';
     const REGEX = 'REGEX';
     const REQUIRED = 'REQUIRED';
-    const REQUIRED_IF = '';
-    const REQUIRE_WITH = '';
-    const REQUIRE_WITH_ALL = '';
-    const REQUIRE_WITHOUT = '';
-    const REQUIRE_WITHOUT_ALL = '';
+    const REQUIRED_IF = 'REQUIRED_IF';
+    const REQUIRE_WITH = 'REQUIRE_WITH';
+    const REQUIRE_WITH_ALL = 'REQUIRE_WITH_ALL';
+    const REQUIRE_WITHOUT = 'REQUIRE_WITHOUT';
+    const REQUIRE_WITHOUT_ALL = 'REQUIRE_WITHOUT_ALL';
     const SAME = 'SAME';
     const TIMESTAMP = 'TIMESTAMP';
     const URL = 'URL';
