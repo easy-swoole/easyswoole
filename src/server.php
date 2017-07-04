@@ -142,10 +142,10 @@ function reloadServer($options){
             $pidFile = $options['pidFile'];
         }
     }
-    if(isset($options['reloadAll'])){
-       $sig = SIGUSR1;
-    }else{
+    if(isset($options['reloadAll']) && $options['reloadAll'] = false){
         $sig = SIGUSR2;
+    }else{
+        $sig = SIGUSR1;
     }
     if(!file_exists($pidFile)){
         echo "pid file :{$pidFile} not exist \n";
