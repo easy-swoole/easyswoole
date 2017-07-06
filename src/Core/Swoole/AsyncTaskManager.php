@@ -40,22 +40,11 @@ class AsyncTaskManager
      * @return bool
      */
     function add($callable, $workerId = self::TASK_DISPATCHER_TYPE_RANDOM, $finishCallBack = null){
-        if(is_string($callable)){
-            if(class_exists($callable)){
-                $callable = new $callable();
-                if(!is_a($callable,AbstractAsyncTask::class)){
-                    trigger_error("async task {$callable} illegal");
-                    return false;
-                }
-            }else{
-                trigger_error("async task {$callable} illegal");
-                return false;
-            }
-        }else if($callable instanceof \Closure){
-            $callable = new SuperClosure($callable);
-        }else{
-            if(!is_a($callable,AbstractAsyncTask::class)){
-                trigger_error("async task {$callable} illegal");
+        if($callable instanceof \Closure){
+            try{
+                $callable = new SuperClosure($callable);
+            }catch (\Exception $exception){
+                trigger_error("async task serialize fail ");
                 return false;
             }
         }
@@ -63,12 +52,13 @@ class AsyncTaskManager
     }
     function addSyncTask($callable,$timeout = 0.5,$workerId = self::TASK_DISPATCHER_TYPE_RANDOM){
         if($callable instanceof \Closure){
-            $callable = new SuperClosure($callable);
+            try{
+                $callable = new SuperClosure($callable);
+            }catch (\Exception $exception){
+                trigger_error("async task serialize fail ");
+                return false;
+            }
         }
         return SwooleHttpServer::getInstance()->getServer()->taskwait($callable,$timeout,$workerId);
-    }
-    function taskWaitingNum(){
-        $info = SwooleHttpServer::getInstance()->getServer()->stats();
-        return $info['tasking_num'];
     }
 }

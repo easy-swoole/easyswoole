@@ -97,11 +97,19 @@ class SwooleHttpServer
         $num = Config::getInstance()->allTaskWorkerNum();
         if(!empty($num)){
             $this->getServer()->on("task",function (\swoole_http_server $server, $taskId, $fromId,$taskObj){
-                Event::getInstance()->onTask($server, $taskId, $fromId,$taskObj);
-                if($taskObj instanceof AbstractAsyncTask){
-                    return $taskObj->handler($server, $taskId, $fromId);
-                }else if($taskObj instanceof SuperClosure){
-                    return $taskObj($server, $taskId);
+                try{
+                    if(is_string($taskObj) && class_exists($taskObj)){
+                        $taskObj = new $taskObj();
+                    }
+                    Event::getInstance()->onTask($server, $taskId, $fromId,$taskObj);
+                    if($taskObj instanceof AbstractAsyncTask){
+                        return $taskObj->handler($server, $taskId, $fromId);
+                    }else if($taskObj instanceof SuperClosure){
+                        return $taskObj($server, $taskId);
+                    }
+                    return null;
+                }catch (\Exception $exception){
+                    return null;
                 }
             });
         }
@@ -110,19 +118,15 @@ class SwooleHttpServer
         $num = Config::getInstance()->allTaskWorkerNum();
         if(!empty($num)){
             $this->getServer()->on("finish",
-                function (\swoole_http_server $server, $taskId,$obj){
-                    Event::getInstance()->onFinish($server, $taskId, $taskId,$obj);
-                    if(isset($obj['taskClassName'])){
-                        $taskClassName = $obj['taskClassName'];
-                        $reflection = new \ReflectionClass ( $taskClassName );
-                        if($reflection){
-                            $instance = $reflection->newInstance();
-                            if($instance instanceof AbstractAsyncTask){
-                                $instance->finishCallBack($server, $taskId,$obj['dataForFinishCallBack']);
-                            }
-                            unset($instance);
+                function (\swoole_http_server $server, $taskId, $taskObj){
+                    try{
+                        Event::getInstance()->onFinish($server, $taskId, $taskId,$taskObj);
+                        //仅仅接受AbstractTask回调处理
+                        if($taskObj instanceof AbstractAsyncTask){
+                            $taskObj->finishCallBack($server, $taskId,$taskObj->getDataForFinishCallBack());
                         }
-                        unset($reflection);
+                    }catch (\Exception $exception){
+
                     }
                 }
             );
