@@ -10,7 +10,7 @@ namespace Conf;
 
 
 use Core\AbstractInterface\AbstractEvent;
-use Core\Component\Logger;
+use Core\Component\Di;
 use Core\Http\Request;
 use Core\Http\Response;
 
@@ -20,7 +20,6 @@ class Event extends AbstractEvent
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
-
     }
 
     function beforeWorkerStart(\swoole_http_server $server)
@@ -58,7 +57,7 @@ class Event extends AbstractEvent
         // TODO: Implement onDispatcher() method.
     }
 
-    function afterResponse(Request $request)
+    function onResponse(Request $request,Response $response)
     {
         // TODO: Implement afterResponse() method.
     }
@@ -77,6 +76,4 @@ class Event extends AbstractEvent
     {
         // TODO: Implement onWorkerError() method.
     }
-
-
 }

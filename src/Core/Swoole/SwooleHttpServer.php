@@ -75,11 +75,27 @@ class SwooleHttpServer
     private function listenRequest(){
         $this->getServer()->on("request",
             function (\swoole_http_request $request,\swoole_http_response $response){
-            Request::getInstance($request);
-            Response::getInstance($response);
-            Event::getInstance()->onRequest(Request::getInstance(),Response::getInstance());
+            $request2 = Request::getInstance($request);
+            $response2 = Response::getInstance($response);
+            Event::getInstance()->onRequest($request2,$response2);
             Dispatcher::getInstance()->dispatch();
-            Event::getInstance()->afterResponse(Request::getInstance());
+            Event::getInstance()->onResponse($request2,$response2);
+            //结束处理
+            $status = $response2->getStatusCode();
+            //状态码有固定格式。
+            $response->status($status);
+            $headers = $response2->getHeaders();
+            foreach ($headers as $header => $val){
+                foreach ($val as $sub){
+                    $response->header($header,$sub);
+                }
+            }
+            $write = $response2->getBody()->__toString();
+            if(!empty($write)){
+                    $response->write($write);
+            }
+            $response2->getBody()->close();
+            $response->end();
             Response::getInstance()->end();
         });
     }

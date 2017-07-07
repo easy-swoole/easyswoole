@@ -31,21 +31,6 @@ class Response extends HttpResponse
     function end(){
         if(!$this->isEndResponse){
             $this->isEndResponse = 1;
-            $status = $this->getStatusCode();
-            //状态码有固定格式。
-            $this->swoole_http_response->status($status);
-            $headers = $this->getHeaders();
-            foreach ($headers as $header => $val){
-                foreach ($val as $sub){
-                    $this->swoole_http_response->header($header,$sub);
-                }
-            }
-            $write = $this->getBody()->__toString();
-            if(!empty($write)){
-                $this->swoole_http_response->write($write);
-            }
-            $this->getBody()->close();
-            $this->swoole_http_response->end();
             return true;
         }else{
             return false;

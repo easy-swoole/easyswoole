@@ -72,7 +72,7 @@ abstract class AbstractEvent
     abstract function onWorkerStop(\swoole_server $server,$workerId);
     abstract function onRequest(Request $request,Response $response);
     abstract function onDispatcher(Request $request,Response $response,$targetControllerClass,$targetAction);
-    abstract function afterResponse(Request $request);
+    abstract function onResponse(Request $request,Response $response);
     abstract function onTask(\swoole_http_server $server, $taskId, $fromId,$callBackObj);
     abstract function onFinish(\swoole_http_server $server, $taskId, $fromId,$callBackObj);
     abstract function onWorkerError(\swoole_http_server $server,$worker_id,$worker_pid,$exit_code);
