@@ -33,6 +33,15 @@ class Validate
         $data = new SplArray($data);
         foreach ($this->ruleMap as $column => $columnBean){
             $checkRuleMap = $columnBean->toArray();
+            //优先检索 OPTIONAL规则。
+            if(isset($checkRuleMap['ruleMap']['OPTIONAL'])){
+                //当某个参数可选时
+                if($data->get($column) === null){
+                    continue;
+                }
+                //OPTIONAL规则不参与实际检验
+                unset($checkRuleMap['ruleMap']['OPTIONAL']);
+            }
             foreach ($checkRuleMap['ruleMap'] as $rule => $ruleData){
                 if(!Func::$rule($column,$data,$ruleData['args'])){
                     $msg = $ruleData['msg'] ? $ruleData['msg'] : $checkRuleMap['errorMsg'];

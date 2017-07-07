@@ -33,6 +33,7 @@ class Rule
     const MAX_LEN = 'MAX_LEN';
     const MIN = 'MIN';
     const MIN_LEN = 'MIN_LEN';
+    const OPTIONAL = 'OPTIONAL';
     const REGEX = 'REGEX';
     const REQUIRED = 'REQUIRED';
     const REQUIRED_IF = 'REQUIRED_IF';
