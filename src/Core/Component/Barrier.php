@@ -37,8 +37,11 @@ class Barrier
         }
         if(!empty($temp)){
             $ret = SwooleHttpServer::getInstance()->getServer()->taskWaitMulti($temp,$timeout);
-            foreach ($ret as $index => $result){
-                $this->results[$this->maps[$index]] = $result;
+            if(!empty($ret)){
+                //极端情况下  所有任务都超时
+                foreach ($ret as $index => $result){
+                    $this->results[$this->maps[$index]] = $result;
+                }
             }
         }
         return $this->results;
