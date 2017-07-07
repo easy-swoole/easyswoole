@@ -131,4 +131,8 @@ class Response extends HttpResponse
             trigger_error("response has end");
         }
     }
+
+    function getSwooleResponse(){
+        return $this->swoole_http_response;
+    }
 }
