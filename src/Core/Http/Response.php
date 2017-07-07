@@ -11,6 +11,7 @@ use Conf\Event;
 use Core\Dispatcher;
 use Core\Http\Message\Response as HttpResponse;
 use Core\Http\Message\Status;
+use Core\UrlParser;
 
 class Response extends HttpResponse
 {
@@ -129,15 +130,18 @@ class Response extends HttpResponse
     }
     function forward($pathTo,array $attribute = array()){
         if(!$this->isEndResponse()){
-            $request = Request::getInstance();
-            $response = Response::getInstance();
-            $request->getUri()->withPath($pathTo);
-            foreach ($attribute as $key => $value){
-                $request->withAttribute($key,$value);
+            if($pathTo == UrlParser::pathInfo()){
+                trigger_error("you can not forward a request in the same path : {$pathTo}");
+            }else{
+                $request = Request::getInstance();
+                $request->getUri()->withPath($pathTo);
+                $response = Response::getInstance();
+                foreach ($attribute as $key => $value){
+                    $request->withAttribute($key,$value);
+                }
+                Event::getInstance()->onRequest($request,$response);
+                Dispatcher::getInstance()->dispatch();
             }
-            //执行OnRequest事件
-            Event::getInstance()->onRequest($request,$response);
-            Dispatcher::getInstance()->dispatch();
         }else{
             trigger_error("response has end");
         }
