@@ -25,7 +25,7 @@ abstract class AbstractController
     abstract function index();
     abstract function onRequest($actionName);
     abstract function actionNotFount($actionName = null, $arguments = null);
-    abstract function afterResponse();
+    abstract function afterAction();
     function request(){
         return Request::getInstance();
     }

@@ -115,7 +115,7 @@ class Dispatcher
                     //同上
                     if(!Response::getInstance()->isEndResponse()){
                         $controller->$actionName();
-                        $controller->afterResponse();
+                        $controller->afterAction();
                     }
                 }
             }else{

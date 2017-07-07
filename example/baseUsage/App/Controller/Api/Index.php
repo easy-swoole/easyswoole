@@ -32,7 +32,7 @@ class Index extends AbstractController
         // TODO: Implement actionNotFount() method.
     }
 
-    function afterResponse()
+    function afterAction()
     {
         // TODO: Implement afterResponse() method.
     }

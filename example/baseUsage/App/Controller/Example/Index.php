@@ -33,7 +33,7 @@ class Index extends AbstractController
         $this->response()->withStatus(Status::CODE_NOT_FOUND);
     }
 
-    function afterResponse()
+    function afterAction()
     {
         // TODO: Implement afterResponse() method.
     }
