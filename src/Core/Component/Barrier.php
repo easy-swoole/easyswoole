@@ -41,7 +41,7 @@ class Barrier
                 $this->results[$this->maps[$index]] = $result;
             }
         }
-
+        return $this->results;
     }
     function getResults(){
         return $this->results;
