@@ -105,12 +105,7 @@ class Func
     }
     static function INTEGER($column,SplArray $array,array $args){
         $data = $array->get($column);
-        //防止字符类型的 '1234'
-        if(is_numeric($data)){
-            return is_integer((int)$data);
-        }else{
-            return false;
-        }
+        return filter_var($data, FILTER_VALIDATE_INT);
     }
     static function IP($column,SplArray $array,array $args){
 
