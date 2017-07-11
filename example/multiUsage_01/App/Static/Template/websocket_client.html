@@ -1,0 +1,56 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<div>
+    <div>
+        <p>info below</p>
+        <ul  id="line">
+
+        </ul>
+    </div>
+    <div>
+        <input type="text" id="says">
+        <button onclick="say()">发送</button>
+    </div>
+</div>
+</body>
+{literal}
+<!--literal 是smarty标签-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script>
+    var wsServer = 'ws://127.0.0.1:9501';
+    var websocket = new WebSocket(wsServer);
+    window.onload = function () {
+        websocket.onopen = function (evt) {
+            addLine("Connected to WebSocket server.");
+        };
+
+        websocket.onclose = function (evt) {
+            addLine("Disconnected");
+        };
+
+        websocket.onmessage = function (evt) {
+            addLine('Retrieved data from server: ' + evt.data);
+        };
+
+        websocket.onerror = function (evt, e) {
+            addLine('Error occured: ' + evt.data);
+        };
+    };
+    function addLine(data) {
+        $("#line").append("<li>"+data+"</li>");
+    }
+    function say() {
+        var content = $("#says").val();
+        if(content.length){
+            $("#says").val('');
+            websocket.send(content);
+        }else{
+            alert('内容不能为空');
+        }
+    }
+</script>
+{/literal}
+</html>
