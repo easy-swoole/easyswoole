@@ -70,7 +70,8 @@ class Request extends ServerRequest
         $host = $this->swoole_http_request->header['host'];
         $host = explode(":",$host);
         $uri->withHost($host[0]);
-        $uri->withPort($host[1]);
+        $port = isset($host[1]) ? $host[1] : 80;
+        $uri->withPort($port);
         return $uri;
     }
     private function initHeaders(){
