@@ -24,7 +24,7 @@ abstract class AbstractController
     }
     abstract function index();
     abstract function onRequest($actionName);
-    abstract function actionNotFount($actionName = null, $arguments = null);
+    abstract function actionNotFound($actionName = null, $arguments = null);
     abstract function afterAction();
     function request(){
         return Request::getInstance();
@@ -35,6 +35,6 @@ abstract class AbstractController
     function __call($actionName, $arguments)
     {
         // TODO: Implement __call() method.
-        $this->actionNotFount($actionName, $arguments);
+        $this->actionNotFound($actionName, $arguments);
     }
 }

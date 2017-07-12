@@ -27,7 +27,7 @@ abstract class AbstractController extends Base
         // TODO: Implement onRequest() method.
     }
 
-    function actionNotFount($actionName = null, $arguments = null)
+    function actionNotFound($actionName = null, $arguments = null)
     {
         // TODO: Implement actionNotFount() method.
         $this->response()->withStatus(Status::CODE_NOT_FOUND);

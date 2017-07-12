@@ -27,7 +27,7 @@ class Index extends AbstractController
         // TODO: Implement onRequest() method.
     }
 
-    function actionNotFount($actionName = null, $arguments = null)
+    function actionNotFound($actionName = null, $arguments = null)
     {
         // TODO: Implement actionNotFount() method.
     }
