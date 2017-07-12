@@ -18,8 +18,12 @@ class Index extends AbstractController
     function index()
     {
         // TODO: Implement index() method.
-//        $this->response()->write("this is api index");/*  url:domain/api/index.html  domain/api/  */
-        $this->response()->write('');
+        $this->response()->write("this is api index");/*  url:domain/api/index.html  domain/api/  */
+    }
+
+    function afterAction()
+    {
+        // TODO: Implement afterAction() method.
     }
 
     function onRequest($actionName)
