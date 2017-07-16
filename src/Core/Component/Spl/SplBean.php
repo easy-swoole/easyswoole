@@ -48,14 +48,20 @@ abstract class SplBean implements \JsonSerializable
         return array_keys($data);
     }
 
-    function toArray(array $columns = null){
+    function toArray(array $columns = null,$filterCallBack = null){
+        if(!is_a($filterCallBack,\Closure::class)){
+            $filterCallBack = function ($val){
+                return !is_null($val);
+            };
+        }
         if($columns){
             $data = $this->jsonSerialize();
-            return array_intersect_key($data, array_flip($columns));
+            return array_filter(array_intersect_key($data, array_flip($columns)),$filterCallBack);
         }else{
-            return $this->jsonSerialize();
+            return array_filter($this->jsonSerialize(),$filterCallBack);
         }
     }
+
     function arrayToBean(array $data){
         $data = array_intersect_key($data,array_flip($this->__varList));
         foreach ($data as $var => $val){
