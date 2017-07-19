@@ -13,6 +13,7 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
 use Core\Dispatcher;
+use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
 
@@ -78,7 +79,18 @@ class SwooleHttpServer
             $request2 = Request::getInstance($request);
             $response2 = Response::getInstance($response);
             Event::getInstance()->onRequest($request2,$response2);
-            Dispatcher::getInstance()->dispatch();
+            try{
+                Dispatcher::getInstance()->dispatch();
+            }catch (\Exception $exception){
+                if(\Conf\Config::getInstance()->getConf("DEBUG.ENABLE")){
+                    trigger_error($exception->getMessage().">".$exception->getTraceAsString());
+                }else{
+                    $response2->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                    $response2->withHeader("Content-Type","text/html;charset=utf-8");
+                    $response2->getBody()->write($exception->getMessage()."<br/>".nl2br($exception->getTraceAsString()));
+                }
+            }
+
             Event::getInstance()->onResponse($request2,$response2);
             //结束处理
             $status = $response2->getStatusCode();
