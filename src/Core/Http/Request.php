@@ -37,17 +37,25 @@ class Request extends ServerRequest
         parent::__construct($method, $uri, null, $body, $protocol, $this->swoole_http_request->server);
         $this->withCookieParams($this->initCookie())->withQueryParams($this->initGet())->withParsedBody($this->initPost())->withUploadedFiles($files);
     }
-    function getRequestParam($keyOrKeys = null){
+    function getRequestParam($keyOrKeys = null, $default = null){
         if($keyOrKeys !== null){
             if(is_string($keyOrKeys)){
                 $ret = $this->getParsedBody($keyOrKeys);
-                if(empty($ret)){
+                if($ret === null){
                     $ret = $this->getQueryParam($keyOrKeys);
+                    if ($ret === null){
+                        if ($default !== null){
+                            $ret = $default;
+                        }
+                    }
                 }
                 return $ret;
             }else if(is_array($keyOrKeys)){
                 $data = $this->getRequestParam();
-                return array_intersect_key($data, array_flip($keyOrKeys));
+                $keysNull = array_fill_keys(array_values($keyOrKeys), null);
+                $all =  array_merge($keysNull, $default, $data);
+                $all = array_intersect_key($all, $keysNull);
+                return $all;
             }else{
                 return null;
             }
