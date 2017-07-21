@@ -31,6 +31,9 @@ class Control
     function startControl(){
         $request = Request::getInstance();
         $response = Response::getInstance();
+        if($response->isEndResponse()){
+            return;
+        }
         if(!$request->getAttribute("version")){
             //如果已经处于版本控制后的请求，则不再做重新匹配
             $target = null;
