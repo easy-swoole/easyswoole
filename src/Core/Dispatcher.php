@@ -34,10 +34,10 @@ class Dispatcher
     }
 
     function dispatch(){
-        $this->currentApplicationDirectory = Di::getInstance()->get(SysConst::APPLICATION_DIR);
         if(Response::getInstance()->isEndResponse()){
             return;
         }
+        $this->currentApplicationDirectory = Di::getInstance()->get(SysConst::APPLICATION_DIR);
         $pathInfo = UrlParser::pathInfo();
         $routeInfo = $this->doFastRouter($pathInfo,Request::getInstance()->getMethod());
         if($routeInfo !== false){
