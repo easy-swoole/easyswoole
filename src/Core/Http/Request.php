@@ -53,6 +53,9 @@ class Request extends ServerRequest
             }else if(is_array($keyOrKeys)){
                 $data = $this->getRequestParam();
                 $keysNull = array_fill_keys(array_values($keyOrKeys), null);
+                if($keysNull === null){
+                    $keysNull = [];
+                }
                 $all =  array_merge($keysNull, $default, $data);
                 $all = array_intersect_key($all, $keysNull);
                 return $all;
