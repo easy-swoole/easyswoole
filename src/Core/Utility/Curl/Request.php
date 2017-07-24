@@ -22,29 +22,26 @@ class Request
         CURLOPT_SSL_VERIFYHOST=>false,
         CURLOPT_HEADER=>true,
     );
+
     function __construct($url,array $opt = array())
     {
         $this->curlOPt[CURLOPT_URL] = $url;
         if(!empty($opt)){
-            $this->curlOPt = $this->curlOPt + $opt;
+            $this->curlOPt = $opt + $this->curlOPt ;
         }
     }
-    function post(array $data){
+
+    function setPost($data){
         $this->curlOPt[CURLOPT_POST] =  true;
         $this->curlOPt[CURLOPT_POSTFIELDS] = $data;
         return $this;
     }
-    function addFile($key,$filePath){
-        $this->curlOPt[CURLOPT_POST] =  true;
-        $this->curlOPt[CURLOPT_POSTFIELDS] =  array(
-            $key=>new \CURLFile($filePath),
-        );
-        return $this;
-    }
+
     function setOpt(array $opt){
-        $this->curlOPt = $this->curlOPt + $opt;
+        $this->curlOPt =  $opt + $this->curlOPt;
         return $this;
     }
+    
     function setUrl($url){
         $this->curlOPt[CURLOPT_URL] = $url;
         return $this;
@@ -53,20 +50,15 @@ class Request
         return $this->curlOPt;
     }
 
-    function exec($autoDebug = 1){
+    function exec(\Closure $callBack = null){
         $curl = curl_init();
         curl_setopt_array($curl,$this->getOpt());
         $result = curl_exec($curl);
-        if($autoDebug){
-            $info = curl_getinfo($curl);
-            $curl_error = curl_error($curl);
-            $curl_errorNo = curl_errno($curl);
+        $response = new Response($result,$curl);
+        if($callBack){
+            return call_user_func($callBack,$response);
         }else{
-            $info = null;
-            $curl_error = null;
-            $curl_errorNo = null;
+            return $response;
         }
-        curl_close($curl);
-        return new Response($result,$info,$curl_error,$curl_errorNo);
     }
 }

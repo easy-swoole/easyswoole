@@ -14,36 +14,41 @@ class Response
     protected $body;
     protected $error;
     protected $errorNo;
-    protected $info;
-    protected $rawResponse;
+    protected $curlInfo;
+    protected $headerLine;
+    protected $cookies = array();
 
-    function __construct($rawResponse,$curlInfo,$error,$errorNo)
+    function __construct($rawResponse,$curlResource)
     {
-        $this->rawResponse = $rawResponse;
-        $this->info = $curlInfo;
-        $this->error = $error;
-        $this->errorNo = $errorNo;
+        $this->curlInfo = curl_getinfo($curlResource);
+        $this->error = curl_error($curlResource);
+        $this->errorNo = curl_errno($curlResource);
+        //处理头部信息
+        $this->headerLine = substr($rawResponse, 0, $this->curlInfo['header_size']);
+        $this->body = substr($rawResponse, $this->curlInfo['header_size']);
+        //处理头部中的cookie
+        preg_match_all("/Set-Cookie:(.*)\n/U",$this->headerLine,$ret);
+        if(!empty($ret[0])){
+            foreach($ret[0] as $item) {
+                $item = explode(";",$item)[0];
+                $item = ltrim($item,"Set-Cookie: ");
+                $item = explode("=",$item);
+                $this->cookies[$item[0]] = rtrim($item[1]);
+            }
+        }
+        curl_close($curlResource);
     }
 
     /**
-     * @return mixed
+     * @return bool|string
      */
     public function getBody()
     {
-        $ret =  Utility::trimHeader($this->rawResponse);
-        return empty($ret) ? '' : $ret;
+        return $this->body;
     }
 
     /**
-     * @return mixed
-     */
-    public function getHeader()
-    {
-        return Utility::getHeader($this->rawResponse);
-    }
-
-    /**
-     * @return mixed
+     * @return string
      */
     public function getError()
     {
@@ -51,7 +56,7 @@ class Response
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getErrorNo()
     {
@@ -63,27 +68,29 @@ class Response
      */
     public function getCurlInfo()
     {
-        return $this->info;
+        return $this->curlInfo;
     }
 
     /**
-     * @return mixed
+     * @return bool|string
      */
-    public function getRawResponse()
+    public function getHeaderLine()
     {
-        return $this->rawResponse;
+        return $this->headerLine;
     }
 
-    function getCookie($toString = false){
-        return Utility::getCookieFromHeader($this->rawResponse,$toString);
-    }
-    function __toString()
+    /**
+     * @return array
+     */
+    public function getCookies()
     {
-        // TODO: Implement __toString() method.
-        if(!isset($this->body)){
-            $this->body = $this->getBody();
-        }
-        return $this->body;
+        return $this->cookies;
     }
+
+    public function getCookie($cookieName){
+        return isset($this->cookies[$cookieName]) ? $this->cookies[$cookieName] : null;
+    }
+
+
 
 }
