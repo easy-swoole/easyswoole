@@ -78,9 +78,10 @@ class SwooleHttpServer
             function (\swoole_http_request $request,\swoole_http_response $response){
             $request2 = Request::getInstance($request);
             $response2 = Response::getInstance($response);
-            Event::getInstance()->onRequest($request2,$response2);
             try{
+                Event::getInstance()->onRequest($request2,$response2);
                 Dispatcher::getInstance()->dispatch();
+                Event::getInstance()->onResponse($request2,$response2);
             }catch (\Exception $exception){
                 if(\Conf\Config::getInstance()->getConf("DEBUG.ENABLE")){
                     trigger_error($exception->getMessage().">".$exception->getTraceAsString());
@@ -90,8 +91,6 @@ class SwooleHttpServer
                     $response2->getBody()->write($exception->getMessage()."<br/>".nl2br($exception->getTraceAsString()));
                 }
             }
-
-            Event::getInstance()->onResponse($request2,$response2);
             //结束处理
             $status = $response2->getStatusCode();
             //状态码有固定格式。
