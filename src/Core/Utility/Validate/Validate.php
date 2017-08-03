@@ -35,7 +35,7 @@ class Validate
             $checkRuleMap = $columnBean->toArray();
             //优先检索 OPTIONAL规则。
             if(isset($checkRuleMap['ruleMap']['OPTIONAL'])){
-                //当某个参数可选时
+                //当某个参数可选时，且数据为空 跳过验证
                 if($this->columnInSplArrIsNull($data, $column)){
                     continue;
                 }
@@ -47,14 +47,12 @@ class Validate
                 if (strpos($column, '*') !== false){
                     //column中包含*的情况
                     $values = $data->get($column);
-//                    var_dump($values);
                     //获取出来是数组的时候   多维数组转一维数组    有可能是null就转成一维数组[null]
                     if (is_array($values)){
                         $values = $this->getOneDimensionalArray($values);
                     }else{
                         $values = array($values);
                     }
-//                    var_dump($values);
 
                     foreach ($values as $value){
                         $data->set('tmpKey', $value);
