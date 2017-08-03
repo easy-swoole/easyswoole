@@ -21,6 +21,24 @@ class Event extends AbstractEvent
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
+        $versionControl = new Control();
+        $versionControl->addVersion("v1",function (Request $request){
+            if($request->getRequestParam("version") == 1){
+                return true;
+            }
+        })->addPathMap("/test",function (Request $request,Response $response){
+            $response->writeJson(200,"v1");
+        });
+
+        $versionControl->addVersion("v2",function (Request $request){
+            if($request->getRequestParam("version") == 2){
+                return true;
+            }
+        })->addPathMap("/test",function (Request $request,Response $response){
+            $response->writeJson(200,"v2");
+        })->addPathMap("/test2","/");
+
+        Di::getInstance()->set("version",$versionControl);
     }
 
     function beforeWorkerStart(\swoole_http_server $server)
@@ -51,6 +69,7 @@ class Event extends AbstractEvent
     function onRequest(Request $request, Response $response)
     {
         // TODO: Implement onRequest() method.
+        Di::getInstance()->get("version")->startControl();
     }
 
     function onDispatcher(Request $request, Response $response, $targetControllerClass, $targetAction)
