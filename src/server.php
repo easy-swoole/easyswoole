@@ -116,8 +116,14 @@ function startServer($options){
         $boolean = $options['cpuAffinity'] ? true : false;
         $conf->setConf("SERVER.CONFIG.open_cpu_affinity",$boolean);
     }
-    echo "try start easyPHP-Swoole Server... \n";
-    $server->run();
+    if($conf->getConf('SERVER.CONFIG.daemonize')){
+        echo "start  easyswoole in daemonize model... \n";
+        $server->run();
+    }else{
+        echo "start  easyswoole in blocking model... \n";
+        $server->run();
+    }
+
 }
 
 function stopServer($options){
