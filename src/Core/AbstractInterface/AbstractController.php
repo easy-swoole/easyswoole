@@ -17,9 +17,9 @@ abstract class AbstractController
     protected $callArgs = null;
     function actionName($actionName = null){
         if($actionName === null){
-            return $this->$actionName;
+            return $this->actionName;
         }else{
-            $this->$actionName = $actionName;
+            $this->actionName = $actionName;
         }
     }
     abstract function index();
