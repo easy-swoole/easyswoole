@@ -51,6 +51,9 @@ class Request extends ServerRequest
                 }
                 return $ret;
             }else if(is_array($keyOrKeys)){
+                if (!is_array($default)){
+                    $default = array();
+                }
                 $data = $this->getRequestParam();
                 $keysNull = array_fill_keys(array_values($keyOrKeys), null);
                 if($keysNull === null){
