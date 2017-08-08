@@ -48,10 +48,10 @@ class Response extends HttpResponse
                 }else if(method_exists($obj,'jsonSerialize')){
                     $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
                 }else{
-                    $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+                    $obj = var_export($obj,true);
                 }
             }else if(is_array($obj)){
-                $obj = var_export($obj,true);
+                $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
             }
             $this->getBody()->write($obj);
             return true;
