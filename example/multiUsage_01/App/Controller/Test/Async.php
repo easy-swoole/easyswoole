@@ -29,7 +29,7 @@ class Async extends AbstractController
        * url is :/test/async/single2/index.html
        */
         AsyncTaskManager::getInstance()->add(function (){
-            Logger::console("this is async task 2");
+            Logger::getInstance()->console("this is async task 2");
             return "test data for async task 2";
         });
         $this->response()->write("async task test 2");
@@ -40,10 +40,10 @@ class Async extends AbstractController
        * url is :/test/async/single3/index.html
        */
         AsyncTaskManager::getInstance()->add(function (){
-            Logger::console("this is async task 3");
+            Logger::getInstance()->console("this is async task 3");
             return "test data for async task 3";
         },AsyncTaskManager::TASK_DISPATCHER_TYPE_RANDOM,function (\swoole_http_server $server, $task_id, $resultData){
-            Logger::console("call back for async task 3 with data {$resultData}");
+            Logger::getInstance()->console("call back for async task 3 with data {$resultData}");
         });
         $this->response()->write("async task test 3");
     }

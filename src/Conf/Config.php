@@ -53,8 +53,8 @@ class Config
 //                    "daemonize"=>false,
 //                    "user"=>"yf",
 //                    "group"=>"root",
-                    "log_file"=>ROOT.'/swoole_log.txt',
-                    'pid_file'=>ROOT."/pid.pid",
+                    "log_file"=>ROOT.'/Log/swoole_log.txt',
+                    'pid_file'=>ROOT."/Log/pid.pid",
 //                    "upload_tmp_dir"=>ROOT."/Temp/"
 
                 ),

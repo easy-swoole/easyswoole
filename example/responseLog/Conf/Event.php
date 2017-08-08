@@ -84,7 +84,7 @@ class Event extends AbstractEvent
         }
         $str .= $response->getBody();
 
-        Logger::console($str);
+        Logger::getInstance()->console($str);
 
     }
 

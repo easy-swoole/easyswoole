@@ -35,7 +35,7 @@ class Event extends AbstractEvent
                  * here,and read the message queue in blocking mode
                 */
                 sleep(1);
-                Logger::console("my process run");
+                Logger::getInstance()->console("my process run");
             }
         }));
     }

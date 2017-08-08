@@ -24,6 +24,6 @@ class Task extends AbstractAsyncTask
     function finishCallBack(\swoole_http_server $server, $task_id, $resultData)
     {
         // TODO: Implement finishCallBack() method.
-        Logger::console("task finish callback with data {$resultData}",false);
+        Logger::getInstance()->console("task finish callback with data {$resultData}",false);
     }
 }

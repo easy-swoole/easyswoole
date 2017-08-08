@@ -11,10 +11,5 @@ namespace Core\AbstractInterface;
 
 interface LoggerWriterInterface
 {
-    /*
-     * @param $msg
-     * @param $timeStamp
-     * @return boolean isSuccess
-     */
-    static function writeLog($msg,$timeStamp);
+    static function writeLog($obj,$logCategory,$timeStamp);
 }

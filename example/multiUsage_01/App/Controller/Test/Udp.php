@@ -19,12 +19,12 @@ class Udp extends AbstractController
      */
     function multiProtocol(){
         $data = UdpClient::sendTo('127.0.0.1','9502',"i am client");
-        Logger::console("receive from udp server data@{$data}");
+        Logger::getInstance()->console("receive from udp server data@{$data}");
         $this->response()->write("udp server say {$data} as 9502");
     }
     function eventLoop(){
         $data = UdpClient::sendTo('127.0.0.1','9503',"i am client");
-        Logger::console("receive from udp server data@{$data}");
+        Logger::getInstance()->console("receive from udp server data@{$data}");
         $this->response()->write("udp server say {$data} as 9503");
     }
 }

@@ -29,7 +29,7 @@ class Websocket extends AbstractController
         $fd = $this->request()->getRequestParam("fd");
         $info =  SwooleHttpServer::getInstance()->getServer()->connection_info($fd);
         if($info['websocket_status']){
-            Logger::console("push data to client {$fd}");
+            Logger::getInstance()->console("push data to client {$fd}");
             SwooleHttpServer::getInstance()->getServer()->push($fd,"data from server at ".time());
             $this->response()->write("push to fd :{$fd}");
         }else{

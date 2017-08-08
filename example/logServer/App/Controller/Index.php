@@ -35,7 +35,7 @@ class Index extends AbstractController
             AsyncTaskManager::getInstance()->add(function ()use($str){
                 Writer::write($str);
             });
-            Logger::console("really write log");
+            Logger::getInstance()->console("really write log");
         }
         $this->response()->writeJson();
     }

@@ -70,7 +70,7 @@ class Event extends AbstractEvent
         // TODO: Implement afterResponse() method.
         $end = microtime(true);
         $ret = $end - $request->getAttribute("startTime");
-        Logger::console("your request take {$ret}");
+        Logger::getInstance()->console("your request take {$ret}");
     }
 
     function onTask(\swoole_http_server $server, $taskId, $fromId, $taskObj)

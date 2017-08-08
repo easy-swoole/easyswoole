@@ -28,7 +28,7 @@ class ErrorHandler implements ErrorHandlerInterface
         if(Request::getInstance()){
             Response::getInstance()->write($error->__toString());
         }else{
-            Logger::console($error,0);
+            Logger::getInstance()->console($error,0);
         }
 
     }
@@ -36,6 +36,6 @@ class ErrorHandler implements ErrorHandlerInterface
     function log(SplError $error)
     {
         // TODO: Implement log() method.
-        Logger::log($error);
+        Logger::getInstance()->log($error);
     }
 }

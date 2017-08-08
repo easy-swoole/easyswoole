@@ -48,7 +48,7 @@ class Core
         $this->registerAutoLoader();
         $this->setDefaultAppDirectory();
         Event::getInstance()->frameInitialize();
-        $this->createTempDirectory();
+        $this->sysDirectoryInit();
         $this->registerErrorHandler();
         return $this;
     }
@@ -56,7 +56,8 @@ class Core
     private function defineSysConst(){
         define("ROOT",realpath(__DIR__.'/../'));
     }
-    private function createTempDirectory(){
+    private function sysDirectoryInit(){
+        //创建临时目录
         $tempDir = Di::getInstance()->get(SysConst::TEMP_DIRECTORY);
         if(empty($tempDir)){
             $tempDir = ROOT."/Temp";
@@ -65,6 +66,13 @@ class Core
         if(!is_dir($tempDir)){
             if(!mkdir($tempDir,0755,true)){
                 die("create Temp Directory:{$tempDir} fail");
+            }
+        }
+        //创建默认日志目录
+        $logDir = ROOT."/Log";
+        if(!is_dir($logDir)){
+            if(!mkdir($logDir,0755,true)){
+                die("create log Directory:{$logDir} fail");
             }
         }
     }

@@ -37,7 +37,7 @@ class Event extends AbstractEvent
         //添加自带多协议监听
         $udp = $server->addlistener("0.0.0.0",9502,SWOOLE_SOCK_UDP);
         $udp->on('packet',function(\swoole_server $server, $data,$addr){
-            Logger::console("receive data {$data}");
+            Logger::getInstance()->console("receive data {$data}");
             $server->sendto($addr['address'], $addr['port'], "Swoole: $data");
         });
 
@@ -64,12 +64,12 @@ class Event extends AbstractEvent
 
         //添加websocket回调事件
         $server->on("message",function (\swoole_websocket_server $server, \swoole_websocket_frame $frame){
-            Logger::console("receive data".$frame->data);
+            Logger::getInstance()->console("receive data".$frame->data);
             $server->push($frame->fd,"you say ".$frame->data);
         });
 
         $server->on("handshake",function (\swoole_http_request $request, \swoole_http_response $response){
-            Logger::console("handshake");
+            Logger::getInstance()->console("handshake");
             //自定定握手规则，没有设置则用系统内置的（只支持version:13的）
             if (!isset($request->header['sec-websocket-key']))
             {
@@ -108,7 +108,7 @@ class Event extends AbstractEvent
         $server->on("close",function (\swoole_http_server $server,$fd){
             $info =  SwooleHttpServer::getInstance()->getServer()->connection_info($fd);
             if($info['websocket_status']){
-                Logger::console("websocket client {$fd} close");
+                Logger::getInstance()->console("websocket client {$fd} close");
             }
         });
         //添加websocket回调事件结束
@@ -134,7 +134,7 @@ class Event extends AbstractEvent
             //加入event loop
             swoole_event_add($listener,function($listener){
                 $data = stream_socket_recvfrom($listener,9503,0,$client);
-                Logger::console("rec data {$data} in event loop");
+                Logger::getInstance()->console("rec data {$data} in event loop");
                 stream_socket_sendto($listener,"hello this is event loop",0,$client);
             });
         }
@@ -152,7 +152,7 @@ class Event extends AbstractEvent
         if($workerId == 0){
             //10秒
             Timer::loop(10*1000,function (){
-               Logger::console("this is timer");
+                Logger::getInstance()->console("this is timer");
             });
         }
 

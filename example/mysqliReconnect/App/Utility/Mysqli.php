@@ -256,7 +256,7 @@ class Mysqli
         }
 
         $this->_mysqli = new \mysqli($this->host, $this->username, $this->password, $this->db, $this->port);
-        Logger::console("a new mysqli connect");
+        Logger::getInstance()->console("a new mysqli connect");
         if ($this->_mysqli->connect_error) {
             throw new \Exception('Connect Error ' . $this->_mysqli->connect_errno . ': ' . $this->_mysqli->connect_error, $this->_mysqli->connect_errno);
         }
@@ -1763,8 +1763,8 @@ class Mysqli
         $stmt = $this->mysqli()->prepare($this->_query);
         if(!$stmt){
             $msg = $this->mysqli()->error . " query: " . $this->_query;
-            Logger::console($msg);
-            Logger::console("reconnect ");
+            Logger::getInstance()->console($msg);
+            Logger::getInstance()->console("reconnect ");
             //未做断线重连尝试次数校验请自己加逻辑。
             $this->connect();
             $stmt = $this->_prepareQuery();
