@@ -36,3 +36,7 @@ QQ交流群 ： 633921431
 
  如果您在使用过程中有任何的疑问，请联系作者 admin@robindata.cn
 
+# 相关资源
+## docker测试镜像
+  如果您想快速体验easyswoole的功能，请直接下载测试镜像。
+  https://dev.aliyun.com/detail.html?spm=5176.1972343.2.4.dtD683&repoId=62694（仅供测试，请勿用于生产环境）
