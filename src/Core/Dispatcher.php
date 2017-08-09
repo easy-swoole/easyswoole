@@ -105,6 +105,17 @@ class Dispatcher
                 $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
+            /*
+             * 防止恶意调用
+             * actionName、onRequest、actionNotFound、afterAction、request
+             * response、__call
+             */
+            if(in_array($actionName,array(
+                'actionName','onRequest','actionNotFound','afterAction','request','response','__call'
+            ))){
+                Response::getInstance()->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                return;
+            }
             $controller = new $finalClass;
             if($controller instanceof AbstractController){
                 Event::getInstance()->onDispatcher(Request::getInstance(),Response::getInstance(),$finalClass,$actionName);
