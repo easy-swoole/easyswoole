@@ -47,7 +47,7 @@ class Config
                     "task_max_request"=>10,
                     'max_request'=>3000,
                     'worker_num'=>4,
-//                    "dispatch_model"=>1,//3为抢占模式 不对繁忙进程发送任务
+//                    "dispatch_mode"=>1,//3为抢占模式 不对繁忙进程发送任务
 //						'task_ipc_mode'=>2,
 //                    "open_cpu_affinity"=>1,
 //                    "daemonize"=>false,
