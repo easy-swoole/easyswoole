@@ -171,7 +171,7 @@ function reloadServer($options){
             $pidFile = $options['pidFile'];
         }
     }
-    if(isset($options['reloadAll']) && $options['reloadAll'] = false){
+    if(isset($options['reloadAll']) && $options['reloadAll'] == false){
         $sig = SIGUSR2;
     }else{
         $sig = SIGUSR1;
