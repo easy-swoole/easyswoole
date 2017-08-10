@@ -105,29 +105,12 @@ class Dispatcher
                 $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
-            /*
-             * 防止恶意调用
-             * actionName、onRequest、actionNotFound、afterAction、request
-             * response、__call
-             */
-            if(in_array($actionName,array(
-                'actionName','onRequest','actionNotFound','afterAction','request','response','__call'
-            ))){
-                Response::getInstance()->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                return;
-            }
             $controller = new $finalClass;
             if($controller instanceof AbstractController){
                 Event::getInstance()->onDispatcher(Request::getInstance(),Response::getInstance(),$finalClass,$actionName);
                 //预防在进控制器之前已经被拦截处理
                 if(!Response::getInstance()->isEndResponse()){
-                    $controller->actionName($actionName);
-                    $controller->onRequest($actionName);
-                    //同上
-                    if(!Response::getInstance()->isEndResponse()){
-                        $controller->$actionName();
-                        $controller->afterAction();
-                    }
+                    $controller->__call($actionName,null);
                 }
             }else{
                 Response::getInstance()->withStatus(Status::CODE_NOT_FOUND);

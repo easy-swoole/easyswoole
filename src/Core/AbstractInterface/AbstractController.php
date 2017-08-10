@@ -8,6 +8,7 @@
 
 namespace Core\AbstractInterface;
 
+use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
 
@@ -35,6 +36,29 @@ abstract class AbstractController
     function __call($actionName, $arguments)
     {
         // TODO: Implement __call() method.
-        $this->actionNotFound($actionName, $arguments);
+        /*
+           * 防止恶意调用
+           * actionName、onRequest、actionNotFound、afterAction、request
+           * response、__call
+        */
+        if(in_array($actionName,array(
+            'actionName','onRequest','actionNotFound','afterAction','request','response','__call'
+        ))){
+            $this->response()->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+            return;
+        }
+        //执行onRequest事件
+        $this->actionName($actionName);
+        $this->onRequest($actionName);
+        //判断是否被拦截
+        if(!$this->response()->isEndResponse()){
+            if(method_exists($this,$actionName)){
+                $realName = $this->actionName();
+                $this->$realName();
+            }else{
+                $this->actionNotFound($actionName, $arguments);
+            }
+        }
+        $this->afterAction();
     }
 }
