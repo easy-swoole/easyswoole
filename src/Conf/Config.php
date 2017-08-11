@@ -47,16 +47,8 @@ class Config
                     "task_max_request"=>10,
                     'max_request'=>3000,
                     'worker_num'=>4,
-//                    "dispatch_mode"=>1,//3为抢占模式 不对繁忙进程发送任务
-//						'task_ipc_mode'=>2,
-//                    "open_cpu_affinity"=>1,
-//                    "daemonize"=>false,
-//                    "user"=>"yf",
-//                    "group"=>"root",
                     "log_file"=>ROOT.'/Log/swoole_log.txt',
                     'pid_file'=>ROOT."/Log/pid.pid",
-//                    "upload_tmp_dir"=>ROOT."/Temp/"
-
                 ),
             ),
             "DEBUG"=>array(
@@ -64,6 +56,7 @@ class Config
                 "DISPLAY_ERROR"=>1,
                 "ENABLE"=>false,
             ),
+            "CONTROLLER_POOL"=>true
         );
     }
 

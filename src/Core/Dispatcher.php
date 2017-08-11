@@ -9,6 +9,7 @@
 namespace Core;
 
 
+use Conf\Config;
 use Conf\Event;
 use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
@@ -26,6 +27,7 @@ class Dispatcher
     protected static $selfInstance;
     protected $fastRouterDispatcher;
     protected $currentApplicationDirectory;
+    protected $controllerPool = array();
     static function getInstance(){
         if(!isset(self::$selfInstance)){
             self::$selfInstance = new Dispatcher();
@@ -105,7 +107,17 @@ class Dispatcher
                 $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
-            $controller = new $finalClass;
+            $isUsePool = Config::getInstance()->getConf("CONTROLLER_POOL");
+            if($isUsePool){
+                if(isset($this->controllerPool[$finalClass])){
+                    $controller = $this->controllerPool[$finalClass];
+                }else{
+                    $controller = new $finalClass;
+                    $this->controllerPool[$finalClass] = $controller;
+                }
+            }else{
+                $controller = new $finalClass;
+            }
             if($controller instanceof AbstractController){
                 Event::getInstance()->onDispatcher(Request::getInstance(),Response::getInstance(),$finalClass,$actionName);
                 //预防在进控制器之前已经被拦截处理
