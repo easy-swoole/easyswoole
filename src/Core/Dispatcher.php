@@ -14,7 +14,6 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
-use Core\Component\Logger;
 use Core\Component\SysConst;
 use Core\Component\SuperClosure;
 use Core\Http\Request;
@@ -28,11 +27,17 @@ class Dispatcher
     protected $fastRouterDispatcher;
     protected $currentApplicationDirectory;
     protected $controllerPool = array();
+    protected $useControllerPool = false;
     static function getInstance(){
         if(!isset(self::$selfInstance)){
             self::$selfInstance = new Dispatcher();
         }
         return self::$selfInstance;
+    }
+
+    function __construct()
+    {
+        $this->useControllerPool = Config::getInstance()->getConf("CONTROLLER_POOL");
     }
 
     function dispatch(){
@@ -107,8 +112,7 @@ class Dispatcher
                 $actionName = isset($list[0]) ? $list[0] : '';
             }
             $actionName = $actionName ? $actionName : "index";
-            $isUsePool = Config::getInstance()->getConf("CONTROLLER_POOL");
-            if($isUsePool){
+            if($this->useControllerPool){
                 if(isset($this->controllerPool[$finalClass])){
                     $controller = $this->controllerPool[$finalClass];
                 }else{
