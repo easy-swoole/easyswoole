@@ -11,7 +11,7 @@ namespace Core\Utility\Curl;
 
 class Response
 {
-    protected $body;
+    protected $body = '';
     protected $error;
     protected $errorNo;
     protected $curlInfo;
@@ -90,7 +90,15 @@ class Response
     public function getCookie($cookieName){
         return isset($this->cookies[$cookieName]) ? $this->cookies[$cookieName] : null;
     }
-
+    function __toString()
+    {
+        // TODO: Implement __toString() method.
+        $ret = '';
+        if(!empty($this->headerLine)){
+            $ret =  $this->headerLine."\n\r\n\r";
+        }
+        return $ret.$this->body;
+    }
 
 
 }
