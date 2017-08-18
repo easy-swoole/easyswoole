@@ -93,6 +93,8 @@ class Core
     private function registerErrorHandler(){
         $conf = Config::getInstance()->getConf("DEBUG");
         if($conf['ENABLE'] == true){
+            ini_set("display_errors", "On");
+            error_reporting(E_ALL | E_STRICT);
             set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
                 $error = new SplError();
                 $error->setErrorCode($errorCode);
