@@ -73,7 +73,7 @@ abstract class AbstractEvent
     abstract function onRequest(Request $request,Response $response);
     abstract function onDispatcher(Request $request,Response $response,$targetControllerClass,$targetAction);
     abstract function onResponse(Request $request,Response $response);
-    abstract function onTask(\swoole_http_server $server, $taskId, $fromId,$callBackObj);
-    abstract function onFinish(\swoole_http_server $server, $taskId, $fromId,$callBackObj);
+    abstract function onTask(\swoole_http_server $server, $taskId, $workerId,$callBackObj);
+    abstract function onFinish(\swoole_http_server $server, $taskId,$callBackObj);
     abstract function onWorkerError(\swoole_http_server $server,$worker_id,$worker_pid,$exit_code);
 }
