@@ -73,12 +73,12 @@ class Event extends AbstractEvent
         Logger::getInstance()->console("your request take {$ret}");
     }
 
-    function onTask(\swoole_http_server $server, $taskId, $fromId, $taskObj)
+    function onTask(\swoole_http_server $server, $taskId, $workerId, $taskObj)
     {
         // TODO: Implement onTask() method.
     }
 
-    function onFinish(\swoole_http_server $server, $taskId, $fromId, $taskObj)
+    function onFinish(\swoole_http_server $server, $taskId, $taskObj)
     {
         // TODO: Implement onFinish() method.
     }

@@ -178,12 +178,12 @@ class Event extends AbstractEvent
         // TODO: Implement afterResponse() method.
     }
 
-    function onTask(\swoole_http_server $server, $taskId, $fromId, $taskObj)
+    function onTask(\swoole_http_server $server, $taskId, $workerId, $taskObj)
     {
         // TODO: Implement onTask() method.
     }
 
-    function onFinish(\swoole_http_server $server, $taskId, $fromId, $taskObj)
+    function onFinish(\swoole_http_server $server, $taskId, $taskObj)
     {
         // TODO: Implement onFinish() method.
     }
