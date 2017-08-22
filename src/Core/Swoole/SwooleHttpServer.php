@@ -108,8 +108,6 @@ class SwooleHttpServer
             $response2->getBody()->close();
             $response->end();
             Response::getInstance()->end();
-            unset($request);
-            unset($response);
         });
     }
     private function workerStartEvent(){
