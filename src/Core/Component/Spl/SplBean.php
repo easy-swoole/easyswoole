@@ -9,9 +9,13 @@
 namespace Core\Component\Spl;
 
 
+use Core\Utility\Judge;
+
 abstract class SplBean implements \JsonSerializable
 {
     private $__varList = array();
+    const FILTER_TYPE_NOT_NULL = 1;
+    const FILTER_TYPE_NOT_EMPTY = 2;
     final function __construct($beanArray = array())
     {
         $this->__varList = $this->allVarKeys();
@@ -48,16 +52,21 @@ abstract class SplBean implements \JsonSerializable
         return array_keys($data);
     }
 
-    function toArray(array $columns = null,$notNull = false){
+    function toArray(array $columns = null,$filterType = false){
         if($columns){
             $data = $this->jsonSerialize();
             $ret = array_intersect_key($data, array_flip($columns));
         }else{
             $ret = $this->jsonSerialize();
         }
-        if($notNull){
+        if($filterType === self::FILTER_TYPE_NOT_NULL){
             return array_filter($ret,function ($val){
                 return !is_null($val);
+            });
+        }else if($filterType === self::FILTER_TYPE_NOT_EMPTY){
+            return array_filter($ret,function ($val){
+                //0不为空
+                return !Judge::isEmpty($val);
             });
         }else{
             return $ret;
