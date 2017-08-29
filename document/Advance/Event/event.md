@@ -4,10 +4,10 @@ easySwoole预留了多种事件入口，以方便用户更加自由地使用easy
 
 * [frameInitialize](frameInitialize.md)
 
-* [beforeWorkerStart](/Advance/Event/beforeWorkerStart.md)
+* [beforeWorkerStart](beforeWorkerStart.md)
 
-* [onWorkerStart](Advance/Event/onWorkerStart.md)
+* [onWorkerStart](onWorkerStart.md)
 
-* [onRequest](Advance/Event/onRequest.md)
+* [onRequest](onRequest.md)
 
-* [onResponse](Advance/Event/onResponse.md)
+* [onResponse](onResponse.md)
