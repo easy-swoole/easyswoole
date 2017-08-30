@@ -8,7 +8,9 @@
  */
 namespace Conf;
 
+use Core\Component\Di;
 use Core\Component\Spl\SplArray;
+use Core\Component\SysConst;
 
 class Config
 {
@@ -47,8 +49,8 @@ class Config
                     "task_max_request"=>10,
                     'max_request'=>3000,
                     'worker_num'=>4,
-                    "log_file"=>ROOT.'/Log/swoole_log.txt',
-                    'pid_file'=>ROOT."/Log/pid.pid",
+                    "log_file"=>Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/swoole.log",
+                    'pid_file'=>Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/pid.pid",
                 ),
             ),
             "DEBUG"=>array(

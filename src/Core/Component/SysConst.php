@@ -21,5 +21,6 @@ class SysConst
     const APPLICATION_DIR = 'APPLICATION_DIR';//定义应用目录（以便支持例如多域名部署需求）
     const SHARE_MEMORY_FILE = 'SHARE_MEMORY_FILE';
     const TEMP_DIRECTORY = 'TEMP_DIRECTORY';
+    const LOG_DIRECTORY = 'LOG_DIRECTORY';
     const VERSION_CONTROL = 'VERSION_CONTROL';
 }
