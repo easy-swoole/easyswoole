@@ -97,7 +97,7 @@ class Func
     }
     static function FLOAT($column,SplArray $array,array $args){
         $data = $array->get($column);
-        return is_float($data);
+        return filter_var($data, FILTER_VALIDATE_FLOAT);
     }
     static function IN($column,SplArray $array,array $args){
         $data = $array->get($column);
@@ -198,6 +198,10 @@ class Func
     }
     static function REQUIRED($column,SplArray $array,array $args){
         $data = $array->get($column);
+        //add by xhx 2017年08月25日09:02:31  在requirewith  products.*.attributes的情况下 获取的是数组
+        if (is_array($data)){
+            $data = $data[0];
+        }
         return $data === null ? false : true;
     }
     static function REQUIRED_IF($column,SplArray $array,array $args){

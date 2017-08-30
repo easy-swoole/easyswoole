@@ -29,4 +29,10 @@ class Message
             return array();
         }
     }
+    //add by xhx 2017年08月23日17:11:09
+    function first(){
+        $message = array_shift($this->allMessages);
+        $message = array_shift($message);
+        return $message;
+    }
 }
