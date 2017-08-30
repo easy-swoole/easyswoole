@@ -75,6 +75,7 @@ function commandHandler(){
 }
 
 function startServer($options){
+    opCacheClear();
     global $server;
     $conf = \Conf\Config::getInstance();
     if(isset($options['daemonize'])){
@@ -181,6 +182,7 @@ function reloadServer($options){
         return;
     }
     $pid = file_get_contents($pidFile);
+    opCacheClear();
     if(!swoole_process::kill($pid,0)){
         echo "pid :{$pid} not exist \n";
         return;
@@ -244,7 +246,14 @@ function evenCheck(){
     }
 
 }
-
+function opCacheClear(){
+    if(function_exists('apc_clear_cache')){
+        apc_clear_cache();
+    }
+    if(function_exists('opcache_reset')){
+        opcache_reset();
+    }
+}
 evenCheck();
 commandHandler();
 
