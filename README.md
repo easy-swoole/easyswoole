@@ -83,7 +83,7 @@ easySwoole 专为API而生，是一款常驻内存化的PHP开发框架，摆脱
 - PHP 代码中如果有异常抛出，必须在回调函数中进行 try/catch 捕获异常，否则会导致工作进程退出。
 - 在Http应用中，使用 echo, var_dump 函数进行输出并不会被响应至客户端，请使用框架中的 $this->response()->write() 代替。
 
-## [相关文档](document/README.md)
+## [相关文档](http://117.25.148.21:9501/)
 
 ## QQ交流群 ： 633921431
  
