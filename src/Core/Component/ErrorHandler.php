@@ -36,6 +36,6 @@ class ErrorHandler implements ErrorHandlerInterface
     function log(SplError $error)
     {
         // TODO: Implement log() method.
-        Logger::getInstance()->log($error);
+        Logger::getInstance('error')->log($error);
     }
 }
