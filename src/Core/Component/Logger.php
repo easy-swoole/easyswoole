@@ -13,14 +13,23 @@ use Core\AbstractInterface\LoggerWriterInterface;
 
 class Logger
 {
-    private static $instance;
-    private static $logCategory = 'default';
+    private static $instance = array();
+    private $logCategory = 'default';
+
     static function getInstance($logCategory = 'default'){
-        self::$logCategory = $logCategory;
-        if(!isset(self::$instance)){
-            self::$instance = new static();
+        if(!isset(self::$instance[$logCategory])){
+            //这样做纯属为了IDE提示
+            $instance = new static($logCategory);
+            self::$instance[$logCategory] = $instance;
+        }else{
+            $instance = self::$instance[$logCategory];
         }
-        return self::$instance;
+        return $instance;
+    }
+
+    function __construct($logCategory)
+    {
+        $this->logCategory = $logCategory;
     }
 
     /**
@@ -29,14 +38,14 @@ class Logger
     function log($obj){
         $loggerWriter = Di::getInstance()->get(SysConst::DI_LOGGER_WRITER);
         if($loggerWriter instanceof LoggerWriterInterface){
-            $loggerWriter::writeLog($obj,self::$logCategory,time());
+            $loggerWriter::writeLog($obj,$this->logCategory,time());
         }else{
             $obj = $this->objectToString($obj);
             /*
              * default method to save log
              */
             $str = "time : ".date("y-m-d H:i:s")." message: ".$obj."\n";
-            $filePrefix = self::$logCategory."_".date('ym');
+            $filePrefix = $this->logCategory."_".date('ym');
             $filePath = ROOT."/Log/{$filePrefix}_log.txt";
             file_put_contents($filePath,$str,FILE_APPEND|LOCK_EX);
         }
