@@ -15,16 +15,18 @@ use Core\UrlParser;
 
 class Control
 {
+    const CURRENT_VERSION = 'CURRENT_VERSION';
+    const LAST_FORWARD_PATH = 'LAST_FORWARD_PATH';
+    const IS_EXCEPT_CONTROL = 'IS_EXCEPT_CONTROL';
     private $map = array();
-    private $defaultHandler;
     /*
      * handler if match a version，must return boolean true
      */
-    function addVersion($version,\Closure $handler){
+    function addVersion($version,\Closure $judge){
         $temp = new Version();
         $this->map[$version] = array(
-            "handler"=>$handler,
-            'version'=>$temp
+            "judge"=>$judge,
+            'versionClass'=>$temp
         );
         return $temp;
     }
@@ -34,53 +36,37 @@ class Control
         if($response->isEndResponse()){
             return;
         }
-        if(!$request->getAttribute("version")){
-            //如果已经处于版本控制后的请求，则不再做重新匹配
-            $target = null;
-            foreach ($this->map as $version => $item){
-                $flag = call_user_func($item['handler'],$request,$response);
-                if($flag){
-                    $target = $item;
-                    break;
-                }
-            }
-            $pathInfo = UrlParser::pathInfo();
-            if($target){
-                $request->withAttribute("version",$version);
-                $realPath = $target['version']->getPathMap($pathInfo);
-                if(is_string($realPath)){
-                    $response->forward($realPath);
-                }else if ($realPath instanceof \Closure){
-                    call_user_func($realPath,$request,$response);
-                }else{
-                    $handler = $target['version']->getDefaultHandler();
-                    if(is_string($handler)){
-                        $response->forward($handler);
-                    }else if ($handler instanceof \Closure){
-                        call_user_func($handler,$request,$response);
-                    }else{
-                        $this->defaultHandler($request,$response);
-                    }
-                }
-                //在没有做任何响应的时候，交给defaultHandler
-                if(empty($response->getStatusCode()) && $response->getBody()){
-                    $this->defaultHandler($request,$response);
-                }
-            }
-            if($target !== null){
-                $response->end();
+        if($request->getAttribute(self::IS_EXCEPT_CONTROL)){
+            return;
+        }
+
+        $targetVersion = null;
+        $targetVersionClass = null;
+        $currentPathInfo = UrlParser::pathInfo();
+        foreach ($this->map as $version => $item){
+            $flag = call_user_func($item['judge'],$request,$response);
+            if($flag){
+                $targetVersion = $version;
+                $targetVersionClass = $item['versionClass'];
+                break;
             }
         }
-    }
-    function setDefaultHandler($defaultPathOrClosureHandler){
-        $this->defaultHandler = $defaultPathOrClosureHandler;
-        return $this;
-    }
-    private function defaultHandler(Request $request,Response $response){
-        if(is_string($this->defaultHandler)){
-            $response->forward($this->defaultHandler);
-        }else if($this->defaultHandler instanceof \Closure){
-            call_user_func($this->defaultHandler,$request,$response);
+
+        if($targetVersion !== null){
+            $handler = $targetVersionClass->getPathMap($currentPathInfo);
+            $request->withAttribute(self::CURRENT_VERSION,$targetVersion);
+            $request->withAttribute(self::LAST_FORWARD_PATH,$currentPathInfo);
+            if($handler == $currentPathInfo){
+                throw new \Exception("api version control for path:{$currentPathInfo} at version:{$targetVersion} is an endless loop");
+            }else{
+                if(is_string($handler)){
+                    $response->forward($handler);
+                    $response->end();
+                }else if($handler instanceof \Closure){
+                    call_user_func($handler,$request,$response);
+                    $response->end();
+                }
+            }
         }
     }
 }

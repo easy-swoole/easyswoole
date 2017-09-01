@@ -12,13 +12,12 @@ namespace Core\Component\Version;
 class Version
 {
     private $maps = array();
-    private $defaultHandler;
-    function addPathMap($rowPathInfo,$targetPathOrClosureHandler){
+    function addPathMap($rowPath,$targetPathOrClosureHandler){
+        $rowPathInfo = $this->generatePathInfo($rowPath);
+        if(is_string($targetPathOrClosureHandler)){
+            $targetPathOrClosureHandler = $this->generatePathInfo($targetPathOrClosureHandler);
+        }
         $this->maps[$rowPathInfo] = $targetPathOrClosureHandler;
-        return $this;
-    }
-    function setDefaultHandler($defaultPathOrClosureHandler){
-        $this->defaultHandler = $defaultPathOrClosureHandler;
         return $this;
     }
 
@@ -38,13 +37,16 @@ class Version
         }
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDefaultHandler()
-    {
-        return $this->defaultHandler;
+    private function generatePathInfo($path){
+        $basePath = dirname($path);
+        $info = pathInfo($path);
+        if($info['filename'] != 'index'){
+            if($basePath == '/'){
+                $basePath = $basePath.$info['filename'];
+            }else{
+                $basePath = $basePath.'/'.$info['filename'];
+            }
+        }
+        return $basePath;
     }
-
-
 }
