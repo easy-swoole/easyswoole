@@ -14,10 +14,12 @@ use Core\Http\Request;
 
 class UrlParser
 {
-    static public function pathInfo(){
-        $pathInfo = Request::getInstance()->getUri()->getPath();
-        $basePath = dirname($pathInfo);
-        $info = pathInfo($pathInfo);
+    static public function pathInfo($path = null){
+        if($path == null){
+            $path = Request::getInstance()->getUri()->getPath();
+        }
+        $basePath = dirname($path);
+        $info = pathInfo($path);
         if($info['filename'] != 'index'){
             if($basePath == '/'){
                 $basePath = $basePath.$info['filename'];
