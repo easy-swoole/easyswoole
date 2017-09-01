@@ -116,6 +116,7 @@ class Response extends HttpResponse
 
     }
     function forward($pathTo,array $attribute = array()){
+        $pathTo = UrlParser::pathInfo($pathTo);
         if(!$this->isEndResponse()){
             if($pathTo == UrlParser::pathInfo()){
                 trigger_error("you can not forward a request in the same path : {$pathTo}");
