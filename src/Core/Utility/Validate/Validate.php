@@ -47,11 +47,14 @@ class Validate
                 if (strpos($column, '*') !== false){
                     //column中包含*的情况
                     $values = $data->get($column);
-                    //获取出来是数组的时候   多维数组转一维数组    有可能是null就转成一维数组[null]
-                    if (is_array($values)){
-                        $values = $this->getOneDimensionalArray($values);
-                    }else{
-                        $values = array($values);
+                    //add by xhx 2017年08月25日08:38:53   如果判断是否维数组的情况下  不能专为一维数组一次判断
+                    if ($rule !== Rule::ARRAY_){
+                        //获取出来是数组的时候   多维数组转一维数组    有可能是null就转成一维数组[null]
+                        if (is_array($values)){
+                            $values = $this->getOneDimensionalArray($values);
+                        }else{
+                            $values = array($values);
+                        }
                     }
 
                     foreach ($values as $value){
