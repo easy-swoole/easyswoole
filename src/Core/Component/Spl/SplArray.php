@@ -59,7 +59,7 @@ class SplArray extends \ArrayObject
                 if(!empty($pathArr)){
                     $temp = [];
                     foreach ($data as $key => $item){
-                        if(is_array($item)){
+                        if(is_array($item) && !empty($item)){
                             $temp[$key] = $func($item,$pathArr,$security);
                         }
                         //对于非数组无下级则不再搜索
