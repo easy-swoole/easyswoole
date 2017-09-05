@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/6/25
- * Time: 下午3:56
+ * Date: 2017/9/5
+ * Time: 上午11:39
  */
 
 namespace Core\Utility\Validate;
@@ -11,22 +11,27 @@ namespace Core\Utility\Validate;
 
 class Message
 {
-    private $allMessages;
-    function __construct(array $message)
+    private $error;
+    function __construct(array $error)
     {
-        $this->allMessages = $message;
+        $this->error = $error;
     }
+
     function hasError(){
-        return !empty($this->allMessages);
+        return !empty($this->error);
+    }
+
+    function getError($filed){
+        if(isset($filed)){
+            return new Error($this->error[$filed]);
+        }else{
+            /*
+             * 预防调用错误
+             */
+            return new Error(array());
+        }
     }
     function all(){
-        return $this->allMessages;
-    }
-    function get($col){
-        if(isset($this->allMessages[$col])){
-            return $this->allMessages[$col];
-        }else{
-            return array();
-        }
+        return $this->error;
     }
 }

@@ -2,14 +2,12 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/6/9
- * Time: 下午12:33
+ * Date: 2017/9/5
+ * Time: 下午12:29
  */
 
 namespace Core\Utility\Validate;
 
-
-use Core\Component\Spl\SplArray;
 
 class Rule
 {
@@ -36,11 +34,6 @@ class Rule
     const OPTIONAL = 'OPTIONAL';
     const REGEX = 'REGEX';
     const REQUIRED = 'REQUIRED';
-    const REQUIRED_IF = 'REQUIRED_IF';
-    const REQUIRE_WITH = 'REQUIRE_WITH';
-    const REQUIRE_WITH_ALL = 'REQUIRE_WITH_ALL';
-    const REQUIRE_WITHOUT = 'REQUIRE_WITHOUT';
-    const REQUIRE_WITHOUT_ALL = 'REQUIRE_WITHOUT_ALL';
     const SAME = 'SAME';
     const TIMESTAMP = 'TIMESTAMP';
     const URL = 'URL';
