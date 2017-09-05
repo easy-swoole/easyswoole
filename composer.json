@@ -10,8 +10,8 @@
     "easyswoole"
   ],
   "autoload" : {
-    "psr-4" : {
-      "Core" : "src"
+    "psr-0": {
+      "Core": "src"
     }
   },
   "authors" : [{
