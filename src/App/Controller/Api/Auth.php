@@ -2,14 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/3/15
- * Time: 下午8:22
+ * Date: 2017/9/5
+ * Time: 下午12:57
  */
 
 namespace App\Controller\Api;
 
 
 use Core\AbstractInterface\AbstractController;
+use Core\Http\Message\Status;
 
 class Auth extends AbstractController
 {
@@ -17,7 +18,7 @@ class Auth extends AbstractController
     function index()
     {
         // TODO: Implement index() method.
-        $this->response()->write("this is api auth index");/*  url:domain/api/auth/index.html  domain/api/auth/   */
+        $this->actionNotFound();
     }
 
     function onRequest($actionName)
@@ -27,14 +28,18 @@ class Auth extends AbstractController
 
     function actionNotFound($actionName = null, $arguments = null)
     {
-        // TODO: Implement actionNotFount() method.
+        // TODO: Implement actionNotFound() method.
+        $this->response()->withStatus(Status::CODE_NOT_FOUND);
     }
 
-    function afterResponse()
+    function afterAction()
     {
-        // TODO: Implement afterResponse() method.
+        // TODO: Implement afterAction() method.
     }
-    function test(){
-      var_dump($this->request()->getUploadedFiles());
+    function login(){
+        /*
+         * url is /api/auth/login/index.html
+         */
+        $this->response()->writeJson(Status::CODE_OK,null,'this is auth login ');
     }
 }

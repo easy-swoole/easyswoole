@@ -10,6 +10,7 @@ namespace App\Controller\Api;
 
 
 use Core\AbstractInterface\AbstractController;
+use Core\Http\Message\Status;
 use Core\Http\Message\UploadFile;
 
 class Index extends AbstractController
@@ -34,6 +35,7 @@ class Index extends AbstractController
     function actionNotFound($actionName = null, $arguments = null)
     {
         // TODO: Implement actionNotFount() method.
+        $this->response()->withStatus(Status::CODE_NOT_FOUND);
     }
 
     function afterResponse()
