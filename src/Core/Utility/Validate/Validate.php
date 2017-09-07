@@ -35,7 +35,7 @@ class Validate
             }else{
                 foreach ($rules as $rule => $args){
                     if(!Func::$rule($filed,$data,$args)){
-                        $error[$filed][$rule] = $msg[$rule] ?  $msg[$rule] :  $msg['__default__'];
+                        $error[$filed][$rule] = isset($msg[$rule]) ? $msg[$rule] :  $msg['__default__'];
                     }
                 }
             }
