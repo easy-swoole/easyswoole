@@ -22,7 +22,7 @@ class Message
     }
 
     function getError($filed){
-        if(isset($filed)){
+        if(isset($this->error[$filed])){
             return new Error($this->error[$filed]);
         }else{
             /*
