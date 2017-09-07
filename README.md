@@ -17,7 +17,7 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 
 ## 关于ab基准测试:
 ```
-系统: CentOS 7.1 桌面版
+系统: CentOS 7.1 
 CPU: 阿里云单核
 内存: 1G
 php: 5.6.30
@@ -60,7 +60,7 @@ Percentage of the requests served within a certain time (ms)
    95%     31
    98%     33
    99%     34
-   100%     52 (longest request)
+   100%    52 (longest request)
 ```
 ## [相关文档](http://www.easyswoole.com/)
 
