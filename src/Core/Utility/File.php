@@ -46,13 +46,13 @@ class File
                 if ($file == '.' || $file == '..') {
                     continue;
                 }
-                if (!is_dir($dirPath . $file)) {
-                    if(!self::deleteFile($dirPath . $file)){
+                if (!is_dir($dirPath ."/". $file)) {
+                    if(!self::deleteFile($dirPath ."/". $file)){
                         closedir($dirHandle);
                         return false;
                     }
                 } else {
-                    if(!self::deleteDir($dirPath . $file)){
+                    if(!self::deleteDir($dirPath ."/". $file)){
                         closedir($dirHandle);
                         return false;
                     }
@@ -82,13 +82,13 @@ class File
                 if ($file == '.' || $file == '..') {
                     continue;
                 }
-                if (!is_dir($dirPath . $file)) {
-                    if(!self::copyFile($dirPath . $file, $targetPath . $file, $overwrite)){
+                if (!is_dir($dirPath ."/". $file)) {
+                    if(!self::copyFile($dirPath ."/". $file, $targetPath ."/". $file, $overwrite)){
                         closedir($dirHandle);
                         return false;
                     }
                 } else {
-                    if(!self::copyDir($dirPath . $file, $targetPath . $file, $overwrite)){
+                    if(!self::copyDir($dirPath ."/". $file, $targetPath ."/". $file, $overwrite)){
                         closedir($dirHandle);
                         return false;
                     };
