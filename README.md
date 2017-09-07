@@ -16,52 +16,52 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 - CPU亲和性/守护进程
 
 ## 关于ab基准测试:
+```
+系统: CentOS 7.1 桌面版
+CPU: 阿里云单核
+内存: 1G
+php: 5.6.30
+Swoole: 1.9.17
+测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>""easyPHP"
+ab -c 500 -n 500000 http://127.0.0.1:9501/ 测试结果如下
 
-    系统: CentOS 7.1
-    CPU: 阿里云单核
-    内存: 1G
-    php: 5.6.30
-    Swoole: 1.8.13-stable
-    测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>""easyPHP"
-    ab -c 500 -n 500000 http://127.0.0.1:9501/ 测试结果如下
-
-    Server Software:        easyPHP
-    Server Hostname:        127.0.0.1
+Server Software:        easyPHP
+Server Hostname:        127.0.0.1
     
-    Server Port:            9501
-    Document Path:          /
-    Document Length:        20 bytes
+Server Port:            9501
+Document Path:          /
+Document Length:        20 bytes
     
-    Concurrency Level:      500
-    Time taken for tests:   30.268 seconds
-    Complete requests:      500000
-    Failed requests:        0
-    Write errors:           0
-    Total transferred:      97500000 bytes
-    HTML transferred:       10000000 bytes
-    Requests per second:    16519.16 [#/sec] (mean)
-    Time per request:       30.268 [ms] (mean)
-    Time per request:       0.061 [ms] (mean, across all concurrent requests)
-    Transfer rate:          3145.74 [Kbytes/sec] received
+Concurrency Level:      500
+Time taken for tests:   30.268 seconds
+Complete requests:      500000
+Failed requests:        0
+Write errors:           0
+Total transferred:      97500000 bytes
+HTML transferred:       10000000 bytes
+Requests per second:    16519.16 [#/sec] (mean)
+Time per request:       30.268 [ms] (mean)
+Time per request:       0.061 [ms] (mean, across all concurrent requests)
+Transfer rate:          3145.74 [Kbytes/sec] received
     
-    Connection Times (ms)
-                  min  mean[+/-sd] median   max
-    Connect:        0   15   1.0     15      25
-    Processing:     2   15   1.3     15      37
-    Waiting:        1   12   2.0     12      31
-    Total:         17   30   1.2     30      52
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   15   1.0     15      25
+Processing:     2   15   1.3     15      37
+Waiting:        1   12   2.0     12      31
+Total:         17   30   1.2     30      52
     
-    Percentage of the requests served within a certain time (ms)
-      50%     30
-      66%     30
-      75%     31
-      80%     31
-      90%     31
-      95%     31
-      98%     33
-      99%     34
-     100%     52 (longest request)
-     
+Percentage of the requests served within a certain time (ms)
+   50%     30
+   66%     30
+   75%     31
+   80%     31
+   90%     31
+   95%     31
+   98%     33
+   99%     34
+   100%     52 (longest request)
+```
 ## [相关文档](http://www.easyswoole.com/)
 
 ## QQ交流群 ： 633921431
