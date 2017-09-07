@@ -62,6 +62,6 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
       99%     34
      100%     52 (longest request)
      
-## [相关文档](http://easyswoole.com/)
+## [相关文档](http://www.easyswoole.com/)
 
 ## QQ交流群 ： 633921431
