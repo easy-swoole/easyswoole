@@ -550,7 +550,7 @@ class Func
             if(is_array($data)){
                 foreach ($data as $item){
                     if(is_numeric($item) || is_string($item)){
-                        if($item > $com){
+                        if(!preg_match($regex,$item)){
                             return false;
                         }
                     }else{
