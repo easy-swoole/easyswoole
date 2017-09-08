@@ -10,6 +10,7 @@ namespace Core\Utility\Validate;
 
 
 use Core\Component\Spl\SplArray;
+use Core\Utility\Judge;
 
 class Func
 {
@@ -369,6 +370,24 @@ class Func
             }
         }
     }
+    static function NOT_EMPTY($column,SplArray $array,array $args){
+        $data = $array->get($column);
+        if(self::isMultiSearch($column)){
+            if(is_array($data)){
+                foreach ($data as $item){
+                    if(Judge::isEmpty($item)){
+                        return false;
+                    }
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return !Judge::isEmpty($data);
+        }
+    }
+
     static function NOT_IN($column,SplArray $array,array $args){
         $data = $array->get($column);
         if(self::isMultiSearch($column)){

@@ -25,6 +25,7 @@ class Rule
     const IP = 'IP';
     const ARRAY_ = 'ARRAY_';
     const LEN = 'LEN';
+    const NOT_EMPTY = 'NOT_EMPTY';
     const NOT_IN = 'NOT_IN';
     const NUMERIC = 'NUMERIC';
     const MAX = 'MAX';
