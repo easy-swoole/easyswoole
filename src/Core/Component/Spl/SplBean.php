@@ -52,7 +52,7 @@ abstract class SplBean implements \JsonSerializable
         return array_keys($data);
     }
 
-    function toArray(array $columns = null,$filterType = false){
+    function toArray($filterType = false,array $columns = null){
         if($columns){
             $data = $this->jsonSerialize();
             $ret = array_intersect_key($data, array_flip($columns));
