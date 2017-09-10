@@ -11,6 +11,7 @@ namespace App;
 
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Logger;
+use Core\Http\Response;
 use FastRoute\RouteCollector;
 
 class Router extends AbstractRouter
@@ -20,8 +21,8 @@ class Router extends AbstractRouter
     {
         // TODO: Implement addRouter() method.
         $routeCollector->addRoute(['GET','POST'],"/router",function (){
-            $this->response()->write("match router now");
-            $this->response()->end();
+            Response::getInstance()->writeJson();
         });
+        $routeCollector->addRoute("GET","/router2",'/test');
     }
 }
