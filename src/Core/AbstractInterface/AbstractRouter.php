@@ -37,7 +37,7 @@ abstract class AbstractRouter
         $this->isCache = true;
         if($cacheFile === null){
             $temp = Di::getInstance()->get(SysConst::TEMP_DIRECTORY);
-            $this->cacheFile = ROOT."/{$temp}/router.cache";
+            $this->cacheFile = $temp."/router.cache";
         }else{
             /*
              * suggest to set a file in memory path ，such as
