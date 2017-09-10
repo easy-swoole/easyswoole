@@ -2,14 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/3/19
- * Time: 上午9:51
+ * Date: 2017/9/10
+ * Time: 下午5:09
  */
 
-namespace Core\Component;
+namespace Core\Component\Sys;
 
 
 use Core\AbstractInterface\ErrorHandlerInterface;
+use Core\Component\Logger;
 use Core\Component\Spl\SplError;
 use Core\Http\Request;
 use Core\Http\Response;

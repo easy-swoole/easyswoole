@@ -2,18 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/2/3
- * Time: 下午7:38
+ * Date: 2017/9/10
+ * Time: 下午5:10
  */
 
-namespace Core\Component;
+namespace Core\Component\Sys;
 
 
 class SysConst
 {
-    /*
-     * DI开头为依赖注入键值名称
-     */
     const DI_ERROR_HANDLER = 'DI_ERROR_HANDLER';
     const DI_LOGGER_WRITER = 'DI_LOGGER_WRITER';
     const DI_SESSION_HANDLER = 'DI_SESSION_HANDLER';

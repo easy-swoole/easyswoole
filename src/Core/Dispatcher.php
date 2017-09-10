@@ -14,7 +14,7 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
-use Core\Component\SysConst;
+use Core\Component\Sys\SysConst;
 use Core\Component\SuperClosure;
 use Core\Http\Request;
 use Core\Http\Response;

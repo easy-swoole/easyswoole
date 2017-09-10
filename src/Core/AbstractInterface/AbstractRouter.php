@@ -8,10 +8,7 @@
 
 namespace Core\AbstractInterface;
 use Core\Component\Di;
-use Core\Component\Logger;
-use Core\Component\SysConst;
-use Core\Http\Request;
-use Core\Http\Response;
+use Core\Component\Sys\SysConst;
 use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;

@@ -10,6 +10,7 @@ namespace Core\Component;
 
 
 use Core\AbstractInterface\LoggerWriterInterface;
+use Core\Component\Sys\SysConst;
 
 class Logger
 {
