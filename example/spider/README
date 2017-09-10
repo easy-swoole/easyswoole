@@ -1,2 +1,0 @@
-请先确保存在 redis拓展并修改Config.php中的redis配置
-如何投递任务请看index控制器
