@@ -60,10 +60,4 @@ abstract class AbstractRouter
     function getRouteCollector(){
         return $this->routeCollector;
     }
-    function request(){
-        return Request::getInstance();
-    }
-    function response(){
-        return Response::getInstance();
-    }
 }

@@ -1,6 +1,5 @@
-<?php
+<?php namespace SuperClosure;
 
-namespace SuperClosure;
 use SuperClosure\Analyzer\AstAnalyzer as DefaultAnalyzer;
 use SuperClosure\Analyzer\ClosureAnalyzer;
 use SuperClosure\Exception\ClosureSerializationException;

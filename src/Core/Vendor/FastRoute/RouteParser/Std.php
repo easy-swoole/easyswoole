@@ -50,6 +50,9 @@ REGEX;
 
     /**
      * Parses a route string that does not contain optional segments.
+     *
+     * @param string
+     * @return mixed[]
      */
     private function parsePlaceholders($route) {
         if (!preg_match_all(

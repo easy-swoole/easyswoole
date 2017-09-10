@@ -7,10 +7,20 @@ use FastRoute\BadRouteException;
 use FastRoute\Route;
 
 abstract class RegexBasedAbstract implements DataGenerator {
+    /** @var mixed[][] */
     protected $staticRoutes = [];
+
+    /** @var Route[][] */
     protected $methodToRegexToRoutesMap = [];
 
+    /**
+     * @return int
+     */
     protected abstract function getApproxChunkSize();
+
+    /**
+     * @return mixed[]
+     */
     protected abstract function processChunk($regexToRoutesMap);
 
     public function addRoute($httpMethod, $routeData, $handler) {
@@ -21,6 +31,9 @@ abstract class RegexBasedAbstract implements DataGenerator {
         }
     }
 
+    /**
+     * @return mixed[]
+     */
     public function getData() {
         if (empty($this->methodToRegexToRoutesMap)) {
             return [$this->staticRoutes, []];
@@ -29,6 +42,9 @@ abstract class RegexBasedAbstract implements DataGenerator {
         return [$this->staticRoutes, $this->generateVariableRouteData()];
     }
 
+    /**
+     * @return mixed[]
+     */
     private function generateVariableRouteData() {
         $data = [];
         foreach ($this->methodToRegexToRoutesMap as $method => $regexToRoutesMap) {
@@ -39,11 +55,19 @@ abstract class RegexBasedAbstract implements DataGenerator {
         return $data;
     }
 
+    /**
+     * @param int
+     * @return int
+     */
     private function computeChunkSize($count) {
         $numParts = max(1, round($count / $this->getApproxChunkSize()));
-        return ceil($count / $numParts);
+        return (int) ceil($count / $numParts);
     }
 
+    /**
+     * @param mixed[]
+     * @return bool
+     */
     private function isStaticRoute($routeData) {
         return count($routeData) === 1 && is_string($routeData[0]);
     }
@@ -87,6 +111,10 @@ abstract class RegexBasedAbstract implements DataGenerator {
         );
     }
 
+    /**
+     * @param mixed[]
+     * @return mixed[]
+     */
     private function buildRegexForRoute($routeData) {
         $regex = '';
         $variables = [];
@@ -118,6 +146,10 @@ abstract class RegexBasedAbstract implements DataGenerator {
         return [$regex, $variables];
     }
 
+    /**
+     * @param string
+     * @return bool
+     */
     private function regexHasCapturingGroups($regex) {
         if (false === strpos($regex, '(')) {
             // Needs to have at least a ( to contain a capturing group
@@ -125,7 +157,7 @@ abstract class RegexBasedAbstract implements DataGenerator {
         }
 
         // Semi-accurate detection for capturing groups
-        return preg_match(
+        return (bool) preg_match(
             '~
                 (?:
                     \(\?\(

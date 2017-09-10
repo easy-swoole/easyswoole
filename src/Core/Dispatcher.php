@@ -24,7 +24,7 @@ use FastRoute\Dispatcher\GroupCountBased;
 class Dispatcher
 {
     protected static $selfInstance;
-    protected $fastRouterDispatcher;
+    protected $fastRouterDispatcher = array();
     protected $currentApplicationDirectory;
     protected $controllerPool = array();
     protected $useControllerPool = false;

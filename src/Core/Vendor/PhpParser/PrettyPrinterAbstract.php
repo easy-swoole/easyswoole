@@ -247,11 +247,11 @@ abstract class PrettyPrinterAbstract
             if ($childPrecedence > $parentPrecedence
                 || ($parentPrecedence == $childPrecedence && $parentAssociativity != $childPosition)
             ) {
-                return '(' . $this->{'p' . $type}($node) . ')';
+                return '(' . $this->p($node) . ')';
             }
         }
 
-        return $this->{'p' . $type}($node);
+        return $this->p($node);
     }
 
     /**
@@ -284,6 +284,38 @@ abstract class PrettyPrinterAbstract
      */
     protected function pCommaSeparated(array $nodes) {
         return $this->pImplode($nodes, ', ');
+    }
+
+    /**
+     * Pretty prints a comma-separated list of nodes in multiline style, including comments.
+     *
+     * The result includes a leading newline and one level of indentation (same as pStmts).
+     *
+     * @param Node[] $nodes         Array of Nodes to be printed
+     * @param bool   $trailingComma Whether to use a trailing comma
+     *
+     * @return string Comma separated pretty printed nodes in multiline style
+     */
+    protected function pCommaSeparatedMultiline(array $nodes, $trailingComma) {
+        $result = '';
+        $lastIdx = count($nodes) - 1;
+        foreach ($nodes as $idx => $node) {
+            if ($node !== null) {
+                $comments = $node->getAttribute('comments', array());
+                if ($comments) {
+                    $result .= "\n" . $this->pComments($comments);
+                }
+
+                $result .= "\n" . $this->p($node);
+            } else {
+                $result .= "\n";
+            }
+            if ($trailingComma || $idx !== $lastIdx) {
+                $result .= ',';
+            }
+        }
+
+        return preg_replace('~\n(?!$|' . $this->noIndentToken . ')~', "\n    ", $result);
     }
 
     /**

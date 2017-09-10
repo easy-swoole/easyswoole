@@ -141,25 +141,51 @@ class Standard extends PrettyPrinterAbstract
     }
 
     protected function pScalar_LNumber(Scalar\LNumber $node) {
+        if ($node->value === -\PHP_INT_MAX-1) {
+            // PHP_INT_MIN cannot be represented as a literal,
+            // because the sign is not part of the literal
+            return '(-' . \PHP_INT_MAX . '-1)';
+        }
+
+        $kind = $node->getAttribute('kind', Scalar\LNumber::KIND_DEC);
+        if (Scalar\LNumber::KIND_DEC === $kind) {
+            return (string) $node->value;
+        }
+
+        $sign = $node->value < 0 ? '-' : '';
         $str = (string) $node->value;
-        switch ($node->getAttribute('kind', Scalar\LNumber::KIND_DEC)) {
+        switch ($kind) {
             case Scalar\LNumber::KIND_BIN:
-                return '0b' . base_convert($str, 10, 2);
+                return $sign . '0b' . base_convert($str, 10, 2);
             case Scalar\LNumber::KIND_OCT:
-                return '0' . base_convert($str, 10, 8);
-            case Scalar\LNumber::KIND_DEC:
-                return $str;
+                return $sign . '0' . base_convert($str, 10, 8);
             case Scalar\LNumber::KIND_HEX:
-                return '0x' . base_convert($str, 10, 16);
+                return $sign . '0x' . base_convert($str, 10, 16);
         }
         throw new \Exception('Invalid number kind');
     }
 
     protected function pScalar_DNumber(Scalar\DNumber $node) {
+        if (!is_finite($node->value)) {
+            if ($node->value === \INF) {
+                return '\INF';
+            } elseif ($node->value === -\INF) {
+                return '-\INF';
+            } else {
+                return '\NAN';
+            }
+        }
+
+        // Try to find a short full-precision representation
         $stringValue = sprintf('%.16G', $node->value);
         if ($node->value !== (double) $stringValue) {
             $stringValue = sprintf('%.17G', $node->value);
         }
+
+        // %G is locale dependent and there exists no locale-independent alternative. We don't want
+        // mess with switching locales here, so let's assume that a comma is the only non-standard
+        // decimal separator we may encounter...
+        $stringValue = str_replace(',', '.', $stringValue);
 
         // ensure that number is really printed as float
         return preg_match('/^-?[0-9]+$/', $stringValue) ? $stringValue . '.0' : $stringValue;
@@ -417,12 +443,12 @@ class Standard extends PrettyPrinterAbstract
 
     protected function pExpr_FuncCall(Expr\FuncCall $node) {
         return $this->pCallLhs($node->name)
-             . '(' . $this->pCommaSeparated($node->args) . ')';
+             . '(' . $this->pMaybeMultiline($node->args) . ')';
     }
 
     protected function pExpr_MethodCall(Expr\MethodCall $node) {
         return $this->pDereferenceLhs($node->var) . '->' . $this->pObjectProperty($node->name)
-             . '(' . $this->pCommaSeparated($node->args) . ')';
+             . '(' . $this->pMaybeMultiline($node->args) . ')';
     }
 
     protected function pExpr_StaticCall(Expr\StaticCall $node) {
@@ -432,7 +458,7 @@ class Standard extends PrettyPrinterAbstract
                    ? $this->p($node->name)
                    : '{' . $this->p($node->name) . '}')
                 : $node->name)
-             . '(' . $this->pCommaSeparated($node->args) . ')';
+             . '(' . $this->pMaybeMultiline($node->args) . ')';
     }
 
     protected function pExpr_Empty(Expr\Empty_ $node) {
@@ -464,6 +490,10 @@ class Standard extends PrettyPrinterAbstract
 
     // Other
 
+    protected function pExpr_Error(Expr\Error $node) {
+        throw new \LogicException('Cannot pretty-print AST with Error nodes');
+    }
+
     protected function pExpr_Variable(Expr\Variable $node) {
         if ($node->name instanceof Expr) {
             return '${' . $this->p($node->name) . '}';
@@ -476,9 +506,9 @@ class Standard extends PrettyPrinterAbstract
         $syntax = $node->getAttribute('kind',
             $this->options['shortArraySyntax'] ? Expr\Array_::KIND_SHORT : Expr\Array_::KIND_LONG);
         if ($syntax === Expr\Array_::KIND_SHORT) {
-            return '[' . $this->pCommaSeparated($node->items) . ']';
+            return '[' . $this->pMaybeMultiline($node->items, true) . ']';
         } else {
-            return 'array(' . $this->pCommaSeparated($node->items) . ')';
+            return 'array(' . $this->pMaybeMultiline($node->items, true) . ')';
         }
     }
 
@@ -497,7 +527,8 @@ class Standard extends PrettyPrinterAbstract
     }
 
     protected function pExpr_ClassConstFetch(Expr\ClassConstFetch $node) {
-        return $this->p($node->class) . '::' . $node->name;
+        return $this->p($node->class) . '::'
+             . (is_string($node->name) ? $node->name : $this->p($node->name));
     }
 
     protected function pExpr_PropertyFetch(Expr\PropertyFetch $node) {
@@ -527,10 +558,10 @@ class Standard extends PrettyPrinterAbstract
 
     protected function pExpr_New(Expr\New_ $node) {
         if ($node->class instanceof Stmt\Class_) {
-            $args = $node->args ? '(' . $this->pCommaSeparated($node->args) . ')' : '';
+            $args = $node->args ? '(' . $this->pMaybeMultiline($node->args) . ')' : '';
             return 'new ' . $this->pClassCommon($node->class, $args);
         }
-        return 'new ' . $this->p($node->class) . '(' . $this->pCommaSeparated($node->args) . ')';
+        return 'new ' . $this->p($node->class) . '(' . $this->pMaybeMultiline($node->args) . ')';
     }
 
     protected function pExpr_Clone(Expr\Clone_ $node) {
@@ -589,7 +620,7 @@ class Standard extends PrettyPrinterAbstract
              . ($node->name->getLast() !== $node->alias ? ' as ' . $node->alias : '');
     }
 
-    private function pUseType($type) {
+    protected function pUseType($type) {
         return $type === Stmt\Use_::TYPE_FUNCTION ? 'function '
             : ($type === Stmt\Use_::TYPE_CONSTANT ? 'const ' : '');
     }
@@ -916,6 +947,23 @@ class Standard extends PrettyPrinterAbstract
             return $this->p($node);
         } else  {
             return '(' . $this->p($node) . ')';
+        }
+    }
+
+    private function hasNodeWithComments(array $nodes) {
+        foreach ($nodes as $node) {
+            if ($node && $node->getAttribute('comments')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function pMaybeMultiline(array $nodes, $trailingComma = false) {
+        if (!$this->hasNodeWithComments($nodes)) {
+            return $this->pCommaSeparated($nodes);
+        } else {
+            return $this->pCommaSeparatedMultiline($nodes, $trailingComma) . "\n";
         }
     }
 }
