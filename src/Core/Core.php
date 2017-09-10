@@ -17,6 +17,7 @@ use Core\Component\ErrorHandler;
 use Core\Component\Spl\SplError;
 use Core\Component\SysConst;
 use Core\Swoole\SwooleHttpServer;
+use Core\Utility\File;
 
 class Core
 {
@@ -63,22 +64,18 @@ class Core
             $tempDir = ROOT."/Temp";
             Di::getInstance()->set(SysConst::TEMP_DIRECTORY,$tempDir);
         }
-        if(!is_dir($tempDir)){
-            if(!mkdir($tempDir,0755,true)){
-                die("create Temp Directory:{$tempDir} fail");
-            }
+        if(!File::createDir($tempDir)){
+            die("create Temp Directory:{$tempDir} fail");
         }
-
+        //创建日志目录
         $logDir = Di::getInstance()->get(SysConst::LOG_DIRECTORY);
         if(empty($logDir)){
             $logDir = ROOT."/Log";
             Di::getInstance()->set(SysConst::LOG_DIRECTORY,$logDir);
         }
         //创建日志目录
-        if(!is_dir($logDir)){
-            if(!mkdir($logDir,0755,true)){
-                die("create log Directory:{$logDir} fail");
-            }
+        if(!File::createDir($logDir)){
+            die("create log Directory:{$logDir} fail");
         }
     }
 
