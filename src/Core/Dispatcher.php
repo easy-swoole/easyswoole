@@ -61,6 +61,9 @@ class Dispatcher
                     $vars = $routeInfo[2];
                     if(is_callable($handler)){
                         call_user_func_array($handler,$vars);
+                    }else if(is_string($handler)){
+                        $pathInfo = UrlParser::pathInfo($handler);
+                        Request::getInstance()->getUri()->withPath($pathInfo);
                     }
                     break;
             }
