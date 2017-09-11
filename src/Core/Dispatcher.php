@@ -81,7 +81,7 @@ class Dispatcher
             /*
              * 此处用于防止URL恶意攻击，造成Dispatch缓存爆满。
              */
-            if(count($this->controllerMap[$this->currentApplicationDirectory]) > 50000){
+            if(isset($this->controllerMap[$this->currentApplicationDirectory]) && count($this->controllerMap[$this->currentApplicationDirectory]) > 50000){
                 unset($this->controllerMap[$this->currentApplicationDirectory]);
             }
             $list = explode("/",$pathInfo);
