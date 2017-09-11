@@ -28,6 +28,7 @@ class Dispatcher
     protected $currentApplicationDirectory;
     protected $controllerPool = array();
     protected $useControllerPool = false;
+    protected $controllerMap = array();
     static function getInstance(){
         if(!isset(self::$selfInstance)){
             self::$selfInstance = new Dispatcher();
@@ -73,48 +74,56 @@ class Dispatcher
         }
         //去除为fastRouter预留的左边斜杠
         $pathInfo = ltrim($pathInfo,"/");
-        $list = explode("/",$pathInfo);
-        $controllerNameSpacePrefix = "{$this->currentApplicationDirectory}\\Controller";
-        $actionName = null;
-        $finalClass = null;
-        $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
-        if(intval($controlMaxDepth) <= 0){
-            $controlMaxDepth = 3;
-        }
-        $maxDepth = count($list) < $controlMaxDepth ? count($list) : $controlMaxDepth;
-        $isIndexController = 0;
-        while ($maxDepth > 0){
-            $className = '';
-            for ($i=0 ;$i<$maxDepth;$i++){
-                $className = $className."\\".ucfirst($list[$i]);//为一级控制器Index服务
+        if(isset($this->controllerMap[$this->currentApplicationDirectory][$pathInfo])){
+            $finalClass = $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['finalClass'];
+            $actionName = $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['actionName'];
+        }else{
+            /*
+             * 此处用于防止URL恶意攻击，造成Dispatch缓存爆满。
+             */
+            if(count($this->controllerMap[$this->currentApplicationDirectory]) > 50000){
+                unset($this->controllerMap[$this->currentApplicationDirectory]);
             }
-            if(class_exists($controllerNameSpacePrefix.$className)){
-                //尝试获取该class后的actionName
-                $actionName = isset($list[$i]) ? $list[$i] : '';
-                $finalClass = $controllerNameSpacePrefix.$className;
-                break;
-            }else{
-                //尝试搜搜index控制器
-                $temp = $className."\\Index";
-                if(class_exists($controllerNameSpacePrefix.$temp)){
-                    $finalClass = $controllerNameSpacePrefix.$temp;
-                    //尝试获取该class后的actionName
-                    $actionName = isset($list[$i]) ? $list[$i] : '';
-                    break;
+            $list = explode("/",$pathInfo);
+            $controllerNameSpacePrefix = "{$this->currentApplicationDirectory}\\Controller";
+            $actionName = null;
+            $finalClass = null;
+            $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
+            if(intval($controlMaxDepth) <= 0){
+                $controlMaxDepth = 3;
+            }
+            $maxDepth = count($list) < $controlMaxDepth ? count($list) : $controlMaxDepth;
+            while ($maxDepth > 0){
+                $className = '';
+                for ($i=0 ;$i<$maxDepth;$i++){
+                    $className = $className."\\".ucfirst($list[$i]);//为一级控制器Index服务
                 }
+                if(class_exists($controllerNameSpacePrefix.$className)){
+                    //尝试获取该class后的actionName
+                    $actionName = empty($list[$i]) ? 'index' : $list[$i];
+                    $finalClass = $controllerNameSpacePrefix.$className;
+                    break;
+                }else{
+                    //尝试搜搜index控制器
+                    $temp = $className."\\Index";
+                    if(class_exists($controllerNameSpacePrefix.$temp)){
+                        $finalClass = $controllerNameSpacePrefix.$temp;
+                        //尝试获取该class后的actionName
+                        $actionName = empty($list[$i]) ? 'index' : $list[$i];
+                        break;
+                    }
+                }
+                $maxDepth--;
             }
-            $maxDepth--;
-        }
-        if(empty($finalClass)){
-            //若无法匹配完整控制器   搜搜Index控制器是否存在
-            $finalClass = $controllerNameSpacePrefix."\\Index";
-            $isIndexController = 1;
+            if(empty($finalClass)){
+                //若无法匹配完整控制器   搜搜Index控制器是否存在
+                $finalClass = $controllerNameSpacePrefix."\\Index";
+                $actionName = empty($list[0]) ? 'index' : $list[0];
+            }
+            $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['finalClass'] = $finalClass;
+            $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['actionName'] = $actionName;
         }
         if(class_exists($finalClass)){
-            if($isIndexController){
-                $actionName = isset($list[0]) ? $list[0] : '';
-            }
-            $actionName = $actionName ? $actionName : "index";
             if($this->useControllerPool){
                 if(isset($this->controllerPool[$finalClass])){
                     $controller = $this->controllerPool[$finalClass];
