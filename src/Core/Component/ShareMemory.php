@@ -2,181 +2,201 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/6/7
- * Time: 下午5:37
+ * Date: 2017/9/10
+ * Time: 下午5:30
  */
 
-namespace Core\Component;
+namespace App;
 
 
+use Core\Component\Di;
+use Core\Component\IO\FileIO;
 use Core\Component\Spl\SplArray;
 use Core\Component\Sys\SysConst;
 
 class ShareMemory
 {
-    protected $timeout = 5000;
-    protected $saveFile;
+    private $file;
+    private $fileStream;
     private static $instance;
-    private $tempData;
-    private $lockFileFp;
-    private $isTransaction = false;
-    private $isGetLock = false;
+    private $ioTimeOut = 200000;
+    private $isStartTransaction = false;
+    private $data = null;
+    private $serializeType;
+    const SERIALIZE_TYPE_JSON = 'SERIALIZE_TYPE_JSON';
+    const SERIALIZE_TYPE_SERIALIZE = 'SERIALIZE_TYPE_SERIALIZE';
     /*
      * 通过文件+锁的方式来实现数据共享，建议将文件设置到/dev/shm下
      */
-    function __construct()
+    function __construct($serializeType = self::SERIALIZE_TYPE_JSON,$file = null)
     {
-        $file = Di::getInstance()->get(SysConst::SHARE_MEMORY_FILE);
-        if(empty($file)){
-            $file = Di::getInstance()->get(SysConst::TEMP_DIRECTORY)."/shareMemory.men";
+        $this->serializeType = $serializeType;
+        if($file == null){
+            $file = Di::getInstance()->get(SysConst::SHARE_MEMORY_FILE);
+            if(empty($file)){
+                $file = Di::getInstance()->get(SysConst::TEMP_DIRECTORY)."/shareMemory.men";
+            }
         }
-        $this->saveFile = $file;
-        if(!file_exists($this->saveFile)){
-            file_put_contents($this->saveFile,'');
-            file_put_contents($this->saveFile.".lock",'');
-        }
+        $this->file = $file;
     }
-
-    static function getInstance(){
+    /*
+     * 默认等待2秒
+     */
+    static function getInstance($serializeType = self::SERIALIZE_TYPE_JSON,$file = null){
         if(!isset(self::$instance)){
-            self::$instance = new static();
+            self::$instance = new static($serializeType,$file);
         }
         return self::$instance;
     }
 
-    function setTimeout($timeout){
-        $this->timeout = $timeout;
+    function setIoTimeOut($ioTimeOut){
+        $this->ioTimeOut = $ioTimeOut;
     }
 
     function startTransaction(){
-        if($this->isTransaction){
-            return true;
-        }
-        if($this->lock()){
-            $this->isTransaction = true;
-            try{
-                $data = file_get_contents($this->saveFile);
-                $js = json_decode($data,1);
-                $this->tempData = $js ? $js : array();
-            }catch (\Exception $exception){
-                $this->tempData = array();
-            }
+        if($this->isStartTransaction){
             return true;
         }else{
-            trigger_error("start transaction error:get lock fail");
-            return false;
+            $this->fileStream = new FileIO($this->file);
+            if($this->fileStream->getStreamResource()){
+                //是否阻塞
+                if($this->ioTimeOut){
+                    $takeTime = 0;
+                    while (!$this->fileStream->lock(LOCK_EX|LOCK_NB)){
+                        if($takeTime > $this->ioTimeOut){
+                            $this->fileStream->close();
+                            unset($this->fileStream);
+                            return false;
+                        }
+                        usleep(5);
+                        $takeTime = $takeTime+5;
+                    }
+                    $this->isStartTransaction = true;
+                    $this->read();
+                    return true;
+                }else{
+                    if($this->fileStream->lock()){
+                        $this->isStartTransaction = true;
+                        $this->read();
+                        return true;
+                    }else{
+                        $this->fileStream->close();
+                        unset($this->fileStream);
+                        return false;
+                    }
+                }
+            }else{
+                return false;
+            }
         }
     }
 
     function commit(){
-        if(!$this->isTransaction){
-            return false;
-        }
-        $this->isTransaction = false;
-        return $this->saveFile($this->tempData);
-    }
+        if($this->isStartTransaction){
+            $this->write();
+            if($this->fileStream->unlock()){
+                $this->data = null;
+                $this->isStartTransaction = false;
+                $this->fileStream->close();
+                unset($this->fileStream);
+                return true;
+            }else{
+                return false;
+            }
 
-    function set($key,$data){
-        if($this->lock()){
-            $spl = new SplArray($this->readFile());
-            $spl->set($key,$data);
-            return $this->saveFile($spl->getArrayCopy());
         }else{
             return false;
         }
+    }
+
+    function set($key,$val){
+        if($this->isStartTransaction){
+            $this->data->set($key,$val);
+            return true;
+        }else{
+            if($this->startTransaction()){
+                $this->data->set($key,$val);
+                return $this->commit();
+            }else{
+                return false;
+            }
+        }
+    }
+
+    function del($key){
+        return $this->set($key,null);
     }
 
     function get($key){
-        if($this->lock()){
-            $spl = new SplArray($this->readFile());
-            return $spl->get($key);
+        if($this->isStartTransaction){
+            return $this->data->get($key);
         }else{
-            return null;
+            if($this->startTransaction()){
+                $data = $this->data->get($key);
+                $this->commit();
+                return $data;
+            }else{
+                return false;
+            }
         }
     }
 
     function clear(){
-        if($this->lock()){
-            return $this->saveFile(array());
+        if($this->isStartTransaction){
+            $this->data = new SplArray();
+            return true;
         }else{
-            return false;
-        }
-    }
-
-    private function readFile(){
-        if($this->isTransaction){
-            return $this->tempData;
-        }else{
-            try{
-                $data = file_get_contents($this->saveFile);
-                $this->unlock();
-                $js = json_decode($data,1);
-                return $js ? $js : array();
-            }catch (\Exception $exception){
-                return array();
+            if($this->startTransaction()){
+                $this->data = new SplArray();
+                return $this->commit();
+            }else{
+                return false;
             }
         }
     }
 
-    private function saveFile(array $data){
-        if($this->isTransaction){
-            $this->tempData = $data;
+    function all(){
+        if($this->isStartTransaction){
+            return $this->data->getArrayCopy();
+        }else{
+            if($this->startTransaction()){
+                $data = $this->data->getArrayCopy();
+                $this->commit();
+                return $data;
+            }else{
+                return null;
+            }
+        }
+    }
+
+    private function read(){
+        if($this->isStartTransaction){
+            $data = $this->fileStream->getContents();
+            if($this->serializeType == self::SERIALIZE_TYPE_JSON){
+                $data = json_decode($data,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+                $this->data = is_array($data) ? new SplArray($data) : new SplArray();
+            }else{
+                $data = unserialize($data);
+                $this->data = is_a($data,SplArray::class) ? $data : new SplArray();
+            }
             return true;
         }else{
-            $ret = file_put_contents($this->saveFile,json_encode($data,1));
-            $this->unlock();
-            return $ret ? true : false;
-        }
-    }
-
-    private function lock(){
-        if($this->isGetLock){
-            return true;
-        }
-        try{
-            $this->lockFileFp = fopen($this->saveFile.".lock","c+");
-            $waitTime = 0;
-            while(true){
-                if(!flock($this->lockFileFp,LOCK_EX|LOCK_NB)){
-                    usleep(1);
-                    $waitTime++;
-                    if($waitTime > $this->timeout){
-                        return false;
-                    }
-                }else{
-                    $this->isGetLock = true;
-                    return true;
-                }
-            }
-        }catch (\Exception $exception){
-            trigger_error($exception);
             return false;
         }
     }
-
-    private function unlock(){
-        if(!$this->isGetLock){
-            return true;
-        }
-        try{
-            $waitTime = 0;
-            while(true){
-                if(!flock($this->lockFileFp,LOCK_UN|LOCK_NB)){
-                    usleep(1);
-                    $waitTime++;
-                    if($waitTime > $this->timeout){
-                        return false;
-                    }
-                }else{
-                    $this->isGetLock = false;
-                    fclose($this->lockFileFp);
-                    return true;
-                }
+    private function write(){
+        if($this->isStartTransaction){
+            $this->fileStream->truncate();
+            $this->fileStream->rewind();
+            if($this->serializeType == self::SERIALIZE_TYPE_JSON){
+                $data = json_encode($this->data,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+            }else{
+                $data = serialize($this->data);
             }
-        }catch (\Exception $exception){
-            trigger_error($exception);
+            $this->fileStream->write($data);
+            return true;
+        }else{
             return false;
         }
     }
-
 }
