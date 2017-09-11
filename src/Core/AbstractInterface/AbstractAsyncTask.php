@@ -9,7 +9,7 @@
 namespace Core\AbstractInterface;
 
 
-use Core\Swoole\SwooleHttpServer;
+use Core\Swoole\Server;
 
 abstract class AbstractAsyncTask
 {
@@ -56,6 +56,6 @@ abstract class AbstractAsyncTask
             $this->dataForFinishCallBack = $dataForFinishCallBack;
         }
         //为何不用$this传递   避免handler中有释放资源类型被序列化出错
-        SwooleHttpServer::getInstance()->getServer()->finish($this);
+        Server::getInstance()->getServer()->finish($this);
     }
 }

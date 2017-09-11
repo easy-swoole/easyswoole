@@ -9,7 +9,7 @@
 namespace Core\Component;
 
 
-use Core\Swoole\SwooleHttpServer;
+use Core\Swoole\Server;
 
 class Barrier
 {
@@ -36,7 +36,7 @@ class Barrier
             $this->maps[] = $name;
         }
         if(!empty($temp)){
-            $ret = SwooleHttpServer::getInstance()->getServer()->taskWaitMulti($temp,$timeout);
+            $ret = Server::getInstance()->getServer()->taskWaitMulti($temp,$timeout);
             if(!empty($ret)){
                 //极端情况下  所有任务都超时
                 foreach ($ret as $index => $result){

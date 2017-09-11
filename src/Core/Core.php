@@ -16,7 +16,7 @@ use Core\Component\Di;
 use Core\Component\Sys\ErrorHandler;
 use Core\Component\Spl\SplError;
 use Core\Component\Sys\SysConst;
-use Core\Swoole\SwooleHttpServer;
+use Core\Swoole\Server;
 use Core\Utility\File;
 
 class Core
@@ -29,7 +29,7 @@ class Core
         return self::$instance;
     }
     function run(){
-        SwooleHttpServer::getInstance()->startServer();
+        Server::getInstance()->startServer();
     }
     function __construct(callable $preHandler = null)
     {

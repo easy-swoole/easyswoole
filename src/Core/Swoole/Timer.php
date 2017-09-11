@@ -21,15 +21,15 @@ class Timer
 
     */
     static function loop($microSeconds,\Closure $func,$args = null){
-        return SwooleHttpServer::getInstance()->getServer()->tick($microSeconds,$func,$args);
+        return Server::getInstance()->getServer()->tick($microSeconds,$func,$args);
     }
     static function delay($microSeconds,\Closure $func,$args = null){
-        SwooleHttpServer::getInstance()->getServer()->after($microSeconds,$func,$args);
+        Server::getInstance()->getServer()->after($microSeconds,$func,$args);
     }
     /*
      * @param $timerId
      */
     static function clear($timerId){
-        SwooleHttpServer::getInstance()->getServer()->clearTimer($timerId);
+        Server::getInstance()->getServer()->clearTimer($timerId);
     }
 }

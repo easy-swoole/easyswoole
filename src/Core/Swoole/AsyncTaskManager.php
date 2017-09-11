@@ -48,7 +48,7 @@ class AsyncTaskManager
                 return false;
             }
         }
-        return SwooleHttpServer::getInstance()->getServer()->task($callable,$workerId,$finishCallBack);
+        return Server::getInstance()->getServer()->task($callable,$workerId,$finishCallBack);
     }
     function addSyncTask($callable,$timeout = 0.5,$workerId = self::TASK_DISPATCHER_TYPE_RANDOM){
         if($callable instanceof \Closure){
@@ -59,6 +59,6 @@ class AsyncTaskManager
                 return false;
             }
         }
-        return SwooleHttpServer::getInstance()->getServer()->taskwait($callable,$timeout,$workerId);
+        return Server::getInstance()->getServer()->taskwait($callable,$timeout,$workerId);
     }
 }

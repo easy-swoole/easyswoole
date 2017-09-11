@@ -17,7 +17,7 @@ use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
 
-class SwooleHttpServer
+class Server
 {
     protected static $instance;
     protected $swooleServer;

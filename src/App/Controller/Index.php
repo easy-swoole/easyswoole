@@ -15,7 +15,7 @@ use Core\Component\Barrier;
 use Core\Component\Logger;
 use Core\Http\Message\Status;
 use Core\Swoole\AsyncTaskManager;
-use Core\Swoole\SwooleHttpServer;
+use Core\Swoole\Server;
 use Core\UrlParser;
 
 class Index extends AbstractController
@@ -65,7 +65,7 @@ class Index extends AbstractController
     }
 
     function shutdown(){
-        SwooleHttpServer::getInstance()->getServer()->shutdown();
+        Server::getInstance()->getServer()->shutdown();
     }
     function router(){
         $this->response()->write("your router not end");
