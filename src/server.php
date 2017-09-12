@@ -154,7 +154,9 @@ function stopServer($options){
         usleep(1000);
         if(swoole_process::kill($pid,0)){
             echo "server stop at ".date("y-m-d h:i:s")."\n";
-            unlink($pidFile);
+            if(isset($pidFile)){
+                unlink($pidFile);
+            }
             break;
         }else{
             if(time() - $time > 2){
