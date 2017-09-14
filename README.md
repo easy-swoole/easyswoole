@@ -62,6 +62,11 @@ Percentage of the requests served within a certain time (ms)
    99%     34
    100%    52 (longest request)
 ```
-## [相关文档](http://www.easyswoole.com/)
+## 其他
 
-## QQ交流群 ： 633921431
+- QQ交流群 ： 633921431
+
+- [项目官网与文档](http://www.easyswoole.com/)
+
+- [文档维护地址](https://github.com/kiss291323003/doc-easyswoole) 
+    easySwoole采用gitbook作为文档撰写工具，若您在使用过程中，有发现文档需要纠正/补充。请直接提交在github上。
