@@ -26,23 +26,6 @@ abstract class AbstractRouter
 
     abstract function addRouter(RouteCollector $routeCollector);
 
-    /*
-     * to enable router file cache
-     * @param $cacheFile
-     */
-    function enableCache($cacheFile = null){
-        $this->isCache = true;
-        if($cacheFile === null){
-            $temp = Di::getInstance()->get(SysConst::TEMP_DIRECTORY);
-            $this->cacheFile = $temp."/router.cache";
-        }else{
-            /*
-             * suggest to set a file in memory path ，such as
-             * /dev/shm/ in centos 6.x~7.x
-             */
-            $this->cacheFile = $cacheFile;
-        }
-    }
 
     /*
      * @return mixed cacheFile or boolean false

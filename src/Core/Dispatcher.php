@@ -158,32 +158,7 @@ class Dispatcher
             $ref = new \ReflectionClass("{$this->currentApplicationDirectory}\\Router");
             $router = $ref->newInstance();
             if($router instanceof AbstractRouter){
-                $is = $router->isCache();
-                if($is){
-                    $is = $is.".{$this->currentApplicationDirectory}";
-                    if(file_exists($is)){
-                        $dispatcherData = file_get_contents($is);
-                        $dispatcherData = unserialize($dispatcherData);
-                    }else{
-                        $dispatcherData =  $router->getRouteCollector()->getData();
-                        $cache =  $dispatcherData;
-                        /*
-                         * to support closure
-                         */
-                        array_walk_recursive($cache,function(&$item,$key){
-                            if($item instanceof \Closure){
-                                $item = new SuperClosure($item);
-                            }
-                        });
-                        file_put_contents(
-                            $is,
-                            serialize($cache)
-                        );
-                    }
-                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($dispatcherData);
-                }else{
-                    $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
-                }
+                $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
             }
         }catch(\Exception $exception){
             //没有设置路由
