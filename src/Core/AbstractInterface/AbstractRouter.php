@@ -25,18 +25,6 @@ abstract class AbstractRouter
     }
 
     abstract function addRouter(RouteCollector $routeCollector);
-
-
-    /*
-     * @return mixed cacheFile or boolean false
-     */
-    function isCache(){
-        if($this->isCache){
-            return $this->cacheFile;
-        }else{
-            return false;
-        }
-    }
     function getRouteCollector(){
         return $this->routeCollector;
     }
