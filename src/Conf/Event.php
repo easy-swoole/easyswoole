@@ -23,17 +23,17 @@ class Event extends AbstractEvent
         date_default_timezone_set('Asia/Shanghai');
     }
 
-    function beforeWorkerStart(\swoole_http_server $server)
+    function beforeWorkerStart(\swoole_server $server)
     {
         // TODO: Implement beforeWorkerStart() method.
     }
 
-    function onStart(\swoole_http_server $server)
+    function onStart(\swoole_server $server)
     {
         // TODO: Implement onStart() method.
     }
 
-    function onShutdown(\swoole_http_server $server)
+    function onShutdown(\swoole_server $server)
     {
         // TODO: Implement onShutdown() method.
     }
@@ -63,17 +63,17 @@ class Event extends AbstractEvent
         // TODO: Implement afterResponse() method.
     }
 
-    function onTask(\swoole_http_server $server, $taskId, $workerId, $taskObj)
+    function onTask(\swoole_server $server, $taskId, $workerId, $taskObj)
     {
         // TODO: Implement onTask() method.
     }
 
-    function onFinish(\swoole_http_server $server, $taskId, $taskObj)
+    function onFinish(\swoole_server $server, $taskId, $taskObj)
     {
         // TODO: Implement onFinish() method.
     }
 
-    function onWorkerError(\swoole_http_server $server, $worker_id, $worker_pid, $exit_code)
+    function onWorkerError(\swoole_server $server, $worker_id, $worker_pid, $exit_code)
     {
         // TODO: Implement onWorkerError() method.
     }

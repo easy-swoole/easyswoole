@@ -43,7 +43,9 @@ class Config
                 "LISTEN"=>"0.0.0.0",
                 "SERVER_NAME"=>"",
                 "PORT"=>9501,
-                "WS_SUPPORT"=>false,
+                "RUN_MODE"=>SWOOLE_PROCESS,//不建议更改此项
+                "SERVER_TYPE"=>\Core\Swoole\Config::SERVER_TYPE_SERVER,//
+                'SOCKET_TYPE'=>SWOOLE_TCP,//当SERVER_TYPE为SERVER_TYPE_SERVER模式时有效
                 "CONFIG"=>array(
                     'task_worker_num' => 8, //异步任务进程
                     "task_max_request"=>10,
@@ -58,7 +60,7 @@ class Config
                 "DISPLAY_ERROR"=>1,
                 "ENABLE"=>false,
             ),
-            "CONTROLLER_POOL"=>true
+            "CONTROLLER_POOL"=>true//web或web socket模式有效
         );
     }
 

@@ -46,11 +46,11 @@ abstract class AbstractAsyncTask
     /*
      * 注意   server为task进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
-    abstract function handler(\swoole_http_server $server,$taskId,$fromId);
+    abstract function handler(\swoole_server $server,$taskId,$fromId);
     /*
      * 注意   server为主worker进程的server   但taskId为分配该任务的主worker分配的taskId 为每个主worker进程内独立自增
      */
-    abstract function finishCallBack(\swoole_http_server $server, $task_id,$resultData);
+    abstract function finishCallBack(\swoole_server $server, $task_id,$resultData);
     protected function finish($dataForFinishCallBack = null){
         if($dataForFinishCallBack !== null){
             $this->dataForFinishCallBack = $dataForFinishCallBack;

@@ -35,10 +35,15 @@ class Server
 
     function __construct()
     {
-        if(Config::getInstance()->wsSupport()){
-            $this->swooleServer = new \swoole_websocket_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+        $conf = Config::getInstance();
+        if($conf->getServerType() == Config::SERVER_TYPE_SERVER){
+            $this->swooleServer = new \swoole_server($conf->getListenIp(),$conf->getListenPort(),$conf->getRunMode(),$conf->getSocketType());
+        }else if($conf->getServerType() == Config::SERVER_TYPE_WEB){
+            $this->swooleServer = new \swoole_http_server($conf->getListenIp(),$conf->getListenPort(),$conf->getRunMode());
+        }else if($conf->getServerType() == Config::SERVER_TYPE_WEB_SOCKET){
+            $this->swooleServer = new \swoole_websocket_server($conf->getListenIp(),$conf->getListenPort(),$conf->getRunMode());
         }else{
-            $this->swooleServer = new \swoole_http_server(Config::getInstance()->listenIp(),Config::getInstance()->listenPort());
+            die('server type error');
         }
     }
 
@@ -49,7 +54,8 @@ class Server
      * 创建并启动一个swoole http server
      */
     function startServer(){
-        $this->getServer()->set(Config::getInstance()->workerSetting());
+        $conf = Config::getInstance();
+        $this->getServer()->set($conf->getWorkerSetting());
         $this->beforeWorkerStart();
         $this->serverStartEvent();
         $this->serverShutdownEvent();
@@ -58,7 +64,9 @@ class Server
         $this->onFinish();
         $this->workerStartEvent();
         $this->workerStopEvent();
-        $this->listenRequest();
+        if($conf->getServerType() != Config::SERVER_TYPE_SERVER){
+            $this->listenRequest();
+        }
         $this->isStart = 1;
         $this->getServer()->start();
     }
@@ -121,7 +129,7 @@ class Server
         });
     }
     private function onTaskEvent(){
-        $num = Config::getInstance()->allTaskWorkerNum();
+        $num = Config::getInstance()->getTaskWorkerNum();
         if(!empty($num)){
             $this->getServer()->on("task",function (\swoole_http_server $server, $taskId, $workerId,$taskObj){
                 try{
@@ -142,10 +150,10 @@ class Server
         }
     }
     private function onFinish(){
-        $num = Config::getInstance()->allTaskWorkerNum();
+        $num = Config::getInstance()->getTaskWorkerNum();
         if(!empty($num)){
             $this->getServer()->on("finish",
-                function (\swoole_http_server $server, $taskId, $taskObj){
+                function (\swoole_server $server, $taskId, $taskObj){
                     try{
                         Event::getInstance()->onFinish($server, $taskId,$taskObj);
                         //仅仅接受AbstractTask回调处理
@@ -163,12 +171,12 @@ class Server
         Event::getInstance()->beforeWorkerStart($this->getServer());
     }
     private function serverStartEvent(){
-        $this->getServer()->on("start",function (\swoole_http_server $server){
+        $this->getServer()->on("start",function (\swoole_server $server){
             Event::getInstance()->onStart($server);
         });
     }
     private function serverShutdownEvent(){
-        $this->getServer()->on("shutdown",function (\swoole_http_server $server){
+        $this->getServer()->on("shutdown",function (\swoole_server $server){
             Event::getInstance()->onShutdown($server);
         });
     }
@@ -181,7 +189,7 @@ class Server
         通过记录日志或者发送报警的信息来提示开发者进行相应的处理。
      */
     private function workerErrorEvent(){
-        $this->getServer()->on("workererror",function (\swoole_http_server $server,$worker_id, $worker_pid, $exit_code){
+        $this->getServer()->on("workererror",function (\swoole_server $server,$worker_id, $worker_pid, $exit_code){
             Event::getInstance()->onWorkerError($server, $worker_id, $worker_pid, $exit_code);
         });
     }

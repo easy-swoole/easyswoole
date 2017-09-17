@@ -27,7 +27,7 @@ abstract class AbstractEvent
     /*
      * 未执行swoole_http_server start
      */
-    abstract function beforeWorkerStart(\swoole_http_server $server);
+    abstract function beforeWorkerStart(\swoole_server $server);
     /*
      * Server启动在主进程的主线程回调此函数
      * 在此事件之前Swoole Server已进行了如下操作
@@ -43,7 +43,7 @@ abstract class AbstractEvent
        worker进程已经创建好了。新创建的对象在主进程内，worker进程无法访问到此内存区域。
        因此全局对象创建的代码需要放置在swoole_server_start之前。
      */
-    abstract function onStart(\swoole_http_server $server);
+    abstract function onStart(\swoole_server $server);
     /*
      * 在此之前Swoole Server已进行了如下操作
             已关闭所有线程
@@ -53,7 +53,7 @@ abstract class AbstractEvent
        强制kill进程不会回调onShutdown，如kill -9
        需要使用kill -15来发送SIGTREM信号到主进程才能按照正常的流程终止
      */
-    abstract function onShutdown(\swoole_http_server $server);
+    abstract function onShutdown(\swoole_server $server);
     /*
      * 此事件在worker进程/task进程启动时发生。这里创建的对象可以在进程生命周期内使用
      * 发生PHP致命错误或者代码中主动调用exit时，Worker/Task进程会退出，管理进程会重新创建新的进程
@@ -73,7 +73,7 @@ abstract class AbstractEvent
     abstract function onRequest(Request $request,Response $response);
     abstract function onDispatcher(Request $request,Response $response,$targetControllerClass,$targetAction);
     abstract function onResponse(Request $request,Response $response);
-    abstract function onTask(\swoole_http_server $server, $taskId, $workerId,$callBackObj);
-    abstract function onFinish(\swoole_http_server $server, $taskId,$callBackObj);
-    abstract function onWorkerError(\swoole_http_server $server,$worker_id,$worker_pid,$exit_code);
+    abstract function onTask(\swoole_server $server, $taskId, $workerId,$callBackObj);
+    abstract function onFinish(\swoole_server $server, $taskId,$callBackObj);
+    abstract function onWorkerError(\swoole_server $server,$worker_id,$worker_pid,$exit_code);
 }
