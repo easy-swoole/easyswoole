@@ -21,7 +21,9 @@ class Router extends AbstractRouter
     {
         // TODO: Implement addRouter() method.
         $routeCollector->addRoute(['GET','POST'],"/router",function (){
-            Response::getInstance()->writeJson();
+            $res = Response::getInstance();
+            $res->writeJson();
+            $res->end();
         });
         $routeCollector->addRoute("GET","/router2",'/test');
     }
