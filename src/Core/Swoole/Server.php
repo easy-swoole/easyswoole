@@ -24,7 +24,7 @@ class Server
     protected $isStart = 0;
     /*
      * 仅仅用于获取一个服务实例
-     * @return SwooleHttpServer
+     * @return Server
      */
     static function getInstance(){
         if(!isset(self::$instance)){
@@ -71,9 +71,9 @@ class Server
         $this->getServer()->start();
     }
     /*
-     * 用于获取 swoole_http_server 实例
+     * 用于获取 swoole_server 实例
      * server启动后，在每个进程中获得的，均为当前自身worker的server（可以理解为进程克隆后独立运行）
-     * @return swoole_http_server
+     * @return swoole_server
      */
     function getServer(){
         return $this->swooleServer;
