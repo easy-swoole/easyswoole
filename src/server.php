@@ -78,29 +78,25 @@ function startServer($options){
     opCacheClear();
     global $server;
     $conf = \Conf\Config::getInstance();
-    if(isset($options['daemonize'])){
-        $boolean = $options['daemonize'] ? true : false;
+    if(isset($options['d'])){
+        $boolean = $options['d'] ? true : false;
         $conf->setConf("SERVER.CONFIG.daemonize",$boolean);
     }else{
         \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
     }
-    if(isset($options['port'])){
+    if(isset($options['p'])){
         $conf->setConf("SERVER.PORT",$options['port']);
     }
-    if(isset($options['listen'])){
+    if(isset($options['ip'])){
         $conf->setConf("SERVER.LISTER",$options['listen']);
     }
-    if(isset($options['pidFile'])){
-        if(!empty($options['pidFile'])){
-            $pidFile = $options['pidFile'];
+    if(isset($options['pid'])){
+        if(!empty($options['pid'])){
+            $pidFile = $options['pid'];
             \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
         }
     }
-    if(isset($options['SwooleLog'])){
-        if(!empty($options['SwooleLog'])){
-            $conf->setConf("SERVER.CONFIG.log_file",$options['SwooleLog']);
-        }
-    }
+
     if(isset($options['workerNum'])){
         $conf->setConf("SERVER.CONFIG.worker_num",$options['workerNum']);
     }
@@ -129,9 +125,9 @@ function startServer($options){
 
 function stopServer($options){
     $pidFile = \Conf\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
-    if(isset($options['pidFile'])){
-        if(!empty($options['pidFile'])){
-            $pidFile = $options['pidFile'];
+    if(isset($options['pid'])){
+        if(!empty($options['pid'])){
+            $pidFile = $options['pid'];
         }
     }
     if(!file_exists($pidFile)){
@@ -143,7 +139,7 @@ function stopServer($options){
         echo "pid :{$pid} not exist \n";
         return;
     }
-    if(isset($options['force'])){
+    if(isset($options['f'])){
         swoole_process::kill($pid,SIGKILL);
     }else{
         swoole_process::kill($pid);
@@ -154,7 +150,7 @@ function stopServer($options){
         usleep(1000);
         if(swoole_process::kill($pid,0)){
             echo "server stop at ".date("y-m-d h:i:s")."\n";
-            if(isset($pidFile)){
+            if(is_file($pidFile)){
                 unlink($pidFile);
             }
             break;
@@ -169,9 +165,9 @@ function stopServer($options){
 
 function reloadServer($options){
     $pidFile = \Conf\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
-    if(isset($options['pidFile'])){
-        if(!empty($options['pidFile'])){
-            $pidFile = $options['pidFile'];
+    if(isset($options['pid'])){
+        if(!empty($options['pid'])){
+            $pidFile = $options['pid'];
         }
     }
     if(isset($options['reloadAll']) && $options['reloadAll'] == false){
@@ -203,10 +199,9 @@ function help($options){
         case 'start':{
             echo "------------easyPHP-Swoole 启动命令------------\n";
             echo "执行php server.php start 即可启动服务。启动可选参数为:\n";
-            echo "--daemonize-boolean       是否以系统守护模式运行\n";
-            echo "--port-portNumber         指定服务监听端口\n";
-            echo "--pidFile-fileName        指定服务PID存储文件\n";
-            echo "--SwooleLog-fileName      指定Swoole日志文件\n";
+            echo "--d-boolean       是否以系统守护模式运行\n";
+            echo "--p-portNumber         指定服务监听端口\n";
+            echo "--pid-fileName        指定服务PID存储文件\n";
             echo "--workerNum-num           设置worker进程数\n";
             echo "--taskWorkerNum-num       设置Task进程数\n";
             echo "--user-userName           指定以某个用户身份执行\n";
@@ -218,15 +213,15 @@ function help($options){
         case 'stop':{
             echo "------------easyPHP-Swoole 停止命令------------\n";
             echo "执行php server.php stop 即可启动服务。启动可选参数为:\n";
-            echo "--pidFile-fileName        指定服务PID存储文件\n";
-            echo "--force       强制停止服务\n";
+            echo "--pid-fileName        指定服务PID存储文件\n";
+            echo "--f       强制停止服务\n";
             break;
         }
         case 'reload':{
             echo "------------easyPHP-Swoole 重启命令------------\n";
             echo "执行php server.php reload 即可启动服务。启动可选参数为:\n";
-            echo "--pidFile-fileName        指定服务PID存储文件\n";
-            echo "--pidFile-reloadAll       重启所有进程，默认仅重启Task进程\n";
+            echo "--pid-fileName        指定服务PID存储文件\n";
+            echo "--pid-reloadAll       重启所有进程，默认仅重启Task进程\n";
             break;
         }
         default:{
