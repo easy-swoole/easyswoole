@@ -42,7 +42,7 @@ function commandParser(){
             $temp = trim($item,"--");
             $temp = explode("-",$temp);
             $key = array_shift($temp);
-            $options[$key] = array_shift($temp);
+            $options[$key] = array_shift($temp) ?: '';
         }
     }
     return array(
@@ -79,22 +79,19 @@ function startServer($options){
     global $server;
     $conf = \Conf\Config::getInstance();
     if(isset($options['d'])){
-        $boolean = $options['d'] ? true : false;
-        $conf->setConf("SERVER.CONFIG.daemonize",$boolean);
+        $conf->setConf("SERVER.CONFIG.daemonize",true);
     }else{
         \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
     }
-    if(isset($options['p'])){
-        $conf->setConf("SERVER.PORT",$options['port']);
+    if(!empty($options['p'])){
+        $conf->setConf("SERVER.PORT",$options['p']);
     }
     if(isset($options['ip'])){
-        $conf->setConf("SERVER.LISTER",$options['listen']);
+        $conf->setConf("SERVER.LISTER",$options['ip']);
     }
-    if(isset($options['pid'])){
-        if(!empty($options['pid'])){
-            $pidFile = $options['pid'];
-            \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
-        }
+    if(!empty($options['pid'])){
+        $pidFile = $options['pid'];
+        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
     }
 
     if(isset($options['workerNum'])){
@@ -110,8 +107,7 @@ function startServer($options){
         $conf->setConf("SERVER.CONFIG.group",$options['group']);
     }
     if(isset($options['cpuAffinity'])){
-        $boolean = $options['cpuAffinity'] ? true : false;
-        $conf->setConf("SERVER.CONFIG.open_cpu_affinity",$boolean);
+        $conf->setConf("SERVER.CONFIG.open_cpu_affinity",true);
     }
     if($conf->getConf('SERVER.CONFIG.daemonize')){
         echo "start  easyswoole in daemonize model... \n";
@@ -125,10 +121,8 @@ function startServer($options){
 
 function stopServer($options){
     $pidFile = \Conf\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
-    if(isset($options['pid'])){
-        if(!empty($options['pid'])){
-            $pidFile = $options['pid'];
-        }
+    if(!empty($options['pid'])){
+        $pidFile = $options['pid'];
     }
     if(!file_exists($pidFile)){
         echo "pid file :{$pidFile} not exist \n";
@@ -170,7 +164,7 @@ function reloadServer($options){
             $pidFile = $options['pid'];
         }
     }
-    if(isset($options['reloadAll']) && $options['reloadAll'] == false){
+    if(isset($options['all']) && $options['all'] == false){
         $sig = SIGUSR2;
     }else{
         $sig = SIGUSR1;
@@ -199,9 +193,9 @@ function help($options){
         case 'start':{
             echo "------------easyPHP-Swoole 启动命令------------\n";
             echo "执行php server.php start 即可启动服务。启动可选参数为:\n";
-            echo "--d-boolean       是否以系统守护模式运行\n";
-            echo "--p-portNumber         指定服务监听端口\n";
-            echo "--pid-fileName        指定服务PID存储文件\n";
+            echo "--d                       是否以系统守护模式运行\n";
+            echo "--p-portNumber            指定服务监听端口\n";
+            echo "--pid-fileName            指定服务PID存储文件\n";
             echo "--workerNum-num           设置worker进程数\n";
             echo "--taskWorkerNum-num       设置Task进程数\n";
             echo "--user-userName           指定以某个用户身份执行\n";
@@ -214,14 +208,14 @@ function help($options){
             echo "------------easyPHP-Swoole 停止命令------------\n";
             echo "执行php server.php stop 即可启动服务。启动可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
-            echo "--f       强制停止服务\n";
+            echo "--f                   强制停止服务\n";
             break;
         }
         case 'reload':{
             echo "------------easyPHP-Swoole 重启命令------------\n";
             echo "执行php server.php reload 即可启动服务。启动可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
-            echo "--pid-reloadAll       重启所有进程，默认仅重启Task进程\n";
+            echo "--pid-all             是否重启所有进程，默认true\n";
             break;
         }
         default:{
