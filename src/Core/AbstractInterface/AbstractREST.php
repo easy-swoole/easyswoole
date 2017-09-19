@@ -37,11 +37,11 @@ abstract class AbstractREST extends AbstractController
         $this->onRequest($actionName);
         //判断是否被拦截
         if(!$this->response()->isEndResponse()){
-            if(method_exists($this,$actionName)){
-                $realName = $this->actionName();
+            $realName = $this->actionName();
+            if(method_exists($this,$realName)){
                 $this->$realName();
             }else{
-                $this->actionNotFound($actionName, $arguments);
+                $this->actionNotFound($realName, $arguments);
             }
         }
         $this->afterAction();
