@@ -24,8 +24,7 @@ use FastRoute\Dispatcher\GroupCountBased;
 class Dispatcher
 {
     protected static $selfInstance;
-    protected $fastRouterDispatcher = array();
-    protected $currentApplicationDirectory;
+    protected $fastRouterDispatcher;
     protected $controllerPool = array();
     protected $useControllerPool = false;
     protected $controllerMap = array();
@@ -45,7 +44,6 @@ class Dispatcher
         if(Response::getInstance()->isEndResponse()){
             return;
         }
-        $this->currentApplicationDirectory = Di::getInstance()->get(SysConst::APPLICATION_DIR);
         $pathInfo = UrlParser::pathInfo();
         $routeInfo = $this->doFastRouter($pathInfo,Request::getInstance()->getMethod());
         if($routeInfo !== false){
@@ -54,7 +52,6 @@ class Dispatcher
                     // ... 404 NdoDispatcherot Found
                     break;
                 case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                    $allowedMethods = $routeInfo[1];
                     Response::getInstance()->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
                     break;
                 case \FastRoute\Dispatcher::FOUND:
@@ -74,18 +71,18 @@ class Dispatcher
         }
         //去除为fastRouter预留的左边斜杠
         $pathInfo = ltrim($pathInfo,"/");
-        if(isset($this->controllerMap[$this->currentApplicationDirectory][$pathInfo])){
-            $finalClass = $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['finalClass'];
-            $actionName = $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['actionName'];
+        if(isset($this->controllerMap[$pathInfo])){
+            $finalClass = $this->controllerMap[$pathInfo]['finalClass'];
+            $actionName = $this->controllerMap[$pathInfo]['actionName'];
         }else{
             /*
              * 此处用于防止URL恶意攻击，造成Dispatch缓存爆满。
              */
-            if(isset($this->controllerMap[$this->currentApplicationDirectory]) && count($this->controllerMap[$this->currentApplicationDirectory]) > 50000){
-                unset($this->controllerMap[$this->currentApplicationDirectory]);
+            if(count($this->controllerMap) > 50000){
+                $this->controllerMap = [];
             }
             $list = explode("/",$pathInfo);
-            $controllerNameSpacePrefix = "{$this->currentApplicationDirectory}\\Controller";
+            $controllerNameSpacePrefix = "App\\Controller";
             $actionName = null;
             $finalClass = null;
             $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
@@ -120,8 +117,8 @@ class Dispatcher
                 $finalClass = $controllerNameSpacePrefix."\\Index";
                 $actionName = empty($list[0]) ? 'index' : $list[0];
             }
-            $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['finalClass'] = $finalClass;
-            $this->controllerMap[$this->currentApplicationDirectory][$pathInfo]['actionName'] = $actionName;
+            $this->controllerMap[$pathInfo]['finalClass'] = $finalClass;
+            $this->controllerMap[$pathInfo]['actionName'] = $actionName;
         }
         if(class_exists($finalClass)){
             if($this->useControllerPool){
@@ -155,25 +152,23 @@ class Dispatcher
             /*
                 * if exit Router class in App directory
              */
-            $ref = new \ReflectionClass("{$this->currentApplicationDirectory}\\Router");
+            $ref = new \ReflectionClass("App\\Router");
             $router = $ref->newInstance();
             if($router instanceof AbstractRouter){
-                $this->fastRouterDispatcher[$this->currentApplicationDirectory] = new GroupCountBased($router->getRouteCollector()->getData());
+                $this->fastRouterDispatcher = new GroupCountBased($router->getRouteCollector()->getData());
             }
         }catch(\Exception $exception){
             //没有设置路由
-            $this->fastRouterDispatcher[$this->currentApplicationDirectory] = false;
+            $this->fastRouterDispatcher = false;
         }
     }
 
     private function doFastRouter($pathInfo,$requestMethod){
-        //判断是否建立过当前应用目录的快速路由
-        if(!isset($this->fastRouterDispatcher[$this->currentApplicationDirectory])){
+        if(!isset($this->fastRouterDispatcher)){
             $this->intRouterInstance();
         }
-        $dispatcher = $this->fastRouterDispatcher[$this->currentApplicationDirectory];
-        if($dispatcher instanceof GroupCountBased){
-            return $dispatcher->dispatch($requestMethod,$pathInfo);
+        if($this->fastRouterDispatcher instanceof GroupCountBased){
+            return $this->fastRouterDispatcher->dispatch($requestMethod,$pathInfo);
         }else{
             return false;
         }

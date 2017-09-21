@@ -48,7 +48,6 @@ class Core
         $this->defineSysConst();
         $this->registerAutoLoader();
         Event::getInstance()->frameInitialize();
-        $this->setDefaultAppDirectory();
         $this->sysDirectoryInit();
         $this->registerErrorHandler();
         return $this;
@@ -82,9 +81,8 @@ class Core
     private static function registerAutoLoader(){
         require_once __DIR__."/AutoLoader.php";
         $loader = AutoLoader::getInstance();
-        //添加系统核心目录
+        $loader->addNamespace("App","App");
         $loader->addNamespace("Core","Core");
-        //添加conf目录
         $loader->addNamespace("Conf","Conf");
         //添加系统依赖组件
         $loader->addNamespace("FastRoute","Core/Vendor/FastRoute");
@@ -117,14 +115,5 @@ class Core
                 }
             });
         }
-    }
-    private function setDefaultAppDirectory(){
-        $dir = Di::getInstance()->get(SysConst::APPLICATION_DIR);
-        if(empty($dir)){
-            $dir = "App";
-            Di::getInstance()->set(SysConst::APPLICATION_DIR,$dir);
-        }
-        $prefix = $dir;
-        AutoLoader::getInstance()->addNamespace($prefix,$dir);
     }
 }
