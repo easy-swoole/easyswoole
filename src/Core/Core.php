@@ -22,20 +22,15 @@ use Core\Utility\File;
 class Core
 {
     protected static $instance;
-    static function getInstance(callable $preHandler = null){
+    static function getInstance(){
         if(!isset(self::$instance)){
-            self::$instance = new static($preHandler);
+            self::$instance = new static();
         }
         return self::$instance;
     }
+
     function run(){
         Server::getInstance()->startServer();
-    }
-    function __construct(callable $preHandler = null)
-    {
-        if(is_callable($preHandler)){
-            call_user_func($preHandler);
-        }
     }
 
     /*
@@ -50,6 +45,7 @@ class Core
         Event::getInstance()->frameInitialize();
         $this->sysDirectoryInit();
         $this->registerErrorHandler();
+        Event::getInstance()->frameInitialized();
         return $this;
     }
 

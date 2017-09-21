@@ -23,6 +23,12 @@ class Event extends AbstractEvent
         date_default_timezone_set('Asia/Shanghai');
     }
 
+    function frameInitialized()
+    {
+        // TODO: Implement frameInitialized() method.
+    }
+
+
     function beforeWorkerStart(\swoole_server $server)
     {
         // TODO: Implement beforeWorkerStart() method.

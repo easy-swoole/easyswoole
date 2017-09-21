@@ -23,7 +23,7 @@ abstract class AbstractEvent
     }
 
     abstract function frameInitialize();
-
+    abstract function frameInitialized();
     /*
      * 未执行swoole_http_server start
      */
