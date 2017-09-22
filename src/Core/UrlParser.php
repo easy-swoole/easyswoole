@@ -29,4 +29,20 @@ class UrlParser
         }
         return $basePath;
     }
+
+    static public function generateURL($controllerClass,$action = 'index',$query = array()){
+        $controllerClass = substr($controllerClass,14);
+        $controllerClass = explode('\\',$controllerClass);
+        $path =  implode("/",$controllerClass);
+        if($action == 'index'){
+            $path =  $path."/index.html";
+        }else{
+            $path =  $path."{$action}/index.html";
+        }
+        if(!empty($query)){
+            return $path."?".http_build_cookie($query);
+        }else{
+            return $path;
+        }
+    }
 }
