@@ -37,7 +37,7 @@ class UrlParser
         if($action == 'index'){
             $path =  $path."/index.html";
         }else{
-            $path =  $path."{$action}/index.html";
+            $path =  $path."/{$action}/index.html";
         }
         if(!empty($query)){
             return $path."?".http_build_cookie($query);
