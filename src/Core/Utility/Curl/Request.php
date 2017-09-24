@@ -23,7 +23,7 @@ class Request
         CURLOPT_HEADER=>true,
     );
 
-    function __construct($url,array $opt = array())
+    function __construct($url = null,array $opt = array())
     {
         $this->curlOPt[CURLOPT_URL] = $url;
         if(!empty($opt)){
