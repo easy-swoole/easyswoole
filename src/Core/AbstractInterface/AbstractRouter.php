@@ -7,8 +7,8 @@
  */
 
 namespace Core\AbstractInterface;
-use Core\Component\Di;
-use Core\Component\Sys\SysConst;
+use Core\Http\Request;
+use Core\Http\Response;
 use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
@@ -27,5 +27,11 @@ abstract class AbstractRouter
     abstract function addRouter(RouteCollector $routeCollector);
     function getRouteCollector(){
         return $this->routeCollector;
+    }
+    function request(){
+        return Request::getInstance();
+    }
+    function response(){
+        return Response::getInstance();
     }
 }
