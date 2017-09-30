@@ -6,10 +6,9 @@
  * Time: 下午5:30
  */
 
-namespace App;
+namespace Core\Component;
 
 
-use Core\Component\Di;
 use Core\Component\IO\FileIO;
 use Core\Component\Spl\SplArray;
 use Core\Component\Sys\SysConst;
@@ -104,6 +103,18 @@ class ShareMemory
                 return false;
             }
 
+        }else{
+            return false;
+        }
+    }
+
+    function rollback($autoCommit = false){
+        if($this->isStartTransaction){
+            $this->read();
+            if($autoCommit){
+                $this->commit();
+            }
+            return true;
         }else{
             return false;
         }
