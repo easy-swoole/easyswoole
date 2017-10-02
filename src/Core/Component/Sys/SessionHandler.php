@@ -37,7 +37,7 @@ class SessionHandler implements \SessionHandlerInterface
         // TODO: Implement destroy() method.
         $this->close();
         if(file_exists($this->saveFile)){
-            unset($this->saveFile);
+            unlink($this->saveFile);
         }
         return true;
     }
