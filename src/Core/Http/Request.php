@@ -14,11 +14,13 @@ use Core\Http\Message\Stream;
 use Core\Http\Message\UploadFile;
 use Core\Http\Message\Uri;
 use Core\Utility\Validate\Validate;
+use Core\Http\Session\Request as SessionRequest;
 
 class Request extends ServerRequest
 {
     private static $instance;
-    private  $swoole_http_request = null;
+    private $swoole_http_request = null;
+    private $session;
     static function getInstance(\swoole_http_request $request = null){
         if($request !== null){
             self::$instance = new Request($request);
@@ -69,11 +71,20 @@ class Request extends ServerRequest
             return array_merge($this->getParsedBody(),$this->getQueryParams());
         }
     }
+
     function requestParamsValidate(Validate $validate){
         return $validate->validate($this->getRequestParam());
     }
+
     function getSwooleRequest(){
         return $this->swoole_http_request;
+    }
+
+    function session(){
+        if(!isset($this->session)){
+            $this->session = new SessionRequest();
+        }
+        return $this->session;
     }
     private function initUri(){
         $uri = new Uri();

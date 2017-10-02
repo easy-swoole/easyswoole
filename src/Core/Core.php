@@ -42,6 +42,7 @@ class Core
         }
         $this->defineSysConst();
         $this->registerAutoLoader();
+        $this->preHandle();
         Event::getInstance()->frameInitialize();
         $this->sysDirectoryInit();
         $this->registerErrorHandler();
@@ -61,6 +62,11 @@ class Core
         }
         if(!File::createDir($tempDir)){
             die("create Temp Directory:{$tempDir} fail");
+        }else{
+            //创建默认Session存储目录
+            $path = $tempDir."/Session";
+            File::createDir($path);
+            Di::getInstance()->set(SysConst::SESSION_SAVE_PATH,$path);
         }
         //创建日志目录
         $logDir = Di::getInstance()->get(SysConst::LOG_DIRECTORY);
@@ -68,7 +74,6 @@ class Core
             $logDir = ROOT."/Log";
             Di::getInstance()->set(SysConst::LOG_DIRECTORY,$logDir);
         }
-        //创建日志目录
         if(!File::createDir($logDir)){
             die("create log Directory:{$logDir} fail");
         }
@@ -111,5 +116,9 @@ class Core
                 }
             });
         }
+    }
+    private function preHandle(){
+        Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
+        Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.8');
     }
 }

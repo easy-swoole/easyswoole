@@ -10,12 +10,15 @@ namespace Core\Http;
 use Conf\Event;
 use Core\Http\Message\Response as HttpResponse;
 use Core\Http\Message\Status;
+use Core\Http\Session\Response as SessionResponse;
+use Core\Http\Session\Session;
 
 class Response extends HttpResponse
 {
     private static $instance;
     private $isEndResponse = 0;
     private $swoole_http_response = null;
+    private $session = null;
     static function getInstance(\swoole_http_response $response = null){
         if($response !== null){
             self::$instance = new Response($response);
@@ -28,6 +31,7 @@ class Response extends HttpResponse
     }
     function end(){
         if(!$this->isEndResponse){
+            Session::getInstance()->close();
             $this->isEndResponse = 1;
             return true;
         }else{
@@ -131,6 +135,13 @@ class Response extends HttpResponse
         }else{
             trigger_error("response has end");
         }
+    }
+
+    function session(){
+        if(!isset($this->session)){
+            $this->session = new SessionResponse();
+        }
+        return $this->session;
     }
 
     function getSwooleResponse(){
