@@ -6,11 +6,8 @@
  * Time: 上午12:46
  */
 
-namespace Core;
+namespace Core\Http;
 
-
-use Core\Component\Logger;
-use Core\Http\Request;
 
 class UrlParser
 {

@@ -12,7 +12,7 @@ namespace Core\Swoole;
 use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
 use Core\Component\SuperClosure;
-use Core\Dispatcher;
+use Core\Http\Dispatcher;
 use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;

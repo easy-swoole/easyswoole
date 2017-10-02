@@ -8,10 +8,8 @@
 
 namespace Core\Http;
 use Conf\Event;
-use Core\Dispatcher;
 use Core\Http\Message\Response as HttpResponse;
 use Core\Http\Message\Status;
-use Core\UrlParser;
 
 class Response extends HttpResponse
 {

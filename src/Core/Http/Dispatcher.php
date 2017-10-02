@@ -6,7 +6,7 @@
  * Time: 上午12:44
  */
 
-namespace Core;
+namespace Core\Http;
 
 
 use Conf\Config;
@@ -15,9 +15,6 @@ use Core\AbstractInterface\AbstractController;
 use Core\AbstractInterface\AbstractRouter;
 use Core\Component\Di;
 use Core\Component\Sys\SysConst;
-use Core\Component\SuperClosure;
-use Core\Http\Request;
-use Core\Http\Response;
 use Core\Http\Message\Status;
 use FastRoute\Dispatcher\GroupCountBased;
 
