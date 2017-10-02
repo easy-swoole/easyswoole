@@ -171,11 +171,49 @@ class File
         }
         return rename($filePath, $targetFilePath);
     }
+
     static function deleteFile($filePath){
         try{
             unlink($filePath);
             return true;
         }catch (\Exception $exception){
+            return false;
+        }
+    }
+
+    /**
+     * @param $dirPath
+     * @param string $filterType   'file'|'dir'
+     * @return bool|array
+     */
+    static function scanDir($dirPath, $filterType = 'file'){
+        $res = [];
+        if(is_dir($dirPath)){
+            try{
+                $dirHandle = opendir($dirPath);
+                if(!$dirHandle){
+                    return false;
+                }
+                while (false !== ($file = readdir($dirHandle))) {
+                    if ($file == '.' || $file == '..') {
+                        continue;
+                    }
+                    if($filterType == 'file'){
+                        if (!is_dir($dirPath ."/". $file)) {
+                            $res[] = $dirPath ."/". $file;
+                        }
+                    }else{
+                        if (is_dir($dirPath ."/". $file)) {
+                            $res[] = $dirPath ."/". $file;
+                        }
+                    }
+                }
+                closedir($dirHandle);
+                return $res;
+            }catch (\Exception $exception){
+                return false;
+            }
+        }else{
             return false;
         }
     }
