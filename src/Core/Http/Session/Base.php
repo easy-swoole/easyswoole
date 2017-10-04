@@ -32,4 +32,13 @@ class Base
     function close(){
         return $this->session->close();
     }
+
+    function start(){
+        if(!$this->session->isStart()){
+            return $this->session->start();
+        }else{
+            trigger_error("session has start");
+            return false;
+        }
+    }
 }
