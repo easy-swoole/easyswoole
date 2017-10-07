@@ -21,6 +21,10 @@ class Base
         return $this->session->sessionName($name);
     }
 
+    function savePath($path = null){
+        return $this->session->savePath($path);
+    }
+
     function sessionId($sid = null){
         return $this->session->sessionId($sid);
     }
