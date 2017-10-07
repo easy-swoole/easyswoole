@@ -22,7 +22,7 @@ CPU: 阿里云单核
 内存: 1G
 php: 5.6.30
 Swoole: 1.9.17
-测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>""easySwoole"
+测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>"easySwoole"
 ab -c 500 -n 500000 http://127.0.0.1:9501/ 测试结果如下
 
 Server Software:        easyPHP
