@@ -24,15 +24,14 @@ class Di
     }
 
 
-    function set($key, $obj,array $params = array(),$singleton = true){
+    function set($key, $obj,...$arg){
         /*
          * 注入的时候不做任何的类型检测与转换
          * 由于编程人员为问题，该注入资源并不一定会被用到
          */
         $this->container[$key] = array(
             "obj"=>$obj,
-            "params"=>$params,
-            "singleton"=>$singleton
+            "params"=>$arg,
         );
         return $this;
     }
@@ -56,16 +55,12 @@ class Di
                 return $result['obj'];
             }else if(is_callable($result['obj'])){
                 $ret =  call_user_func_array($result['obj'],$result['params']);
-                if($result['singleton']){
-                    $this->set($key,$ret);
-                }
+                $this->set($key,$ret);
                 return $ret;
             }else if(is_string($result['obj']) && class_exists($result['obj'])){
                 $reflection = new \ReflectionClass ( $result['obj'] );
                 $ins =  $reflection->newInstanceArgs ( $result['params'] );
-                if($result['singleton']){
-                    $this->set($key,$ins);
-                }
+                $this->set($key,$ins);
                 return $ins;
             }else{
                 return $result['obj'];
