@@ -150,6 +150,6 @@ class Core
     }
     private function preHandle(){
         Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
-        Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.8');
+        Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.9');
     }
 }
