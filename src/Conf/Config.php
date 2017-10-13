@@ -51,8 +51,6 @@ class Config
                     "task_max_request"=>10,
                     'max_request'=>5000,//强烈建议设置此配置项
                     'worker_num'=>8,
-                    "log_file"=>Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/swoole.log",
-                    'pid_file'=>Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/pid.pid",
                 ),
             ),
             "DEBUG"=>array(

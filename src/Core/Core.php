@@ -106,6 +106,8 @@ class Core
         if(!File::createDir($logDir)){
             die("create log Directory:{$logDir} fail");
         }
+        Config::getInstance()->setConf("SERVER.CONFIG.log_file",$logDir."/swoole.log");
+        Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$logDir."/pid.pid");
     }
 
     private static function registerAutoLoader(){
