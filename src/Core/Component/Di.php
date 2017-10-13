@@ -55,13 +55,13 @@ class Di
                 return $result['obj'];
             }else if(is_callable($result['obj'])){
                 $ret =  call_user_func_array($result['obj'],$result['params']);
-                $this->set($key,$ret);
-                return $ret;
+                $this->container[$key]['obj'] = $ret;
+                return $this->container[$key]['obj'];
             }else if(is_string($result['obj']) && class_exists($result['obj'])){
                 $reflection = new \ReflectionClass ( $result['obj'] );
                 $ins =  $reflection->newInstanceArgs ( $result['params'] );
-                $this->set($key,$ins);
-                return $ins;
+                $this->container[$key]['obj'] = $ins;
+                return $this->container[$key]['obj'];
             }else{
                 return $result['obj'];
             }
