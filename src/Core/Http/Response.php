@@ -88,7 +88,7 @@ class Response extends HttpResponse
             trigger_error("response has end");
         }
     }
-    public function setCookie($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null, $httponly = null){
+    public function setCookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httponly = null){
         if(!$this->isEndResponse()){
             //仅支持header重定向  不做meta定向
             $temp = " {$name}={$value};";
@@ -97,9 +97,7 @@ class Response extends HttpResponse
                 $maxAge = $expire - time();
                 $temp .=" Max-Age={$maxAge};";
             }
-            if($path != null){
-                $temp .= " Path={$path};";
-            }
+            $temp .= " Path={$path};";
             if($domain != null){
                 $temp .= " Domain={$domain};";
             }
