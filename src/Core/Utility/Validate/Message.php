@@ -31,7 +31,19 @@ class Message
             return new Error(array());
         }
     }
+
     function all(){
         return $this->error;
+    }
+
+    function first(){
+        if($this->hasError()){
+            return new Error(array_shift($this->error));
+        }else{
+            /*
+             * 预防调用错误
+             */
+            return new Error(array());
+        }
     }
 }
