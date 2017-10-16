@@ -155,7 +155,7 @@ class Session
     private function init(){
         $di = Di::getInstance();
         $name = $di->get(SysConst::SESSION_NAME);
-        $this->sessionName = $name ? $name : 'easySWoole';
+        $this->sessionName = $name ? $name : 'EasySWoole';
         $this->sessionSavePath = $di->get(SysConst::SESSION_SAVE_PATH);
         $this->sessionId = null;
         $this->isStart = false;
