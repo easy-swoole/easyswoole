@@ -113,16 +113,27 @@ class Session
             }
             $request = HttpRequest::getInstance();
             $cookie = $request->getCookieParams($this->sessionName);
-            if($cookie === null){
-                $sid = $this->generateSid();
-                $data = array(
-                    $this->sessionName=>$sid
-                );
-                $request->withCookieParams($request->getRequestParam()+$data);
-                HttpResponse::getInstance()->setCookie($this->sessionName,$sid);
-                $this->sessionId = $sid;
+            if($this->sessionId){
+                //预防提前指定sid
+                if($this->sessionId != $cookie){
+                    $data = array(
+                        $this->sessionName=>$this->sessionId
+                    );
+                    $request->withCookieParams($request->getRequestParam()+$data);
+                    HttpResponse::getInstance()->setCookie($this->sessionName,$this->sessionId);
+                }
             }else{
-                $this->sessionId = $cookie;
+                if($cookie === null){
+                    $sid = $this->generateSid();
+                    $data = array(
+                        $this->sessionName=>$sid
+                    );
+                    $request->withCookieParams($request->getRequestParam()+$data);
+                    HttpResponse::getInstance()->setCookie($this->sessionName,$sid);
+                    $this->sessionId = $sid;
+                }else{
+                    $this->sessionId = $cookie;
+                }
             }
             $this->isStart = 1;
             return true;
