@@ -66,6 +66,17 @@ function commandHandler(){
             reloadServer($command['options']);
             break;
         }
+        case 'update':{
+            echo "start download\n";
+            exec('curl -sS -o master.tar.gz https://codeload.github.com/kiss291323003/easyswoole/tar.gz/master');
+            echo "download success\n";
+            exec('tar -xzvf master.tar.gz');
+            exec('rm -rf ./Core');
+            exec('mv ./easyswoole-master/src/Core ./');
+            exec('rm -rf ./easyswoole-master master.tar.gz');
+            echo "update success\n";
+            break;
+        }
         case 'help':
         default:{
             help($command['options']);
