@@ -202,7 +202,7 @@ function help($options){
     }
     switch ($opName){
         case 'start':{
-            echo "------------easyPHP-Swoole 启动命令------------\n";
+            echo "------------easySwoole 启动命令------------\n";
             echo "执行php server.php start 即可启动服务。启动可选参数为:\n";
             echo "--d                       是否以系统守护模式运行\n";
             echo "--p-portNumber            指定服务监听端口\n";
@@ -216,25 +216,30 @@ function help($options){
             break;
         }
         case 'stop':{
-            echo "------------easyPHP-Swoole 停止命令------------\n";
+            echo "------------easySwoole 停止命令------------\n";
             echo "执行php server.php stop 即可启动服务。启动可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
             echo "--f                   强制停止服务\n";
             break;
         }
         case 'reload':{
-            echo "------------easyPHP-Swoole 重启命令------------\n";
+            echo "------------easySwoole 重启命令------------\n";
             echo "执行php server.php reload 即可启动服务。启动可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
             echo "--pid-all             是否重启所有进程，默认true\n";
             break;
         }
+        case 'update':{
+            echo "------------easySwoole 更新命令------------\n";
+            break;
+        }
         default:{
-            echo "------------欢迎使用easyPHP-Swoole------------\n";
+            echo "------------欢迎使用easySwoole------------\n";
             echo "有关某个命令的详细信息，请键入 help 命令,可选参数为:\n";
-            echo "--start            启动easyPHP-Swoole\n";
-            echo "--stop             停止easyPHP-Swoole\n";
-            echo "--reload           重启easyPHP-Swoole\n";
+            echo "--start            启动easySwoole\n";
+            echo "--stop             停止easySwoole\n";
+            echo "--reload           重启easySwoole\n";
+            echo "--update           重启easySwoole\n";
         }
     }
 }
