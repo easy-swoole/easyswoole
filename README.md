@@ -17,50 +17,51 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 
 ## 关于ab基准测试:
 ```
-系统: CentOS 7.1 
+系统: CentOS 7.1 (未做系统内核优化)
 CPU: 阿里云单核
 内存: 1G
 php: 5.6.30
 Swoole: 1.9.17
-测试代码: Index控制器中输出"hello world"并发送header "X-Server"=>"easySwoole"
-ab -c 500 -n 500000 http://127.0.0.1:9501/ 测试结果如下
+测试代码: Index控制器中输出"hello world"
+ab -c 100 -n 500000 http://127.0.0.1:9501/ 测试结果如下
 
-Server Software:        easyPHP
+
+Server Software:        swoole-http-server
 Server Hostname:        127.0.0.1
-    
 Server Port:            9501
+
 Document Path:          /
-Document Length:        20 bytes
-    
-Concurrency Level:      500
-Time taken for tests:   30.268 seconds
-Complete requests:      500000
+Document Length:        21 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.808 seconds
+Complete requests:      50000
 Failed requests:        0
 Write errors:           0
-Total transferred:      97500000 bytes
-HTML transferred:       10000000 bytes
-Requests per second:    16519.16 [#/sec] (mean)
-Time per request:       30.268 [ms] (mean)
-Time per request:       0.061 [ms] (mean, across all concurrent requests)
-Transfer rate:          3145.74 [Kbytes/sec] received
-    
+Total transferred:      8850000 bytes
+HTML transferred:       1050000 bytes
+Requests per second:    8608.19 [#/sec] (mean)
+Time per request:       11.617 [ms] (mean)
+Time per request:       0.116 [ms] (mean, across all concurrent requests)
+Transfer rate:          1487.94 [Kbytes/sec] received
+
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0   15   1.0     15      25
-Processing:     2   15   1.3     15      37
-Waiting:        1   12   2.0     12      31
-Total:         17   30   1.2     30      52
-    
+Connect:        0    1   0.4      1       2
+Processing:     2   10   2.5     10      81
+Waiting:        1   10   2.4      9      80
+Total:          3   12   2.5     12      83
+
 Percentage of the requests served within a certain time (ms)
-   50%     30
-   66%     30
-   75%     31
-   80%     31
-   90%     31
-   95%     31
-   98%     33
-   99%     34
-   100%    52 (longest request)
+  50%     12
+  66%     12
+  75%     12
+  80%     12
+  90%     12
+  95%     13
+  98%     13
+  99%     13
+ 100%     83 (longest request)
 ```
 ## 其他
 
