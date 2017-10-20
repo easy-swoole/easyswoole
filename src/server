@@ -86,8 +86,8 @@ function commandHandler(){
 }
 
 function startServer($options){
-$log =
-'
+    $log =
+        '
   ______                          _____                              _
  |  ____|                        / ____|                            | |
  | |__      __ _   ___   _   _  | (___   __      __   ___     ___   | |   ___
@@ -101,17 +101,16 @@ $log =
     opCacheClear();
     global $server;
     $conf = \Conf\Config::getInstance();
-    if(isset($options['d'])){
-        $conf->setConf("SERVER.CONFIG.daemonize",true);
-    }else{
-        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
+    if(isset($options['ip'])){
+        $conf->setConf("SERVER.LISTEN",$options['ip']);
     }
+    echo 'listen address       '.$conf->getConf('SERVER.LISTEN')."\n";
+
     if(!empty($options['p'])){
         $conf->setConf("SERVER.PORT",$options['p']);
     }
-    if(isset($options['ip'])){
-        $conf->setConf("SERVER.LISTER",$options['ip']);
-    }
+    echo 'listen port          '.$conf->getConf('SERVER.PORT')."\n";
+
     if(!empty($options['pid'])){
         $pidFile = $options['pid'];
         \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
@@ -120,25 +119,33 @@ $log =
     if(isset($options['workerNum'])){
         $conf->setConf("SERVER.CONFIG.worker_num",$options['workerNum']);
     }
+    echo 'worker num           '.$conf->getConf('SERVER.CONFIG.worker_num')."\n";
+
     if(isset($options['taskWorkerNum'])){
         $conf->setConf("SERVER.CONFIG.task_worker_num",$options['taskWorkerNum']);
     }
+    echo 'task worker num      '.$conf->getConf('SERVER.CONFIG.worker_num')."\n";
     if(isset($options['user'])){
         $conf->setConf("SERVER.CONFIG.user",$options['user']);
     }
+    echo 'user             '.$conf->getConf('SERVER.CONFIG.user')."\n";
+
     if(isset($options['group'])){
         $conf->setConf("SERVER.CONFIG.group",$options['group']);
     }
+    echo 'user group            '.$conf->getConf('SERVER.CONFIG.group')."\n";
     if(isset($options['cpuAffinity'])){
         $conf->setConf("SERVER.CONFIG.open_cpu_affinity",true);
     }
-    if($conf->getConf('SERVER.CONFIG.daemonize')){
-        echo "start  easyswoole in daemonize model... \n";
-        $server->run();
+    $label = 'false';
+    if(isset($options['d'])){
+        $conf->setConf("SERVER.CONFIG.daemonize",true);
+        $label = 'true';
     }else{
-        echo "start  easyswoole in blocking model... \n";
-        $server->run();
+        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
     }
+    echo "daemonize            {$label} \n";
+    $server->run();
 
 }
 
