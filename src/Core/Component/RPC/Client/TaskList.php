@@ -21,7 +21,7 @@ class TaskList
         $this->conf = $config;
     }
 
-    function addCall($serverName,$action,array $args = array(),callable $successCall = null,callable $failCall = null){
+    function addCall($serverName,$action,array $args = null,callable $successCall = null,callable $failCall = null){
         $package = new Package();
         $package->setServerName($serverName);
         $package->setAction($action);
