@@ -145,6 +145,21 @@ function startServer($options){
         \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
     }
     echo "daemonize            {$label} \n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.ENABLE')){
+         $label = 'true';
+    }
+    echo 'debug enable         '.$label."\n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.LOG')){
+             $label = 'true';
+    }
+    echo 'debug log error      '.$label."\n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.DISPLAY_ERROR')){
+                 $label = 'true';
+    }
+    echo 'debug display error  '.$label."\n";
     $server->run();
 
 }
