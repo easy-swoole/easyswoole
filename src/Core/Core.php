@@ -74,8 +74,8 @@ class Core
         $this->preHandle();
         Event::getInstance()->frameInitialize();
         $this->sysDirectoryInit();
-        $this->registerErrorHandler();
         Event::getInstance()->frameInitialized();
+        $this->registerErrorHandler();
         return $this;
     }
 
