@@ -124,7 +124,7 @@ function startServer($options){
     if(isset($options['taskWorkerNum'])){
         $conf->setConf("SERVER.CONFIG.task_worker_num",$options['taskWorkerNum']);
     }
-    echo 'task worker num      '.$conf->getConf('SERVER.CONFIG.worker_num')."\n";
+    echo 'task worker num      '.$conf->getConf('SERVER.CONFIG.task_worker_num')."\n";
     if(isset($options['user'])){
         $conf->setConf("SERVER.CONFIG.user",$options['user']);
     }
