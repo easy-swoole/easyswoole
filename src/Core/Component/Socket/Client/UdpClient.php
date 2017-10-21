@@ -9,9 +9,10 @@
 namespace Core\Component\Socket\Client;
 
 
+use Core\Component\Socket\AbstractInterface\AbstractClient;
 use Core\Component\Socket\Type;
 
-class UdpClient extends Client
+class UdpClient extends AbstractClient
 {
     protected $server_socket;
     protected $server_port;

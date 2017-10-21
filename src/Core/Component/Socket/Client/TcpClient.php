@@ -9,9 +9,10 @@
 namespace Core\Component\Socket\Client;
 
 
+use Core\Component\Socket\AbstractInterface\AbstractClient;
 use Core\Component\Socket\Type;
 
-class TcpClient extends Client
+class TcpClient extends AbstractClient
 {
     protected $server_port;
     protected $server_fd;

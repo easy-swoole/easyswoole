@@ -2,16 +2,16 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/10
- * Time: 下午10:54
+ * Date: 2017/10/21
+ * Time: 下午5:46
  */
 
-namespace Core\Component\Socket\Client;
+namespace Core\Component\Socket\AbstractInterface;
 
 
 use Core\Component\Spl\SplBean;
 
-class Client extends SplBean
+abstract class AbstractClient extends SplBean
 {
     protected $clientType;
 
@@ -29,12 +29,5 @@ class Client extends SplBean
     public function setClientType($clientType)
     {
         $this->clientType = $clientType;
-    }
-
-
-
-    protected function initialize()
-    {
-        // TODO: Implement initialize() method.
     }
 }

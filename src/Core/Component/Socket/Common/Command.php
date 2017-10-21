@@ -2,16 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/10
- * Time: 下午9:38
+ * Date: 2017/10/21
+ * Time: 下午6:14
  */
 
-namespace Core\Component\Socket\Command;
+namespace Core\Component\Socket\Common;
 
 
-use Core\Component\Spl\SplBean;
-
-class Command extends SplBean
+class Command
 {
     protected $command;
     protected $message;
@@ -76,10 +74,5 @@ class Command extends SplBean
     public function setRawData($rawData)
     {
         $this->rawData = $rawData;
-    }
-
-    function initialize()
-    {
-
     }
 }
