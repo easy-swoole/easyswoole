@@ -235,9 +235,9 @@ class TcpClient extends Client
     protected function initialize()
     {
         if($this->getWebsocketStatus()){
-            $this->setSocketType(Type::WEB_SOCKET);
+            $this->setClientType(Type::WEB_SOCKET);
         }else{
-            $this->setSocketType(Type::TCP);
+            $this->setClientType(Type::TCP);
         }
     }
 
