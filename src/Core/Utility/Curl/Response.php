@@ -107,6 +107,9 @@ class Response
 
     function follow($url,callable $preCall = null){
         $request = new Request($url);
+        $request->setOpt(array(
+           CURLOPT_FAILONERROR=>$this->curlInfo['url']
+        ));
         if(is_callable($preCall)){
             call_user_func_array($preCall,array(
                $this,$request
