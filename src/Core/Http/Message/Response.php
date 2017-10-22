@@ -9,10 +9,13 @@
 namespace Core\Http\Message;
 
 
+use Core\Utility\Curl\Cookie;
+
 class Response extends Message
 {
     private $statusCode = 200;
     private $reasonPhrase = 'OK';
+    private $cookies = [];
     public function getStatusCode()
     {
         // TODO: Implement getStatusCode() method.
@@ -39,5 +42,14 @@ class Response extends Message
     {
         // TODO: Implement getReasonPhrase() method.
         return $this->reasonPhrase;
+    }
+
+    function withAddedCookie(Cookie $cookie){
+        $this->cookies[$cookie->getName()] = $cookie;
+        return $this;
+    }
+
+    function getCookies(){
+        return $this->cookies;
     }
 }

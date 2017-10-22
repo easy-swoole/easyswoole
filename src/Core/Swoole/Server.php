@@ -16,6 +16,7 @@ use Core\Http\Dispatcher;
 use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
+use Core\Utility\Curl\Cookie;
 
 class Server
 {
@@ -101,13 +102,16 @@ class Server
             }
             //结束处理
             $status = $response2->getStatusCode();
-            //状态码有固定格式。
             $response->status($status);
             $headers = $response2->getHeaders();
             foreach ($headers as $header => $val){
                 foreach ($val as $sub){
                     $response->header($header,$sub);
                 }
+            }
+            $cookies = $response2->getCookies();
+            foreach ($cookies as $cookie){
+                $response->cookie($cookie->getName(),$cookie->getName(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
             }
             $write = $response2->getBody()->__toString();
             if(!empty($write)){

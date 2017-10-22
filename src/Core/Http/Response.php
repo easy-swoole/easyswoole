@@ -12,6 +12,7 @@ use Core\Http\Message\Response as HttpResponse;
 use Core\Http\Message\Status;
 use Core\Http\Session\Response as SessionResponse;
 use Core\Http\Session\Session;
+use Core\Utility\Curl\Cookie;
 
 class Response extends HttpResponse
 {
@@ -88,26 +89,17 @@ class Response extends HttpResponse
             trigger_error("response has end");
         }
     }
-    public function setCookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httponly = null){
+    public function setCookie($name, $value = null, $expire = null, $path = '/', $domain = '', $secure = false, $httponly = false){
         if(!$this->isEndResponse()){
-            //仅支持header重定向  不做meta定向
-            $temp = " {$name}={$value};";
-            if($expire != null){
-                $temp .= " Expires=".date("D, d M Y H:i:s",$expire) . ' GMT;';
-                $maxAge = $expire - time();
-                $temp .=" Max-Age={$maxAge};";
-            }
-            $temp .= " Path={$path};";
-            if($domain != null){
-                $temp .= " Domain={$domain};";
-            }
-            if($secure != null){
-                $temp .=" Secure;";
-            }
-            if($httponly != null){
-                $temp .=" HttpOnly;";
-            }
-            $this->withAddedHeader('Set-Cookie',$temp);
+            $cookie = new Cookie();
+            $cookie->setName($name);
+            $cookie->setValue($value);
+            $cookie->setExpire($expire);
+            $cookie->setPath($path);
+            $cookie->setDomain($domain);
+            $cookie->setSecure($secure);
+            $cookie->setHttponly($httponly);
+            $this->withAddedCookie($cookie);
             return true;
         }else{
             trigger_error("response has end");
