@@ -17,9 +17,11 @@ class Response
     protected $curlInfo;
     protected $headerLine;
     protected $cookies = array();
+    protected $requestCookies;
 
-    function __construct($rawResponse,$curlResource)
+    function __construct($rawResponse,$curlResource,$requestCookies)
     {
+        $this->requestCookies = $requestCookies;
         $this->curlInfo = curl_getinfo($curlResource);
         $this->error = curl_error($curlResource);
         $this->errorNo = curl_errno($curlResource);
@@ -30,10 +32,12 @@ class Response
         preg_match_all("/Set-Cookie:(.*)\n/U",$this->headerLine,$ret);
         if(!empty($ret[0])){
             foreach($ret[0] as $item) {
-                $item = explode(";",$item)[0];
-                $item = ltrim($item,"Set-Cookie: ");
-                $item = explode("=",$item);
-                $this->cookies[$item[0]] = rtrim($item[1]);
+                preg_match('/(Cookie: )(.*?)(;)/',$item,$ret);
+                $ret = explode('=',$ret[2]);
+                $cookie = new Cookie();
+                $cookie->setValue($ret[1]);
+                $cookie->setName($ret[0]);
+                $this->cookies[$ret[0]] = $cookie;
             }
         }
         curl_close($curlResource);
@@ -90,6 +94,7 @@ class Response
     public function getCookie($cookieName){
         return isset($this->cookies[$cookieName]) ? $this->cookies[$cookieName] : null;
     }
+
     function __toString()
     {
         // TODO: Implement __toString() method.
@@ -100,5 +105,17 @@ class Response
         return $ret.$this->body;
     }
 
-
+    function follow($url,callable $preCall = null){
+        $request = new Request($url);
+        if(is_callable($preCall)){
+            call_user_func_array($preCall,array(
+               $this,$request
+            ));
+        }
+        $cookies = $this->cookies + $this->requestCookies;
+        foreach ($cookies as $cookie){
+            $request->addCookie($cookie);
+        }
+        return $request->exec();
+    }
 }

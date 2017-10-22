@@ -11,6 +11,7 @@ namespace Core\Utility\Curl;
 
 class Request
 {
+    protected $cookies = [];
     protected $curlOPt = array(
         CURLOPT_CONNECTTIMEOUT=>3,
         CURLOPT_TIMEOUT=>10,
@@ -50,11 +51,23 @@ class Request
         return $this->curlOPt;
     }
 
+    function addCookie(Cookie $cookie){
+        $this->cookies[$cookie->getName()] = $cookie;
+    }
+
     function exec(\Closure $callBack = null){
         $curl = curl_init();
-        curl_setopt_array($curl,$this->getOpt());
+        $opt = $this->getOpt();
+        if(!empty($this->cookies)){
+            $str = '';
+            foreach ($this->cookies as $cookie){
+                $str .= $cookie->__toString();
+            }
+            $opt[CURLOPT_COOKIE] = $str;
+        }
+        curl_setopt_array($curl,$opt);
         $result = curl_exec($curl);
-        $response = new Response($result,$curl);
+        $response = new Response($result,$curl,$this->cookies);
         if($callBack){
             return call_user_func($callBack,$response);
         }else{
