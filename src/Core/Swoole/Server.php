@@ -111,7 +111,7 @@ class Server
             }
             $cookies = $response2->getCookies();
             foreach ($cookies as $cookie){
-                $response->cookie($cookie->getName(),$cookie->getName(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
+                $response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
             }
             $write = $response2->getBody()->__toString();
             if(!empty($write)){
