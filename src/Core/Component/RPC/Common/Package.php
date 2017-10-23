@@ -13,13 +13,33 @@ use Core\Component\Spl\SplBean;
 
 class Package extends SplBean
 {
-    const ERROR_CODE_ACTION_NOT_FOUND = -1;
-    const ERROR_CODE_SERVER_ERROR = -2;
+    const ERROR_SERVER_NOT_FOUND = -1;
+    const ERROR_ACTION_NOT_FOUND = -2;
+    const ERROR_SERVER_ERROR = -3;
     protected $serverName;
     protected $action;
     protected $args;
     protected $message;
     protected $errorCode;
+    protected $errorMsg;
+
+    /**
+     * @return mixed
+     */
+    public function getErrorMsg()
+    {
+        return $this->errorMsg;
+    }
+
+    /**
+     * @param mixed $errorMsg
+     */
+    public function setErrorMsg($errorMsg)
+    {
+        $this->errorMsg = $errorMsg;
+    }
+
+
 
     /**
      * @return mixed

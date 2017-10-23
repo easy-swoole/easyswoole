@@ -2,71 +2,80 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/19
- * Time: 下午5:55
+ * Date: 2017/10/23
+ * Time: 下午5:35
  */
 
 namespace Core\Component\RPC\Client;
 
 
-use Core\Component\RPC\Common\AbstractPackageDecoder;
-use Core\Component\RPC\Common\AbstractPackageEncoder;
+use Core\Component\RPC\AbstractInterface\AbstractPackageParser;
 use Core\Component\RPC\Common\Config;
 use Core\Component\RPC\Common\Package;
+use Core\Component\Socket\Client\TcpClient;
 
 class Client
 {
-    protected $serverList = [];
-    function selectServer(Config $serverInfo){
-        if(empty($serverInfo->getHost())){
-            throw new \Exception("rpc host error@".$serverInfo->getHost());
+    private $serverList = [];
+    private $serverConf = [];
+    function selectServer(Config $conf){
+        if(empty($conf->getHost())){
+            throw new \Exception("rpc host error @".$conf->getHost());
         }
-        if(empty($serverInfo->getPort())){
-            throw new \Exception("rpc host port error@".$serverInfo->getPort());
+        if(empty($conf->getPort())){
+            throw new \Exception("rpc host port error @".$conf->getPort());
         }
-        $serverHash = spl_object_hash($serverInfo);
+        if(empty($conf->getPackageParserClass())){
+            throw new \Exception("rpc packageParserClass  error @".$conf->getPort());
+        }
+        $serverHash = spl_object_hash($conf);
         if(isset($this->serverList[$serverHash])){
             return $this->serverList[$serverHash];
         }else{
-            $call = new TaskList($serverInfo);
+            $call = new CallList();
             $this->serverList[$serverHash] = $call;
+            $this->serverConf[$serverHash] = $conf;
             return $call;
         }
     }
 
-    function run($timeOut = 1000){
-        $clients = array();
-        $mapInfo = array();
-        foreach ($this->serverList as $item){
-            if($item instanceof TaskList){
-                $taskList = $item->getTaskList();
-                $taskServerConf = $item->getConfig();
-                foreach ($taskList as $task){
-                    if($task instanceof TaskObj){
-                        $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
-                        $client->set(array(
-                            'open_eof_check'=>true,
-                            'package_eof'=>$taskServerConf->getEof(),//\r\n
-                        ));
-                        $client->connect($taskServerConf->getHost(), $taskServerConf->getPort(), $taskServerConf->getConnectTimeOut(), 0);
-                        if($client->isConnected()){
-                            $data = $task->getPackage()->__toString();
-                            $encoder = $taskServerConf->getPackageEncoder();
-                            if($encoder instanceof AbstractPackageEncoder){
-                                $data = $encoder->encode($data);
-                            }
-                            $client->send($data.$taskServerConf->getEof());
+    function call($timeOut = 1000){
+        $clients = [];
+        $clientsInfo = [];
+        $serverPackageParser = [];
+        foreach ($this->serverList as $serverHash => $callList){
+            $serverConf = $this->serverConf[$serverHash];
+            $currentTaskList = $callList->getTaskList();
+            $currentServerPackageParser = $serverConf->getPackageParserClass();
+            if(class_exists($currentServerPackageParser)){
+                $serverPackageParser[$serverHash] = $currentServerPackageParser = new $currentServerPackageParser();
+            }
+            foreach ($currentTaskList as $task){
+                if($task instanceof Call){
+                    $client = new \swoole_client(SWOOLE_TCP,SWOOLE_SOCK_SYNC);
+                    $client->set(array(
+                        'open_eof_check'=>true,
+                        'package_eof'=>$serverConf->getEof(),//\r\n
+                    ));
+                    $client->connect($serverConf->getHost(), $serverConf->getPort(), $serverConf->getConnectTimeOut(), 0);
+                    if($client->isConnected()){
+                        if($currentServerPackageParser instanceof AbstractPackageParser){
+                            $data = $currentServerPackageParser->encode($task->getPackage());
+                            $client->send($data.$serverConf->getEof());
                             $clients[$client->sock] = $client;
-                            $mapInfo[$client->sock] = array(
-                                'taskObj'=>$task,
-                                'eof'=>$taskServerConf->getEof(),
-                                'decoder'=>$taskServerConf->getPackageDecoder()
+                            $clientsInfo[$client->sock] = array(
+                                'callObj'=>$task,
+                                'eof'=>$serverConf->getEof(),
+                                'serverHash'=>$serverHash
                             );
-                        }else{
-                            $handler = $task->getFailCall();
-                            if(is_callable($handler)){
-                                call_user_func($handler,$task->getPackage());
-                            }
+                        }
+                    }else{
+                        $handler = $task->getFailCall();
+                        //失败的时候立即执行失败回调
+                        if(is_callable($handler)){
+                            call_user_func_array($handler,array(
+                                new Package(),$task->getPackage()
+                            ));
                         }
                     }
                 }
@@ -83,35 +92,48 @@ class Client
                 foreach ($read as $index => $c)
                 {
                     $data = $c->recv();
-                    $eof = $mapInfo[$c->sock]['eof'];
+                    $eof = $clientsInfo[$c->sock]['eof'];
                     $data = substr($data,0,-strlen($eof));
-                    $decoder = $mapInfo[$c->sock]['decoder'];
-                    if($decoder instanceof AbstractPackageDecoder){
-                        $data = $decoder->decode($data);
+                    $serverHash = $clientsInfo[$c->sock]['serverHash'];
+                    $decoder = $serverPackageParser[$serverHash];
+                    $res = new Package();
+                    if($decoder instanceof AbstractPackageParser){
+                        $decoder->decode($res,new TcpClient(),$data);
                     }
-                    $arr = json_decode($data,1);
-                    $arr = is_array($arr) ? $arr :[];
-                    $package = new Package($arr);
-                    $handler = $mapInfo[$c->sock]['taskObj']->getSuccessCall();
-                    if(is_callable($handler)){
-                        call_user_func($handler,$package);
+                    if($res->getErrorCode() || $res->getMessage()){
+                        $handler = $clientsInfo[$c->sock]['callObj']->getFailCall();
+                        if(is_callable($handler)){
+                            call_user_func($handler,array(
+                                $clientsInfo[$c->sock]['callObj']->getPackage(),$res
+                            ));
+                        }
+                    }else{
+                        $handler = $clientsInfo[$c->sock]['callObj']->getSuccessCall();
+                        if(is_callable($handler)){
+                            call_user_func($handler,array(
+                                $clientsInfo[$c->sock]['callObj']->getPackage(),$res
+                            ));
+                        }
                     }
                     $c->close();
                     unset($clients[$c->sock]);
-                    unset($mapInfo[$c->sock]);
+                    unset($clientsInfo[$c->sock]);
                 }
             }
             $now = microtime(1);
             $spend = intval(($now-$start)*1000);
             if($spend > $timeOut){
                 foreach ($clients as $sock =>$client){
-                    $handler = $mapInfo[$sock]['taskObj']->getFailCall();
+                    $handler = $clientsInfo[$c->sock]['callObj']->getSuccessCall();
                     if(is_callable($handler)){
-                        call_user_func($handler,$mapInfo[$sock]['taskObj']->getPackage());
+                        //request response
+                        call_user_func_array($handler,array(
+                            $clientsInfo[$c->sock]['callObj']->getPackage(),new Package(),
+                        ));
                     }
                     $client->close();
                     unset($clients[$client->sock]);
-                    unset($mapInfo[$client->sock]);
+                    unset($clientsInfo[$client->sock]);
                 }
                 break;
             }

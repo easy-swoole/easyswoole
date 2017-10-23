@@ -17,8 +17,7 @@ class Config extends SplBean
     protected $port;
     protected $eof = '0x0d0x0a';
     protected $heartBeatCheckInterval  = 30;
-    protected $packageEncoder = null;
-    protected $packageDecoder = null;
+    protected $packageParserClass = DefaultPackageParser::class;
     protected $connectTimeOut = 0.5;
 
     /**
@@ -71,32 +70,20 @@ class Config extends SplBean
     }
 
     /**
-     * @return null
+     * @return mixed
      */
-    public function getPackageEncoder()
+    public function getPackageParserClass()
     {
-        return $this->packageEncoder;
-    }
-
-    public function setPackageEncoder(AbstractPackageEncoder $packageEncoder)
-    {
-        $this->packageEncoder = $packageEncoder;
+        return $this->packageParserClass;
     }
 
     /**
-     * @return null
+     * @param mixed $packageParserClass
      */
-    public function getPackageDecoder()
+    public function setPackageParserClass($packageParserClass)
     {
-        return $this->packageDecoder;
+        $this->packageParserClass = $packageParserClass;
     }
-
-    public function setPackageDecoder(AbstractPackageDecoder $packageDecoder)
-    {
-        $this->packageDecoder = $packageDecoder;
-    }
-
-
 
     /**
      * @return mixed

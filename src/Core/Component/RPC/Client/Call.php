@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/19
- * Time: 下午8:06
+ * Date: 2017/10/23
+ * Time: 下午5:40
  */
 
 namespace Core\Component\RPC\Client;
@@ -11,7 +11,7 @@ namespace Core\Component\RPC\Client;
 
 use Core\Component\RPC\Common\Package;
 
-class TaskObj
+class Call
 {
     protected $package;
     protected $successCall;
@@ -46,6 +46,4 @@ class TaskObj
     {
         return $this->failCall;
     }
-
-
 }

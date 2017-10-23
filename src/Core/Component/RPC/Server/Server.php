@@ -2,36 +2,42 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/19
- * Time: 下午1:39
+ * Date: 2017/10/23
+ * Time: 下午3:49
  */
 
 namespace Core\Component\RPC\Server;
 
-use Core\Component\RPC\Common\AbstractPackageDecoder;
-use Core\Component\RPC\Common\AbstractPackageEncoder;
+
+use Core\Component\RPC\AbstractInterface\AbstractActionRegister;
+use Core\Component\RPC\AbstractInterface\AbstractPackageParser;
+use Core\Component\RPC\Common\ActionList;
 use Core\Component\RPC\Common\Config;
 use Core\Component\RPC\Common\Package;
 use Core\Component\Socket\Client\TcpClient;
 use Core\Component\Socket\Response;
-use Core\Swoole\AsyncTaskManager;
-use Core\Swoole\Server as SwooleServer;
+use \Core\Swoole\Server as SwooleServer;
 
 class Server
 {
     protected $config;
-    protected $serverList = [];
-    function __construct(Config $bean)
+    private $serverList = [];
+    private $serverActionList = [];
+    private $serverParser = [];
+    function __construct(Config $config)
     {
-        $this->config = $bean;
+        $this->config = $config;
+        if(empty($this->config->getPackageParserClass())){
+            die('server conf need package parser class');
+        }
     }
 
-    function registerServer($serverName){
-        if(isset($this->serverList[$serverName])){
-            return $this->serverList[$serverName];
+    function registerServer($name){
+        if(isset($this->serverList[$name])){
+            return $this->serverList[$name];
         }else{
-            $handler = new ServerHandler();
-            $this->serverList[$serverName] = $handler;
+            $handler = new Service();
+            $this->serverList[$name] = $handler;
             return $handler;
         }
     }
@@ -48,46 +54,66 @@ class Server
             $client = new TcpClient($server->getClientInfo($fd));
             $client->setFd($fd);
             $client->setReactorId($from_id);
-            $parser = $this->config->getPackageDecoder();
-            if($parser instanceof AbstractPackageDecoder){
-                $data = $parser->decode($data);
-            }
-            $arr = json_decode($data,1);
-            $arr = is_array($arr) ? $arr :[];
-            $requestPackage = new Package($arr);
-            $responsePackage = new Package();
-            $serverName = $requestPackage->getServerName();
-            $action = $requestPackage->getAction();
-            if(isset($this->serverList[$serverName])){
-                $handler = $this->serverList[$serverName]->getAction($action);
-                $responsePackage->setServerName($serverName);
-                $responsePackage->setAction($action);
+            $receivePackage = new Package();
+            //借助成员变量实现伪单例模式，使得一个进程内仅有一个解析器对象。
+            $parserClass = $this->config->getPackageParserClass();
+            if(isset($this->serverParser[$parserClass])){
+                $this->serverParser[$parserClass];
             }else{
-                $handler = null;
-            }
-            $eof = $this->config->getEof();
-            if(is_callable($handler)){
-                try{
-                    $message = call_user_func_array($handler,array(
-                        $responsePackage,$requestPackage,$client
-                    ));
-                    if($message !== null){
-                        $responsePackage->setMessage($message);
-                    }
-                }catch (\Exception $exception){
-                    $responsePackage->setErrorCode($responsePackage::ERROR_CODE_SERVER_ERROR);
+                if(class_exists($parserClass)){
+                    $this->serverParser[$parserClass] = new $parserClass();
+                }else{
+                    $this->serverParser[$parserClass] = false;
                 }
+            }
+            $parser = $this->serverParser[$parserClass];
+            if($parser instanceof AbstractPackageParser){
+                $parser->decode($receivePackage,$client,$data);
+                $serverName = $receivePackage->getServerName();
+                $response = new Package();
+                $response->setServerName($serverName);
+                $response->setAction($receivePackage->getAction());
+                //判断有没有该服务
+                if(isset($this->serverList[$serverName])){
+                    //存在该服务  还未进行action 注册的时候
+                    if(!isset($this->serverActionList[$serverName])){
+                        $actionList = new ActionList();
+                        $service = $this->serverList[$serverName];
+                        //获取行为注册类
+                        $registerClass = $service->getActionRegisterClass();
+                        if(class_exists($registerClass)){
+                            $ins = new $registerClass();
+                            if($ins instanceof AbstractActionRegister){
+                                $ins->register($actionList);
+                            }
+                        }
+                        $this->serverActionList[$serverName] = $actionList;
+                    }
+                    $actionList = $this->serverActionList[$serverName];
+                    $action = $receivePackage->getAction();
+                    $call = $actionList->getHandler($action);
+                    if(is_callable($call)){
+                        try{
+                            call_user_func_array($call,array(
+                                $receivePackage,$response,$client
+                            ));
+                        }catch (\Exception $exception){
+                            $response->setErrorCode($response::ERROR_SERVER_ERROR);
+                            $response->setErrorMsg($exception->getTraceAsString());
+                        }
+                    }else{
+                        $response->setErrorCode($response::ERROR_ACTION_NOT_FOUND);
+                        $response->setErrorMsg("server @ {$serverName} action @ {$action} not found");
+                    }
+                }else{
+                    $response->setErrorCode($response::ERROR_SERVER_NOT_FOUND);
+                    $response->setErrorMsg("server @ {$serverName} not found");
+                }
+                $ret = $parser->encode($response);
+                Response::response($client,(string)$ret,$this->config->getEof());
             }else{
-                $responsePackage->setErrorCode($responsePackage::ERROR_CODE_ACTION_NOT_FOUND);
+                trigger_error("{$parserClass} is not a instance of AbstractPackageParser");
             }
-            $resData = $responsePackage->__toString();
-            $encoder = $this->config->getPackageEncoder();
-            if($encoder instanceof AbstractPackageEncoder){
-                $resData = $encoder->encode($resData);
-            }
-            AsyncTaskManager::getInstance()->add(function ()use($client,$resData,$eof){
-                Response::response($client,$resData,$eof);
-            });
         });
     }
 }
