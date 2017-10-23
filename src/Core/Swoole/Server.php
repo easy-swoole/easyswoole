@@ -16,6 +16,7 @@ use Core\Http\Dispatcher;
 use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
+use Core\Swoole\Pipe\Dispatch;
 use Core\Utility\Curl\Cookie;
 
 class Server
@@ -58,6 +59,7 @@ class Server
         $conf = Config::getInstance();
         $this->getServer()->set($conf->getWorkerSetting());
         $this->beforeWorkerStart();
+        $this->pipeMessage();
         $this->serverStartEvent();
         $this->serverShutdownEvent();
         $this->workerErrorEvent();
@@ -195,6 +197,12 @@ class Server
     private function workerErrorEvent(){
         $this->getServer()->on("workererror",function (\swoole_server $server,$worker_id, $worker_pid, $exit_code){
             Event::getInstance()->onWorkerError($server, $worker_id, $worker_pid, $exit_code);
+        });
+    }
+
+    private function pipeMessage(){
+        $this->getServer()->on('pipeMessage',function (\swoole_server $server, $fromId,$data){
+            Dispatch::getInstance()->dispatch($server,$fromId,$data);
         });
     }
 }
