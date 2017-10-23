@@ -2,44 +2,44 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/21
- * Time: 下午5:38
+ * Date: 2017/10/23
+ * Time: 下午2:31
  */
 
-namespace Core\Component\Socket\AbstractInterface;
+namespace Core\Component\Socket;
 
 
+use Core\Component\Socket\AbstractInterface\AbstractClient;
+use Core\Component\Socket\AbstractInterface\AbstractCommandParser;
+use Core\Component\Socket\AbstractInterface\AbstractCommandRegister;
 use Core\Component\Socket\Client\TcpClient;
 use Core\Component\Socket\Client\UdpClient;
 use Core\Component\Socket\Common\Command;
-use Core\Component\Socket\Common\ParserContainer;
 use Core\Component\Socket\Common\CommandList;
-use Core\Component\Socket\Response;
 use Core\Swoole\Server;
 
-abstract class AbstractDispatcher
+
+class Dispatcher
 {
     private static $instance;
     private $commandList;
-    private $parserContainer;
-    static function getInstance(){
+    private $commandParser;
+    static function getInstance($commandRegisterClass,$commandParserClass){
         if(!isset(self::$instance)){
-            self::$instance = new static();
+            self::$instance = new Dispatcher($commandRegisterClass,$commandParserClass);
         }
         return self::$instance;
     }
 
-    function __construct()
+    function __construct($commandRegisterClass,$commandParserClass)
     {
         $this->commandList = new CommandList();
-        $this->parserContainer = new ParserContainer();
-        $this->parserRegister($this->parserContainer);
-        $this->commandRegister($this->commandList);
+        $commandRegister = new $commandRegisterClass();
+        if($commandRegister instanceof AbstractCommandRegister){
+            $commandRegister->register($this->commandList);
+        }
+        $this->commandParser  = new $commandParserClass();
     }
-
-    abstract protected function parserRegister(ParserContainer $container);
-    abstract protected function commandRegister(CommandList $commandList);
-
 
     function dispatchTCP($fd,$reactorId,$data){
         $client = new TcpClient(Server::getInstance()->getServer()->connection_info($fd));
@@ -60,16 +60,17 @@ abstract class AbstractDispatcher
     }
 
     private function run(AbstractClient $client,$data){
-        $command = $this->parserContainer->getParserObj()->parser($client,$data)->getResultCommand();
-        if($command instanceof Command){
+        if($this->commandParser instanceof AbstractCommandParser){
+            $command = new Command();
+            $this->commandParser->parser($command,$client,$data);
             $handler = $this->commandList->getHandler($command);
             if(is_callable($handler)){
                 try{
                     $ret = call_user_func_array($handler,array(
-                       $command,$client
+                        $command,$client
                     ));
-                    if($ret !== null && !is_object($ret)){
-                        Response::response($client,$ret);
+                    if($ret !== null){
+                        Response::response($client,(string)$ret);
                     }
                 }catch (\Exception $exception){
                     trigger_error($exception->getTraceAsString());
@@ -77,5 +78,4 @@ abstract class AbstractDispatcher
             }
         }
     }
-
 }

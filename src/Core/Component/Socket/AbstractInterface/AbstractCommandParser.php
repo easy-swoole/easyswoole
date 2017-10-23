@@ -15,20 +15,5 @@ use Core\Component\Socket\Common\Command;
 
 abstract class AbstractCommandParser
 {
-    private $command;
-    abstract protected function handler(Command $result,AbstractClient $client,$data);
-
-    function parser(AbstractClient $client,$data){
-        $this->command = new Command();
-        $this->handler($this->command,$client,$data);
-        return $this;
-    }
-
-    function getResultCommand(){
-        //为了IDE提示
-        if(!$this->command instanceof Command){
-            $this->command = new Command();
-        }
-        return $this->command;
-    }
+    abstract function parser(Command $result,AbstractClient $client,$rawData);
 }
