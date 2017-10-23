@@ -16,7 +16,7 @@ use Core\Http\Dispatcher;
 use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Swoole\Pipe\Dispatch;
+use Core\Swoole\Pipe\Dispatcher;
 use Core\Utility\Curl\Cookie;
 
 class Server
@@ -202,7 +202,7 @@ class Server
 
     private function pipeMessage(){
         $this->getServer()->on('pipeMessage',function (\swoole_server $server, $fromId,$data){
-            Dispatch::getInstance()->dispatch($server,$fromId,$data);
+            Dispatcher::getInstance()->dispatch($server,$fromId,$data);
         });
     }
 }

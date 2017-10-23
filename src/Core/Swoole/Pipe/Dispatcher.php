@@ -12,13 +12,13 @@ namespace Core\Swoole\Pipe;
 use Core\Component\Di;
 use Core\Component\Sys\SysConst;
 
-class Dispatch
+class Dispatcher
 {
     private $commandList;
     private static $instance;
     static function getInstance(){
         if(!isset(self::$instance)){
-            self::$instance = new Dispatch();
+            self::$instance = new Dispatcher();
         }
         return self::$instance;
     }
