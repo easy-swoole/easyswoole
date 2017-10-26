@@ -51,9 +51,15 @@ use Core\Utility\File;
 class Core
 {
     protected static $instance;
-    static function getInstance(){
+    private $preCall;
+    function __construct($preCall)
+    {
+        $this->preCall = $preCall;
+    }
+
+    static function getInstance(callable $preCall = null){
         if(!isset(self::$instance)){
-            self::$instance = new static();
+            self::$instance = new static($preCall);
         }
         return self::$instance;
     }
@@ -151,5 +157,8 @@ class Core
     private function preHandle(){
         Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
         Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.10');
+        if(is_callable($this->preCall)){
+            call_user_func($this->preCall);
+        }
     }
 }
