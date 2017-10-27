@@ -155,10 +155,10 @@ class Core
         }
     }
     private function preHandle(){
-        Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
-        Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.10');
         if(is_callable($this->preCall)){
             call_user_func($this->preCall);
         }
+        Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
+        Di::getInstance()->set(SysConst::EASY_SWOOLE_VERSION,'1.0.10');
     }
 }
