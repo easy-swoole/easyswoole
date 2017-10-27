@@ -86,7 +86,7 @@ class Core
     }
 
     private function defineSysConst(){
-        define("ROOT",realpath(__DIR__.'/../'));
+        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../'));
     }
     private function sysDirectoryInit(){
         //创建临时目录
