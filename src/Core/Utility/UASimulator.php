@@ -19,7 +19,7 @@ class UASimulator
 {
     // 操作系统类型
     const SYS_WIN     = 'WIN';
-    const SYS_OXS     = 'OSX';
+    const SYS_OSX     = 'OSX';
     const SYS_IOS     = 'IOS';
     const SYS_LINUX   = 'LINUX';
     const SYS_ANDROID = 'ANDROID';
@@ -55,7 +55,7 @@ class UASimulator
 
         $Platform = [
             UASimulator::SYS_WIN,
-            UASimulator::SYS_OXS,
+            UASimulator::SYS_OSX,
             UASimulator::SYS_IOS,
             UASimulator::SYS_LINUX,
             UASimulator::SYS_ANDROID,
@@ -95,7 +95,7 @@ class UASimulator
                     'X64' => 'x86_64)'   // 64Bits
                 ]
             ],
-            UASimulator::SYS_OXS     => [
+            UASimulator::SYS_OSX     => [
                 'version' => [
                     ' 10_8_0)',   // Mountain Lion 10.8.0
                     ' 10_8_1)',   // Mountain Lion 10.8.1
@@ -176,9 +176,9 @@ class UASimulator
             case UASimulator::SYS_LINUX:
                 $version = $Platform[UASimulator::SYS_LINUX]['version'];
                 return $version[array_rand($version, 1)] . $Platform[UASimulator::SYS_LINUX]['bits'][$bits];
-            case UASimulator::SYS_OXS:
-                $version = $Platform[UASimulator::SYS_OXS]['version'];
-                return $Platform[UASimulator::SYS_OXS]['bits'][$bits] . $version[array_rand($version, 1)];
+            case UASimulator::SYS_OSX:
+                $version = $Platform[UASimulator::SYS_OSX]['version'];
+                return $Platform[UASimulator::SYS_OSX]['bits'][$bits] . $version[array_rand($version, 1)];
             case UASimulator::SYS_ANDROID:
                 $version = $Platform[UASimulator::SYS_ANDROID]['version'];
                 return $version[array_rand($version, 1)];
