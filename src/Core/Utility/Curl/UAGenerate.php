@@ -7,15 +7,15 @@
 // | Author: eValor <mipone@foxmail.com>
 // +----------------------------------------------------------------------
 
-namespace Core\Utility;
+namespace Core\Utility\Curl;
 
 /**
  * 爬虫UA随机生成器
- * Class UASimulator
+ * Class UAGenerate
  * @author : evalor <master@evalor.cn>
- * @package Utils
+ * @package Core\Utility\Curl
  */
-class UASimulator
+class UAGenerate
 {
     // 操作系统类型
     const SYS_WIN     = 'WIN';
@@ -44,7 +44,7 @@ class UASimulator
     }
 
     /**
-     * Mock操作系统以及版本号
+     * 生成操作系统以及版本号
      * @author : evalor <master@evalor.cn>
      * @param string $system 平台类型
      * @param string $bits 系统版本(手机不分版本)
@@ -54,21 +54,21 @@ class UASimulator
     {
 
         $Platform = [
-            UASimulator::SYS_WIN,
-            UASimulator::SYS_OSX,
-            UASimulator::SYS_IOS,
-            UASimulator::SYS_LINUX,
-            UASimulator::SYS_ANDROID,
+            UAGenerate::SYS_WIN,
+            UAGenerate::SYS_OSX,
+            UAGenerate::SYS_IOS,
+            UAGenerate::SYS_LINUX,
+            UAGenerate::SYS_ANDROID,
         ];
 
-        $Bit = [UASimulator::SYS_BIT_X64, UASimulator::SYS_BIT_X86,];
+        $Bit = [UAGenerate::SYS_BIT_X64, UAGenerate::SYS_BIT_X86,];
 
         if (!in_array($system, $Platform)) $system = $Platform[array_rand($Platform, 1)];
         if (!in_array($bits, $Bit)) $bits = $Bit[array_rand($Bit, 1)];
 
 
         $Platform = [
-            UASimulator::SYS_WIN     => [
+            UAGenerate::SYS_WIN     => [
                 'version' => [
                     ' (Windows NT 5.0; ',  // Windows 2000
                     ' (Windows NT 5.1; ',  // Windows XP
@@ -83,7 +83,7 @@ class UASimulator
                     'X64' => 'Win64; x64)'   // 64Bits
                 ]
             ],
-            UASimulator::SYS_LINUX   => [
+            UAGenerate::SYS_LINUX   => [
                 'version' => [
                     ' (X11; Linux; ',  // Linux UNKNOW
                     ' (X11; Ubuntu; ', // Linux Ubuntu
@@ -95,7 +95,7 @@ class UASimulator
                     'X64' => 'x86_64)'   // 64Bits
                 ]
             ],
-            UASimulator::SYS_OSX     => [
+            UAGenerate::SYS_OSX     => [
                 'version' => [
                     ' 10_8_0)',   // Mountain Lion 10.8.0
                     ' 10_8_1)',   // Mountain Lion 10.8.1
@@ -130,7 +130,7 @@ class UASimulator
                     'X64' => ' (Macintosh; Intel x86_64 Mac OS X'   // 64Bits
                 ],
             ],
-            UASimulator::SYS_ANDROID => [
+            UAGenerate::SYS_ANDROID => [
                 'version' => [
                     ' (Linux; Android 4.1.1; Mobile)', // Jelly Bean 4.1
                     ' (Linux; Android 4.1.2; Mobile)', // Jelly Bean 4.1
@@ -150,7 +150,7 @@ class UASimulator
                     ' (Linux; Android 7.0; Mobile)',   // AndroidN 7.0
                 ]
             ],
-            UASimulator::SYS_IOS     => [
+            UAGenerate::SYS_IOS     => [
                 'version' => [
                     ' (iPhone; CPU iPhone OS 5_0 like Mac OS X)',   // iPhone iOS 5.0
                     ' (iPhone; CPU iPhone OS 5_1 like Mac OS X)',   // iPhone iOS 5.1
@@ -170,29 +170,29 @@ class UASimulator
         ];
 
         switch ($system) {
-            case UASimulator::SYS_WIN:
-                $version = $Platform[UASimulator::SYS_WIN]['version'];
-                return $version[array_rand($version, 1)] . $Platform[UASimulator::SYS_WIN]['bits'][$bits];
-            case UASimulator::SYS_LINUX:
-                $version = $Platform[UASimulator::SYS_LINUX]['version'];
-                return $version[array_rand($version, 1)] . $Platform[UASimulator::SYS_LINUX]['bits'][$bits];
-            case UASimulator::SYS_OSX:
-                $version = $Platform[UASimulator::SYS_OSX]['version'];
-                return $Platform[UASimulator::SYS_OSX]['bits'][$bits] . $version[array_rand($version, 1)];
-            case UASimulator::SYS_ANDROID:
-                $version = $Platform[UASimulator::SYS_ANDROID]['version'];
+            case UAGenerate::SYS_WIN:
+                $version = $Platform[UAGenerate::SYS_WIN]['version'];
+                return $version[array_rand($version, 1)] . $Platform[UAGenerate::SYS_WIN]['bits'][$bits];
+            case UAGenerate::SYS_LINUX:
+                $version = $Platform[UAGenerate::SYS_LINUX]['version'];
+                return $version[array_rand($version, 1)] . $Platform[UAGenerate::SYS_LINUX]['bits'][$bits];
+            case UAGenerate::SYS_OSX:
+                $version = $Platform[UAGenerate::SYS_OSX]['version'];
+                return $Platform[UAGenerate::SYS_OSX]['bits'][$bits] . $version[array_rand($version, 1)];
+            case UAGenerate::SYS_ANDROID:
+                $version = $Platform[UAGenerate::SYS_ANDROID]['version'];
                 return $version[array_rand($version, 1)];
-            case UASimulator::SYS_IOS:
-                $version = $Platform[UASimulator::SYS_IOS]['version'];
+            case UAGenerate::SYS_IOS:
+                $version = $Platform[UAGenerate::SYS_IOS]['version'];
                 return $version[array_rand($version, 1)];
             default:
-                $version = $Platform[UASimulator::SYS_WIN]['version'];
-                return $version[array_rand($version, 1)] . $Platform[UASimulator::SYS_WIN]['bits'][$bits];
+                $version = $Platform[UAGenerate::SYS_WIN]['version'];
+                return $version[array_rand($version, 1)] . $Platform[UAGenerate::SYS_WIN]['bits'][$bits];
         }
     }
 
     /**
-     * 模拟浏览器以及引擎版本号
+     * 生成浏览器以及引擎版本号
      * @author : evalor <master@evalor.cn>
      * @param bool $isWechat 是否模拟微信浏览器
      * @return string 浏览器引擎以及版本号
