@@ -37,7 +37,7 @@ class Logger
      * @param $obj
      */
     function log($obj){
-        $loggerWriter = Di::getInstance()->get(SysConst::DI_LOGGER_WRITER);
+        $loggerWriter = Di::getInstance()->get(SysConst::LOGGER_WRITER);
         if($loggerWriter instanceof LoggerWriterInterface){
             $loggerWriter::writeLog($obj,$this->logCategory,time());
         }else{
