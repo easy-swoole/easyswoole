@@ -54,9 +54,9 @@ class Config
                 ),
             ),
             "DEBUG"=>array(
-                "LOG"=>1,
-                "DISPLAY_ERROR"=>1,
-                "ENABLE"=>false,
+                "LOG"=>true,
+                "DISPLAY_ERROR"=>true,
+                "ENABLE"=>true,
             ),
             "CONTROLLER_POOL"=>true//web或web socket模式有效
         );

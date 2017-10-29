@@ -11,7 +11,10 @@ namespace Core\Swoole;
 
 use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
+use Core\AbstractInterface\HttpExceptionHandlerInterface;
+use Core\Component\Di;
 use Core\Component\SuperClosure;
+use Core\Component\Sys\SysConst;
 use Core\Http\Dispatcher;
 use Core\Http\Message\Status;
 use Core\Http\Request;
@@ -93,12 +96,13 @@ class Server
                 Dispatcher::getInstance()->dispatch();
                 Event::getInstance()->onResponse($request2,$response2);
             }catch (\Exception $exception){
-                if(\Conf\Config::getInstance()->getConf("DEBUG.ENABLE")){
-                    trigger_error($exception->getMessage().">".$exception->getTraceAsString());
+                $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
+                if($handler instanceof HttpExceptionHandlerInterface){
+                    $handler->handler($exception,$request2,$response2);
                 }else{
-                    $response2->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                    $response2->withHeader("Content-Type","text/html;charset=utf-8");
-                    $response2->getBody()->write($exception->getMessage()."<br/>".nl2br($exception->getTraceAsString()));
+                    if(\Conf\Config::getInstance()->getConf("DEBUG.ENABLE")){
+                        trigger_error($exception->getMessage().' for '.$exception->getTraceAsString(),E_USER_ERROR);
+                    }
                 }
             }
             //结束处理

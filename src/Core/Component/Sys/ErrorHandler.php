@@ -12,6 +12,7 @@ namespace Core\Component\Sys;
 use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Logger;
 use Core\Component\Spl\SplError;
+use Core\Http\Message\Status;
 use Core\Http\Request;
 use Core\Http\Response;
 
@@ -27,7 +28,10 @@ class ErrorHandler implements ErrorHandlerInterface
     {
         // TODO: Implement display() method.
         if(Request::getInstance()){
-            Response::getInstance()->write($error->__toString());
+            $response2 = Response::getInstance();
+            $response2->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+            $response2->withHeader("Content-Type","text/html;charset=utf-8");
+            $response2->write(nl2br($error->__toString()));
         }else{
             Logger::getInstance()->console($error,0);
         }
