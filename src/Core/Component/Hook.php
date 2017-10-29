@@ -23,31 +23,18 @@ class Hook
         return self::$instance;
     }
 
-    function listen($event,$callback,$params = []){
-        $this->eventList[$event] = array(
-            'handler'=>$callback,
-            'params'=>$params
-        );
+    function listen($event,callable $callback){
+        $this->eventList[$event] = $callback;
         return $this;
     }
 
-    function event($event,$async = true){
+    function event($event,...$arg){
         if(isset($this->eventList[$event])){
             $handler = $this->eventList[$event];
-            if($async && Server::getInstance()->isStart()){
-                AsyncTaskManager::getInstance()->add(function ()use($handler){
-                    try{
-                        call_user_func_array($handler['handler'],$handler['params']);
-                    }catch (\Exception $exception){
-                        throw $exception;
-                    }
-                });
-            }else{
-                try{
-                    call_user_func_array($handler['handler'],$handler['params']);
-                }catch (\Exception $exception){
-                    throw $exception;
-                }
+            try{
+                call_user_func_array($handler,$arg);
+            }catch (\Exception $exception){
+                throw $exception;
             }
         }
     }
