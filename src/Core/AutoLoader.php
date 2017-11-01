@@ -80,6 +80,7 @@ class AutoLoader
         }
         return false;
     }
+
     protected function loadMappedFile($prefix,$relative_class)
     {
         if (isset($this->prefixes[$prefix]) === false) {
@@ -95,6 +96,7 @@ class AutoLoader
         }
         return false;
     }
+
     function requireFile($file)
     {
         /*
@@ -107,5 +109,13 @@ class AutoLoader
             return true;
         }
         return false;
+    }
+
+    function importPath($path,$ext = 'php'){
+        $path = rtrim($path,'/');
+        $pat = $path.'/*.'.$ext;
+        foreach (glob($pat) as $file){
+            $this->requireFile($file);
+        }
     }
 }
