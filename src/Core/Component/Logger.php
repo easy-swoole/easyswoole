@@ -47,7 +47,7 @@ class Logger
              */
             $str = "time : ".date("y-m-d H:i:s")." message: ".$obj."\n";
             $filePrefix = $this->logCategory."_".date('ym');
-            $filePath = ROOT."/Log/{$filePrefix}.log";
+            $filePath = Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/{$filePrefix}.log";
             file_put_contents($filePath,$str,FILE_APPEND|LOCK_EX);
         }
     }
