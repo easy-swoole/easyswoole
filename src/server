@@ -273,7 +273,7 @@ function help($options){
             echo "--start            启动easySwoole\n";
             echo "--stop             停止easySwoole\n";
             echo "--reload           重启easySwoole\n";
-            echo "--update           重启easySwoole\n";
+            echo "--update           更新框架文件\n";
         }
     }
 }
