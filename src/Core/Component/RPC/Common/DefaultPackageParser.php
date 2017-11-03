@@ -17,6 +17,7 @@ class DefaultPackageParser extends AbstractPackageParser
     function decode(Package $result, TcpClient $client, $rawData)
     {
         // TODO: Implement decode() method.
+        $rawData = pack('H*', base_convert($rawData, 2, 16));
         $js = json_decode($rawData,1);
         $js = is_array($js) ? $js :[];
         $result->arrayToBean($js);
@@ -25,7 +26,9 @@ class DefaultPackageParser extends AbstractPackageParser
     function encode(Package $res)
     {
         // TODO: Implement encode() method.
-        return $res->__toString();
+        $data = $res->__toString();
+        $value = unpack('H*', $data);
+        return base_convert($value[1], 16, 2);
     }
 
 }
