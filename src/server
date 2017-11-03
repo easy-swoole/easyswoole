@@ -77,6 +77,11 @@ function commandHandler(){
             echo "update success\n";
             break;
         }
+        case 'version':{
+            echo \Core\Component\Di::getInstance()->get(\Core\Component\Sys\SysConst::VERSION);
+            echo "\n";
+            break;
+        }
         case 'help':
         default:{
             help($command['options']);
@@ -160,6 +165,8 @@ function startServer($options){
                  $label = 'true';
     }
     echo 'debug display error  '.$label."\n";
+    echo 'swoole version       '.phpversion('swoole')."\n";
+    echo 'easyswoole version   '.\Core\Component\Di::getInstance()->get(Core\Component\Sys\SysConst::VERSION)."\n";
     $server->run();
 
 }
