@@ -53,7 +53,7 @@ class Multi
             curl_close($ch);
         }
         if($successCh){
-            $res = new Response(curl_multi_getcontent($successCh),$successCh);
+            $res = new Response(curl_multi_getcontent($successCh),$successCh,[]);
         }else{
             $res = null;
         }
@@ -94,7 +94,7 @@ class Multi
         foreach ($map as $key => $ch){
             curl_multi_remove_handle($mh,$ch);
             //ch在Response结构函数中已经自动被close
-            $data[$key] = new Response(curl_multi_getcontent($ch),$ch);
+            $data[$key] = new Response(curl_multi_getcontent($ch),$ch,[]);
         }
         curl_multi_close($mh);
         return $data;

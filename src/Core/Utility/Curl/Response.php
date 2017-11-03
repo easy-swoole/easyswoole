@@ -19,7 +19,7 @@ class Response
     protected $cookies = array();
     protected $requestCookies;
 
-    function __construct($rawResponse,$curlResource,$requestCookies)
+    function __construct($rawResponse,$curlResource,array $requestCookies)
     {
         $this->requestCookies = $requestCookies;
         $this->curlInfo = curl_getinfo($curlResource);
