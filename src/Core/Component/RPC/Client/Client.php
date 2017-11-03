@@ -73,8 +73,10 @@ class Client
                         $handler = $task->getFailCall();
                         //失败的时候立即执行失败回调
                         if(is_callable($handler)){
+                            $res = new Package();
+                            $res->setErrorCode($res::ERROR_SERVER_CONNECT_FAIL);
                             call_user_func_array($handler,array(
-                                new Package(),$task->getPackage()
+                                $task->getPackage(),$res
                             ));
                         }
                     }
@@ -100,17 +102,17 @@ class Client
                     if($decoder instanceof AbstractPackageParser){
                         $decoder->decode($res,new TcpClient(),$data);
                     }
-                    if($res->getErrorCode() || $res->getMessage()){
+                    if($res->getErrorCode() || $res->getErrorMsg()){
                         $handler = $clientsInfo[$c->sock]['callObj']->getFailCall();
                         if(is_callable($handler)){
-                            call_user_func($handler,array(
+                            call_user_func_array($handler,array(
                                 $clientsInfo[$c->sock]['callObj']->getPackage(),$res
                             ));
                         }
                     }else{
                         $handler = $clientsInfo[$c->sock]['callObj']->getSuccessCall();
                         if(is_callable($handler)){
-                            call_user_func($handler,array(
+                            call_user_func_array($handler,array(
                                 $clientsInfo[$c->sock]['callObj']->getPackage(),$res
                             ));
                         }
@@ -126,9 +128,10 @@ class Client
                 foreach ($clients as $sock =>$client){
                     $handler = $clientsInfo[$c->sock]['callObj']->getSuccessCall();
                     if(is_callable($handler)){
-                        //request response
+                        $res = new Package();
+                        $res->setErrorCode($res::ERROR_SERVER_RESPONSE_TIME_OUT);
                         call_user_func_array($handler,array(
-                            $clientsInfo[$c->sock]['callObj']->getPackage(),new Package(),
+                            $clientsInfo[$c->sock]['callObj']->getPackage(),$res,
                         ));
                     }
                     $client->close();
