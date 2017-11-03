@@ -17,11 +17,15 @@ class ActionList
         $this->list[$name] = $call;
     }
 
+    function setDefaultAction(callable $call){
+        $this->list['__DEFAULT__'] = $call;
+    }
+
     function getHandler($name){
         if(isset($this->list[$name])){
             return $this->list[$name];
         }else{
-            return null;
+            return isset($this->list['__DEFAULT__']) ? $this->list['__DEFAULT__'] : null;
         }
     }
 }
