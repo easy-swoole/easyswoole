@@ -24,7 +24,21 @@ class Index extends AbstractController
     {
         // TODO: Implement index() method.
         $this->response()->withHeader("Content-type","text/html;charset=utf-8");
-        $this->response()->write(file_get_contents(ROOT."/App/Static/index.html"));
+        $this->response()->write('
+    <style type="text/css">
+       *{ padding: 0; margin: 0; }
+       div{ padding: 4px 48px;}
+       body{ background: #fff; font-family: "微软雅黑"; color: #333;font-size:24px}
+       h1{ font-size: 100px; font-weight: normal; margin-bottom: 12px; }
+       p{ line-height: 1.8em; font-size: 36px } a,a:hover{color:blue;}
+    </style>
+    <div style="padding: 24px 48px;">
+        <h1>:)</h1><p>欢迎使用<b> easySwoole</b></p> 
+        <span style="font-size:25px">从未如此之快 - 专为API而生的常驻内存型框架</span>
+       <br/>
+       <span style="font-size:20px">[ 欢迎前往 <a href="https://github.com/kiss291323003/easyswoole/" target="easySwoole">GitHub</a> 为 easySwoole 赏一个Star ]</span>
+   </div>
+ ');/*  url:domain/index.html  domain/   domain  */
     }
 
     function onRequest($actionName)
