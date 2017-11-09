@@ -11,7 +11,7 @@ namespace Core\Component\Version;
 
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\UrlParser;
+use Core\Http\UrlParser;
 
 class Control
 {
