@@ -72,13 +72,15 @@ function commandHandler(){
             echo "download success\n";
             exec('tar -xzvf master.tar.gz');
             exec('rm -rf ./Core');
+            exec('rm -rf ./server');
             exec('mv ./easyswoole-master/src/Core ./');
+            exec('mv ./easyswoole-master/src/server ./');
             exec('rm -rf ./easyswoole-master master.tar.gz');
             echo "update success\n";
             break;
         }
         case 'version':{
-            echo \Core\Component\Di::getInstance()->get(\Core\Component\Sys\SysConst::VERSION);
+            echo \Core\Component\Di::getInstance()->get(\Core\Component\SysConst::VERSION);
             echo "\n";
             break;
         }
