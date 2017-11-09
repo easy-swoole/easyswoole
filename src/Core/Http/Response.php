@@ -17,7 +17,7 @@ use Core\Utility\Curl\Cookie;
 class Response extends HttpResponse
 {
     private static $instance;
-    private $isEndResponse = 0;
+    private $isEndResponse = 0;//1 逻辑end  2真实end
     private $swoole_http_response = null;
     private $session = null;
     static function getInstance(\swoole_http_response $response = null){
@@ -31,33 +31,31 @@ class Response extends HttpResponse
         $this->swoole_http_response = $response;
     }
     function end($realEnd = false){
-        if(!$this->isEndResponse){
+        if($this->isEndResponse == 0){
             Session::getInstance()->close();
             $this->isEndResponse = 1;
-            if($realEnd === true){
-                //结束处理
-                $status = $this->getStatusCode();
-                $this->swoole_http_response->status($status);
-                $headers = $this->getHeaders();
-                foreach ($headers as $header => $val){
-                    foreach ($val as $sub){
-                        $this->swoole_http_response->header($header,$sub);
-                    }
+        }
+        if($realEnd === true && $this->isEndResponse != 2){
+            $this->isEndResponse = 2;
+            //结束处理
+            $status = $this->getStatusCode();
+            $this->swoole_http_response->status($status);
+            $headers = $this->getHeaders();
+            foreach ($headers as $header => $val){
+                foreach ($val as $sub){
+                    $this->swoole_http_response->header($header,$sub);
                 }
-                $cookies = $this->getCookies();
-                foreach ($cookies as $cookie){
-                    $this->swoole_http_response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
-                }
-                $write = $this->getBody()->__toString();
-                if(!empty($write)){
-                    $this->swoole_http_response->write($write);
-                }
-                $this->getBody()->close();
-                $this->swoole_http_response->end();
             }
-            return true;
-        }else{
-            return false;
+            $cookies = $this->getCookies();
+            foreach ($cookies as $cookie){
+                $this->swoole_http_response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
+            }
+            $write = $this->getBody()->__toString();
+            if(!empty($write)){
+                $this->swoole_http_response->write($write);
+            }
+            $this->getBody()->close();
+            $this->swoole_http_response->end();
         }
     }
 
