@@ -102,10 +102,10 @@ class Response extends HttpResponse
             return false;
         }
     }
-    function redirect($url){
+    function redirect($url,$status = Status::CODE_MOVED_TEMPORARILY){
         if(!$this->isEndResponse()){
             //仅支持header重定向  不做meta定向
-            $this->withStatus(Status::CODE_MOVED_TEMPORARILY);
+            $this->withStatus($status);
             $this->withHeader('Location',$url);
         }else{
             trigger_error("response has end");
