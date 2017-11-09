@@ -30,10 +30,31 @@ class Response extends HttpResponse
     {
         $this->swoole_http_response = $response;
     }
-    function end(){
+    function end($realEnd = false){
         if(!$this->isEndResponse){
             Session::getInstance()->close();
             $this->isEndResponse = 1;
+            if($realEnd === true){
+                //结束处理
+                $status = $this->getStatusCode();
+                $this->swoole_http_response->status($status);
+                $headers = $this->getHeaders();
+                foreach ($headers as $header => $val){
+                    foreach ($val as $sub){
+                        $this->swoole_http_response->header($header,$sub);
+                    }
+                }
+                $cookies = $this->getCookies();
+                foreach ($cookies as $cookie){
+                    $this->swoole_http_response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
+                }
+                $write = $this->getBody()->__toString();
+                if(!empty($write)){
+                    $this->swoole_http_response->write($write);
+                }
+                $this->getBody()->close();
+                $this->swoole_http_response->end();
+            }
             return true;
         }else{
             return false;

@@ -13,6 +13,7 @@ use Conf\Event;
 use Core\AbstractInterface\AbstractAsyncTask;
 use Core\AbstractInterface\HttpExceptionHandlerInterface;
 use Core\Component\Di;
+use Core\Component\Error\Trigger;
 use Core\Component\SuperClosure;
 use Core\Component\SysConst;
 use Core\Http\Dispatcher;
@@ -99,31 +100,10 @@ class Server
                 if($handler instanceof HttpExceptionHandlerInterface){
                     $handler->handler($exception,$request2,$response2);
                 }else{
-                    if(\Conf\Config::getInstance()->getConf("DEBUG.ENABLE")){
-                        trigger_error($exception->getMessage().' for '.$exception->getTraceAsString(),E_USER_ERROR);
-                    }
+                    Trigger::exception($exception);
                 }
             }
-            //结束处理
-            $status = $response2->getStatusCode();
-            $response->status($status);
-            $headers = $response2->getHeaders();
-            foreach ($headers as $header => $val){
-                foreach ($val as $sub){
-                    $response->header($header,$sub);
-                }
-            }
-            $cookies = $response2->getCookies();
-            foreach ($cookies as $cookie){
-                $response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
-            }
-            $write = $response2->getBody()->__toString();
-            if(!empty($write)){
-                    $response->write($write);
-            }
-            $response2->getBody()->close();
-            $response->end();
-            Response::getInstance()->end();
+            $response2->end(true);
         });
     }
     private function workerStartEvent(){

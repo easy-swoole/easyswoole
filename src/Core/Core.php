@@ -42,9 +42,12 @@ use Conf\Config;
 use Conf\Event;
 use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Di;
+use Core\Component\Error\Trigger;
 use Core\Component\Sys\ErrorHandler;
 use Core\Component\Spl\SplError;
 use Core\Component\SysConst;
+use Core\Http\Request;
+use Core\Http\Response;
 use Core\Swoole\Server;
 use Core\Utility\File;
 
@@ -134,22 +137,16 @@ class Core
             ini_set("display_errors", "On");
             error_reporting(E_ALL | E_STRICT);
             set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
-                $error = new SplError();
-                $error->setErrorCode($errorCode);
-                $error->setDescription($description);
-                $error->setFile($file);
-                $error->setLine($line);
-                $error->setContext($context);
-                $errorHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
-                if(!is_a($errorHandler,ErrorHandlerInterface::class)){
-                    $errorHandler = new ErrorHandler();
-                }
-                $errorHandler->handler($error);
-                if($conf['DISPLAY_ERROR'] == true){
-                    $errorHandler->display($error);
-                }
-                if($conf['LOG'] == true){
-                    $errorHandler->log($error);
+                Trigger::error($description." in {$file} line {$line}",debug_backtrace());
+            });
+            register_shutdown_function(function (){
+                $error = error_get_last();
+                if(!empty($error)){
+                    Trigger::error($error['message']." in file ".$error['file']." line ".$error['line'],debug_backtrace());
+                    //HTTP下，发送致命错误时，原有进程无法按照预期结束链接,强制执行end
+                    if(Request::getInstance()){
+                        Response::getInstance()->end(true);
+                    }
                 }
             });
         }

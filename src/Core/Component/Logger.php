@@ -32,9 +32,6 @@ class Logger
         $this->logCategory = $logCategory;
     }
 
-    /**
-     * @param $obj
-     */
     function log($obj){
         $loggerWriter = Di::getInstance()->get(SysConst::LOGGER_WRITER);
         if($loggerWriter instanceof LoggerWriterInterface){
@@ -49,13 +46,17 @@ class Logger
             $filePath = Di::getInstance()->get(SysConst::LOG_DIRECTORY)."/{$filePrefix}.log";
             file_put_contents($filePath,$str,FILE_APPEND|LOCK_EX);
         }
+        return $this;
     }
+
+
     function console($obj,$saveLog = 1){
         $obj = $this->objectToString($obj);
         echo $obj . "\n";
         if($saveLog){
             $this->log($obj);
         }
+        return $this;
     }
     private function objectToString($obj){
         if(is_object($obj)){
