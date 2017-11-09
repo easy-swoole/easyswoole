@@ -44,7 +44,7 @@ use Core\AbstractInterface\ErrorHandlerInterface;
 use Core\Component\Di;
 use Core\Component\Sys\ErrorHandler;
 use Core\Component\Spl\SplError;
-use Core\Component\Sys\SysConst;
+use Core\Component\SysConst;
 use Core\Swoole\Server;
 use Core\Utility\File;
 

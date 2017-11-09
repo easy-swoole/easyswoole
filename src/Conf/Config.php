@@ -8,9 +8,7 @@
  */
 namespace Conf;
 
-use Core\Component\Di;
 use Core\Component\Spl\SplArray;
-use Core\Component\Sys\SysConst;
 
 class Config
 {

@@ -10,7 +10,7 @@ namespace Core\Swoole\Pipe;
 
 
 use Core\Component\Di;
-use Core\Component\Sys\SysConst;
+use Core\Component\SysConst;
 
 class Dispatcher
 {

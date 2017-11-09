@@ -11,7 +11,6 @@ namespace Core\Component;
 
 use Core\Component\IO\FileIO;
 use Core\Component\Spl\SplArray;
-use Core\Component\Sys\SysConst;
 
 class ShareMemory
 {

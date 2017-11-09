@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/9/10
- * Time: 下午5:10
+ * Date: 2017/11/9
+ * Time: 下午12:22
  */
 
-namespace Core\Component\Sys;
+namespace Core\Component;
 
 
 class SysConst

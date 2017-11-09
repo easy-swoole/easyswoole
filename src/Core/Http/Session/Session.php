@@ -10,8 +10,7 @@ namespace Core\Http\Session;
 
 
 use Core\Component\Di;
-use Core\Component\Sys\SessionHandler;
-use Core\Component\Sys\SysConst;
+use Core\Component\SysConst;
 use Core\Http\Request as HttpRequest;
 use Core\Http\Response as HttpResponse;
 use Core\Swoole\AsyncTaskManager;

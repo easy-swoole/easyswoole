@@ -166,7 +166,7 @@ function startServer($options){
     }
     echo 'debug display error  '.$label."\n";
     echo 'swoole version       '.phpversion('swoole')."\n";
-    echo 'easyswoole version   '.\Core\Component\Di::getInstance()->get(Core\Component\Sys\SysConst::VERSION)."\n";
+    echo 'easyswoole version   '.\Core\Component\Di::getInstance()->get(Core\Component\SysConst::VERSION)."\n";
     $server->run();
 
 }

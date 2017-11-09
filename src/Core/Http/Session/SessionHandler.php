@@ -2,13 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/2
- * Time: 下午9:53
+ * Date: 2017/11/9
+ * Time: 下午12:26
  */
 
-namespace Core\Component\Sys;
-
-
+namespace Core\Http\Session;
 use Core\Component\IO\FileIO;
 use Core\Utility\File;
 
