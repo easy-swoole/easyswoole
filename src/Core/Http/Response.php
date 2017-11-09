@@ -16,6 +16,9 @@ use Core\Utility\Curl\Cookie;
 
 class Response extends HttpResponse
 {
+    const STATUS_NOT_END = 0;
+    const STATUS_LOGICAL_END = 1;
+    const STATUS_REAL_END = 2;
     private static $instance;
     private $isEndResponse = 0;//1 逻辑end  2真实end
     private $swoole_http_response = null;
@@ -31,12 +34,12 @@ class Response extends HttpResponse
         $this->swoole_http_response = $response;
     }
     function end($realEnd = false){
-        if($this->isEndResponse == 0){
+        if($this->isEndResponse == self::STATUS_NOT_END){
             Session::getInstance()->close();
-            $this->isEndResponse = 1;
+            $this->isEndResponse = self::STATUS_LOGICAL_END;
         }
-        if($realEnd === true && $this->isEndResponse != 2){
-            $this->isEndResponse = 2;
+        if($realEnd === true && $this->isEndResponse !== self::STATUS_REAL_END){
+            $this->isEndResponse = self::STATUS_REAL_END;
             //结束处理
             $status = $this->getStatusCode();
             $this->swoole_http_response->status($status);
