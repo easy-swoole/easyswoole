@@ -136,7 +136,7 @@ class Core
         if($conf['ENABLE'] == true){
             ini_set("display_errors", "On");
             error_reporting(E_ALL | E_STRICT);
-            set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
+            set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null){
                 Trigger::error($description." in {$file} line {$line}",debug_backtrace());
             });
             register_shutdown_function(function (){
