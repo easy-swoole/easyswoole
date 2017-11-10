@@ -11,6 +11,7 @@ namespace Core\Component\Error;
 
 use Conf\Config;
 use Core\AbstractInterface\ErrorHandlerInterface;
+use Core\AbstractInterface\ExceptionHandlerInterface;
 use Core\Component\Di;
 use Core\Component\SysConst;
 
@@ -37,7 +38,7 @@ class Trigger
     public static function exception(\Exception $exception){
         $conf = Config::getInstance()->getConf("DEBUG");
         $handler = Di::getInstance()->get(SysConst::EXCEPTION_HANDLER);
-        if(!$handler instanceof ErrorHandlerInterface){
+        if(!$handler instanceof ExceptionHandlerInterface){
             $handler = new ExceptionHandler();
         }
         $handler->handler($exception);
