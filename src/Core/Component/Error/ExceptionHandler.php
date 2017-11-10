@@ -26,9 +26,9 @@ class ExceptionHandler implements ExceptionHandlerInterface
     {
         // TODO: Implement display() method.
         if(Request::getInstance()){
-            Response::getInstance()->write(nl2br($exception->getTraceAsString()));
+            Response::getInstance()->write(nl2br($exception->getMessage().$exception->getTraceAsString()));
         }else{
-            Logger::getInstance('error')->console($exception->getMessage()." ".$exception->getTraceAsString(),false);
+            Logger::getInstance('error')->console($exception->getMessage().$exception->getTraceAsString(),false);
         }
     }
 
