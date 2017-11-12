@@ -16,23 +16,23 @@ use Core\Http\Response;
 
 class ErrorHandler  implements ErrorHandlerInterface
 {
-    function handler($msg, $trace)
+    function handler($msg,$file = null,$line = null, $trace)
     {
         // TODO: Implement handler() method.
     }
 
-    function display($msg, $trace)
+    function display($msg,$file = null,$line = null, $trace)
     {
         // TODO: Implement display() method.
         //判断是否在HTTP模式下
         if(Request::getInstance()){
-            Response::getInstance()->write($msg);
+            Response::getInstance()->write($msg ." in file {$file} line {$line}");
         }else{
-            Logger::getInstance('error')->console($msg,false);
+            Logger::getInstance('error')->console($msg." in file {$file} line {$line}",false);
         }
     }
 
-    function log($msg, $trace)
+    function log($msg,$file = null,$line = null, $trace)
     {
         // TODO: Implement log() method.
         Logger::getInstance('error')->log($msg);

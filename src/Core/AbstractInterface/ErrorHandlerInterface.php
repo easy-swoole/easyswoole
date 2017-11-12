@@ -10,7 +10,7 @@ namespace Core\AbstractInterface;
 
 interface ErrorHandlerInterface
 {
-    function handler($msg,$trace);
-    function display($msg,$trace);
-    function log($msg,$trace);
+    function handler($msg,$file = null,$line = null,$trace);
+    function display($msg,$file = null,$line = null,$trace);
+    function log($msg,$file = null,$line = null,$trace);
 }
