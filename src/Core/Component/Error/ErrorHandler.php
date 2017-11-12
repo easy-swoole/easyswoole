@@ -16,12 +16,12 @@ use Core\Http\Response;
 
 class ErrorHandler  implements ErrorHandlerInterface
 {
-    function handler($msg,$file = null,$line = null, $trace)
+    function handler($msg,$file = null,$line = null,$errorCode = null, $trace)
     {
         // TODO: Implement handler() method.
     }
 
-    function display($msg,$file = null,$line = null, $trace)
+    function display($msg,$file = null,$line = null,$errorCode = null, $trace)
     {
         // TODO: Implement display() method.
         //判断是否在HTTP模式下
@@ -32,10 +32,10 @@ class ErrorHandler  implements ErrorHandlerInterface
         }
     }
 
-    function log($msg,$file = null,$line = null, $trace)
+    function log($msg,$file = null,$line = null,$errorCode = null, $trace)
     {
         // TODO: Implement log() method.
-        Logger::getInstance('error')->log($msg);
+        Logger::getInstance('error')->log($msg." in file {$file} line {$line}");
     }
 
 }

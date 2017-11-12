@@ -17,7 +17,7 @@ use Core\Component\SysConst;
 
 class Trigger
 {
-    public static function error($msg,$file = null,$line = null,$trace = null){
+    public static function error($msg,$file = null,$line = null,$errorCode = E_USER_ERROR,$trace = null){
         $conf = Config::getInstance()->getConf("DEBUG");
         if($trace == null){
             $trace = debug_backtrace();
@@ -26,12 +26,12 @@ class Trigger
         if(!$handler instanceof ErrorHandlerInterface){
             $handler = new ErrorHandler();
         }
-        $handler->handler($msg,$file,$line,$trace);
+        $handler->handler($msg,$file,$line,$errorCode,$trace);
         if($conf['DISPLAY_ERROR'] == true){
-            $handler->display($msg,$file,$line,$trace);
+            $handler->display($msg,$file,$line,$errorCode,$trace);
         }
         if($conf['LOG'] == true){
-            $handler->log($msg,$file,$line,$trace);
+            $handler->log($msg,$file,$line,$errorCode,$trace);
         }
     }
 
