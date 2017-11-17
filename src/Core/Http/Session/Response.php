@@ -21,6 +21,6 @@ class Response extends Base
            $data = [];
         }
         $data[$key] = $default;
-        $this->session->write(serialize($data));
+        return $this->session->write(serialize($data));
     }
 }
