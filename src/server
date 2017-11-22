@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * Created by PhpStorm.
@@ -278,7 +279,7 @@ function help($options){
         }
         default:{
             echo "------------欢迎使用easySwoole------------\n";
-            echo "有关某个命令的详细信息，请键入 help 命令,可选参数为:\n";
+            echo "有关某个命令的详细信息，请使用 help 命令, 如help --start 可选参数为:\n";
             echo "--start            启动easySwoole\n";
             echo "--stop             停止easySwoole\n";
             echo "--reload           重启easySwoole\n";
