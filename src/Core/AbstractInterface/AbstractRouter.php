@@ -21,10 +21,10 @@ abstract class AbstractRouter
     function __construct()
     {
         $this->routeCollector = new RouteCollector(new Std(),new GroupCountBased());
-        $this->addRouter($this->routeCollector);
+        $this->register($this->routeCollector);
     }
 
-    abstract function addRouter(RouteCollector $routeCollector);
+    abstract function register(RouteCollector $routeCollector);
     function getRouteCollector(){
         return $this->routeCollector;
     }

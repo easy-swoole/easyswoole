@@ -17,7 +17,7 @@ use FastRoute\RouteCollector;
 class Router extends AbstractRouter
 {
 
-    function addRouter(RouteCollector $routeCollector)
+    function register(RouteCollector $routeCollector)
     {
         // TODO: Implement addRouter() method.
         $routeCollector->addRoute(['GET','POST'],"/router",function (){
