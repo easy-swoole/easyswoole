@@ -2,51 +2,68 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/7/7
- * Time: 下午2:30
+ * Date: 2017/11/22
+ * Time: 下午9:57
  */
 
 namespace Core\Component\Version;
+use FastRoute\DataGenerator\GroupCountBased;
+use FastRoute\Dispatcher\GroupCountBased as Dispatcher;
+use FastRoute\RouteCollector;
+use FastRoute\RouteParser\Std;
 
 
 class Version
 {
-    private $maps = array();
-    function addPathMap($rowPath,$targetPathOrClosureHandler){
-        $rowPathInfo = $this->generatePathInfo($rowPath);
-        if(is_string($targetPathOrClosureHandler)){
-            $targetPathOrClosureHandler = $this->generatePathInfo($targetPathOrClosureHandler);
+    private $versionName;
+    private $judge;
+    private $routeCollector;
+    private $dispatcher = null;
+    private $defaultHandler = null;
+    function __construct($versionName,callable $judge)
+    {
+        $this->versionName = $versionName;
+        $this->judge = $judge;
+        $this->routeCollector = new RouteCollector(new Std(),new GroupCountBased());
+    }
+
+    function register(){
+        return $this->routeCollector;
+    }
+
+
+    function dispatch($urlPath,$requestMethod){
+        if($this->dispatcher == null){
+            $this->dispatcher = new Dispatcher($this->routeCollector->getData());
         }
-        $this->maps[$rowPathInfo] = $targetPathOrClosureHandler;
-        return $this;
+        return $this->dispatch($urlPath,$requestMethod);
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function getPathMaps()
+    public function getVersionName()
     {
-        return $this->maps;
+        return $this->versionName;
     }
 
-    public function getPathMap($rowPath){
-        if(isset($this->maps[$rowPath])){
-            return $this->maps[$rowPath];
-        }else{
-            return null;
-        }
+    /**
+     * @return callable
+     */
+    public function getJudge()
+    {
+        return $this->judge;
     }
 
-    private function generatePathInfo($path){
-        $basePath = dirname($path);
-        $info = pathInfo($path);
-        if($info['filename'] != 'index'){
-            if($basePath == '/'){
-                $basePath = $basePath.$info['filename'];
-            }else{
-                $basePath = $basePath.'/'.$info['filename'];
-            }
-        }
-        return $basePath;
+    /**
+     * @return null
+     */
+    public function getDefaultHandler()
+    {
+        return $this->defaultHandler;
     }
+
+
+
+
 }
