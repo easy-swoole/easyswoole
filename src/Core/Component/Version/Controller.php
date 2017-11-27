@@ -17,7 +17,7 @@ class Controller
 {
     private static $instance;
     private $versionList = null;
-    function getInstance($versionRegisterClass){
+    static function getInstance($versionRegisterClass){
         if(!isset(self::$instance)){
             self::$instance = new Controller($versionRegisterClass);
         }
