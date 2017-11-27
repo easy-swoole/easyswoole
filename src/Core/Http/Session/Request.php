@@ -27,4 +27,18 @@ class Request extends Base
             return $default;
         }
     }
+
+    function toArray(){
+        if(!$this->session->isStart()){
+            $this->session->start();
+        }
+        $data = $this->session->read();
+        $data = unserialize($data);
+        if(is_array($data)){
+            return $data;
+        }else{
+            return array();
+        }
+    }
+
 }
