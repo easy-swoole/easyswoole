@@ -156,6 +156,6 @@ class Core
             call_user_func($this->preCall);
         }
         Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
-        Di::getInstance()->set(SysConst::VERSION,'1.1.0');
+        Di::getInstance()->set(SysConst::VERSION,'1.1.1');
     }
 }
