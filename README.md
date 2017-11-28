@@ -15,29 +15,65 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 
 - 强大的 TCP/UDP Server 框架，多线程，EventLoop，事件驱动，异步，Worker进程组，Task异步任务，毫秒定时器，SSL/TLS隧道加密
 - EventLoop API，让用户可以直接操作底层的事件循环，将socket，stream，管道等Linux文件加入到事件循环中。
-## 描述
-  把EasySwoole 的核心与配置文件和业务代码分离出来,方便用户进行升级维护 
-## 使用方法
-    ```
-    composer require aprchen/easyswoole_core
-    ```
-    
-   拷贝 App 与 Conf目录到自己的文件夹,
-   新建bin目录,新建 server文件,输入以下内容
- 
-   ```
-    #!/usr/local/bin/php
-    <?php
-    define("ES_ROOT",realpath(__DIR__.'/../src'));
-    define("ES_APP",ES_ROOT.'/App');
-    define("ES_CONF",ES_ROOT.'/Conf');
-    require_once dirname(__FILE__).'/../vendor/easyswoole/easyswoole/src/server';
-   ```
-  启动
-  ```
-  php bin\server start
-  ```
-    
+
+## 优势:
+
+- 简单易用开发效率高
+- 并发百万TCP连接
+- TCP/UDP/UnixSock
+- 支持异步/同步/协程
+- 支持多进程/多线程
+- CPU亲和性/守护进程
+
+## 关于ab基准测试:
+```
+系统: CentOS 7.1 (未做系统内核优化)
+CPU: 阿里云单核
+内存: 1G
+php: 5.6.30
+Swoole: 1.9.17
+测试代码: Index控制器中输出"hello world"
+ab -c 100 -n 500000 http://127.0.0.1:9501/ 测试结果如下
+
+
+Server Software:        swoole-http-server
+Server Hostname:        127.0.0.1
+Server Port:            9501
+
+Document Path:          /
+Document Length:        21 bytes
+
+Concurrency Level:      100
+Time taken for tests:   5.808 seconds
+Complete requests:      50000
+Failed requests:        0
+Write errors:           0
+Total transferred:      8850000 bytes
+HTML transferred:       1050000 bytes
+Requests per second:    8608.19 [#/sec] (mean)
+Time per request:       11.617 [ms] (mean)
+Time per request:       0.116 [ms] (mean, across all concurrent requests)
+Transfer rate:          1487.94 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.4      1       2
+Processing:     2   10   2.5     10      81
+Waiting:        1   10   2.4      9      80
+Total:          3   12   2.5     12      83
+
+Percentage of the requests served within a certain time (ms)
+  50%     12
+  66%     12
+  75%     12
+  80%     12
+  90%     12
+  95%     13
+  98%     13
+  99%     13
+ 100%     83 (longest request)
+```
+
 ## 其他
 
 - QQ交流群 ： 633921431
