@@ -18,7 +18,26 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 ## 描述
   把EasySwoole 的核心与配置文件和业务代码分离出来,方便用户进行升级维护 
 ## 使用方法
+    ```
+    composer require aprchen/easyswoole_core
+    ```
+    
+   拷贝 App 与 Conf目录到自己的文件夹,
+   新建bin目录,新建 server文件,输入以下内容
  
+   ```
+    #!/usr/local/bin/php
+    <?php
+    define("ES_ROOT",realpath(__DIR__.'/../src'));
+    define("ES_APP",ES_ROOT.'/App');
+    define("ES_CONF",ES_ROOT.'/Conf');
+    require_once dirname(__FILE__).'/../vendor/easyswoole/easyswoole/src/server';
+   ```
+  启动
+  ```
+  php bin\server start
+  ```
+    
 ## 其他
 
 - QQ交流群 ： 633921431
