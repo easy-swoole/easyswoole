@@ -1,7 +1,7 @@
 
 {
-    "name": "easyswoole/easyswoole",
-    "type": "framework",
+    "name": "aprchen/easyswoole_core",
+    "type": "lib",
     "authors": [
       {
         "name": "kiss291323003"
