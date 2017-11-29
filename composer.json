@@ -1,4 +1,3 @@
-
 {
     "name": "aprchen/easyswoole_core",
     "type": "lib",
@@ -17,5 +16,8 @@
             "App\\": "src/App/",
             "Conf\\": "src/Conf/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2"
     }
 }
