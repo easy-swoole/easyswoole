@@ -140,12 +140,12 @@ class Core
             ini_set("display_errors", "On");
             error_reporting(E_ALL | E_STRICT);
             set_error_handler(function($errorCode, $description, $file = null, $line = null, $context = null){
-                Trigger::error($description." in {$file} line {$line}",debug_backtrace());
+                Trigger::error($description,$file,$line,$errorCode,debug_backtrace());
             });
             register_shutdown_function(function (){
                 $error = error_get_last();
                 if(!empty($error)){
-                    Trigger::error($error['message']." in file ".$error['file']." line ".$error['line'],debug_backtrace());
+                    Trigger::error($error['message'],$error['file'],$error['line'],E_ERROR,debug_backtrace());
                     //HTTP下，发送致命错误时，原有进程无法按照预期结束链接,强制执行end
                     if(Request::getInstance()){
                         Response::getInstance()->end(true);
@@ -154,6 +154,7 @@ class Core
             });
         }
     }
+
     private function preHandle(){
         if(is_callable($this->preCall)){
             call_user_func($this->preCall);

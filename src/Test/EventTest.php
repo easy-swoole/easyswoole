@@ -10,4 +10,4 @@
 class EventTest extends \PHPUnit\Framework\TestCase
 {
 
-}
+} 
