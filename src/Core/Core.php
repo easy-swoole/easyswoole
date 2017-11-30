@@ -89,13 +89,16 @@ class Core
     }
 
     private function defineSysConst(){
-        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../'));
+        defined('ES_ROOT') or define("ES_ROOT",realpath(__DIR__.'/../'));
+        defined('ES_APP') or define("ES_APP",ES_ROOT.'/App');
+        defined('ES_CONF') or define("ES_CONF",ES_ROOT.'/Conf');
+        defined('ES_CORE') or define("ES_CORE",__DIR__.'/../Core');
     }
     private function sysDirectoryInit(){
         //创建临时目录
         $tempDir = Di::getInstance()->get(SysConst::TEMP_DIRECTORY);
         if(empty($tempDir)){
-            $tempDir = ROOT."/Temp";
+            $tempDir = ES_ROOT."/Temp";
             Di::getInstance()->set(SysConst::TEMP_DIRECTORY,$tempDir);
         }
         if(!File::createDir($tempDir)){
@@ -109,7 +112,7 @@ class Core
         //创建日志目录
         $logDir = Di::getInstance()->get(SysConst::LOG_DIRECTORY);
         if(empty($logDir)){
-            $logDir = ROOT."/Log";
+            $logDir = ES_ROOT."/Log";
             Di::getInstance()->set(SysConst::LOG_DIRECTORY,$logDir);
         }
         if(!File::createDir($logDir)){
@@ -122,13 +125,13 @@ class Core
     private static function registerAutoLoader(){
         require_once __DIR__."/AutoLoader.php";
         $loader = AutoLoader::getInstance();
-        $loader->addNamespace("App","App");
-        $loader->addNamespace("Core","Core");
-        $loader->addNamespace("Conf","Conf");
+        $loader->addNamespace("App",ES_APP);
+        $loader->addNamespace("Core",ES_CORE);
+        $loader->addNamespace("Conf",ES_CONF);
         //添加系统依赖组件
-        $loader->addNamespace("FastRoute","Core/Vendor/FastRoute");
-        $loader->addNamespace("SuperClosure","Core/Vendor/SuperClosure");
-        $loader->addNamespace("PhpParser","Core/Vendor/PhpParser");
+        $loader->addNamespace("FastRoute",ES_CORE."/Vendor/FastRoute");
+        $loader->addNamespace("SuperClosure",ES_CORE."/Vendor/SuperClosure");
+        $loader->addNamespace("PhpParser",ES_CORE."/Vendor/PhpParser");
     }
 
     private function registerErrorHandler(){
@@ -151,11 +154,12 @@ class Core
             });
         }
     }
+
     private function preHandle(){
         if(is_callable($this->preCall)){
             call_user_func($this->preCall);
         }
         Di::getInstance()->set(SysConst::SESSION_NAME,'EasySwoole');
-        Di::getInstance()->set(SysConst::VERSION,'1.1.1');
+        Di::getInstance()->set(SysConst::VERSION,'1.1.0');
     }
 }

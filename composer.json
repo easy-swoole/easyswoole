@@ -1,7 +1,6 @@
-
 {
-    "name": "easyswoole/easyswoole",
-    "type": "framework",
+    "name": "aprchen/easyswoole_core",
+    "type": "lib",
     "authors": [
       {
         "name": "kiss291323003"
@@ -17,5 +16,8 @@
             "App\\": "src/App/",
             "Conf\\": "src/Conf/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2"
     }
 }
