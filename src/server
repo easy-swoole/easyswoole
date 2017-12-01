@@ -72,12 +72,14 @@ function commandHandler(){
             exec('curl -sS -o master.tar.gz https://codeload.github.com/kiss291323003/easyswoole/tar.gz/master');
             echo "download success\n";
             exec('tar -xzvf master.tar.gz');
-            exec('rm -rf ./Core');
-            exec('rm -rf ./server');
-            exec('mv ./easyswoole-master/src/Core ./');
-            exec('mv ./easyswoole-master/src/server ./');
-            if (isset($command['options']['helper'])){
+            if (isset($command['options']['ide'])){
+                exec('rm -rf ./ide_helper');
                 exec('mv ./easyswoole-master/ide_helper ./');
+            }else{
+                exec('rm -rf ./Core');
+                exec('rm -rf ./server');
+                exec('mv ./easyswoole-master/src/Core ./');
+                exec('mv ./easyswoole-master/src/server ./');
             }
             exec('rm -rf ./easyswoole-master master.tar.gz');
             echo "update success\n";
@@ -279,7 +281,7 @@ function help($options){
         case 'update':{
             echo "------------easySwoole 更新命令------------\n";
             echo "执行php server.php update 即可更新框架。更新可选参数为:\n";
-            echo "--helper              同时释放ide助手到框架中\n";
+            echo "--ide-help               更新ide助手文件，不存在则下载\n";
             break;
         }
         default:{
