@@ -76,6 +76,9 @@ function commandHandler(){
             exec('rm -rf ./server');
             exec('mv ./easyswoole-master/src/Core ./');
             exec('mv ./easyswoole-master/src/server ./');
+            if (isset($command['options']['helper'])){
+                exec('mv ./easyswoole-master/ide_helper ./');
+            }
             exec('rm -rf ./easyswoole-master master.tar.gz');
             echo "update success\n";
             break;
@@ -261,20 +264,22 @@ function help($options){
         }
         case 'stop':{
             echo "------------easySwoole 停止命令------------\n";
-            echo "执行php server.php stop 即可启动服务。启动可选参数为:\n";
+            echo "执行php server.php stop 即可停止服务。停止可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
             echo "--f                   强制停止服务\n";
             break;
         }
         case 'reload':{
             echo "------------easySwoole 重启命令------------\n";
-            echo "执行php server.php reload 即可启动服务。启动可选参数为:\n";
+            echo "执行php server.php reload 即可重启服务。重启可选参数为:\n";
             echo "--pid-fileName        指定服务PID存储文件\n";
             echo "--pid-all             是否重启所有进程，默认true\n";
             break;
         }
         case 'update':{
             echo "------------easySwoole 更新命令------------\n";
+            echo "执行php server.php update 即可更新框架。更新可选参数为:\n";
+            echo "--helper              同时释放ide助手到框架中\n";
             break;
         }
         default:{
