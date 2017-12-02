@@ -69,7 +69,7 @@ function commandHandler(){
         }
         case 'update':{
             echo "start download\n";
-            exec('curl -sS -o master.tar.gz https://github.com/easy-swoole/easyswoole/tar.gz/master');
+            exec('curl -sS -o master.tar.gz https://codeload.github.com/easy-swoole/easyswoole/tar.gz/master');
             echo "download success\n";
             exec('tar -xzvf master.tar.gz');
             if (isset($command['options']['ide'])){
