@@ -6,13 +6,13 @@
  * Time: 下午9:41
  */
 
-namespace easySwoole\Core;
+namespace EasySwoole\Core;
 
 
-use easySwoole\Core\AbstractInterface\Singleton;
-use easySwoole\Core\Component\Di;
-use easySwoole\Core\Component\SysConst;
-use easySwoole\Core\Utility\File;
+use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Utility\File;
 
 class Core
 {

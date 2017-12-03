@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/2
- * Time: 下午9:41
+ * Date: 2017/12/3
+ * Time: 下午5:50
  */
 
-namespace easySwoole\Core;
+namespace EasySwoole;
 
 
 class AutoLoader
@@ -23,7 +23,7 @@ class AutoLoader
 
     function __construct()
     {
-        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../'));
+        defined('ROOT') or define("ROOT",realpath(__DIR__));
         spl_autoload_register(array($this, 'loadClass'));
     }
 

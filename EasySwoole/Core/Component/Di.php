@@ -6,10 +6,10 @@
  * Time: 下午10:11
  */
 
-namespace easySwoole\Core\Component;
+namespace EasySwoole\Core\Component;
 
 
-use easySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\AbstractInterface\Singleton;
 
 class Di
 {

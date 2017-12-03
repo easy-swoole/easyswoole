@@ -6,10 +6,10 @@
  * Time: 下午10:31
  */
 
-namespace easySwoole\Core\Swoole;
+namespace EasySwoole\Core\Swoole;
 
 
-use easySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\AbstractInterface\Singleton;
 
 class Server
 {

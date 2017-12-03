@@ -6,7 +6,7 @@
  * Time: 下午11:07
  */
 
-namespace easySwoole\Core\Utility\Curl;
+namespace EasySwoole\Core\Utility\Curl;
 
 
 

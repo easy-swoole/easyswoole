@@ -6,7 +6,7 @@
  * Time: 下午4:30
  */
 
-namespace easySwoole\Core\Component\Spl;
+namespace EasySwoole\Core\Component\Spl;
 
 
 class SplBean implements \JsonSerializable

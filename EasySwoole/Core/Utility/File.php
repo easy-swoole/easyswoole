@@ -6,7 +6,7 @@
  * Time: 下午10:50
  */
 
-namespace easySwoole\Core\Utility;
+namespace EasySwoole\Core\Utility;
 
 
 class File

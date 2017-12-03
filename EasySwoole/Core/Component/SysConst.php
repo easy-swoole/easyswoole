@@ -6,7 +6,7 @@
  * Time: 下午10:33
  */
 
-namespace easySwoole\Core\Component;
+namespace EasySwoole\Core\Component;
 
 
 class SysConst

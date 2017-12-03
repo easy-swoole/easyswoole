@@ -1,4 +1,4 @@
-# easySwoole
+# EasySwoole
 ```
   ______                          _____                              _        
  |  ____|                        / ____|                            | |       
