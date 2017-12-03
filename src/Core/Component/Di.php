@@ -2,29 +2,22 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/2/1
- * Time: 上午12:23
+ * Date: 2017/12/2
+ * Time: 下午10:11
  */
 
-namespace Core\Component;
+namespace easySwoole\Core\Component;
 
+
+use easySwoole\Core\AbstractInterface\Singleton;
 
 class Di
 {
-    /*
-     * 借以实现IOC注入
-     */
-    protected static $instance;
-    protected $container = array();
-    static function getInstance(){
-        if(!isset(self::$instance)){
-            self::$instance = new static();
-        }
-        return self::$instance;
-    }
+    use Singleton;
+    private $container = array();
 
-
-    function set($key, $obj,...$arg){
+    public function set($key, $obj,...$arg):void
+    {
         if(count($arg) == 1 && is_array($arg[0])){
             $arg = $arg[0];
         }
@@ -36,22 +29,20 @@ class Di
             "obj"=>$obj,
             "params"=>$arg,
         );
-        return $this;
     }
 
-    function delete($key){
+    function delete($key):void
+    {
         unset( $this->container[$key]);
     }
 
-    function clear(){
+    function clear():void
+    {
         $this->container = array();
     }
 
-    /**
-     * @param $key
-     * @return mixed
-     */
-    function get($key){
+    function get($key)
+    {
         if(isset($this->container[$key])){
             $result = $this->container[$key];
             if(is_object($result['obj'])){

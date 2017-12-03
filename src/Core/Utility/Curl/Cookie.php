@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/10/22
- * Time: 下午10:50
+ * Date: 2017/12/2
+ * Time: 下午11:05
  */
 
-namespace Core\Utility\Curl;
+namespace easySwoole\Core\Utility\Curl;
 
 
 class Cookie
@@ -15,9 +15,9 @@ class Cookie
     private $value;
     private $expire = 0;
     private $path = '/';
-    private $domain = '';
+    private $domain = null;
     private $secure = false;
-    private $httponly = false;
+    private $httpOnly = false;
 
     /**
      * @return mixed
@@ -52,17 +52,17 @@ class Cookie
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getExpire()
+    public function getExpire(): int
     {
         return $this->expire;
     }
 
     /**
-     * @param mixed $expire
+     * @param int $expire
      */
-    public function setExpire($expire)
+    public function setExpire(int $expire)
     {
         $this->expire = $expire;
     }
@@ -70,7 +70,7 @@ class Cookie
     /**
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -78,57 +78,57 @@ class Cookie
     /**
      * @param string $path
      */
-    public function setPath($path)
+    public function setPath(string $path)
     {
         $this->path = $path;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getDomain()
+    public function getDomain(): ?string
     {
         return $this->domain;
     }
 
     /**
-     * @param mixed $domain
+     * @param string $domain
      */
-    public function setDomain($domain)
+    public function setDomain(string $domain)
     {
         $this->domain = $domain;
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getSecure()
+    public function isSecure(): bool
     {
         return $this->secure;
     }
 
     /**
-     * @param mixed $secure
+     * @param bool $secure
      */
-    public function setSecure($secure)
+    public function setSecure(bool $secure)
     {
         $this->secure = $secure;
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getHttponly()
+    public function isHttpOnly(): bool
     {
-        return $this->httponly;
+        return $this->httpOnly;
     }
 
     /**
-     * @param mixed $httponly
+     * @param bool $httpOnly
      */
-    public function setHttponly($httponly)
+    public function setHttpOnly(bool $httpOnly)
     {
-        $this->httponly = $httponly;
+        $this->httpOnly = $httpOnly;
     }
 
     function __toString()
@@ -136,5 +136,6 @@ class Cookie
         // TODO: Implement __toString() method.
         return "{$this->name}={$this->value};";
     }
+
 
 }

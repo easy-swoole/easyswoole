@@ -2,17 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/1/23
- * Time: 上午11:17
+ * Date: 2017/12/2
+ * Time: 下午11:07
  */
 
-namespace Core\Utility\Curl;
+namespace easySwoole\Core\Utility\Curl;
+
 
 
 class Request
 {
-    protected $cookies = [];
-    protected $curlOPt = array(
+    private $curlOPt = [
         CURLOPT_CONNECTTIMEOUT=>3,
         CURLOPT_TIMEOUT=>10,
         CURLOPT_AUTOREFERER=>true,
@@ -22,42 +22,56 @@ class Request
         CURLOPT_SSL_VERIFYPEER=>false,
         CURLOPT_SSL_VERIFYHOST=>false,
         CURLOPT_HEADER=>true,
-    );
+    ];
 
-    function __construct($url = null,array $opt = array())
+    private $fields = [];
+    private $cookies = [];
+
+    function __construct(string $url = null)
     {
-        $this->curlOPt[CURLOPT_URL] = $url;
-        if(!empty($opt)){
-            $this->curlOPt = $opt + $this->curlOPt ;
+        if($url !== null){
+            $this->setUrl($url);
         }
     }
 
-    function setPost($data){
-        $this->curlOPt[CURLOPT_POST] =  true;
-        $this->curlOPt[CURLOPT_POSTFIELDS] = $data;
-        return $this;
-    }
-
-    function setOpt(array $opt){
-        $this->curlOPt =  $opt + $this->curlOPt;
-        return $this;
-    }
-    
-    function setUrl($url){
+    public function setUrl(string $url):Request
+    {
         $this->curlOPt[CURLOPT_URL] = $url;
         return $this;
     }
-    function getOpt(){
-        return $this->curlOPt;
+
+    public function addCookie(Cookie $cookie):Request
+    {
+        $this->cookies[$cookie->getName()] = $cookie->getValue();
+        return $this;
     }
 
-    function addCookie(Cookie $cookie){
-        $this->cookies[$cookie->getName()] = $cookie;
+    public function addPost(Field $field,$isFile = false):Request
+    {
+        $this->fields['post'][$field->getName()] = $isFile ? new \CURLFile($field->getVal()) : $field->getVal();
+        return $this;
     }
 
-    function exec(\Closure $callBack = null){
+    public function addGet(Field $field):Request
+    {
+        $this->fields['get'][$field->getName()] = $field->getVal();
+        return $this;
+    }
+
+    public function setUserOpt(array $opt,$isMerge = true):Request
+    {
+        if($isMerge){
+            $this->curlOPt = $opt+ $this->curlOPt;
+        }else{
+            $this->curlOPt = $opt;
+        }
+        return $this;
+    }
+
+    public function exec():Response
+    {
         $curl = curl_init();
-        $opt = $this->getOpt();
+        $opt = $this->curlOPt;
         if(!empty($this->cookies)){
             $str = '';
             foreach ($this->cookies as $cookie){
@@ -65,13 +79,34 @@ class Request
             }
             $opt[CURLOPT_COOKIE] = $str;
         }
+        if(isset($this->fields['get'])){
+            $query = http_build_query($this->fields['get']);
+            $opt[CURLOPT_URL] = rtrim( $opt[CURLOPT_URL],'?').'?'.$query;
+        }
+        if(isset($this->fields['post'])){
+            //若用户已经设置了POST  则opt中的优先级最高
+            if(!isset($opt[CURLOPT_POSTFIELDS])){
+                $opt[CURLOPT_POSTFIELDS] = $this->fields['post'];
+                $opt[CURLOPT_POST] = true;
+            }
+        }
+        if(!empty($this->cookies))
+        {
+            //优先级同上
+            if(!isset($opt[CURLOPT_COOKIE])){
+                $str = '';
+                foreach ($this->cookies as $cookie => $value){
+                    $str .= $cookie.'='.$value.';';
+                }
+                $opt[CURLOPT_COOKIE] = $str;
+            }
+        }
         curl_setopt_array($curl,$opt);
         $result = curl_exec($curl);
-        $response = new Response($result,$curl,$this->cookies);
-        if($callBack){
-            return call_user_func($callBack,$response);
-        }else{
-            return $response;
-        }
+        return new Response($result,$curl);
     }
+
+
+
+
 }

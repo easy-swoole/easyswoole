@@ -1,56 +1,57 @@
 <?php
-
 /**
  * Created by PhpStorm.
- * User: YF
- * Date: 16/8/24
- * Time: 下午11:58
+ * User: yf
+ * Date: 2017/12/2
+ * Time: 下午9:41
  */
 
-namespace Core;
-
+namespace easySwoole\Core;
 
 
 class AutoLoader
 {
-    protected static $instance;
-    /**
-     * 对应每个命名空间的路径前缀配置
-     * @var array
-     */
-    protected $prefixes = array();
-    static function getInstance(){
+    private static $instance;
+    private $prefixes = array();
+    static function getInstance():AutoLoader
+    {
         if(!isset(self::$instance)){
             self::$instance = new AutoLoader();
         }
         return self::$instance;
     }
+
     function __construct()
     {
-        $this->register();
-    }
-
-    /**
-     *注册自动加载事件
-     */
-    protected function register()
-    {
+        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../'));
         spl_autoload_register(array($this, 'loadClass'));
     }
-    /**
-     * @param string $prefix 名称空间前缀.
-     * @param string $base_dir 对应的基础路径
-     * @param bool $prepend 该路径是否优先搜索
-     * @return $this
-     */
-    public function addNamespace($prefix,$base_dir,$memorySecure = 1,$prepend = false)
+
+
+    private function loadClass($class):bool
+    {
+        $prefix = $class;
+        while (false !== $pos = strrpos($prefix, '\\')) {
+            $prefix = substr($class, 0, $pos + 1);
+            $relative_class = substr($class, $pos + 1);
+            $mapped_file = $this->loadMappedFile($prefix, $relative_class);
+            if ($mapped_file) {
+                return true;
+            }
+            $prefix = rtrim($prefix, '\\');
+        }
+        return false;
+    }
+
+
+    public function addNamespace($prefix,$base_dir,$clear = false,$prepend = false):AutoLoader
     {
         $prefix = trim($prefix, '\\') . '\\';
         $base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . '/';
         if (isset($this->prefixes[$prefix]) === false) {
             $this->prefixes[$prefix] = array();
         }
-        if($memorySecure == 1){
+        if($clear == 1){
             //执行清空
             $this->prefixes[$prefix] = array();
         }
@@ -62,42 +63,21 @@ class AutoLoader
         return $this;
     }
 
-    /**
-     * @param $class
-     * @return bool|string
-     */
-    protected function loadClass($class)
-    {
-        $prefix = $class;
-        while (false !== $pos = strrpos($prefix, '\\')) {
-            $prefix = substr($class, 0, $pos + 1);
-            $relative_class = substr($class, $pos + 1);
-            $mapped_file = $this->loadMappedFile($prefix, $relative_class);
-            if ($mapped_file) {
-                return $mapped_file;
-            }
-            $prefix = rtrim($prefix, '\\');
-        }
-        return false;
-    }
-
-    protected function loadMappedFile($prefix,$relative_class)
+    protected function loadMappedFile($prefix,$relative_class):bool
     {
         if (isset($this->prefixes[$prefix]) === false) {
             return false;
         }
         foreach ($this->prefixes[$prefix] as $base_dir) {
-            $file = $base_dir
-                . str_replace('\\', '/', $relative_class)
-                . '.php';
+            $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
             if ($this->requireFile($file)) {
-                return $file;
+                return true;
             }
         }
         return false;
     }
 
-    function requireFile($file)
+    function requireFile($file):bool
     {
         /*
          * 若不加ROOT，会导致在daemonize模式下
@@ -111,7 +91,8 @@ class AutoLoader
         return false;
     }
 
-    function importPath($path,$ext = 'php'){
+    function importPath($path,$ext = 'php'):void
+    {
         $path = rtrim($path,'/');
         $pat = $path.'/*.'.$ext;
         foreach (glob($pat) as $file){

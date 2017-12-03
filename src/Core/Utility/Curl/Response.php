@@ -2,30 +2,27 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/1/23
- * Time: 上午11:17
+ * Date: 2017/12/2
+ * Time: 下午11:38
  */
 
-namespace Core\Utility\Curl;
+namespace easySwoole\Core\Utility\Curl;
 
 
 class Response
 {
-    protected $body = '';
-    protected $error;
-    protected $errorNo;
-    protected $curlInfo;
-    protected $headerLine;
-    protected $cookies = array();
-    protected $requestCookies;
+    private $cookies = [];
+    private $body = '';
+    private $error;
+    private $errorNo = null;
+    private $curlInfo = [];
+    private $headerLine = '';
 
-    function __construct($rawResponse,$curlResource,array $requestCookies)
+    function __construct($rawResponse,$curlResource)
     {
-        $this->requestCookies = $requestCookies;
         $this->curlInfo = curl_getinfo($curlResource);
         $this->error = curl_error($curlResource);
         $this->errorNo = curl_errno($curlResource);
-        //处理头部信息
         $this->headerLine = substr($rawResponse, 0, $this->curlInfo['header_size']);
         $this->body = substr($rawResponse, $this->curlInfo['header_size']);
         //处理头部中的cookie
@@ -35,12 +32,30 @@ class Response
                 preg_match('/(Cookie: )(.*?)(;)/',$item,$ret);
                 $ret = explode('=',$ret[2]);
                 $cookie = new Cookie();
-                $cookie->setValue($ret[1]);
                 $cookie->setName($ret[0]);
+                $cookie->setValue($ret[1]);
                 $this->cookies[$ret[0]] = $cookie;
             }
         }
         curl_close($curlResource);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCookies(): array
+    {
+        return $this->cookies;
+    }
+
+
+    public function getCookie($name):?Cookie
+    {
+        if(isset($this->cookies[$name])){
+            return $this->cookies[$name];
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -54,13 +69,13 @@ class Response
     /**
      * @return string
      */
-    public function getError()
+    public function getError(): string
     {
         return $this->error;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getErrorNo()
     {
@@ -68,7 +83,7 @@ class Response
     }
 
     /**
-     * @return mixed
+     * @return array|mixed
      */
     public function getCurlInfo()
     {
@@ -81,44 +96,5 @@ class Response
     public function getHeaderLine()
     {
         return $this->headerLine;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCookies()
-    {
-        return $this->cookies;
-    }
-
-    public function getCookie($cookieName){
-        return isset($this->cookies[$cookieName]) ? $this->cookies[$cookieName] : null;
-    }
-
-    function __toString()
-    {
-        // TODO: Implement __toString() method.
-        $ret = '';
-        if(!empty($this->headerLine)){
-            $ret =  $this->headerLine."\n\r\n\r";
-        }
-        return $ret.$this->body;
-    }
-
-    function follow($url,callable $preCall = null){
-        $request = new Request($url);
-        $request->setOpt(array(
-           CURLOPT_REFERER=>$this->curlInfo['url']
-        ));
-        if(is_callable($preCall)){
-            call_user_func_array($preCall,array(
-               $this,$request
-            ));
-        }
-        $cookies = $this->cookies + $this->requestCookies;
-        foreach ($cookies as $cookie){
-            $request->addCookie($cookie);
-        }
-        return $request->exec();
     }
 }

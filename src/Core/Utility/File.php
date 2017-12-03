@@ -2,16 +2,19 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/9/7
- * Time: 下午12:15
+ * Date: 2017/12/2
+ * Time: 下午10:50
  */
 
-namespace Core\Utility;
+namespace easySwoole\Core\Utility;
 
 
 class File
 {
-    static function createDir($dirPath){
+    const TYPE_FILE = 1;
+    const TYPE_DIR = 2;
+    static function createDir($dirPath):bool
+    {
         if(!is_dir($dirPath)){
             try{
                 return mkdir($dirPath,0755,true);
@@ -22,7 +25,8 @@ class File
             return true;
         }
     }
-    static function deleteDir($dirPath){
+    static function deleteDir($dirPath):bool
+    {
         if(self::clearDir($dirPath)){
             try{
                 return rmdir($dirPath);
@@ -33,7 +37,8 @@ class File
             return false;
         }
     }
-    static function clearDir($dirPath){
+    static function clearDir($dirPath):bool
+    {
         if (!is_dir($dirPath)) {
             return false;
         }
@@ -64,7 +69,8 @@ class File
             return false;
         }
     }
-    static function copyDir($dirPath,$targetPath,$overwrite = true){
+    static function copyDir($dirPath,$targetPath,$overwrite = true):bool
+    {
         if (!is_dir($dirPath)) {
             return false;
         }
@@ -100,7 +106,8 @@ class File
             return false;
         }
     }
-    static function moveDir($dirPath,$targetPath,$overwrite = true){
+    static function moveDir($dirPath,$targetPath,$overwrite = true):bool
+    {
         try{
             if(self::copyDir($dirPath,$targetPath,$overwrite)){
                 return self::deleteDir($dirPath);
@@ -111,7 +118,8 @@ class File
             return false;
         }
     }
-    static function createFile($filePath, $overwrite = true){
+    static function createFile($filePath, $overwrite = true):bool
+    {
         if (file_exists($filePath) && $overwrite == false) {
             return false;
         } elseif (file_exists($filePath) && $overwrite == true) {
@@ -130,14 +138,16 @@ class File
             return false;
         }
     }
-    static function saveFile($filePath,$content, $overwrite = true){
+    static function saveFile($filePath,$content, $overwrite = true):bool
+    {
         if(self::createFile($filePath,$overwrite)){
-            return file_put_contents($filePath,$content);
+            return (bool)file_put_contents($filePath,$content);
         }else{
             return false;
         }
     }
-    static function copyFile($filePath,$targetFilePath,$overwrite = true){
+    static function copyFile($filePath,$targetFilePath,$overwrite = true):bool
+    {
         if (!file_exists($filePath)) {
             return false;
         }
@@ -154,7 +164,8 @@ class File
         };
         return copy($filePath, $targetFilePath);
     }
-    static function moveFile($filePath,$targetFilePath,$overwrite = true){
+    static function moveFile($filePath,$targetFilePath,$overwrite = true):bool
+    {
         if (!file_exists($filePath)) {
             return false;
         }
@@ -172,7 +183,8 @@ class File
         return rename($filePath, $targetFilePath);
     }
 
-    static function deleteFile($filePath){
+    static function deleteFile($filePath):bool
+    {
         try{
             unlink($filePath);
             return true;
@@ -181,24 +193,20 @@ class File
         }
     }
 
-    /**
-     * @param $dirPath
-     * @param string $filterType   'file'|'dir'
-     * @return bool|array
-     */
-    static function scanDir($dirPath, $filterType = 'file'){
+    static function scanDir($dirPath, $filterType = self::TYPE_FILE):?array
+    {
         $res = [];
         if(is_dir($dirPath)){
             try{
                 $dirHandle = opendir($dirPath);
                 if(!$dirHandle){
-                    return false;
+                    return null;
                 }
                 while (false !== ($file = readdir($dirHandle))) {
                     if ($file == '.' || $file == '..') {
                         continue;
                     }
-                    if($filterType == 'file'){
+                    if($filterType == self::TYPE_FILE){
                         if (!is_dir($dirPath ."/". $file)) {
                             $res[] = $dirPath ."/". $file;
                         }
@@ -211,10 +219,10 @@ class File
                 closedir($dirHandle);
                 return $res;
             }catch (\Exception $exception){
-                return false;
+                return null;
             }
         }else{
-            return false;
+            return null;
         }
     }
 }
