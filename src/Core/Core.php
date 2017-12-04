@@ -23,6 +23,7 @@ class Core
     public function initialize():Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
+        Di::getInstance()->set(SysConst::APP_NAMESPACE,'App');
         Event::frameInitialize();
         $this->sysDirectoryInit();
         Event::frameInitialized();
