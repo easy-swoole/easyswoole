@@ -42,7 +42,8 @@ class EventRegister extends Container
     private $allows = [
         'start','shutdown','workerStart','workerStop','workerExit','timer',
         'connect','receive','packet','close','bufferFull','bufferEmpty','task',
-        'finish','pipeMessage','workerError','managerStart','managerStop'
+        'finish','pipeMessage','workerError','managerStart','managerStop',
+        'request','handShake','message','open'
     ];
 
     function add($key, $item): Container
@@ -73,5 +74,11 @@ class EventRegister extends Container
 
             });
         }
+        $this->add(self::onTask,function (\swoole_server $server, $taskId, $workerId,$taskObj){
+
+        });
+        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj){
+
+        });
     }
 }

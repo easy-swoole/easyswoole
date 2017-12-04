@@ -33,7 +33,7 @@ class Server
 
     function getServer():\swoole_server
     {
-        return $this->getServer();
+        return $this->swooleServer;
     }
 
     function start()
