@@ -11,7 +11,7 @@ namespace EasySwoole;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Spl\SplArray;
-use \EasySwoole\Core\Swoole\Config as swooleConf;
+use EasySwoole\Core\Swoole\Config as swooleConf;
 
 
 class Config

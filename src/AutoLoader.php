@@ -23,7 +23,7 @@ class AutoLoader
 
     function __construct()
     {
-        defined('ROOT') or define("ROOT",realpath(__DIR__));
+        defined('ROOT') or define("ROOT",getcwd());
         spl_autoload_register(array($this, 'loadClass'));
     }
 
