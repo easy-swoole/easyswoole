@@ -14,4 +14,37 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 class Server
 {
     use Singleton;
+    private $swooleServer;
+    private $conf;
+    function __construct()
+    {
+        $conf = Config::getInstance();
+        $this->conf = $conf;
+        if($conf->getServerType() == Config::TYPE_SERVER){
+            $this->swooleServer = new \swoole_server($conf->getListenIp(),$conf->getListenPort(),$conf->getSocketType());
+        }else if($conf->getServerType() == Config::TYPE_WEB){
+            $this->swooleServer = new \swoole_http_server($conf->getListenIp(),$conf->getListenPort());
+        }else if($conf->getServerType() == Config::TYPE_WEB_SOCKET){
+            $this->swooleServer = new \swoole_websocket_server($conf->getListenIp(),$conf->getListenPort());
+        }else{
+            die('server type error');
+        }
+    }
+
+    function getServer():\swoole_server
+    {
+        return $this->getServer();
+    }
+
+    function start()
+    {
+        $this->getServer()->set($this->getConf()->getWorkerSetting());
+        $this->getServer()->start();
+    }
+
+    function getConf():Config
+    {
+        return $this->conf;
+    }
+
 }
