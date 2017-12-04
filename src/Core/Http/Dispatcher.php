@@ -22,4 +22,9 @@ class Dispatcher
     {
         $this->controllerNameSpacePrefix = Di::getInstance()->get(SysConst::APP_NAMESPACE).'\\Controller';
     }
+
+    public function dispatch(Request $request,Response $response):void
+    {
+
+    }
 }
