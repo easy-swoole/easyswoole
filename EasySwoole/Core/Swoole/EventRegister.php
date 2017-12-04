@@ -9,10 +9,13 @@
 namespace EasySwoole\Core\Swoole;
 
 
+use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Container;
 
 class EventRegister extends Container
 {
+    use Singleton;
+
     const onStart = 'start';
     const onShutdown = 'shutdown';
     const onWorkerStart = 'workerStart';
@@ -32,6 +35,10 @@ class EventRegister extends Container
     const onManagerStart = 'managerStart';
     const onManagerStop = 'managerStop';
 
+    const onRequest = 'request';
+    const onHandShake = 'handShake';
+    const onMessage = 'message';
+    const onOpen = 'open';
     private $allows = [
         'start','shutdown','workerStart','workerStop','workerExit','timer',
         'connect','receive','packet','close','bufferFull','bufferEmpty','task',
@@ -50,5 +57,21 @@ class EventRegister extends Container
             trigger_error("event {$key} is not allow");
         }
         return $this;
+    }
+
+    function __construct($defaultEvents = true)
+    {
+        if($defaultEvents){
+            $this->registerDefaultEvent();
+        }
+    }
+
+    private function registerDefaultEvent()
+    {
+        if(Config::getInstance()->getServerType() != Config::TYPE_SERVER){
+            $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response){
+
+            });
+        }
     }
 }

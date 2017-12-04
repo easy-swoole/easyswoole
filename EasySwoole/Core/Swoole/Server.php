@@ -39,6 +39,10 @@ class Server
     function start()
     {
         $this->getServer()->set($this->getConf()->getWorkerSetting());
+        $events = EventRegister::getInstance()->all();
+        foreach ($events as $event => $callback){
+            $this->getServer()->on($event,$callback);
+        }
         $this->getServer()->start();
     }
 

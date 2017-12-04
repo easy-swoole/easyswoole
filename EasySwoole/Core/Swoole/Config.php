@@ -151,6 +151,4 @@ class Config
         $this->socketType = $socketType;
     }
 
-
-
 }
