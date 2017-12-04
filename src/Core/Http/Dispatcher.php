@@ -20,6 +20,6 @@ class Dispatcher
     private $controllerNameSpacePrefix;
     function __construct()
     {
-        $this->controllerNameSpacePrefix = Di::getInstance()->get(SysConst::APP_NAMESPACE).'\\';
+        $this->controllerNameSpacePrefix = Di::getInstance()->get(SysConst::APP_NAMESPACE).'\\Controller';
     }
 }
