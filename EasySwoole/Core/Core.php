@@ -13,6 +13,7 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Utility\File;
+use EasySwoole\Event;
 
 class Core
 {
@@ -21,15 +22,9 @@ class Core
     public function initialize():Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
-        $event = Di::getInstance()->get(SysConst::EVENT_FRAME_INITIALIZE);
+        Event::frameInitialize();
         $this->sysDirectoryInit();
-        if(is_callable($event)){
-            call_user_func($event);
-        }
-        $event = Di::getInstance()->get(SysConst::EVENT_FRAME_INITIALIZED);
-        if(is_callable($event)){
-            call_user_func($event);
-        }
+        Event::frameInitialized();
         return $this;
     }
 
