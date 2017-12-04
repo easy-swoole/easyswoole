@@ -119,7 +119,7 @@ class Server
     private function onTaskEvent(){
         $num = Config::getInstance()->getTaskWorkerNum();
         if(!empty($num)){
-            $this->getServer()->on("task",function (\swoole_http_server $server, $taskId, $workerId,$taskObj){
+            $this->getServer()->on("task",function (\swoole_server $server, $taskId, $workerId,$taskObj){
                 try{
                     if(is_string($taskObj) && class_exists($taskObj)){
                         $taskObj = new $taskObj();
