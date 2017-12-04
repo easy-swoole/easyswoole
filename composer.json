@@ -1,0 +1,27 @@
+{
+    "name": "easyswoole/easyswoole",
+    "type": "framework",
+    "description": "none",
+    "authors": [
+        {
+            "name": "YF",
+            "email": "291323003@qq.com"
+        }
+    ],
+    "require": {
+        "nikic/fast-route": "^1.2",
+        "nikic/php-parser": "^3.1",
+        "jeremeamia/SuperClosure": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "EasySwoole\\": "src/"
+        }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
+    }
+}
