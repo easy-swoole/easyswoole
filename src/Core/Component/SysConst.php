@@ -12,6 +12,7 @@ namespace EasySwoole\Core\Component;
 class SysConst
 {
     const APP_NAMESPACE = 'APP_NAMESPACE';
+    const CONTROLLER_MAX_DEPTH = 'CONTROLLER_MAX_DEPTH';
 
     const DIR_TEMP = 'DIR_TEMP';
     const DIR_LOG = 'DIR_LOG';

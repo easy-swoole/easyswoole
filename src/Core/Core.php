@@ -24,6 +24,7 @@ class Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
         Di::getInstance()->set(SysConst::APP_NAMESPACE,'App');
+        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH,3);
         Event::frameInitialize();
         $this->sysDirectoryInit();
         Event::frameInitialized();

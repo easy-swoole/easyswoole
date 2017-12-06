@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Http;
 
 
+use EasySwoole\Core\AbstractInterface\AbstractController;
 use EasySwoole\Core\AbstractInterface\AbstractRouter;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Http\Message\Status;
@@ -35,6 +36,10 @@ class Dispatcher
     {
         if(!$response->isEndResponse()){
             $this->router($request,$response);
+        };
+
+        if(!$response->isEndResponse()){
+            $this->controllerHandler($request,$response);
         };
     }
 
@@ -79,6 +84,55 @@ class Dispatcher
                         break;
                 }
             }
+        }
+    }
+
+    private function controllerHandler(Request $request,Response $response)
+    {
+        $pathInfo = ltrim($request->getUri()->getPath(),"/");
+        $list = explode("/",$pathInfo);
+        $actionName = null;
+        $finalClass = null;
+        $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
+        $currentDepth = count($list);
+        $maxDepth = $currentDepth < $controlMaxDepth ? $currentDepth : $controlMaxDepth;
+        while ($maxDepth > 0){
+            $className = '';
+            for ($i=0 ;$i<$maxDepth;$i++){
+                $className = $className."\\".ucfirst($list[$i]);//为一级控制器Index服务
+            }
+            if(class_exists($this->controllerNameSpacePrefix.$className)){
+                //尝试获取该class后的actionName
+                $actionName = empty($list[$i]) ? 'index' : $list[$i];
+                $finalClass = $this->controllerNameSpacePrefix.$className;
+                break;
+            }else{
+                //尝试搜搜index控制器
+                $temp = $className."\\Index";
+                if(class_exists($this->controllerNameSpacePrefix.$temp)){
+                    $finalClass = $this->controllerNameSpacePrefix.$temp;
+                    //尝试获取该class后的actionName
+                    $actionName = empty($list[$i]) ? 'index' : $list[$i];
+                    break;
+                }
+            }
+            $maxDepth--;
+        }
+        if(empty($finalClass)){
+            //若无法匹配完整控制器   搜搜Index控制器是否存在
+            $finalClass = $this->controllerNameSpacePrefix."\\Index";
+            $actionName = empty($list[0]) ? 'index' : $list[0];
+        }
+        if(class_exists($finalClass)){
+            $controller = new $finalClass;
+            if($controller instanceof AbstractController){
+                $controller->__hook($actionName,$request,$response);
+            }else{
+                trigger_error("class@{$finalClass} not a controller class");
+                $response->withStatus(Status::CODE_NOT_FOUND);
+            }
+        }else{
+            $response->withStatus(Status::CODE_NOT_FOUND);
         }
     }
 
