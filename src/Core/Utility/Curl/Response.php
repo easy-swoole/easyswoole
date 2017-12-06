@@ -32,8 +32,8 @@ class Response
         preg_match_all("/Set-Cookie:(.*)\n/U",$this->headerLine,$ret);
         if(!empty($ret[0])){
             foreach($ret[0] as $item) {
-                preg_match('/(Cookie: )(.*?)(;)/',$item,$ret);
-                $ret = explode('=',$ret[2]);
+                preg_match('/(Cookie: )(.*?)(\r\n)/',$item,$ret);
+                $ret = explode('=',trim($ret[2],';'));
                 $cookie = new Cookie();
                 $cookie->setValue($ret[1]);
                 $cookie->setName($ret[0]);
