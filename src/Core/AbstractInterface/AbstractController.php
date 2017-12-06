@@ -19,7 +19,7 @@ abstract class AbstractController
     private $response;
     private $actionName;
     private static $forbidMethod = [
-        'actionName','onRequest','actionNotFound','afterAction','request','response','__call','__hook'
+        'getActionName','onRequest','actionNotFound','afterAction','request','response','__call','__hook'
     ];
 
     abstract function index();
