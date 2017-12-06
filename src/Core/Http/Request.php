@@ -12,6 +12,7 @@ use EasySwoole\Core\Http\Message\ServerRequest;
 use EasySwoole\Core\Http\Message\Stream;
 use EasySwoole\Core\Http\Message\UploadFile;
 use EasySwoole\Core\Http\Message\Uri;
+use EasySwoole\Core\Http\Message\Utility;
 
 class Request  extends ServerRequest
 {
@@ -89,7 +90,7 @@ class Request  extends ServerRequest
     {
         $headers = $this->request->header;
         foreach ($headers as $header => $val){
-            $this->withAddedHeader($header,$val);
+            $this->withAddedHeader($header,Utility::headerItemToArray($val));
         }
     }
 
@@ -126,4 +127,11 @@ class Request  extends ServerRequest
     {
         return isset($this->swoole_http_request->get) ? $this->request->get : array();
     }
+
+    final public function __toString():string
+    {
+        // TODO: Implement __toString() method.
+        return Utility::toString($this);
+    }
+
 }

@@ -12,6 +12,7 @@ namespace EasySwoole\Core\Component;
 class SysConst
 {
     const APP_NAMESPACE = 'APP_NAMESPACE';
+    const SWOOLE_EVENT_REGISTER = 'SWOOLE_EVENT_REGISTER';
 
     const DIR_TEMP = 'DIR_TEMP';
     const DIR_LOG = 'DIR_LOG';

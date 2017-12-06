@@ -45,7 +45,7 @@ class Response extends Message
     }
 
     function withAddedCookie(Cookie $cookie){
-        $this->cookies[$cookie->getName()] = $cookie;
+        $this->cookies[] = $cookie;
         return $this;
     }
 

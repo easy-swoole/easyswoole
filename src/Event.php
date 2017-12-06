@@ -9,6 +9,10 @@
 namespace EasySwoole;
 
 
+use EasySwoole\Core\Http\Request;
+use EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Swoole\EventRegister;
+
 class Event
 {
     public static function frameInitialize():void
@@ -16,7 +20,22 @@ class Event
 
     }
 
+    public static function swooleEventRegister(EventRegister $register):void
+    {
+
+    }
+
     public static function frameInitialized():void
+    {
+
+    }
+
+    public static function onRequest(Request $request,Response $response):void
+    {
+
+    }
+
+    public static function afterAction(Request $request,Response $response):void
     {
 
     }

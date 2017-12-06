@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Swoole;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Event;
 
 class Server
 {
@@ -39,7 +40,9 @@ class Server
     function start()
     {
         $this->getServer()->set($this->getConf()->getWorkerSetting());
-        $events = EventRegister::getInstance()->all();
+        $register = new EventRegister();
+        Event::swooleEventRegister($register);
+        $events = $register->all();
         foreach ($events as $event => $callback){
             $this->getServer()->on($event,$callback);
         }

@@ -8,6 +8,8 @@
 
 namespace EasySwoole\Core\Http;
 use  EasySwoole\Core\Http\Message\Response as MessageResponse;
+use EasySwoole\Core\Http\Message\Status;
+use EasySwoole\Core\Utility\Curl\Cookie;
 
 
 class Response extends MessageResponse
@@ -20,10 +22,10 @@ class Response extends MessageResponse
     final public function __construct(\swoole_http_response $response)
     {
         $this->response = $response;
+        parent::__construct();
     }
 
     function end($realEnd = false){
-//        $this->getH
         if($this->isEndResponse == self::STATUS_NOT_END){
             $this->isEndResponse = self::STATUS_LOGICAL_END;
         }
@@ -44,10 +46,10 @@ class Response extends MessageResponse
             }
             $write = $this->getBody()->__toString();
             if(!empty($write)){
-                $this->swoole_http_response->write($write);
+                $this->response->write($write);
             }
             $this->getBody()->close();
-            $this->swoole_http_response->end();
+            $this->response->end();
         }
     }
 
@@ -99,6 +101,10 @@ class Response extends MessageResponse
             trigger_error("response has end");
         }
     }
+
+    /*
+     * 目前swoole不支持同键名的header   因此只能通过别的方式设置多个cookie
+     */
     public function setCookie($name, $value = null, $expire = null, $path = '/', $domain = '', $secure = false, $httponly = false){
         if(!$this->isEndResponse()){
             $cookie = new Cookie();
@@ -117,21 +123,15 @@ class Response extends MessageResponse
         }
 
     }
-    function forward($pathTo,array $attribute = array()){
+
+    function forward($pathTo,Request $request){
         $pathTo = UrlParser::pathInfo($pathTo);
         if(!$this->isEndResponse()){
-            if($pathTo == UrlParser::pathInfo()){
-                trigger_error("you can not forward a request in the same path : {$pathTo}");
-            }else{
-                $request = Request::getInstance();
-                $request->getUri()->withPath($pathTo);
-                $response = Response::getInstance();
-                foreach ($attribute as $key => $value){
-                    $request->withAttribute($key,$value);
-                }
-                Event::getInstance()->onRequest($request,$response);
-                Dispatcher::getInstance()->dispatch();
+            if($pathTo == UrlParser::pathInfo($request->getUri()->getPath())){
+                trigger_error("you yor forward a request in the same path : {$pathTo}");
             }
+            $request->getUri()->withPath($pathTo);
+            Dispatcher::getInstance()->dispatch($request,$this);
         }else{
             trigger_error("response has end");
         }
