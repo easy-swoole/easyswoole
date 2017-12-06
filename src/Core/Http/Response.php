@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Http;
 use  EasySwoole\Core\Http\Message\Response as MessageResponse;
 use EasySwoole\Core\Http\Message\Status;
+use EasySwoole\Core\Http\Message\Utility;
 use EasySwoole\Core\Utility\Curl\Cookie;
 
 
@@ -140,5 +141,11 @@ class Response extends MessageResponse
     function getSwooleResponse()
     {
         return $this->response;
+    }
+
+    final public function __toString():string
+    {
+        // TODO: Implement __toString() method.
+        return Utility::toString($this);
     }
 }

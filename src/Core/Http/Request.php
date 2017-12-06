@@ -23,7 +23,12 @@ class Request  extends ServerRequest
         $this->request = $request;
         $this->initHeaders();
         $protocol = str_replace('HTTP/', '', $request->server['server_protocol']) ;
-        $body = new Stream($request->rawContent());
+        //为单元测试准备
+        if($request->fd){
+            $body = new Stream($request->rawContent());
+        }else{
+            $body = new Stream('');
+        }
         $uri = $this->initUri();
         $files = $this->initFiles();
         $method = $request->server['request_method'];
@@ -88,7 +93,7 @@ class Request  extends ServerRequest
 
     private function initHeaders()
     {
-        $headers = $this->request->header;
+        $headers = isset($this->request->header) ? $this->request->header :[];
         foreach ($headers as $header => $val){
             $this->withAddedHeader($header,Utility::headerItemToArray($val));
         }

@@ -77,7 +77,11 @@ class EventRegister extends Container
                 Event::onRequest($request_psr,$response_psr);
                 Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
                 Event::afterAction($request_psr,$response_psr);
-                $response_psr->end(true);
+                //为cli单元测试准备  可在无服务启动下测试
+                if($request->fd){
+                    $response_psr->end(true);
+                }
+                return $response_psr;
             });
         }
         $this->add(self::onTask,function (\swoole_server $server, $taskId, $workerId,$taskObj){
