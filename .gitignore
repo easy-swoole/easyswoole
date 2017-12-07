@@ -1,7 +1,9 @@
 .idea/easyPHP-Swoole.iml
+.idea/hanwenbo-easyswoole.iml
 .idea/modules.xml
 .idea/workspace.xml
 .idea/vcs.xml
+.idea/php.xml
 src/swoole_log.txt
 vendor/
 composer.lock
