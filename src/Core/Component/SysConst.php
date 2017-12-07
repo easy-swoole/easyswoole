@@ -19,4 +19,6 @@ class SysConst
 
     const VERSION = 'VERSION';
 
+    const LOGGER_WRITER = 'LOGGER_WRITER';
+
 }

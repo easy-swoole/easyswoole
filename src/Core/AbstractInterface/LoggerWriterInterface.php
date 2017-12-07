@@ -11,5 +11,5 @@ namespace EasySwoole\Core\AbstractInterface;
 
 interface LoggerWriterInterface
 {
-    static function writeLog($obj,$logCategory,$timeStamp);
+    function writeLog($obj,$logCategory,$timeStamp);
 }
