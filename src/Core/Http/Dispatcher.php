@@ -89,7 +89,7 @@ class Dispatcher
 
     private function controllerHandler(Request $request,Response $response)
     {
-        $pathInfo = ltrim($request->getUri()->getPath(),"/");
+        $pathInfo = ltrim(UrlParser::pathInfo($request->getUri()->getPath()),"/");
         $list = explode("/",$pathInfo);
         $actionName = null;
         $finalClass = null;
@@ -99,7 +99,7 @@ class Dispatcher
         while ($maxDepth > 0){
             $className = '';
             for ($i=0 ;$i<$maxDepth;$i++){
-                $className = $className."\\".ucfirst($list[$i]);//为一级控制器Index服务
+                $className = $className."\\".ucfirst($list[$i] ?: 'Index');//为一级控制器Index服务
             }
             if(class_exists($this->controllerNameSpacePrefix.$className)){
                 //尝试获取该class后的actionName
