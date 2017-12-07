@@ -145,7 +145,4 @@ class Dispatcher
             $response->withStatus(Status::CODE_NOT_FOUND);
         }
     }
-
-
-
 }
