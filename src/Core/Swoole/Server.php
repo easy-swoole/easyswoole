@@ -17,7 +17,8 @@ class Server
     use Singleton;
     private $swooleServer;
     private $conf;
-    function __construct()
+    private $currentFd = null;
+    public function __construct()
     {
         $conf = Config::getInstance();
         $this->conf = $conf;
@@ -32,12 +33,12 @@ class Server
         }
     }
 
-    function getServer():\swoole_server
+    public function getServer():\swoole_server
     {
         return $this->swooleServer;
     }
 
-    function start()
+    public function start()
     {
         $this->getServer()->set($this->getConf()->getWorkerSetting());
         $register = new EventRegister();
@@ -49,7 +50,20 @@ class Server
         $this->getServer()->start();
     }
 
-    function getConf():Config
+
+    public function getCurrentFd():?int
+    {
+        return $this->currentFd;
+    }
+
+    public function setCurrentFd(int $currentFd)
+    {
+        $this->currentFd = $currentFd;
+    }
+
+
+
+    public function getConf():Config
     {
         return $this->conf;
     }

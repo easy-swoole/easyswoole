@@ -11,6 +11,7 @@ namespace EasySwoole\Core\Swoole;
 
 use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
 use EasySwoole\Core\Component\Container;
+use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
@@ -73,11 +74,17 @@ class EventRegister extends Container
     {
         if(Config::getInstance()->getServerType() != Config::TYPE_SERVER){
             $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response){
+                //保存当前进程的fd
+                Server::getInstance()->setCurrentFd($request->fd);
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                Event::onRequest($request_psr,$response_psr);
-                Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
-                Event::afterAction($request_psr,$response_psr);
+                try{
+                    Event::onRequest($request_psr,$response_psr);
+                    Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
+                    Event::afterAction($request_psr,$response_psr);
+                }catch (\Exception $exception){
+
+                }
                 //为cli单元测试准备  可在无服务启动下测试
                 if($request->fd){
                     $response_psr->end(true);

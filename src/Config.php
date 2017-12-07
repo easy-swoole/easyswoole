@@ -55,11 +55,10 @@ class Config
                 ),
             ),
             "DEBUG"=>array(
-                "LOG"=>true,
-                "DISPLAY_ERROR"=>true,
+                "RESPONSE"=>true,
+                'AUTO_CLOSE'=>true,
                 "ENABLE"=>true,
             ),
-            "CONTROLLER_POOL"=>true//web或web socket模式有效
         );
     }
 

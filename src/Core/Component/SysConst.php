@@ -21,4 +21,7 @@ class SysConst
 
     const LOGGER_WRITER = 'LOGGER_WRITER';
 
+    const ERROR_HANDLER = 'ERROR_HANDLER';
+    const SHUTDOWN_FUNCTION = 'SHUTDOWN_FUNCTION';
+
 }
