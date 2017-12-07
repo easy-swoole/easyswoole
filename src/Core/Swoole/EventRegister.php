@@ -10,9 +10,13 @@ namespace EasySwoole\Core\Swoole;
 
 
 use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
+use EasySwoole\Core\AbstractInterface\HttpExceptionHandlerInterface;
 use EasySwoole\Core\Component\Container;
+use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Logger;
+use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\Dispatcher;
+use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Event;
@@ -83,7 +87,14 @@ class EventRegister extends Container
                     Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
                     Event::afterAction($request_psr,$response_psr);
                 }catch (\Exception $exception){
-
+                    $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
+                    if($handler instanceof HttpExceptionHandlerInterface){
+                        $handler->handle($exception,$request_psr,$response_psr);
+                    }else{
+                        $response_psr = new Response($response);
+                        $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                        $response_psr->write($exception->getMessage());
+                    }
                 }
                 //为cli单元测试准备  可在无服务启动下测试
                 if($request->fd){
