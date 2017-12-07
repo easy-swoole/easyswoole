@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Swoole;
 
 
+use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Request;
@@ -84,11 +85,38 @@ class EventRegister extends Container
                 return $response_psr;
             });
         }
-        $this->add(self::onTask,function (\swoole_server $server, $taskId, $workerId,$taskObj){
 
+        $this->add(self::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj)
+        {
+            if(is_string($taskObj) && class_exists($taskObj)){
+                $taskObj = new $taskObj;
+            }
+            try{
+                if($taskObj instanceof AbstractAsyncTask){
+                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
+                    //在有return或者设置了结果的时候  说明需要执行结束回调
+                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                    if(!is_null($ret)){
+                        $taskObj->setResult($ret);
+                        return $taskObj;
+                    }
+                }
+            }catch (\Exception $exception){
+
+            }
+            return null;
         });
-        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj){
 
+        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj)
+        {
+            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $taskObj->finish($taskObj->getResult(),$taskId);
+                }catch (\Exception $exception){
+
+                }
+            }
         });
     }
 }
