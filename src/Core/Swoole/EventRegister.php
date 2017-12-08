@@ -9,8 +9,14 @@
 namespace EasySwoole\Core\Swoole;
 
 
+use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
+use EasySwoole\Core\AbstractInterface\HttpExceptionHandlerInterface;
 use EasySwoole\Core\Component\Container;
+use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\Logger;
+use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\Dispatcher;
+use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Event;
@@ -72,11 +78,24 @@ class EventRegister extends Container
     {
         if(Config::getInstance()->getServerType() != Config::TYPE_SERVER){
             $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response){
+                //保存当前进程的fd
+                Server::getInstance()->setCurrentFd($request->fd);
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                Event::onRequest($request_psr,$response_psr);
-                Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
-                Event::afterAction($request_psr,$response_psr);
+                try{
+                    Event::onRequest($request_psr,$response_psr);
+                    Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
+                    Event::afterAction($request_psr,$response_psr);
+                }catch (\Exception $exception){
+                    $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
+                    if($handler instanceof HttpExceptionHandlerInterface){
+                        $handler->handle($exception,$request_psr,$response_psr);
+                    }else{
+                        $response_psr = new Response($response);
+                        $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                        $response_psr->write($exception->getMessage());
+                    }
+                }
                 //为cli单元测试准备  可在无服务启动下测试
                 if($request->fd){
                     $response_psr->end(true);
@@ -84,11 +103,38 @@ class EventRegister extends Container
                 return $response_psr;
             });
         }
-        $this->add(self::onTask,function (\swoole_server $server, $taskId, $workerId,$taskObj){
 
+        $this->add(self::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj)
+        {
+            if(is_string($taskObj) && class_exists($taskObj)){
+                $taskObj = new $taskObj;
+            }
+            try{
+                if($taskObj instanceof AbstractAsyncTask){
+                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
+                    //在有return或者设置了结果的时候  说明需要执行结束回调
+                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                    if(!is_null($ret)){
+                        $taskObj->setResult($ret);
+                        return $taskObj;
+                    }
+                }
+            }catch (\Exception $exception){
+
+            }
+            return null;
         });
-        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj){
 
+        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj)
+        {
+            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $taskObj->finish($taskObj->getResult(),$taskId);
+                }catch (\Exception $exception){
+
+                }
+            }
         });
     }
 }

@@ -10,7 +10,9 @@ namespace EasySwoole;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Spl\SplArray;
+use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Swoole\Config as swooleConf;
 
 
@@ -52,14 +54,15 @@ class Config
                     "task_max_request"=>10,
                     'max_request'=>5000,//强烈建议设置此配置项
                     'worker_num'=>8,
+                    'log_file'=>Di::getInstance()->get(SysConst::DIR_LOG).'/swoole.log',
+                    'pid_file'=>Di::getInstance()->get(SysConst::DIR_TEMP).'/pid.pid'
                 ),
             ),
             "DEBUG"=>array(
-                "LOG"=>true,
-                "DISPLAY_ERROR"=>true,
+                "RESPONSE"=>true,
+                'AUTO_CLOSE'=>true,
                 "ENABLE"=>true,
             ),
-            "CONTROLLER_POOL"=>true//web或web socket模式有效
         );
     }
 
