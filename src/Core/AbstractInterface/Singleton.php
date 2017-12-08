@@ -9,15 +9,50 @@
 namespace EasySwoole\Core\AbstractInterface;
 
 
+use EasySwoole\Core\Swoole\Server;
+
 trait Singleton
 {
-    private static $instance;
+    private static $instanceList = [];
 
-    static function getInstance()
+    static function getInstance($saveInCoroutine = false)
     {
-        if(!isset(self::$instance)){
-            self::$instance = new static();
+        if($saveInCoroutine == false){
+            $cid = 0;
+        }else{
+            $cid = self::getInstanceId();
         }
-        return self::$instance;
+        if(!isset(self::$instanceList[$cid])){
+            $ins = new static();
+            self::$instanceList[$cid] = $ins;
+        }else{
+            /*
+            * 为了IDE提示才
+            */
+            $ins = self::$instanceList[$cid];
+        }
+        return $ins;
+    }
+
+    static function getInstanceId():int
+    {
+        $cid = Server::getInstance()->coroutineId();
+        if($cid === null){
+            $cid = 0;
+        }
+        return $cid;
+    }
+
+    final public function freeInstance($instanceId = null):?bool
+    {
+        if($instanceId === null){
+            $instanceId = self::getInstanceId();
+        }
+        if(isset(self::$instanceList[$instanceId])){
+            unset(self::$instanceList[$instanceId]);
+            return true;
+        }else{
+            return false;
+        }
     }
 }
