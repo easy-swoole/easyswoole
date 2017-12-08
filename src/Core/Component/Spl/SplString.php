@@ -97,8 +97,7 @@ class SplString extends Stream
 
 	function subString( int $start, int $length ) : SplString
 	{
-		$string = substr( $this->rawString, $start, $length );
-		return $this->setString( $string );
+		return $this->setString( substr( $this->rawString, $start, $length ) );
 	}
 
 	function compare( string $str, int $ignoreCase = 0 ) : int
