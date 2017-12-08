@@ -14,26 +14,27 @@ use EasySwoole\Core\Component\Lib\Stream;
 class SplString extends Stream
 {
 	private $rawString;
+	private $stream;
 
 	function __construct( string $str = null )
 	{
-		parent::__construct( $str );
-		$this->rawString = (string)$str;
+		$this->stream    = parent::__construct( $str );
+		$this->rawString = $str;
 	}
 
-	function setString( $string ):SplString
+	function setString( string $string ) : SplString
 	{
-		$this->rawString = (String)$string;
+		parent::__construct( $string );
+		$this->rawString = $string;
 		return $this;
 	}
 
-	function split( $length = 1 ):SplString
+	function split( int $length = 1 ) : array
 	{
-		$this->rawString = str_split( $this->rawString, $length );
-		return $this;
+		return str_split( $this->rawString, $length );
 	}
 
-	function encodingConvert( $desEncoding, $detectList
+	function encodingConvert( string $desEncoding, $detectList
 	= [
 		'UTF-8',
 		'ASCII',
@@ -42,7 +43,7 @@ class SplString extends Stream
 		'LATIN1',
 		'BIG5',
 		"UCS-2",
-	] ):SplString
+	] ) : SplString
 	{
 		$fileType = mb_detect_encoding( $this->rawString, $detectList );
 		if( $fileType != $desEncoding ){
@@ -53,7 +54,7 @@ class SplString extends Stream
 		}
 	}
 
-	function toUtf8():string
+	function toUtf8() : SplString
 	{
 		return $this->encodingConvert( "UTF-8" );
 	}
@@ -61,13 +62,13 @@ class SplString extends Stream
 	/*
 	 * special function for unicode
 	 */
-	function unicodeToUtf8():SplString
+	function unicodeToUtf8() : SplString
 	{
 		$this->rawString = preg_replace_callback( '/\\\\u([0-9a-f]{4})/i', create_function( '$matches', 'return mb_convert_encoding(pack("H*", $matches[1]), "UTF-8", "UCS-2BE");' ), $this->rawString );
 		return $this;
 	}
 
-	function toUnicode():SplString
+	function toUnicode() : SplString
 	{
 		$raw = (string)$this->encodingConvert( "UCS-2" );
 		$len = strlen( $raw );
@@ -89,18 +90,18 @@ class SplString extends Stream
 	 * special function for unicode end
 	*/
 
-	function explode( $separator )
+	function explode( string $separator ) : array
 	{
-		return new SplArray( explode( $separator, $this->rawString ) );
+		return explode( $separator, $this->rawString );
 	}
 
-	function subString( $start, $length ):SplString
+	function subString( int $start, int $length ) : SplString
 	{
 		$this->rawString = substr( $this->rawString, $start, $length );
 		return $this;
 	}
 
-	function compare( $str, $ignoreCase = 0 )
+	function compare( string $str, int $ignoreCase = 0 ) : int
 	{
 		if( $ignoreCase ){
 			return strcasecmp( $str, $this->rawString );
@@ -109,67 +110,67 @@ class SplString extends Stream
 		}
 	}
 
-	function lTrim( $charList = " \t\n\r\0\x0B" ):SplString
+	function lTrim( string $charList = " \t\n\r\0\x0B" ) : SplString
 	{
 		$this->rawString = ltrim( $this->rawString, $charList );
 		return $this;
 	}
 
-	function rTrim( $charList = " \t\n\r\0\x0B" ):SplString
+	function rTrim( string $charList = " \t\n\r\0\x0B" ) : SplString
 	{
 		$this->rawString = rtrim( $this->rawString, $charList );
 		return $this;
 	}
 
-	function trim( $charList = " \t\n\r\0\x0B" ):SplString
+	function trim( string $charList = " \t\n\r\0\x0B" ) : SplString
 	{
 		$this->rawString = trim( $this->rawString, $charList );
 		return $this;
 	}
 
-	function pad( $length, $padString = null, $pad_type = STR_PAD_RIGHT ):SplString
+	function pad( int $length, string $padString = null, int $pad_type = STR_PAD_RIGHT ) : SplString
 	{
 		$this->rawString = str_pad( $this->rawString, $length, $padString, $pad_type );
 		return $this;
 	}
 
-	function repeat( $times ):SplString
+	function repeat( int $times ) : SplString
 	{
 		$this->rawString = str_repeat( $this->rawString, $times );
 		return $this;
 	}
 
-	function length():string
+	function length() : int
 	{
 		return strlen( $this->rawString );
 	}
 
-	function toUpper():SplString
+	function toUpper() : SplString
 	{
 		$this->rawString = strtoupper( $this->rawString );
 		return $this;
 	}
 
-	function toLower():SplString
+	function toLower() : SplString
 	{
 		$this->rawString = strtolower( $this->rawString );
 		return $this;
 	}
 
-	function stripTags( $allowable_tags = null ):SplString
+	function stripTags( string $allowable_tags = null ) : SplString
 	{
 		$this->rawString = strip_tags( $this->rawString, $allowable_tags );
 		return $this;
 	}
 
-	function replace( $find, $replaceTo ):SplString
+	function replace( string $find, string $replaceTo ) : SplString
 	{
 		$this->rawString = str_replace( $find, $replaceTo, $this->rawString );
 		return $this;
 	}
 
 
-	function betweenInStr( $startStr, $endStr ):SplString
+	function betweenInStr( string $startStr, string $endStr ) : SplString
 	{
 		$st = stripos( $this->rawString, $startStr );
 		$ed = stripos( $this->rawString, $endStr );
@@ -181,7 +182,7 @@ class SplString extends Stream
 		return $this;
 	}
 
-	function regex( $regex, $rawReturn = false )
+	function regex( $regex, bool $rawReturn = false )
 	{
 		preg_match( $regex, $this->rawString, $result );
 		if( !empty( $result ) ){
@@ -195,7 +196,7 @@ class SplString extends Stream
 		}
 	}
 
-	function exist( $find, $ignoreCase = true ):bool
+	function exist( string $find, bool $ignoreCase = true ) : bool
 	{
 		if( $ignoreCase ){
 			$label = stripos( $this->rawString, $find );
@@ -205,8 +206,8 @@ class SplString extends Stream
 		return $label === false ? false : true;
 	}
 
-	function __toString():string
+	function __toString()
 	{
-		return (String)$this->rawString;
+		return $this->rawString;
 	}
 }
