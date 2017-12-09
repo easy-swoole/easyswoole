@@ -78,8 +78,6 @@ class EventRegister extends Container
     {
         if(Config::getInstance()->getServerType() != Config::TYPE_SERVER){
             $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response){
-                //保存当前进程的fd
-                Server::getInstance()->setCurrentFd($request->fd);
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 try{
@@ -100,6 +98,8 @@ class EventRegister extends Container
                 if($request->fd){
                     $response_psr->end(true);
                 }
+                $request_psr->freeInstance();
+                $response_psr->freeInstance();
                 return $response_psr;
             });
         }

@@ -7,6 +7,7 @@
  */
 
 namespace EasySwoole\Core\Http;
+use EasySwoole\Core\AbstractInterface\Singleton;
 use  EasySwoole\Core\Http\Message\Response as MessageResponse;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Message\Utility;
@@ -20,10 +21,24 @@ class Response extends MessageResponse
     const STATUS_LOGICAL_END = 1;
     const STATUS_REAL_END = 2;
     private $isEndResponse = 0;//1 逻辑end  2真实end
+
+    use Singleton;
+
     final public function __construct(\swoole_http_response $response)
     {
         $this->response = $response;
         parent::__construct();
+        self::$instanceList[self::getInstanceId()] = $this;
+    }
+
+    private static $instanceList = [];
+
+    public static function getInstance():?Response
+    {
+        if(isset(self::$instanceList[self::getInstanceId()])){
+            return self::$instanceList[self::getInstanceId()];
+        }
+        return null;
     }
 
     function end($realEnd = false){

@@ -8,15 +8,25 @@
 
 namespace EasySwoole\Core\Http;
 
+use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Http\Message\ServerRequest;
 use EasySwoole\Core\Http\Message\Stream;
 use EasySwoole\Core\Http\Message\UploadFile;
 use EasySwoole\Core\Http\Message\Uri;
 use EasySwoole\Core\Http\Message\Utility;
 
+
 class Request  extends ServerRequest
 {
     private $request;
+    use Singleton;
+    public static function getInstance():?Request
+    {
+        if(isset(self::$instanceList[self::getInstanceId()])){
+            return self::$instanceList[self::getInstanceId()];
+        }
+        return null;
+    }
 
     final function __construct(\swoole_http_request $request)
     {
@@ -34,6 +44,7 @@ class Request  extends ServerRequest
         $method = $request->server['request_method'];
         parent::__construct($method, $uri, null, $body, $protocol, $request->server);
         $this->withCookieParams($this->initCookie())->withQueryParams($this->initGet())->withParsedBody($this->initPost())->withUploadedFiles($files);
+        self::$instanceList[self::getInstanceId()] = $this;
     }
 
     function getRequestParam($keyOrKeys = null, $default = null)
@@ -138,5 +149,4 @@ class Request  extends ServerRequest
         // TODO: Implement __toString() method.
         return Utility::toString($this);
     }
-
 }

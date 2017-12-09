@@ -14,6 +14,7 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Swoole\Server;
 use EasySwoole\Core\Utility\File;
 use EasySwoole\Event;
@@ -76,14 +77,15 @@ class Core
             $userHandler = function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
                 $str = "{$description} in file {$file} at line {$line}";
                 Logger::getInstance()->console($str);
-                if(Server::getInstance()->getCurrentFd()){
-                    if($conf['RESPONSE']){
-                        Server::getInstance()->getServer()->send(Server::getInstance()->getCurrentFd(),$str);
-                    }
-                    if($conf['AUTO_CLOSE']){
-                        Server::getInstance()->getServer()->close(Server::getInstance()->getCurrentFd());
-                    }
-                }
+//                //在http下的进程   目前携程模式下暂未有完美实现方式，待定
+//                if(Request::getInstance()){
+//                    if($conf['RESPONSE']){
+//                        Server::getInstance()->getServer()->send(Request::getInstance()->getSwooleRequest()->fd,$str);
+//                    }
+//                    if($conf['AUTO_CLOSE']){
+//                        Server::getInstance()->getServer()->close(Request::getInstance()->getSwooleRequest()->fd);
+//                    }
+//                }
             };
         }
         set_error_handler($userHandler);
@@ -95,14 +97,16 @@ class Core
                 if(!empty($error)){
                     $str = $error['message'].' at file '.$error['file'].' line '.$error['line'];
                     Logger::getInstance()->console($str);
-                    if(Server::getInstance()->getCurrentFd()){
-                        if($conf['RESPONSE']){
-                            Server::getInstance()->getServer()->send(Server::getInstance()->getCurrentFd(),$str);
-                        }
-                        if($conf['AUTO_CLOSE']){
-                            Server::getInstance()->getServer()->close(Server::getInstance()->getCurrentFd());
-                        }
-                    }
+                    //在http下的进程          目前携程模式下暂未有完美实现方式，待定
+//                    var_dump(Request::getInstanceId());
+//                    if(Request::getInstance()){
+//                        if($conf['RESPONSE']){
+//                            Server::getInstance()->getServer()->send(Request::getInstance()->getSwooleRequest()->fd,$str);
+//                        }
+//                        if($conf['AUTO_CLOSE']){
+//                            Server::getInstance()->getServer()->close(Request::getInstance()->getSwooleRequest()->fd);
+//                        }
+//                    }
                 }
             };
         }
