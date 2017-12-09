@@ -17,7 +17,6 @@ class Server
     use Singleton;
     private $swooleServer;
     private $conf;
-    private $currentFd = null;
     public function __construct()
     {
         $conf = Config::getInstance();
@@ -51,17 +50,29 @@ class Server
     }
 
 
-    public function getCurrentFd():?int
+    public function coroutineId():?int
     {
-        return $this->currentFd;
+        if(class_exists('Swoole\Coroutine')){
+            //进程错误的时候返回-1
+            $ret =  \Swoole\Coroutine::getuid();
+            if($ret >= 0){
+                return $ret;
+            }else{
+                return null;
+            }
+        }else{
+            return null;
+        }
     }
 
-    public function setCurrentFd(int $currentFd)
+    public function isCoroutine():bool
     {
-        $this->currentFd = $currentFd;
+        if($this->coroutineId() !== null){
+            return true;
+        }else{
+            return false;
+        }
     }
-
-
 
     public function getConf():Config
     {
