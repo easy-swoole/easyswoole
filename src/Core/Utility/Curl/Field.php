@@ -14,6 +14,12 @@ class Field
     private $name;
     private $val;
 
+    function __construct($key = null,$val = null)
+    {
+        $this->name = $key;
+        $this->val = $val;
+    }
+
     /**
      * @return mixed
      */
