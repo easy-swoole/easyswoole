@@ -20,12 +20,17 @@ class Event
 
     }
 
-    public static function swooleEventRegister(EventRegister $register):void
+    public static function frameInitialized():void
     {
 
     }
 
-    public static function frameInitialized():void
+    public static function serverCreate(\swoole_server $server):void
+    {
+
+    }
+
+    public static function swooleEventRegister(EventRegister $register):void
     {
 
     }

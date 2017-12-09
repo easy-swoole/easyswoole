@@ -30,6 +30,7 @@ class Server
         }else{
             die('server type error');
         }
+        Event::serverCreate($this->swooleServer);
     }
 
     public function getServer():\swoole_server
