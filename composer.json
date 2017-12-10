@@ -2,6 +2,9 @@
     "name": "easyswoole/easyswoole",
     "type": "framework",
     "description": "none",
+    "bin": [
+        "bin/easyswoole"
+    ],
     "authors": [
         {
             "name": "YF",

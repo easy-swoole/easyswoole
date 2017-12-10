@@ -1,0 +1,120 @@
+<?php
+
+define('ROOT',realpath(getcwd()));
+
+foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+
+function opCacheClear()
+{
+    if(function_exists('apc_clear_cache')){
+        apc_clear_cache();
+    }
+    if(function_exists('opcache_reset')){
+        opcache_reset();
+    }
+}
+
+function commandParser($argv)
+{
+    //去除文件参数
+    array_shift($argv);
+    $mainCommand = array_shift($argv);
+    switch ($mainCommand) {
+        case 'start':{
+            showLogo();
+            $inst = \EasySwoole\Core\Core::getInstance()->initialize();
+            if(in_array('-d',$argv)){
+                \EasySwoole\Config::getInstance()->setConf("SERVER.CONFIG.daemonize",true);
+            }
+            $inst->run();
+            break;
+        }
+        case 'stop':{
+            $inst = \EasySwoole\Core\Core::getInstance()->initialize();
+            $pidFile =  \EasySwoole\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+            if(file_exists($pidFile)){
+                $pid = file_get_contents($pidFile);
+                if(!swoole_process::kill($pid,0)){
+                    echo "pid :{$pid} not exist \n";
+                    return;
+                }
+                if(in_array('-f',$argv)){
+                    swoole_process::kill($pid,SIGKILL);
+                }else{
+                    swoole_process::kill($pid);
+                }
+                //等待5秒
+                $time = time();
+                while (true){
+                    usleep(1000);
+                    if(swoole_process::kill($pid,0)){
+                        echo "server stop at ".date("y-m-d h:i:s")."\n";
+                        if(is_file($pidFile)){
+                            unlink($pidFile);
+                        }
+                        break;
+                    }else{
+                        if(time() - $time > 5){
+                            echo "stop server fail.try -f again \n";
+                            break;
+                        }
+                    }
+                }
+            }else{
+                echo "pid file no exist\n";
+            }
+            break;
+        }
+        case 'reload':{
+            $inst = \EasySwoole\Core\Core::getInstance()->initialize();
+            $pidFile =  \EasySwoole\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+            if(file_exists($pidFile)){
+                if(in_array('-all',$argv)){
+                    $sig = SIGUSR1;
+                }else{
+                    $sig = SIGUSR2;
+                }
+                opCacheClear();
+                $pid = file_get_contents($pidFile);
+                if(!swoole_process::kill($pid,0)){
+                    echo "pid :{$pid} not exist \n";
+                    return;
+                }
+                swoole_process::kill($pid,$sig);
+                echo "send server reload command at ".date("y-m-d h:i:s")."\n";
+
+            }else{
+                echo "pid file no exist\n";
+            }
+            break;
+        }
+        default:{
+
+        }
+    }
+}
+
+
+function showLogo(){
+    $log =
+'
+  ______                          _____                              _
+ |  ____|                        / ____|                            | |
+ | |__      __ _   ___   _   _  | (___   __      __   ___     ___   | |   ___
+ |  __|    / _` | / __| | | | |  \___ \  \ \ /\ / /  / _ \   / _ \  | |  / _ \
+ | |____  | (_| | \__ \ | |_| |  ____) |  \ V  V /  | (_) | | (_) | | | |  __/
+ |______|  \__,_| |___/  \__, | |_____/    \_/\_/    \___/   \___/  |_|  \___|
+                          __/ |
+                         |___/
+';
+    echo $log;
+}
+
+
+commandParser($argv);
