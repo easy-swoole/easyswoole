@@ -23,6 +23,11 @@ class Core
 {
     use Singleton;
 
+    public function __construct()
+    {
+        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../../'));
+    }
+
     public function initialize():Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
@@ -44,10 +49,10 @@ class Core
 
     private function sysDirectoryInit():void
     {
-        //创建临时目录
+        //创建临时目录    请以绝对路径，不然守护模式运行会有问题
         $tempDir = Di::getInstance()->get(SysConst::DIR_TEMP);
         if(empty($tempDir)){
-            $tempDir = "Temp";
+            $tempDir = ROOT."/Temp";
             Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
         }
         if(!File::createDir($tempDir)){
@@ -56,7 +61,7 @@ class Core
         //创建日志目录
         $logDir = Di::getInstance()->get(SysConst::DIR_LOG);
         if(empty($logDir)){
-            $logDir = "Logs";
+            $logDir = ROOT."/Logs";
             Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
         }
         if(!File::createDir($logDir)){
@@ -77,15 +82,6 @@ class Core
             $userHandler = function($errorCode, $description, $file = null, $line = null, $context = null)use($conf){
                 $str = "{$description} in file {$file} at line {$line}";
                 Logger::getInstance()->console($str);
-//                //在http下的进程   目前携程模式下暂未有完美实现方式，待定
-//                if(Request::getInstance()){
-//                    if($conf['RESPONSE']){
-//                        Server::getInstance()->getServer()->send(Request::getInstance()->getSwooleRequest()->fd,$str);
-//                    }
-//                    if($conf['AUTO_CLOSE']){
-//                        Server::getInstance()->getServer()->close(Request::getInstance()->getSwooleRequest()->fd);
-//                    }
-//                }
             };
         }
         set_error_handler($userHandler);
@@ -97,16 +93,6 @@ class Core
                 if(!empty($error)){
                     $str = $error['message'].' at file '.$error['file'].' line '.$error['line'];
                     Logger::getInstance()->console($str);
-                    //在http下的进程          目前携程模式下暂未有完美实现方式，待定
-//                    var_dump(Request::getInstanceId());
-//                    if(Request::getInstance()){
-//                        if($conf['RESPONSE']){
-//                            Server::getInstance()->getServer()->send(Request::getInstance()->getSwooleRequest()->fd,$str);
-//                        }
-//                        if($conf['AUTO_CLOSE']){
-//                            Server::getInstance()->getServer()->close(Request::getInstance()->getSwooleRequest()->fd);
-//                        }
-//                    }
                 }
             };
         }
