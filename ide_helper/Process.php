@@ -5,6 +5,7 @@ namespace Swoole;
  * swoole进程管理类
  * 内置IPC通信支持，子进程和主进程之间可以方便的通信
  * 支持标准输入输出重定向，子进程内echo，会发送到管道中，而不是输出屏幕
+ * @method exit(int $code) int 退出子进程
  * Class swoole_process
  */
 class Process
@@ -24,7 +25,7 @@ class Process
     public $pipe;
 
     /**
-     * @param mixed $callback 子进程的回调函数
+     * @param callable $callback 子进程的回调函数
      * @param bool $redirect_stdin_stdout 是否重定向标准输入输出
      * @param bool $create_pipe 是否创建管道
      */
@@ -53,22 +54,12 @@ class Process
     }
 
     /**
-     * 退出子进程，实际函数名为exit，IDE将exit识别为关键词了，会有语法错误，所以这里叫_exit
-     *
-     * @param int $code
-     * @return int
-     */
-    function _exit($code = 0)
-    {
-    }
-
-    /**
      * 执行另外的一个程序
      * @param string $execute_file 可执行文件的路径
      * @param array $params 参数数组
      * @return bool
      */
-    function exec($execute_file, $params)
+    function exec(string $execute_file, array $params)
     {
     }
 
@@ -77,9 +68,10 @@ class Process
      * 成功返回一个数组包含子进程的PID和退出状态码
      * 如array('code' => 0, 'pid' => 15001)，失败返回false
      *
+     * @param bool $blocking 是否阻塞等待
      * @return false | array
      */
-    static function wait()
+    static function wait($blocking = true)
     {
     }
 

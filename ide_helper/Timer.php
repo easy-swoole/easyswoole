@@ -23,6 +23,7 @@ class Timer
      * @param int $ms 指定时间，单位为毫秒
      * @param callable $callback 时间到期后所执行的函数，必须是可以调用的。callback函数不接受任何参数
      * @param mixed $param 回调参数
+     * @return int $timerId 定时器ID
      */
     static function tick($ms, callable $callback, $param = null)
     {
@@ -34,6 +35,7 @@ class Timer
      *
      * @param int $ms 指定时间，单位为毫秒
      * @param callable $callback 时间到期后所执行的函数，必须是可以调用的。callback函数不接受任何参数
+     * @return int $timerId 定时器ID
      */
     static function after($ms, callable $callback)
     {
