@@ -440,7 +440,7 @@ function swoole_event_wait()
  * 添加定时器，可用于客户端环境和fpm中
  *
  * @param $interval
- * @param $callback
+ * @param callable $callback
  * @return int
  */
 function swoole_timer_add($interval, $callback)
@@ -450,7 +450,7 @@ function swoole_timer_add($interval, $callback)
 /**
  * 单次定时器，在N毫秒后执行回调函数
  * @param $ms
- * @param $callback  function ($user_param)｛｝
+ * @param callable $callback  function ($user_param)｛｝
  * @param $user_param
  * @return int
  */
@@ -479,7 +479,7 @@ function swoole_timer_clear($timer_id)
 /**
  * 添加TICK定时器
  * @param      $ms
- * @param      $callback  function($timmerID, $params){}
+ * @param      callable $callback function($timmerID, $params){}
  * @param null $params
  * @return int
  */
@@ -555,8 +555,9 @@ function swoole_async_readfile($filename, $callback)
  * @param string $filename
  * @param string $content
  * @param callback $callback
+ * @param int $flags (在 1.9.1 或更高版本可用)
  */
-function swoole_async_writefile($filename, $content, $callback)
+function swoole_async_writefile($filename, $content, $callback, $flags = 0)
 {
 }
 
@@ -575,9 +576,10 @@ function swoole_async_writefile($filename, $content, $callback)
  * @param string $filename
  * @param mixed $callback
  * @param int $trunk_size
+ * @param int $offset (在 1.7.13 或更高版本可用)
  * @return bool
  */
-function swoole_async_read($filename, $callback, $trunk_size = 8192)
+function swoole_async_read($filename, $callback, $trunk_size = 8192, $offset = 0)
 {
 }
 
@@ -606,7 +608,7 @@ function swoole_async_set(array $setting)
  *
  * @return bool
  */
-function swoole_async_write($filename, $content, $offset, $callback = NULL)
+function swoole_async_write($filename, $content, $offset = -1, $callback = NULL)
 {
 }
 
@@ -711,12 +713,61 @@ class swoole_table extends Swoole\Table
 
 }
 
+class swoole_channel extends Swoole\Channel
+{
+
+}
+
+class swoole_redis_server extends Swoole\Redis\Server
+{
+
+}
+
+/**
+ * @desc 内置 Websocket 服务器
+ *
+ * $server = new swoole_websocket_server("0.0.0.0", 11521);
+ * $server->on("open", function(swoole_websocket_server $server, $request){
+ *      $request->fd     客户端的socket id
+ * });
+ * $server->on("message", function(swoole_websocket_server $server, swoole_websocket_frame $frame){
+ *      $frame->fd       客户端的socket id，使用$server->push推送数据时需要用到
+ *      $frame->data     数据内容，可以是文本内容也可以是二进制数据，可以通过opcode的值来判断
+ *      $frame->opcode   WebSocket的OpCode类型，可以参考WebSocket协议标准文档
+ *      $frame->finish   表示数据帧是否完整，一个WebSocket请求可能会分成多个数据帧进行发送
+ * });
+ * $server->on("close", function(){
+ *      $fd 客户端的socket id，使用$server->push推送数据时需要用到
+ * });
+ */
 class swoole_websocket_server extends Swoole\WebSocket\Server
 {
 
 }
 
+/**
+ * @property $fd       客户端的socket id，使用$server->push推送数据时需要用到
+ * @property $data     数据内容，可以是文本内容也可以是二进制数据，可以通过opcode的值来判断
+ * @property $opcode   WebSocket的OpCode类型，可以参考WebSocket协议标准文档
+ * @property $finish   表示数据帧是否完整，一个WebSocket请求可能会分成多个数据帧进行发送
+ */
 class swoole_websocket_frame extends Swoole\WebSocket\Frame
+{
+
+}
+class swoole_mysql extends \Swoole\Mysql
+{
+
+}
+class swoole_http2_client extends \Swoole\Http2\Client
+{
+
+}
+class swoole_mysql_exception extends \Swoole\Mysql\Exception
+{
+    
+}
+class swoole_serialize extends \Swoole\Serialize
 {
 
 }

@@ -36,17 +36,19 @@ class Redis
     /**
      * 获取KEY值
      * @param $key
+     * @param callable $callback
      */
-    public function get()
+    public function get($key, callback $callback)
     {
     }
 
     /**
      * 将当前值设置为指定的数字
-     *
+     * @param $key
      * @param $value
+     * @param callable $callback
      */
-    public function set($value)
+    public function set($key, $value, callback $callback)
     {
     }
 }

@@ -12,6 +12,15 @@ class Table
     const TYPE_FLOAT  = 3;
 
     /**
+     * 创建内存表对象
+     *
+     * @param int $size $size参数指定表格的最大行数，必须为2的指数，如1024,8192,65536等
+     */
+    public function __construct($size)
+    {
+    }
+
+    /**
      * 获取key
      * @param $key
      * @return array
