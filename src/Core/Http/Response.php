@@ -140,14 +140,14 @@ class Response extends MessageResponse
 
     }
 
-    function forward($pathTo,Request $request){
+    function forward($pathTo,Request $request,$appNameSpace = 'App\\'){
         $pathTo = UrlParser::pathInfo($pathTo);
         if(!$this->isEndResponse()){
             if($pathTo == UrlParser::pathInfo($request->getUri()->getPath())){
                 trigger_error("you yor forward a request in the same path : {$pathTo}");
             }
             $request->getUri()->withPath($pathTo);
-            Dispatcher::getInstance()->dispatch($request,$this);
+            Dispatcher::getInstance($appNameSpace)->dispatch($request,$this);
         }else{
             trigger_error("response has end");
         }

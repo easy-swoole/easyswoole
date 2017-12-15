@@ -20,17 +20,30 @@ use FastRoute\RouteCollector;
 
 class Dispatcher
 {
-    use Singleton;
+
     private $controllerNameSpacePrefix;
     private $router = null;
     private $controllerPool = [];
-    function __construct()
+    function __construct($appNameSpace)
     {
-        $this->controllerNameSpacePrefix = Di::getInstance()->get(SysConst::APP_NAMESPACE).'\\Controller';
+        $this->controllerNameSpacePrefix = $appNameSpace.'Controller';
         $collector = $this->checkRouter();
         if($collector){
             $this->router = new GroupCountBased($collector->getData());
         }
+    }
+
+    /*
+     * 依赖IOC实现不同的app dispatcher实例单例
+     */
+    public static function getInstance($appNameSpace):Dispatcher
+    {
+        $ins = Di::getInstance()->get(SysConst::APP_NAMESPACE.$appNameSpace);
+        if(!$ins instanceof Dispatcher){
+            $ins = new Dispatcher($appNameSpace);
+            Di::getInstance()->set(SysConst::APP_NAMESPACE.$appNameSpace,$ins);
+        }
+        return $ins;
     }
 
     public function dispatch(Request $request,Response $response):void

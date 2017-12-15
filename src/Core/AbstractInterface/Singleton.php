@@ -7,9 +7,7 @@
  */
 
 namespace EasySwoole\Core\AbstractInterface;
-
-
-use EasySwoole\Core\Swoole\Server;
+use EasySwoole\Core\Swoole\ServerManager;
 
 trait Singleton
 {
@@ -36,7 +34,7 @@ trait Singleton
 
     static function getInstanceId():int
     {
-        $cid = Server::getInstance()->coroutineId();
+        $cid = ServerManager::getInstance()->coroutineId();
         if($cid === null){
             $cid = 0;
         }

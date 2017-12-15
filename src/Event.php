@@ -25,22 +25,17 @@ class Event
 
     }
 
-    public static function serverCreate(\swoole_server $server):void
+    public static function mainServerCreate(\swoole_server $server,EventRegister $register):void
     {
 
     }
 
-    public static function swooleEventRegister(EventRegister $register):void
+    public static function onRequest(Request $request,Response $response,$appNameSpace):void
     {
 
     }
 
-    public static function onRequest(Request $request,Response $response):void
-    {
-
-    }
-
-    public static function afterAction(Request $request,Response $response):void
+    public static function afterAction(Request $request,Response $response,$appNameSpace):void
     {
 
     }

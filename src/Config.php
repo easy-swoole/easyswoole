@@ -13,7 +13,7 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\Component\SysConst;
-use EasySwoole\Core\Swoole\Config as swooleConf;
+use EasySwoole\Core\Swoole\ServerManager;
 
 
 class Config
@@ -44,12 +44,13 @@ class Config
     private function sysConf():array
     {
         return array(
-            "SERVER"=>array(
-                "LISTEN"=>"0.0.0.0",
+            "MAIN_SERVER"=>array(
+                "HOST"=>"0.0.0.0",
                 "PORT"=>9501,
-                "SERVER_TYPE"=>swooleConf::TYPE_WEB,//
-                'SOCKET_TYPE'=>SWOOLE_TCP,//当SERVER_TYPE为SERVER_TYPE_SERVER模式时有效
-                "CONFIG"=>array(
+                "SERVER_TYPE"=>ServerManager::TYPE_WEB_SERVER,
+                'SOCK_TYPE'=>SWOOLE_TCP,//该配置项当为SERVER_TYPE值为TYPE_SERVER时有效
+                'RUN_MODEL'=>SWOOLE_PROCESS,
+                "SETTING"=>array(
                     'task_worker_num' => 8, //异步任务进程
                     "task_max_request"=>10,
                     'max_request'=>5000,//强烈建议设置此配置项

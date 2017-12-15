@@ -14,10 +14,9 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
-use EasySwoole\Core\Http\Request;
-use EasySwoole\Core\Swoole\Server;
 use EasySwoole\Core\Utility\File;
 use EasySwoole\Event;
+use EasySwoole\Core\Swoole\ServerManager;
 
 class Core
 {
@@ -43,7 +42,7 @@ class Core
     public function run():void
     {
         $this->initialize();
-        Server::getInstance()->start();
+        ServerManager::getInstance()->start();
     }
 
 

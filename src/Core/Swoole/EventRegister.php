@@ -67,43 +67,36 @@ class EventRegister extends Container
         return $this;
     }
 
-    function __construct($defaultEvents = true)
+    public function registerDefaultOnRequest($appNameSpace = 'App\\'):void
     {
-        if($defaultEvents){
-            $this->registerDefaultEvent();
-        }
+        $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($appNameSpace){
+            $request_psr = new Request($request);
+            $response_psr = new Response($response);
+            try{
+                Event::onRequest($request_psr,$response_psr,$appNameSpace);
+                Dispatcher::getInstance($appNameSpace)->dispatch($request_psr,$response_psr);
+                Event::afterAction($request_psr,$response_psr,$appNameSpace);
+            }catch (\Exception $exception){
+                $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
+                if($handler instanceof HttpExceptionHandlerInterface){
+                    $handler->handle($exception,$request_psr,$response_psr);
+                }else{
+                    $response_psr = new Response($response);
+                    $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                    $response_psr->write($exception->getMessage());
+                }
+            }
+            //携程模式下  底层不会自动end
+            $response_psr->end(true);
+            //兼容携程模式
+            $request_psr->freeInstance();
+            $response_psr->freeInstance();
+            return $response_psr;
+        });
     }
 
-    private function registerDefaultEvent()
+    public function registerDefaultOnTask():void
     {
-        if(Config::getInstance()->getServerType() != Config::TYPE_SERVER){
-            $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response){
-                $request_psr = new Request($request);
-                $response_psr = new Response($response);
-                try{
-                    Event::onRequest($request_psr,$response_psr);
-                    Dispatcher::getInstance()->dispatch($request_psr,$response_psr);
-                    Event::afterAction($request_psr,$response_psr);
-                }catch (\Exception $exception){
-                    $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
-                    if($handler instanceof HttpExceptionHandlerInterface){
-                        $handler->handle($exception,$request_psr,$response_psr);
-                    }else{
-                        $response_psr = new Response($response);
-                        $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                        $response_psr->write($exception->getMessage());
-                    }
-                }
-                //为cli单元测试准备  可在无服务启动下测试
-                if($request->fd){
-                    $response_psr->end(true);
-                }
-                $request_psr->freeInstance();
-                $response_psr->freeInstance();
-                return $response_psr;
-            });
-        }
-
         $this->add(self::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj)
         {
             if(is_string($taskObj) && class_exists($taskObj)){
@@ -124,7 +117,10 @@ class EventRegister extends Container
             }
             return null;
         });
+    }
 
+    public function registerDefaultOnFinish():void
+    {
         $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj)
         {
             //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
