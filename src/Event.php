@@ -12,6 +12,7 @@ namespace EasySwoole;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Swoole\EventRegister;
+use EasySwoole\Core\Swoole\ServerManager;
 
 class Event
 {
@@ -25,7 +26,7 @@ class Event
 
     }
 
-    public static function mainServerCreate(\swoole_server $server,EventRegister $register):void
+    public static function mainServerCreate(ServerManager $server,EventRegister $register):void
     {
 
     }
