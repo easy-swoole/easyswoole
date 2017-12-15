@@ -6,6 +6,8 @@ namespace Swoole;
  *
  * Author: wudi <wudi23@baidu.com>
  * Date: 2016/02/17
+ * @property string $host 服务器地址
+ * @property int $port 服务器端口
  */
 class Server
 {
@@ -14,6 +16,7 @@ class Server
      *
      * swoole_server::set()函数所设置的参数会保存到$setting属性上。
      * 在回调函数中可以访问运行参数的值。
+     * 配置选项 https://wiki.swoole.com/wiki/page/274.html
      *
      * swoole-1.6.11+可用
      *
@@ -84,17 +87,6 @@ class Server
     public $connections;
 
     /**
-     * swoole_server构造函数
-     * @param     $host
-     * @param     $port
-     * @param int $mode
-     * @param int $sock_type
-     */
-    function __construct($host, $port, $mode = SWOOLE_PROCESS, $sock_type = SWOOLE_SOCK_TCP)
-    {
-    }
-
-    /**
      * 注册事件回调函数，与swoole_server->on相同。swoole_http_server->on的不同之处是：
      *
      * * swoole_http_server->on不接受onConnect/onReceive回调设置
@@ -116,6 +108,11 @@ class Server
      *  * onWorkerError
      *  * onManagerStart
      *  * onManagerStop
+     *  WebSocket
+     *  * onOpen
+     *  * onHandshake
+     *  * onMessage
+     *
      *
      *     $http_server->on('request', function(swoole_http_request $request, swoole_http_response $response) {
      *         $response->end("<h1>hello swoole</h1>");
@@ -131,7 +128,7 @@ class Server
      * !! $response/$request 对象传递给其他函数时，不要加&引用符号
      *
      * @param string $event
-     * @param mixed $callback
+     * @param callable $callback
      */
     public function on($event, $callback)
     {
@@ -149,18 +146,39 @@ class Server
     }
 
     /**
-     * 启动server，监听所有TCP/UDP端口
+     * swoole_server 构造函数 https://wiki.swoole.com/wiki/page/14.html
+     *
+     * @param string $host
+     * ipv4: 本机 127.0.0.1 全部地址 0.0.0.0
+     * ipv6: 本机 ::1       全部地址 ::
+     *
+     * @param int $port
+     * $sock_type 为 UnixSocket Stream/Dgram，此参数将被忽略
+     * 监听 1024 以下的端口需要 root 权限
+     * 0 随机可用端口
+     *
+     * @param int $mode
+     * swoole_server的3种运行模式介绍 https://wiki.swoole.com/wiki/page/353.html
+     *
+     * @param int $sock_type
+     * swoole 支持的 Socket 类型 https://wiki.swoole.com/wiki/page/16.html
+     * $sock_type | SWOOLE_SSL 可以启用 SSL 隧道加密
+     */
+    function __construct($host, $port, $mode = SWOOLE_PROCESS, $sock_type = SWOOLE_SOCK_TCP)
+    {
+    }
+
+    /**
+     * 启动server，监听所有TCP/UDP端口 https://wiki.swoole.com/wiki/page/19.html
      *
      * 启动成功后会创建worker_num+2个进程。主进程+Manager进程+worker_num个Worker进程
      *
      * @return bool
      */
-    public function start()
-    {
-    }
+    public function start(){}
 
     /**
-     * 向客户端发送数据
+     * 向客户端发送数据 https://wiki.swoole.com/wiki/page/p-server/send.html
      *
      *  * $data，发送的数据。TCP协议最大不得超过2M，UDP协议不得超过64K
      *  * 发送成功会返回true，如果连接已被关闭或发送失败会返回false
@@ -185,12 +203,10 @@ class Server
      * @param int $from_id
      * @return bool
      */
-    public function send($fd, $data, $from_id = 0)
-    {
-    }
+    public function send($fd, $data, $from_id = 0){}
 
     /**
-     * 向任意的客户端IP:PORT发送UDP数据包
+     * 向任意的客户端IP:PORT发送UDP数据包 https://wiki.swoole.com/wiki/page/381.html
      *
      *  * $ip为IPv4字符串，如192.168.1.102。如果IP不合法会返回错误
      *  * $port为 1-65535的网络端口号，如果端口错误发送会失败
@@ -210,15 +226,22 @@ class Server
      * @param string $ip
      * @param int $port
      * @param string $data
-     * @param bool $ipv6
+     * @param int $server_socket 服务器可能会同时监听多个UDP端口，此参数可以指定使用哪个端口发送数据包
      * @return bool
      */
-    public function sendto($ip, $port, $data, $ipv6 = false)
-    {
-    }
+    public function sendto($ip, $port, $data, $server_socket = -1){}
 
     /**
-     * 关闭客户端连接
+     * 阻塞地向客户端发送数据 https://wiki.swoole.com/wiki/page/434.html
+     * sendwait目前仅可用于SWOOLE_BASE模式
+     *
+     * @param int $fd
+     * @param string $send_data
+     */
+    public function sendwait($fd, $send_data){}
+
+    /**
+     * 关闭客户端连接 https://wiki.swoole.com/wiki/page/p-server/close.html
      *
      * !! swoole-1.6以上版本不需要$from_id swoole-1.5.8以下的版本，务必要传入正确的$from_id，否则可能会导致连接泄露
      *
@@ -227,10 +250,10 @@ class Server
      * Server主动close连接，也一样会触发onClose事件。不要在close之后写清理逻辑。应当放置到onClose回调中处理。
      *
      * @param int $fd
-     * @param int $from_id
+     * @param bool $reset true 会强制关闭连接，丢弃发送队列中的数据
      * @return bool
      */
-    public function close($fd, $from_id = 0)
+    public function close($fd, $reset = false)
     {
     }
 
@@ -274,16 +297,15 @@ class Server
      *
      * @param mixed $data
      * @param int $dst_worker_id
-     * @param callable $finishCallBack
      * @return bool
      */
-    public function task($data, $dst_worker_id = -1,$finishCallBack = null)
+    public function task($data, $dst_worker_id = -1)
     {
     }
 
 
     /**
-     * 此函数可以向任意worker进程或者task进程发送消息。在非主进程和管理进程中可调用。收到消息的进程会触发onPipeMessage事件
+     * 此函数可以向任意worker进程或者task进程发送消息。在非主进程和管理进程中可调用。收到消息的进程会触发onPipeMessage事件 https://wiki.swoole.com/wiki/page/363.html
      *
      *  * $message为发送的消息数据内容
      *  * $dst_worker_id为目标进程的ID，范围是0 ~ (worker_num + task_worker_num - 1)
@@ -322,26 +344,12 @@ class Server
      * @param int $dst_worker_id
      * @return bool
      */
-    public function sendMessage($message, $dst_worker_id = -1)
-    {
-        return true;
-    }
+    public function sendMessage($message, $dst_worker_id = -1){}
 
     /**
-     * 此函数用于在task进程中通知worker进程，投递的任务已完成。此函数可以传递结果数据给worker进程
-     *
-     *      $serv->finish("response");
-     *
-     * 使用swoole_server::finish函数必须为Server设置onFinish回调函数。此函数只可用于task进程的onTask回调中
-     *
-     * swoole_server::finish是可选的。如果worker进程不关心任务执行的结果，不需要调用此函数
-     * 在onTask回调函数中return字符串，等同于调用finish
-     *
-     * @param string $task_data
+     * 次函数已废弃 https://wiki.swoole.com/wiki/page/223.html
      */
-    public function finish($task_data)
-    {
-    }
+//    public function finish($task_data){}
 
     /**
      * 检测服务器所有连接，并找出已经超过约定时间的连接。
@@ -359,7 +367,7 @@ class Server
     }
 
     /**
-     * 获取连接的信息
+     * 获取连接的信息 https://wiki.swoole.com/wiki/page/p-connection_info.html
      *
      * connection_info可用于UDP服务器，但需要传入from_id参数
      *
@@ -385,9 +393,10 @@ class Server
      *
      * @param int $fd
      * @param int $from_id
+     * @param bool $ignore_close
      * @return array | bool
      */
-    public function connection_info($fd, $from_id = -1)
+    public function connection_info($fd, $from_id = -1, $ignore_close = false)
     {
     }
 
@@ -417,12 +426,10 @@ class Server
      * @param int $pagesize
      * @return array | bool
      */
-    public function connection_list($start_fd = -1, $pagesize = 100)
-    {
-    }
+    public function connection_list($start_fd = -1, $pagesize = 10){}
 
     /**
-     * 重启所有worker进程
+     * 重启所有worker进程 https://wiki.swoole.com/wiki/page/p-server/reload.html
      *
      * 一台繁忙的后端服务器随时都在处理请求，如果管理员通过kill进程方式来终止/重启服务器程序，可能导致刚好代码执行到一半终止。 这种情况下会产生数据的不一致。如交易系统中，支付逻辑的下一段是发货，假设在支付逻辑之后进程被终止了。会导致用户支付了货币，但并没有发货，后果非常严重。
      *
@@ -448,6 +455,15 @@ class Server
      * @return bool
      */
     public function reload()
+    {
+    }
+
+    /**
+     * 使当前worker进程停止运行，并立即触发onWorkerStop回调函数 https://wiki.swoole.com/wiki/page/547.html
+     * @param int $worker_id
+     * @param bool $waitEvent
+     */
+    public function stop($worker_id = -1, $waitEvent = false)
     {
     }
 
@@ -484,15 +500,15 @@ class Server
      * @param string $host
      * @param int $port
      * @param int $type
-     * 
+     *
      * @return \swoole_server_port|bool 如果成功，1.8.0以上版本返回swoole_server_port，以下返回TRUE；如果失败返回FALSE
      */
-    public function addlistener($host, $port, $type = SWOOLE_SOCK_TCP)
+    public function addListener($host, $port, $type = SWOOLE_SOCK_TCP)
     {
     }
 
     /**
-     * 得到当前Server的活动TCP连接数，启动时间，accpet/close的总次数等信息
+     * 得到当前Server的活动TCP连接数，启动时间，accpet/close的总次数等信息 https://wiki.swoole.com/wiki/page/288.html
      *
      *      array (
      *        'start_time' => 1409831644,
@@ -514,7 +530,7 @@ class Server
     }
 
     /**
-     * 在指定的时间后执行函数
+     * 在指定的时间后执行函数 https://wiki.swoole.com/wiki/page/320.html
      *
      * swoole_server::after函数是一个一次性定时器，执行完成后就会销毁。
      *
@@ -523,17 +539,17 @@ class Server
      * $after_time_ms 最大不得超过 86400000
      * 此方法是swoole_timer_after函数的别名
      *
-     * @param $ms
      * @param int $after_time_ms
      * @param mixed $callback_function
      * @param mixed $param
+     * @return int $timerId
      */
     public function after($after_time_ms, $callback_function, $param = null)
     {
     }
 
-    /*
-     * 增加监听端口，addlistener的别名
+    /**
+     * 增加监听端口，addListener 的别名
      * @param $host
      * @param $port
      * @param $type
@@ -545,7 +561,7 @@ class Server
 
     /**
      *
-     * 添加一个用户自定义的工作进程
+     * 添加一个用户自定义的工作进程 https://wiki.swoole.com/wiki/page/390.html
      *
      *  * $process 为swoole_process对象，注意不需要执行start。在swoole_server启动时会自动创建进程，并执行指定的子进程函数
      *  * 创建的子进程可以调用$server对象提供的各个方法，如connection_list/connection_info/stats
@@ -554,7 +570,7 @@ class Server
      *
      * 子进程会托管到Manager进程，如果发生致命错误，manager进程会重新创建一个
      *
-     * @param swoole_process $process
+     * @param swoole_process|Process $process
      */
     public function addProcess(swoole_process $process)
     {
@@ -589,33 +605,33 @@ class Server
      *
      * @param $interval
      */
-    public function clearTimer($interval)
+    public function deltimer($interval)
     {
     }
 
     /**
-     * 增加tick定时器
+     * 增加tick定时器 https://wiki.swoole.com/wiki/page/414.html
      *
-     * 可以自定义回调函数。此函数是swoole_timer_tick的别名
+     * 可以自定义回调函数。此函数是 swoole_timer_tick 的别名
      *
      * worker进程结束运行后，所有定时器都会自动销毁
      *
      * 设置一个间隔时钟定时器，与after定时器不同的是tick定时器会持续触发，直到调用swoole_timer_clear清除。与swoole_timer_add不同的是tick定时器可以存在多个相同间隔时间的定时器。
      *
-     * @param int $ms
+     * @param int $interval_ms
      * @param mixed $callback
      * @param mixed $param
-     * @return int
+     * @return int $timerId
      */
     public function tick($interval_ms, $callback, $param = null)
     {
     }
 
     /**
-     * 删除设定的定时器，此定时器不会再触发
-     * @param $id
+     * 清除tick/after定时器，此函数是 swoole_timer_clear 的别名
+     * @param int $id
      */
-    function clearAfter($id)
+    function clearTimer($id)
     {
     }
 
@@ -641,9 +657,9 @@ class Server
     }
 
     /**
-     * 发送文件到TCP客户端连接
+     * 发送文件到TCP客户端连接 https://wiki.swoole.com/wiki/page/187.html
      *
-     * endfile函数调用OS提供的sendfile系统调用，由操作系统直接读取文件并写入socket。sendfile只有2次内存拷贝，使用此函数可以降低发送大量文件时操作系统的CPU和内存占用。
+     * sendfile函数调用OS提供的sendfile系统调用，由操作系统直接读取文件并写入socket。sendfile只有2次内存拷贝，使用此函数可以降低发送大量文件时操作系统的CPU和内存占用。
      *
      * $filename 要发送的文件路径，如果文件不存在会返回false
      * 操作成功返回true，失败返回false
@@ -651,14 +667,14 @@ class Server
      *
      * @param int $fd
      * @param string $filename 文件绝对路径
+     * @param int $offset
+     * @param int $length
      * @return bool
      */
-    public function sendfile($fd, $filename)
-    {
-    }
+    public function sendfile($fd, $filename, $offset =0, $length = 0){}
 
     /**
-     * 将连接绑定一个用户定义的ID，可以设置dispatch_mode=5设置已此ID值进行hash固定分配。可以保证某一个UID的连接全部会分配到同一个Worker进程
+     * 将连接绑定一个用户定义的ID，可以设置dispatch_mode=5设置已此ID值进行hash固定分配。可以保证某一个UID的连接全部会分配到同一个Worker进程 https://wiki.swoole.com/wiki/page/369.html
      *
      * 在默认的dispatch_mode=2设置下，server会按照socket fd来分配连接数据到不同的worker。
      * 因为fd是不稳定的，一个客户端断开后重新连接，fd会发生改变。这样这个客户端的数据就会被分配到别的Worker。
@@ -689,21 +705,33 @@ class Server
     }
 
     /**
-     * 判断fd对应的连接是否存在
+     * 判断 fd 对应的连接是否存在 https://wiki.swoole.com/wiki/page/454.html
+     *
      * @param int $fd
      * @return bool
      */
-    function exist($fd)
-    {
-
-    }
+    public function exist($fd){}
 
     /**
+     * 停止接收数据 https://wiki.swoole.com/wiki/page/613.html
+     *
+     * @param int $fd
+     */
+    public function pause($fd){}
+
+    /**
+     * 恢复数据接收 https://wiki.swoole.com/wiki/page/614.html
+     *
+     * @param int $fd
+     */
+    public function resume($fd){}
+
+    /**
+     * 延后执行一个PHP函数 https://wiki.swoole.com/wiki/page/516.html
      * @param callable $callback
      */
     public function defer(callable $callback)
     {
-
     }
 
     /**
@@ -711,6 +739,21 @@ class Server
      * @return bool | array
      */
     function getClientInfo($fd)
+    {
+
+    }
+
+    /**
+     * 并发执行多个Task
+     *
+     * 执行成功返回一个结果数据，数组的key与传入的$tasks一致
+     * 某个任务执行超时不会影响其他任务，返回的结果数据中将不包含超时的任务
+     *
+     * @param array $tasks 必须为数字索引数组，不支持关联索引数组，底层会遍历$tasks将任务逐个投递到Task进程
+     * @param double $timeout 为浮点型，单位为秒
+     * @return array
+     */
+    function taskWaitMulti(array $tasks, $timeout)
     {
 
     }

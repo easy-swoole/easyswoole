@@ -111,7 +111,7 @@ class Client
      * 注册异步事件回调函数
      *
      * @param $event_name
-     * @param $callback_function
+     * @param callable $callback_function
      * @return bool
      */
     public function on($event_name, $callback_function)
@@ -147,21 +147,29 @@ class Client
      * 设置客户端参数
      * @param array $setting
      */
-    function set(array $setting)
+    public function set(array $setting)
     {
     }
 
     /**
      * 睡眠，停止接收数据
      */
-    function sleep()
+    public function sleep()
     {
     }
 
     /**
      * 唤醒，开始接收数据
      */
-    function wakeup()
+    public function wakeup()
+    {
+    }
+
+    /**
+     * @param $file string file with path
+     * @return bool|mixed false if file not exist
+     */
+    public function sendfile($file)
     {
     }
 }

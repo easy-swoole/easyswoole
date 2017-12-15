@@ -39,7 +39,7 @@ class Atomic
     {
     }
 
-    /*
+    /**
      * 获取当前计数的值
      * @return int
      */
