@@ -34,6 +34,13 @@ class Response extends MessageResponse
         }
         if($realEnd === true && $this->isEndResponse !== self::STATUS_REAL_END){
             $this->isEndResponse = self::STATUS_REAL_END;
+            $this->response->end();
+        }
+    }
+
+    function response():bool
+    {
+        if(!$this->isEndResponse()){
             //结束处理
             $status = $this->getStatusCode();
             $this->response->status($status);
@@ -52,11 +59,14 @@ class Response extends MessageResponse
                 $this->response->write($write);
             }
             $this->getBody()->close();
-            $this->response->end();
+            return true;
+        }else{
+            return false;
         }
     }
 
-    function isEndResponse(){
+    function isEndResponse()
+    {
         return $this->isEndResponse;
     }
     function write($obj){
