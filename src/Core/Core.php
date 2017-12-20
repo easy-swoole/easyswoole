@@ -41,7 +41,6 @@ class Core
 
     public function run():void
     {
-        $this->initialize();
         ServerManager::getInstance()->start();
     }
 
@@ -71,7 +70,7 @@ class Core
     private function errorHandle():void
     {
         $conf = Config::getInstance()->getConf("DEBUG");
-        if($conf['ENABLE'] != true){
+        if(!$conf){
             return;
         }
         ini_set("display_errors", "On");

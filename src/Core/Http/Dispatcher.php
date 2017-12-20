@@ -145,7 +145,6 @@ class Dispatcher
                 $maxDepth--;
             }
         }
-
         if(class_exists($finalClass)){
             $controller = new $finalClass;
             if($controller instanceof AbstractController){

@@ -7,7 +7,6 @@
  */
 
 namespace EasySwoole\Core\Http;
-use EasySwoole\Core\AbstractInterface\Singleton;
 use  EasySwoole\Core\Http\Message\Response as MessageResponse;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Message\Utility;
@@ -22,23 +21,11 @@ class Response extends MessageResponse
     const STATUS_REAL_END = 2;
     private $isEndResponse = 0;//1 逻辑end  2真实end
 
-    use Singleton;
 
     final public function __construct(\swoole_http_response $response)
     {
         $this->response = $response;
         parent::__construct();
-        self::$instanceList[self::getInstanceId()] = $this;
-    }
-
-    private static $instanceList = [];
-
-    public static function getInstance():?Response
-    {
-        if(isset(self::$instanceList[self::getInstanceId()])){
-            return self::$instanceList[self::getInstanceId()];
-        }
-        return null;
     }
 
     function end($realEnd = false){
@@ -47,6 +34,13 @@ class Response extends MessageResponse
         }
         if($realEnd === true && $this->isEndResponse !== self::STATUS_REAL_END){
             $this->isEndResponse = self::STATUS_REAL_END;
+            $this->response->end();
+        }
+    }
+
+    function response():bool
+    {
+        if(!$this->isEndResponse()){
             //结束处理
             $status = $this->getStatusCode();
             $this->response->status($status);
@@ -65,11 +59,14 @@ class Response extends MessageResponse
                 $this->response->write($write);
             }
             $this->getBody()->close();
-            $this->response->end();
+            return true;
+        }else{
+            return false;
         }
     }
 
-    function isEndResponse(){
+    function isEndResponse()
+    {
         return $this->isEndResponse;
     }
     function write($obj){

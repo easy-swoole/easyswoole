@@ -59,11 +59,7 @@ class Config
                     'pid_file'=>Di::getInstance()->get(SysConst::DIR_TEMP).'/pid.pid'
                 ),
             ),
-            "DEBUG"=>array(
-                "RESPONSE"=>true,
-                'AUTO_CLOSE'=>true,
-                "ENABLE"=>true,
-            ),
+            "DEBUG"=>true,
         );
     }
 
