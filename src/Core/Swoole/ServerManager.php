@@ -104,12 +104,14 @@ class ServerManager
         if(!$register->get($register::onFinish)){
             $register->registerDefaultOnFinish();
         }
-        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER){
-            //检查是否注册了onRequest
+
+        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
+            //检查是否注册了onRequest,否则注册默认onRequest
             if(!$register->get($register::onRequest)){
                 $register->registerDefaultOnRequest();
             }
         }
+
         $events = $register->all();
         foreach ($events as $event => $callback){
             $this->mainServer->on($event,$callback);
