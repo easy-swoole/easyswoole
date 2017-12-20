@@ -41,7 +41,6 @@ class Core
 
     public function run():void
     {
-        $this->initialize();
         ServerManager::getInstance()->start();
     }
 
