@@ -11,13 +11,13 @@ namespace EasySwoole\Core\Socket;
 
 use EasySwoole\Core\Socket\Client\Tcp;
 
-abstract class TcpController extends BaseController
+abstract class TcpController extends AbstractController
 {
     private $client;
-    final function __construct($fd,$reactorId,$actionName)
+    final function __construct(Tcp $client,array $args)
     {
-        parent::__construct($actionName);
-        $this->client = new Tcp($fd,$reactorId);
+        parent::__construct($args);
+        $this->client = $client;
     }
 
     function client():Tcp
@@ -25,7 +25,4 @@ abstract class TcpController extends BaseController
         // TODO: Implement client() method.
         return $this->client;
     }
-
-
-
 }

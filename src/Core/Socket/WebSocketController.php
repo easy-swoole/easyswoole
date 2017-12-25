@@ -9,7 +9,20 @@
 namespace EasySwoole\Core\Socket;
 
 
-class WebSocketController
-{
+use EasySwoole\Core\Socket\Client\WebSocket;
 
+abstract class WebSocketController extends AbstractController
+{
+    private $client;
+    final function __construct(WebSocket $client,array $args)
+    {
+        parent::__construct($args);
+        $this->client = $client;
+    }
+
+    function client():WebSocket
+    {
+        // TODO: Implement client() method.
+        return $this->client;
+    }
 }

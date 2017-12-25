@@ -11,9 +11,8 @@ namespace EasySwoole\Core\Socket\Client;
 
 class Tcp
 {
-    private $reactorId;
-    private $fd;
-    private $isWebSocket = false;
+    protected $reactorId;
+    protected $fd;
 
     final function __construct($fd = null,$reactorId = null)
     {
@@ -52,21 +51,4 @@ class Tcp
     {
         $this->fd = $fd;
     }
-
-    /**
-     * @return bool
-     */
-    public function isWebSocket(): bool
-    {
-        return $this->isWebSocket;
-    }
-
-    /**
-     * @param bool $isWebSocket
-     */
-    public function setIsWebSocket(bool $isWebSocket)
-    {
-        $this->isWebSocket = $isWebSocket;
-    }
-
 }
