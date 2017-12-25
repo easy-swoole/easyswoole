@@ -60,7 +60,7 @@ class Dispatch
                     if(!empty($res)){
                         $res = $this->parser->encode($res);
                         if(!isset($res)){
-
+                            Response::response($client,$res);
                         }
                     }
                 }
