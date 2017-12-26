@@ -13,6 +13,7 @@ use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\Command\ParserInterface;
+use Swoole\Mysql\Exception;
 
 class Dispatch
 {
@@ -20,9 +21,17 @@ class Dispatch
     const WEB_SOCK = 2;
     const UDP = 3;
     private $parser;
+    private $exceptionHandler;
+
     function __construct(ParserInterface $parser)
     {
         $this->parser = $parser;
+    }
+
+    public function setExceptionHandler(callable $handler):Dispatch
+    {
+        $this->exceptionHandler = $handler;
+        return $this;
     }
 
     /*
@@ -30,7 +39,7 @@ class Dispatch
      * Web Socket swoole_websocket_frame $frame
      * Udp array $client_info;
      */
-    function dispatch($type ,string $data, ...$args)
+    function dispatch($type ,string $data, ...$args):void
     {
         switch ($type){
             case self::TCP:{
@@ -53,14 +62,25 @@ class Dispatch
         $controller = $command->getControllerClass();
         if(!empty($controller)){
             if(class_exists($controller)){
-                $controller = new $controller($client,$command->getArgs());
+                $ref = new \ReflectionClass($controller);
+                $controller = $ref->newInstanceArgs(array(
+                    $client,$command->getArgs()
+                ));
                 if($controller instanceof AbstractController){
-                    $controller->__hook($command->getAction());
-                    $res = $controller->getResponse()->__toString();
-                    if(!empty($res)){
-                        $res = $this->parser->encode($res);
-                        if(!isset($res)){
-                            Response::response($client,$res);
+                    try{
+                        $controller->__hook($command->getAction());
+                        $res = $controller->getResponse()->__toString();
+                        if(!empty($res)){
+                            $res = $this->parser->encode($res);
+                            if(!isset($res)){
+                                Response::response($client,$res);
+                            }
+                        }
+                    }catch (Exception $exception){
+                        if(is_callable($this->exceptionHandler)){
+                            call_user_func_array($this->exceptionHandler,array(
+                               $exception,$client,$command
+                            ));
                         }
                     }
                 }
