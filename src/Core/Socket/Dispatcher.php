@@ -15,7 +15,7 @@ use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\Command\ParserInterface;
 use Swoole\Mysql\Exception;
 
-class Dispatch
+class Dispatcher
 {
     const TCP = 1;
     const WEB_SOCK = 2;
@@ -28,7 +28,7 @@ class Dispatch
         $this->parser = $parser;
     }
 
-    public function setExceptionHandler(callable $handler):Dispatch
+    public function setExceptionHandler(callable $handler):Dispatcher
     {
         $this->exceptionHandler = $handler;
         return $this;
