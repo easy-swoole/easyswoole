@@ -35,13 +35,14 @@ class Dispatcher
 
     /*
      * 依赖IOC实现不同的app dispatcher实例单例
+     * 默认'App\\'
      */
     public static function getInstance($appNameSpace):Dispatcher
     {
-        $ins = Di::getInstance()->get(SysConst::APP_NAMESPACE.$appNameSpace);
+        $ins = Di::getInstance()->get($appNameSpace);
         if(!$ins instanceof Dispatcher){
             $ins = new Dispatcher($appNameSpace);
-            Di::getInstance()->set(SysConst::APP_NAMESPACE.$appNameSpace,$ins);
+            Di::getInstance()->set($appNameSpace,$ins);
         }
         return $ins;
     }
