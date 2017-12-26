@@ -36,7 +36,7 @@ class Index extends AbstractController
         <h1>:)</h1><p>欢迎使用<b> easySwoole</b></p> 
         <span style="font-size:25px">从未如此之快 - 专为API而生的常驻内存型框架</span>
        <br/>
-       <span style="font-size:20px">[ 欢迎前往 <a href="https://github.com/kiss291323003/easyswoole/" target="easySwoole">GitHub</a> 为 easySwoole 赏一个Star ]</span>
+       <span style="font-size:20px">[ 欢迎前往 <a href="https://github.com/easy-swoole/easyswoole" target="easySwoole">GitHub</a> 为 easySwoole 赏一个Star ]</span>
    </div>
  ');/*  url:domain/index.html  domain/   domain  */
     }
