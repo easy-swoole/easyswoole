@@ -37,11 +37,23 @@ class Request  extends ServerRequest
         $this->withCookieParams($this->initCookie())->withQueryParams($this->initGet())->withParsedBody($this->initPost())->withUploadedFiles($files);
     }
 
-    function getRequestParam($keyOrKeys = null, $default = null)
+    function getRequestParam(...$key)
     {
-        //此处需要重构
+        $data = array_merge($this->getParsedBody(),$this->getQueryParams());;
+        if(empty($key)){
+            return $data;
+        }else{
+           $res = [];
+           foreach ($key as $item){
+               $res[$item] = isset($data[$item])? $data[$item] : null;
+           }
+           if(count($key) == 1){
+               return array_shift($res);
+           }else{
+               return $res;
+           }
+        }
     }
-
 
     function getSwooleRequest()
     {
