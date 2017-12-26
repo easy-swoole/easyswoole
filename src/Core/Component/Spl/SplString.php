@@ -9,9 +9,7 @@
 namespace EasySwoole\Core\Component\Spl;
 
 
-use EasySwoole\Core\Component\Lib\Stream;
-
-class SplString extends Stream
+class SplString extends SplStream
 {
 
 	function __construct( string $str = null )

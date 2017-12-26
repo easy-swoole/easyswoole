@@ -6,10 +6,10 @@
  * Time: 上午11:58
  */
 
-namespace EasySwoole\Core\Component\Lib;
+namespace EasySwoole\Core\Component\Spl;
 
 
-class Stream
+class SplStream
 {
     private $stream;
     private $seekable;

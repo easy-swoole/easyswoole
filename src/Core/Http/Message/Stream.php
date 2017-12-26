@@ -9,7 +9,9 @@
 namespace EasySwoole\Core\Http\Message;
 
 
-class Stream extends \EasySwoole\Core\Component\Lib\Stream
+use EasySwoole\Core\Component\Spl\SplStream;
+
+class Stream extends SplStream
 {
 
 }

@@ -9,7 +9,7 @@
 namespace EasySwoole\Core\Socket;
 
 
-use EasySwoole\Core\Component\Lib\Stream;
+use EasySwoole\Core\Component\Spl\SplStream;
 
 abstract class AbstractController
 {
@@ -25,7 +25,7 @@ abstract class AbstractController
 
     function __construct(array $args)
     {
-        $this->response = new Stream();
+        $this->response = new SplStream();
         $this->args = $args;
     }
 
@@ -37,7 +37,7 @@ abstract class AbstractController
         return true;
     }
 
-    function getResponse():Stream
+    function getResponse():SplStream
     {
         return $this->response;
     }
