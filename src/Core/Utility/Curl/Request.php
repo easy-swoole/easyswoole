@@ -71,6 +71,13 @@ class Request
     public function exec():Response
     {
         $curl = curl_init();
+        curl_setopt_array($curl,$this->getOpt());
+        $result = curl_exec($curl);
+        return new Response($result,$curl);
+    }
+
+    public function getOpt():array
+    {
         $opt = $this->curlOPt;
         if(!empty($this->cookies)){
             $str = '';
@@ -101,12 +108,6 @@ class Request
                 $opt[CURLOPT_COOKIE] = $str;
             }
         }
-        curl_setopt_array($curl,$opt);
-        $result = curl_exec($curl);
-        return new Response($result,$curl);
+        return $opt;
     }
-
-
-
-
 }
