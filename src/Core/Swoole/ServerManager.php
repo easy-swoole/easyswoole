@@ -55,6 +55,7 @@ class ServerManager
         foreach ($this->serverList as $serverName => $server){
             $subPort = $mainServer->addlistener($server['host'],$server['port'],$server['type']);
             if($subPort){
+                $this->serverList[$serverName] = $subPort;
                 if(is_array($server['setting'])){
                     $subPort->set($server['setting']);
                 }
@@ -120,10 +121,16 @@ class ServerManager
     }
 
 
-    public function getServer():?\swoole_server
+    public function getServer($serverName = null):?\swoole_server
     {
          if($this->mainServer){
-             return $this->mainServer;
+             if($serverName === null){
+                 return $this->mainServer;
+             }else{
+                 if(isset($this->serverList[$serverName])){
+                     return $this->serverList[$serverName];
+                 }
+             }
          }else{
              throw  new \Exception('getServer cannot call before mainServer create');
          }
