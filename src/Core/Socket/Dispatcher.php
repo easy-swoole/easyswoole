@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
@@ -66,7 +67,7 @@ class Dispatcher
                 $controller = $ref->newInstanceArgs(array(
                     $client,$command->getArgs()
                 ));
-                if($controller instanceof AbstractController){
+                if($controller instanceof Controller){
                     try{
                         $controller->__hook($command->getAction());
                         $res = $controller->getResponse()->__toString();
@@ -87,6 +88,5 @@ class Dispatcher
             }
 
         }
-
     }
 }

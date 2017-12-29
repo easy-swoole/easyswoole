@@ -2,17 +2,16 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/4
- * Time: 下午6:09
+ * Date: 2017/12/29
+ * Time: 下午7:29
  */
 
-namespace EasySwoole\Core\AbstractInterface;
+namespace EasySwoole\Core\Http\AbstractInterface;
 use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
 
-
-abstract class AbstractRouter
+abstract class Router
 {
     private $routeCollector;
     final function __construct()

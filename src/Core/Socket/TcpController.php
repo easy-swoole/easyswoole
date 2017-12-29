@@ -9,9 +9,10 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Tcp;
 
-abstract class TcpController extends AbstractController
+abstract class TcpController extends Controller
 {
     private $client;
     final function __construct(Tcp $client,array $args)

@@ -9,9 +9,10 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Udp;
 
-abstract class UdpController extends AbstractController
+abstract class UdpController extends Controller
 {
 
     private $client;

@@ -9,9 +9,9 @@
 namespace EasySwoole\Core\Http;
 
 
-use EasySwoole\Core\AbstractInterface\AbstractController;
-use EasySwoole\Core\AbstractInterface\AbstractRouter;
-use EasySwoole\Core\AbstractInterface\Singleton;
+
+use EasySwoole\Core\Http\AbstractInterface\Controller;
+use EasySwoole\Core\Http\AbstractInterface\Router;
 use EasySwoole\Core\Http\Message\Status;
 use FastRoute\Dispatcher\GroupCountBased;
 use EasySwoole\Core\Component\Di;
@@ -63,7 +63,7 @@ class Dispatcher
         $class = $this->controllerNameSpacePrefix.'\\Router';
         if(class_exists($class)){
             $router = new $class;
-            if($router instanceof AbstractRouter){
+            if($router instanceof Router){
                 return $router->getRouteCollector();
             }else{
                 return null;
@@ -148,7 +148,7 @@ class Dispatcher
         }
         if(class_exists($finalClass)){
             $controller = new $finalClass;
-            if($controller instanceof AbstractController){
+            if($controller instanceof Controller){
                 $controller->__hook($actionName,$request,$response);
             }else{
                 trigger_error("class@{$finalClass} not a controller class");

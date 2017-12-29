@@ -9,9 +9,10 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\WebSocket;
 
-abstract class WebSocketController extends AbstractController
+abstract class WebSocketController extends Controller
 {
     private $client;
     final function __construct(WebSocket $client,array $args)

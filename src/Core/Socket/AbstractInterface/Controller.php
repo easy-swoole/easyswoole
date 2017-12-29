@@ -2,16 +2,16 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/20
- * Time: 下午3:55
+ * Date: 2017/12/29
+ * Time: 下午7:32
  */
 
-namespace EasySwoole\Core\Socket;
+namespace EasySwoole\Core\Socket\AbstractInterface;
 
 
 use EasySwoole\Core\Component\Spl\SplStream;
 
-abstract class AbstractController
+abstract class Controller
 {
     private $response;
     private $actionName;

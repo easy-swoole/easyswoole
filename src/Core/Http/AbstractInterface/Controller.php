@@ -2,18 +2,19 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/4
- * Time: 下午6:35
+ * Date: 2017/12/29
+ * Time: 下午7:26
  */
 
-namespace EasySwoole\Core\AbstractInterface;
+namespace EasySwoole\Core\Http\AbstractInterface;
+
 
 
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 
-abstract class AbstractController
+abstract class Controller
 {
     private $request;
     private $response;
