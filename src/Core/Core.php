@@ -10,12 +10,13 @@ namespace EasySwoole\Core;
 
 
 use EasySwoole\Config;
+use EasySwoole\Core\AbstractInterface\EventInterface;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Utility\File;
-use EasySwoole\Event;
 use EasySwoole\Core\Swoole\ServerManager;
 
 class Core
@@ -30,12 +31,13 @@ class Core
     public function initialize():Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
-        Di::getInstance()->set(SysConst::APP_NAMESPACE,'App');
         Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH,3);
-        Event::frameInitialize();
+        //创建全局事件容器
+        $event = $this->eventHook();
+        $event->hook('frameInitialize');
         $this->sysDirectoryInit();
         $this->errorHandle();
-        Event::frameInitialized();
+        $event->hook('frameInitialized');
         return $this;
     }
 
@@ -55,6 +57,8 @@ class Core
         }
         if(!File::createDir($tempDir)){
             die("create Temp Directory:{$tempDir} fail");
+        }else{
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         }
         //创建日志目录
         $logDir = Di::getInstance()->get(SysConst::DIR_LOG);
@@ -64,6 +68,8 @@ class Core
         }
         if(!File::createDir($logDir)){
             die("create log Directory:{$logDir} fail");
+        }else{
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
         }
     }
 
@@ -95,5 +101,22 @@ class Core
             };
         }
         register_shutdown_function($func);
+    }
+
+    private function eventHook():Event
+    {
+        $event = Event::getInstance();
+        $sysEvent = Config::getInstance()->getConf('SYS_EVENT_CLASS');
+        if(!empty($sysEvent) && class_exists($sysEvent)){
+            $sysEvent = new $sysEvent();
+            if($sysEvent instanceof EventInterface){
+                $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
+                $event->add('frameInitialized',[$sysEvent,'frameInitialized']);
+                $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
+                $event->add('onRequest',[$sysEvent,'onRequest']);
+                $event->add('afterAction',[$sysEvent,'afterAction']);
+            }
+        }
+        return $event;
     }
 }

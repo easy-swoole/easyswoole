@@ -8,7 +8,7 @@
 
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
-use EasySwoole\Event;
+use EasySwoole\Core\Component\Event;
 
 class ServerManager
 {
@@ -97,7 +97,7 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        Event::mainServerCreate($this,$register);
+        Event::getInstance()->hook('mainServerCreate',$this,$register);
         //检查是否注册了默认的ontask与onfinish事件
         if(!$register->get($register::onTask)){
             $register->registerDefaultOnTask();
