@@ -26,7 +26,7 @@ class Config
     {
         //请在bin文件中执行 install命令，将Resource/Config.php释放至ROOT
         $data = require ROOT.'/Config.php';
-        $this->conf = new SplArray([]);
+        $this->conf = new SplArray($data);
     }
 
     public function getConf($keyPath)
