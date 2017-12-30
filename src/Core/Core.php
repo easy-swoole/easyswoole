@@ -25,6 +25,9 @@ class Core
 
     public function __construct()
     {
+        /*
+         * 定义框架核心包父目录为ROOT
+         */
         defined('ROOT') or define("ROOT",realpath(__DIR__.'/../../'));
     }
 
@@ -37,7 +40,6 @@ class Core
         $event->hook('frameInitialize');
         $this->sysDirectoryInit();
         $this->errorHandle();
-        $event->hook('frameInitialized');
         return $this;
     }
 
@@ -46,31 +48,15 @@ class Core
         ServerManager::getInstance()->start();
     }
 
-
     private function sysDirectoryInit():void
     {
         //创建临时目录    请以绝对路径，不然守护模式运行会有问题
-        $tempDir = Di::getInstance()->get(SysConst::DIR_TEMP);
-        if(empty($tempDir)){
-            $tempDir = ROOT."/Temp";
-            Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
-        }
-        if(!File::createDir($tempDir)){
-            die("create Temp Directory:{$tempDir} fail");
-        }else{
-            Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
-        }
-        //创建日志目录
-        $logDir = Di::getInstance()->get(SysConst::DIR_LOG);
-        if(empty($logDir)){
-            $logDir = ROOT."/Logs";
-            Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
-        }
-        if(!File::createDir($logDir)){
-            die("create log Directory:{$logDir} fail");
-        }else{
-            Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
-        }
+        $tempDir = Config::getInstance()->getConf('TEMP_DIR');
+        $logDir = Config::getInstance()->getConf('LOG_DIR');
+        Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
+        Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
+        Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
+        Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
     }
 
     private function errorHandle():void
@@ -111,7 +97,6 @@ class Core
             $sysEvent = new $sysEvent();
             if($sysEvent instanceof EventInterface){
                 $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
-                $event->add('frameInitialized',[$sysEvent,'frameInitialized']);
                 $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
                 $event->add('onRequest',[$sysEvent,'onRequest']);
                 $event->add('afterAction',[$sysEvent,'afterAction']);

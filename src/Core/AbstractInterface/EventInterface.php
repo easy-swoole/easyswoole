@@ -18,8 +18,6 @@ interface EventInterface
 {
     public function frameInitialize():void;
 
-    public function frameInitialized():void;
-
     public function mainServerCreate(ServerManager $server,EventRegister $register):void;
 
     public  function onRequest(Request $request,Response $response,$appNameSpace):void;
