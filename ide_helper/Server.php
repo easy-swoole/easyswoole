@@ -297,9 +297,10 @@ class Server
      *
      * @param mixed $data
      * @param int $dst_worker_id
+     * @param finishCallback null
      * @return bool
      */
-    public function task($data, $dst_worker_id = -1)
+    public function task($data, $dst_worker_id = -1,$finishCallback = null)
     {
     }
 
