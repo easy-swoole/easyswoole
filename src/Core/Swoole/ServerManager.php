@@ -8,7 +8,7 @@
 
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
-use EasySwoole\Event;
+use EasySwoole\Core\Component\Event;
 
 class ServerManager
 {
@@ -55,6 +55,7 @@ class ServerManager
         foreach ($this->serverList as $serverName => $server){
             $subPort = $mainServer->addlistener($server['host'],$server['port'],$server['type']);
             if($subPort){
+                $this->serverList[$serverName] = $subPort;
                 if(is_array($server['setting'])){
                     $subPort->set($server['setting']);
                 }
@@ -96,7 +97,7 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        Event::mainServerCreate($this,$register);
+        Event::getInstance()->hook('mainServerCreate',$this,$register);
         //检查是否注册了默认的ontask与onfinish事件
         if(!$register->get($register::onTask)){
             $register->registerDefaultOnTask();
@@ -120,10 +121,16 @@ class ServerManager
     }
 
 
-    public function getServer():?\swoole_server
+    public function getServer($serverName = null):?\swoole_server
     {
          if($this->mainServer){
-             return $this->mainServer;
+             if($serverName === null){
+                 return $this->mainServer;
+             }else{
+                 if(isset($this->serverList[$serverName])){
+                     return $this->serverList[$serverName];
+                 }
+             }
          }else{
              throw  new \Exception('getServer cannot call before mainServer create');
          }

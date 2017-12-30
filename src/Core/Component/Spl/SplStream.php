@@ -6,27 +6,27 @@
  * Time: 上午11:58
  */
 
-namespace EasySwoole\Core\Component\Lib;
+namespace EasySwoole\Core\Component\Spl;
 
 
-class Stream
+class SplStream
 {
     private $stream;
     private $seekable;
     private $readable;
     private $writable;
-    private $readList = array(
+    private $readList = [
         'r' => true, 'w+' => true, 'r+' => true, 'x+' => true, 'c+' => true,
         'rb' => true, 'w+b' => true, 'r+b' => true, 'x+b' => true,
         'c+b' => true, 'rt' => true, 'w+t' => true, 'r+t' => true,
         'x+t' => true, 'c+t' => true, 'a+' => true
-    );
-    private $writeList = array(
+    ];
+    private $writeList = [
         'w' => true, 'w+' => true, 'rw' => true, 'r+' => true, 'x+' => true,
         'c+' => true, 'wb' => true, 'w+b' => true, 'r+b' => true,
         'x+b' => true, 'c+b' => true, 'w+t' => true, 'r+t' => true,
         'x+t' => true, 'c+t' => true, 'a' => true, 'a+' => true
-    );
+    ];
     function __construct($resource = '',$mode = 'r+')
     {
         switch (gettype($resource)) {

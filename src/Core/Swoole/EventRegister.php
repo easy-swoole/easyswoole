@@ -13,13 +13,13 @@ use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
 use EasySwoole\Core\AbstractInterface\HttpExceptionHandlerInterface;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\Logger;
+use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
-use EasySwoole\Event;
+
 
 class EventRegister extends Container
 {
@@ -73,9 +73,10 @@ class EventRegister extends Container
             $request_psr = new Request($request);
             $response_psr = new Response($response);
             try{
-                Event::onRequest($request_psr,$response_psr,$appNameSpace);
+                $event = Event::getInstance();
+                $event->hook('onRequest',$request_psr,$response_psr,$appNameSpace);
                 Dispatcher::getInstance($appNameSpace)->dispatch($request_psr,$response_psr);
-                Event::afterAction($request_psr,$response_psr,$appNameSpace);
+                $event->hook('afterAction',$request_psr,$response_psr,$appNameSpace);
             }catch (\Exception $exception){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
                 if($handler instanceof HttpExceptionHandlerInterface){

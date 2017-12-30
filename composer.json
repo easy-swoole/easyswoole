@@ -18,8 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "EasySwoole\\": "src/",
-            "App\\": "App/"
+            "EasySwoole\\": "src/"
         }
     },
     "repositories": {
