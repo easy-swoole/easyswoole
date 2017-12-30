@@ -28,7 +28,7 @@ class DefaultPackageParser extends AbstractPackageParser
         // TODO: Implement encode() method.
         $data = $res->__toString();
         $value = unpack('H*', $data);
-        return base_convert($value[1], 16, 2);
+        return $value[1];
     }
 
 }
