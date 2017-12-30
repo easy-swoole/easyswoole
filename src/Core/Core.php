@@ -25,10 +25,7 @@ class Core
 
     public function __construct()
     {
-        /*
-         * 定义框架核心包父目录为ROOT
-         */
-        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../../'));
+        defined('ROOT') or define("ROOT",realpath(getcwd()));
     }
 
     public function initialize():Core
