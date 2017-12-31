@@ -13,6 +13,7 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use Swoole\Mysql\Exception;
 
 abstract class Controller
 {
@@ -20,7 +21,7 @@ abstract class Controller
     private $response;
     private $actionName;
     private static $forbidMethod = [
-        'getActionName','onRequest','actionNotFound','afterAction','request','response','__call','__hook'
+        'getActionName','onRequest','actionNotFound','afterAction','request','response','__call','__hook','onException'
     ];
 
     abstract function index();
@@ -30,6 +31,10 @@ abstract class Controller
     abstract function actionNotFound($action):void;
 
     abstract function afterAction($actionName):void;
+
+    abstract function onException(\Exception $exception,$actionName):void;
+
+    abstract function onParamsError($actionName,$params):void;
 
     public function getActionName():string
     {
@@ -55,8 +60,24 @@ abstract class Controller
                 $this->onRequest($actionName);
                 //防止onRequest中   对actionName 进行修改
                 $actionName = $this->actionName;
-                $this->$actionName();
-                $this->afterAction($actionName);
+                if(method_exists($this,$actionName)){
+                    $args = $this->request()->getRequestParam();
+                    ksort($args);
+                    try{
+                        $ref = new \ReflectionClass(static::class);
+                        $num = $ref->getMethod($actionName)->getNumberOfParameters();
+                        if($num == count($args)){
+                            call_user_func_array(array($this,$actionName),$args);
+                        }else{
+                            $this->onParamsError($actionName,$args);
+                        }
+                    }catch (Exception $exception){
+                        $this->onException($exception,$actionName);
+                    }
+                    $this->afterAction($actionName);
+                }else{
+                    $this->actionNotFound($actionName);
+                }
             }
         }
     }
@@ -69,11 +90,5 @@ abstract class Controller
     final public function response():Response
     {
         return $this->response;
-    }
-
-    final function __call($name, $arguments)
-    {
-        // TODO: Implement __call() method.
-        $this->actionNotFound($name);
     }
 }

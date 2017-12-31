@@ -12,7 +12,7 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 
-interface HttpExceptionHandlerInterface
+interface ExceptionHandlerInterface
 {
     public function handle(\Exception $exception,Request $request,Response $response);
 }
