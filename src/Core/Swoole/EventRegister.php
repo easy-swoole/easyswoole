@@ -10,11 +10,11 @@ namespace EasySwoole\Core\Swoole;
 
 
 use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
-use EasySwoole\Core\AbstractInterface\HttpExceptionHandlerInterface;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
@@ -79,7 +79,7 @@ class EventRegister extends Container
                 $event->hook('afterAction',$request_psr,$response_psr,$appNameSpace);
             }catch (\Exception $exception){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
-                if($handler instanceof HttpExceptionHandlerInterface){
+                if($handler instanceof ExceptionHandlerInterface){
                     $handler->handle($exception,$request_psr,$response_psr);
                 }else{
                     $response_psr = new Response($response);

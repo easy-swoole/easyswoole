@@ -19,7 +19,7 @@ class Request  extends ServerRequest
 {
     private $request;
 
-    final function __construct(\swoole_http_request $request)
+    function __construct(\swoole_http_request $request)
     {
         $this->request = $request;
         $this->initHeaders();
@@ -104,17 +104,17 @@ class Request  extends ServerRequest
 
     private function initCookie()
     {
-        return isset($this->swoole_http_request->cookie) ? $this->request->cookie : array();
+        return isset($this->request->cookie) ? $this->request->cookie : array();
     }
 
     private function initPost()
     {
-        return isset($this->swoole_http_request->post) ? $this->request->post : array();
+        return isset($this->request->post) ? $this->request->post : array();
     }
 
     private function initGet()
     {
-        return isset($this->swoole_http_request->get) ? $this->request->get : array();
+        return isset($this->request->get) ? $this->request->get : array();
     }
 
     final public function __toString():string
