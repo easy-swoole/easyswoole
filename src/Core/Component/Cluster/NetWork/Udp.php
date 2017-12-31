@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/29
- * Time: 下午1:31
+ * Date: 2017/12/31
+ * Time: 下午10:07
  */
 
-namespace EasySwoole\Core\Cluster\NetWork;
+namespace EasySwoole\Core\Component\Cluster\NetWork;
 
 
 class Udp
