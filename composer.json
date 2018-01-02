@@ -1,6 +1,6 @@
 {
     "name": "easyswoole/easyswoole",
-    "type": "framework",
+    "type": "easyswoole-framework",
     "description": "none",
     "bin": [
         "bin/easyswoole"
@@ -26,5 +26,8 @@
             "type": "composer",
             "url": "https://packagist.phpcomposer.com"
         }
+    },
+    "require-dev": {
+        "eaglewu/swoole-ide-helper": "dev-master"
     }
 }
