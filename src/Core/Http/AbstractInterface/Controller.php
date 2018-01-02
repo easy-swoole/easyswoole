@@ -26,7 +26,7 @@ abstract class Controller
 
     abstract function index();
 
-    abstract function onRequest($action):void;
+    abstract function onRequest($action):?bool;
 
     abstract function actionNotFound($action):void;
 
@@ -54,7 +54,7 @@ abstract class Controller
             $response->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
             $response->end();
         }else{
-            if(!$this->response->isEndResponse()){
+            if($this->onRequest($actionName) !== false){
                 $this->onRequest($actionName);
                 //防止onRequest中   对actionName 进行修改
                 $actionName = $this->actionName;
