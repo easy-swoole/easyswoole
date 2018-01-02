@@ -26,13 +26,16 @@ abstract class Controller
 
     abstract function index();
 
-    abstract function onRequest($action):?bool;
-
     abstract function actionNotFound($action):void;
 
     abstract function afterAction($actionName):void;
 
     abstract function onException(\Exception $exception,$actionName):void;
+
+    public function onRequest($action):?bool
+    {
+        return true;
+    }
 
     public function getActionName():string
     {
