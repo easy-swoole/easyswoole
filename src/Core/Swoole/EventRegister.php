@@ -88,7 +88,12 @@ class EventRegister extends Container
                 }
             }
             //携程模式下  底层不会自动end
-            $response_psr->response();
+            if($response_psr->autoResponse()){
+                $response_psr->response();
+            }
+            if($response_psr->autoEnd()){
+                $response_psr->end(true);
+            }
         });
     }
 
