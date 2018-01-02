@@ -2,6 +2,10 @@
 
 <?php
 
+use EasySwoole\Core\Core;
+use EasySwoole\Config as Conf;
+use EasySwoole\Core\Utility\File;
+
 define('ROOT', realpath(getcwd()));
 
 foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
@@ -115,7 +119,15 @@ function showHelp($options)
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以启动框架 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  --d \e[0m      以守护模式启动框架\n
+\e[32m  --d \e[0m                   以守护模式启动框架
+\e[32m  --ip\e[34m-address \e[0m          指定服务监听地址
+\e[32m  --p\e[34m-portNumber \e[0m        指定服务监听端口
+\e[32m  --pid\e[34m-fileName \e[0m        指定服务PID存储文件
+\e[32m  --workerNum\e[34m-num \e[0m       设置worker进程数
+\e[32m  --taskWorkerNum\e[34m-num \e[0m   设置Task进程数
+\e[32m  --user\e[34m-userName \e[0m       指定以某个用户身份执行
+\e[32m  --group\e[34m-groupName \e[0m     指定以某个用户组身份执行
+\e[32m  --cpuAffinity \e[0m         开启CPU亲和\n
 HELP_START;
             break;
         case 'stop':
@@ -125,7 +137,8 @@ HELP_START;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以停止框架 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  --f \e[0m      强制停止服务\n
+\e[32m  --f \e[0m             强制停止服务
+\e[32m  --pid\e[34m-pidFile \e[0m   指定服务PID存储文件\n
 HELP_STOP;
             break;
         case 'reload':
@@ -135,7 +148,8 @@ HELP_STOP;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以重启框架 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  --all \e[0m    重启所有进程\n
+\e[32m  --all \e[0m           重启所有进程
+\e[32m  --pid\e[34m-pidFile \e[0m   指定服务PID存储文件\n
 HELP_STOP;
             break;
         case 'install':
@@ -183,20 +197,85 @@ function showLogo()
 LOGO;
 }
 
+function showTag($name, $value)
+{
+    echo "\e[32m" . str_pad($name, 20, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m\n";
+}
+
 function serverStart($options)
 {
     showLogo();
-    $inst = \EasySwoole\Core\Core::getInstance()->initialize();
-    if (in_array('d', $options)) {
-        \EasySwoole\Config::getInstance()->setConf("SERVER.CONFIG.daemonize", true);
+    $conf    = Conf::getInstance();
+    $inst    = Core::getInstance()->initialize();
+    $version = \EasySwoole\Core\Component\Di::getInstance()->get(\EasySwoole\Core\Component\SysConst::VERSION);
+    echo "\n\e[31mEasySwoole\e[0m framework \e[34mVersion {$version}\e[0m\n\n";
+
+    // listen host set
+    if (isset($options['ip'])) {
+        $conf->setConf("MAIN_SERVER.HOST", $options['ip']);
     }
+    showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
+
+    // listen port set
+    if (!empty($options['p'])) {
+        $conf->setConf("MAIN_SERVER.PORT", $options['p']);
+    }
+    showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
+
+    // pid file set
+    if (!empty($options['pid'])) {
+        $pidFile = $options['pid'];
+        $conf->setConf("MAIN_SERVER.SETTING.pid_file", $pidFile);
+    }
+
+    // worker num set
+    if (isset($options['workerNum'])) {
+        $conf->setConf("MAIN_SERVER.SETTING.worker_num", $options['workerNum']);
+    }
+    showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
+
+    // task worker num set
+    if (isset($options['taskWorkerNum'])) {
+        $conf->setConf("MAIN_SERVER.SETTING.task_worker_num", $options['taskWorkerNum']);
+    }
+    showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
+
+    // run at user set
+    $user = get_current_user();
+    if (isset($options['user'])) {
+        $conf->setConf("MAIN_SERVER.SETTING.user", $options['user']);
+        $user = $conf->getConf('MAIN_SERVER.SETTING.user');
+    }
+    showTag('run at user', $user);
+
+    // daemonize set
+    $label = 'false';
+    if (isset($options['d'])) {
+        $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
+        $label = 'true';
+    }
+    showTag('daemonize', $label);
+
+    // cpuAffinity set
+    if (isset($options['cpuAffinity'])) {
+        $conf->setConf("MAIN_SERVER.SETTING.open_cpu_affinity", true);
+    }
+
+    showTag('debug enable', $conf->getConf('DEBUG') ? 'true' : 'false');
+    showTag('swoole version', phpversion('swoole'));
+    showTag('swoole pid', getmypid());
+
     $inst->run();
 }
 
 function serverStop($options)
 {
-    $inst    = \EasySwoole\Core\Core::getInstance()->initialize();
-    $pidFile = \EasySwoole\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+    Core::getInstance()->initialize();
+    $Conf    = Conf::getInstance();
+    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+    if (!empty($options['pid'])) {
+        $pidFile = $options['pid'];
+    }
     if (file_exists($pidFile)) {
         $pid = file_get_contents($pidFile);
 
@@ -235,8 +314,12 @@ function serverStop($options)
 
 function serverReload($options)
 {
-    $inst    = \EasySwoole\Core\Core::getInstance()->initialize();
-    $pidFile = \EasySwoole\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+    Core::getInstance()->initialize();
+    $Conf    = Conf::getInstance();
+    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+    if (!empty($options['pid'])) {
+        $pidFile = $options['pid'];
+    }
     if (file_exists($pidFile)) {
         if (in_array('all', $options)) {
             $sig = SIGUSR1;
@@ -262,15 +345,15 @@ function serverInstall($options)
     $lockFile = ROOT . '/easyswoole.install';
     if (!is_file($lockFile)) {
         initConf();
-        $conf    = \EasySwoole\Config::getInstance();
-        $temPath = $conf->getConf('TEMP_DIR');
-        $logPath = $conf->getConf('LOG_DIR');
+        $Conf    = Conf::getInstance();
+        $temPath = $Conf->getConf('TEMP_DIR');
+        $logPath = $Conf->getConf('LOG_DIR');
 
-        if (!\EasySwoole\Core\Utility\File::createDir($temPath)) {
+        if (!File::createDir($temPath)) {
             die("create Temp Directory:{$temPath} fail");
         }
 
-        if (!\EasySwoole\Core\Utility\File::createDir($logPath)) {
+        if (!File::createDir($logPath)) {
             die("create Log Directory:{$logPath} fail");
         }
 
