@@ -34,8 +34,8 @@ class Core
         Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH,3);
         //创建全局事件容器
         $event = $this->eventHook();
-        $event->hook('frameInitialize');
         $this->sysDirectoryInit();
+        $event->hook('frameInitialize');
         $this->errorHandle();
         return $this;
     }
