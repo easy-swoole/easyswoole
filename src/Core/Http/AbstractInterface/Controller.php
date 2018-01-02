@@ -34,8 +34,6 @@ abstract class Controller
 
     abstract function onException(\Exception $exception,$actionName):void;
 
-    abstract function onParamsError($actionName,$params):void;
-
     public function getActionName():string
     {
         return $this->actionName;
@@ -64,14 +62,7 @@ abstract class Controller
                     $args = $this->request()->getRequestParam();
                     ksort($args);
                     try{
-                        //此处应利用反射做各种类型、变量匹配判断  先暂时预留   待日后实现
-                        $ref = new \ReflectionClass(static::class);
-                        $num = $ref->getMethod($actionName)->getNumberOfParameters();
-                        if($num == count($args)){
-                            call_user_func_array(array($this,$actionName),$args);
-                        }else{
-                            $this->onParamsError($actionName,$args);
-                        }
+                        $this->$actionName();
                     }catch (Exception $exception){
                         $this->onException($exception,$actionName);
                     }
