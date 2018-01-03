@@ -41,4 +41,9 @@ class Config
     {
         $this->conf->set($keyPath,$data);
     }
+
+    public function toArray():array
+    {
+        return $this->conf->getArrayCopy();
+    }
 }
