@@ -50,14 +50,15 @@ class Validate
                 break;
             }else{
                 foreach ($filedRules as $rule => $args){
-                    if(!Func::$rule($data[$filed],$args)){
+                    $currentData = isset($data[$filed]) ? $data[$filed] : null;
+                    if(!Func::$rule($currentData,$args)){
                         $errorList->addError($filed,new ErrorBean(
-                           [
-                               'filed'=>$filed,
-                               'message'=>$errorMsg,
-                               'data'=>$data[$filed],
-                               'failRule'=>$rule
-                           ]
+                            [
+                                'filed'=>$filed,
+                                'message'=>$errorMsg,
+                                'data'=>$currentData,
+                                'failRule'=>$rule
+                            ]
                         ));
                         break;
                     }else{
