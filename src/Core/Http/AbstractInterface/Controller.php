@@ -10,7 +10,6 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 
 
 
-use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Utility\Validate\Rules;
@@ -22,7 +21,7 @@ abstract class Controller
     private $response;
     private $actionName;
 
-    protected abstract function index();
+    abstract function index();
 
     protected abstract function actionNotFound($action = null):void;
 
