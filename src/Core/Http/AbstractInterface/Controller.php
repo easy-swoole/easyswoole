@@ -13,6 +13,8 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Utility\Validate\Rules;
+use EasySwoole\Core\Utility\Validate\Validate;
 use Swoole\Mysql\Exception;
 
 abstract class Controller
@@ -85,5 +87,14 @@ abstract class Controller
     final public function response():Response
     {
         return $this->response;
+    }
+
+    /*
+     * 若不想用自带验证器，可以自己新建base控制器，重写validateParams方法
+     */
+    public function validateParams(Rules $rules)
+    {
+        $validate = new Validate();
+        return $validate->validate($this->request()->getRequestParam(),$rules);
     }
 }
