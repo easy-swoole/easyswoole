@@ -15,7 +15,6 @@ use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Utility\Validate\Rules;
 use EasySwoole\Core\Utility\Validate\Validate;
-use Swoole\Mysql\Exception;
 
 abstract class Controller
 {
@@ -68,7 +67,7 @@ abstract class Controller
                     ksort($args);
                     try{
                         $this->$actionName();
-                    }catch (Exception $exception){
+                    }catch (\Exception $exception){
                         $this->onException($exception,$actionName);
                     }
                     $this->afterAction($actionName);
