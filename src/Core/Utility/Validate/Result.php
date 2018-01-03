@@ -35,4 +35,9 @@ class Result
         return $this->errorList;
     }
 
+    public function hasError():bool
+    {
+        return $this->getErrorList()->hasError();
+    }
+
 }
