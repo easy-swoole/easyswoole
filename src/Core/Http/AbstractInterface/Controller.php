@@ -26,7 +26,7 @@ abstract class Controller
 
     abstract function index();
 
-    abstract function actionNotFound($action):void;
+    abstract function actionNotFound($action = null):void;
 
     abstract function afterAction($actionName):void;
 
