@@ -1,5 +1,3 @@
-#!/usr/bin/env php
-
 <?php
 
 use EasySwoole\Core\Core;

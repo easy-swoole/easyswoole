@@ -28,7 +28,7 @@ class SplString extends SplStream
 
 	function split( int $length = 1 ) : SplArray
 	{
-		return str_split( $this->__toString(), $length );
+		return new SplArray(str_split( $this->__toString(), $length ));
 	}
 
 	function explode($delimiter):SplArray

@@ -70,7 +70,7 @@ class Response extends MessageResponse
             }
             $cookies = $this->getCookies();
             foreach ($cookies as $cookie){
-                $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
+                $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
             }
             $write = $this->getBody()->__toString();
             if(!empty($write)){
