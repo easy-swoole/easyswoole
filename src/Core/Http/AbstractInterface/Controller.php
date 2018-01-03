@@ -62,10 +62,9 @@ abstract class Controller
                 $this->onRequest($actionName);
                 //防止onRequest中   对actionName 进行修改
                 $actionName = $this->actionName;
-                //支持在子类控制器中以private来修饰某个方法不可见
-                if(is_callable([$this,$actionName])){
-                    $args = $this->request()->getRequestParam();
-                    ksort($args);
+                //支持在子类控制器中以private，protected来修饰某个方法不可见
+                $ref = new \ReflectionClass(static::class);
+                if($ref->hasMethod($actionName) && $ref->getMethod($actionName)->isPublic()){
                     try{
                         $this->$actionName();
                     }catch (\Exception $exception){
