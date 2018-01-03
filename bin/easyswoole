@@ -358,6 +358,10 @@ function serverInstall($options)
         }
 
         file_put_contents($lockFile, 'installed at ' . date('Y-m-d H:i:s'));
+
+        $realPath = __DIR__ . '/easyswoole';
+        file_put_contents(ROOT . '/easyswoole', "#!/usr/bin/env php\n<?php\nrequire '$realPath';");
+
         echo "easySwoole server install complete!\n";
     } else {
         die("easySwoole framework has been installed\nPlease remove \e[31m{$lockFile}\e[0m and try again\n");
