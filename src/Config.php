@@ -46,4 +46,9 @@ class Config
     {
         return $this->conf->getArrayCopy();
     }
+
+    public function load(array $conf):void
+    {
+        $this->conf = new SplArray($conf);
+    }
 }
