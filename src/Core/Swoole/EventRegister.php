@@ -13,6 +13,7 @@ use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
+use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Dispatcher;
@@ -113,9 +114,11 @@ class EventRegister extends Container
                         $taskObj->setResult($ret);
                         return $taskObj;
                     }
+                }else if($taskObj instanceof SuperClosure){
+                    return $taskObj();
                 }
             }catch (\Exception $exception){
-
+                trigger_error($exception->getMessage());
             }
             return null;
         });
@@ -130,7 +133,7 @@ class EventRegister extends Container
                 try{
                     $taskObj->finish($taskObj->getResult(),$taskId);
                 }catch (\Exception $exception){
-
+                    trigger_error($exception->getMessage());
                 }
             }
         });

@@ -16,7 +16,12 @@ class TaskManager
     public static  function async($task,$finishCallback = null,$taskWorkerId = -1)
     {
         if($task instanceof \Closure){
-            $task = new SuperClosure($task);
+            try{
+                $task = new SuperClosure($task);
+            }catch (\Exception $exception){
+                trigger_error($exception->getMessage());
+                return false;
+            }
         }
         return ServerManager::getInstance()->getServer()->task($task,$taskWorkerId,$finishCallback);
     }
@@ -24,7 +29,12 @@ class TaskManager
     public static  function sync($task,$timeout = 0.5,$taskWorkerId = -1)
     {
         if($task instanceof \Closure){
-            $task = new SuperClosure($task);
+            try{
+                $task = new SuperClosure($task);
+            }catch (\Exception $exception){
+                trigger_error($exception->getMessage());
+                return false;
+            }
         }
         return ServerManager::getInstance()->getServer()->taskwait($task,$timeout,$taskWorkerId);
     }
@@ -35,6 +45,14 @@ class TaskManager
         $map = [];
         $result = [];
         foreach ($taskList as $name => $task){
+            if($task instanceof \Closure){
+                try{
+                    $task = new SuperClosure($task);
+                }catch (\Exception $exception){
+                    trigger_error($exception->getMessage());
+                    continue;
+                }
+            }
             $temp[] = $task;
             $map[] = $name;
         }
