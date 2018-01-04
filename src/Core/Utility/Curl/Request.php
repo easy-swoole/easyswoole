@@ -81,8 +81,8 @@ class Request
         $opt = $this->curlOPt;
         if(!empty($this->cookies)){
             $str = '';
-            foreach ($this->cookies as $cookie){
-                $str .= $cookie->__toString();
+            foreach ($this->cookies as $name=>$value){
+                $str .= "{$name}={$value};";
             }
             $opt[CURLOPT_COOKIE] = $str;
         }
