@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 
 
 
+use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Utility\Validate\Rules;
@@ -44,8 +45,12 @@ abstract class Controller
         $this->actionName = $action;
     }
 
-    protected function __hook(string $actionName,Request $request,Response $response):void
+    function __hook(string $actionName,Request $request,Response $response):void
     {
+        if($actionName == '__hook'){
+            $this->response()->withStatus(Status::CODE_BAD_REQUEST);
+            return;
+        }
         $this->request = $request;
         $this->response = $response;
         $this->actionName = $actionName;
