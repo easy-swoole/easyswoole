@@ -15,6 +15,7 @@ class ServerManager
     private static $instance;
     private $serverList = [];
     private $mainServer = null;
+    private $isStart = false;
 
     const TYPE_SERVER = 1;
     const TYPE_WEB_SERVER = 2;
@@ -41,10 +42,16 @@ class ServerManager
         return $eventRegister;
     }
 
+    public function isStart():bool
+    {
+        return $this->isStart;
+    }
+
     public function start():void
     {
        $this->createMainServer();
        $this->attachListener();
+       $this->isStart = true;
        $this->getServer()->start();
     }
 
