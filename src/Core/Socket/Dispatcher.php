@@ -14,7 +14,6 @@ use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\Command\ParserInterface;
-use Swoole\Mysql\Exception;
 
 class Dispatcher
 {
@@ -77,7 +76,7 @@ class Dispatcher
                                 Response::response($client,$res);
                             }
                         }
-                    }catch (Exception $exception){
+                    }catch (\Exception $exception){
                         if(is_callable($this->exceptionHandler)){
                             call_user_func_array($this->exceptionHandler,array(
                                $exception,$client,$command
