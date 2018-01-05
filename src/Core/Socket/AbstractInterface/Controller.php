@@ -17,13 +17,15 @@ abstract class Controller
     private $actionName;
     private $args;
 
-    abstract function client();
+    protected abstract function client();
 
-    abstract function actionNotFound(string $actionName);
+    protected abstract function actionNotFound(string $actionName);
 
-    abstract function afterAction($actionName);
+    protected abstract function afterAction($actionName);
 
-    function __construct(array $args)
+    protected abstract function onException(\Exception $exception):?string ;
+
+    protected function __construct(array $args)
     {
         $this->response = new SplStream();
         $this->args = $args;
@@ -32,22 +34,22 @@ abstract class Controller
     /*
      * 返回false的时候为拦截
      */
-    public function onRequest(string $actionName):bool
+    protected function onRequest(string $actionName):bool
     {
         return true;
     }
 
-    function getResponse():SplStream
+    protected function getResponse():SplStream
     {
         return $this->response;
     }
 
-    function write(string $message):void
+    protected function write(string $message):void
     {
         $this->response->write($message);
     }
 
-    public function getArg($key)
+    protected function getArg($key)
     {
         if(isset($this->args[$key])){
             return $this->args[$key];
@@ -56,7 +58,7 @@ abstract class Controller
         }
     }
 
-    public function getArgs():array
+    protected function getArgs():array
     {
         return $this->args;
     }
@@ -64,7 +66,7 @@ abstract class Controller
     /**
      * @return string
      */
-    public function getActionName():string
+    protected function getActionName():string
     {
         return $this->actionName;
     }
@@ -72,27 +74,34 @@ abstract class Controller
     /**
      * @param string $actionName
      */
-    public function setActionName(string $actionName)
+    protected function setActionName(string $actionName)
     {
         $this->actionName = $actionName;
     }
 
-    public function __hook(string $actionName)
+    public function __hook(string $actionName):?string
     {
+        if($actionName == '__hook'){
+            return null;
+        }
         $this->actionName = $actionName;
         if($this->onRequest($actionName) !== false){
-            if(method_exists($this,$actionName)){
-                $forbidMethod = [
-                    'client','actionNotFound','__construct','write','getArg','getActionName','getArgs','__hook',
-                    'getResponse','afterAction'
-                ];
-                if(!in_array($this->getActionName(),$forbidMethod)){
-                    $this->$actionName();
-                    $this->afterAction($this->getActionName());
+            $ref = new \ReflectionClass(static::class);
+            if($ref->hasMethod($actionName)){
+                if($ref->getMethod($actionName)->isPublic()){
+                    try{
+                        $this->$actionName();
+                        $this->afterAction($this->getActionName());
+                    }catch (\Exception $exception){
+                        return $this->onException($exception);
+                    }
+                }else{
+                    $this->actionNotFound($actionName);
                 }
             }else{
                 $this->actionNotFound($actionName);
             }
         }
+        return $this->getResponse()->__toString();
     }
 }

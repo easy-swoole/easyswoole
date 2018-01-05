@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Socket;
 
 
 use EasySwoole\Core\Socket\AbstractInterface\Controller;
+use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
@@ -28,16 +29,17 @@ class Dispatcher
         $this->parser = $parser;
     }
 
-    public function setExceptionHandler(callable $handler):Dispatcher
+    public function setExceptionHandler(ExceptionHandler $handler = null):Dispatcher
     {
         $this->exceptionHandler = $handler;
         return $this;
     }
 
     /*
-     * Tcp  $fd，$reactorId
-     * Web Socket swoole_websocket_frame $frame
-     * Udp array $client_info;
+     * $args:
+     *  Tcp  $fd，$reactorId
+     *  Web Socket swoole_websocket_frame $frame
+     *  Udp array $client_info;
      */
     function dispatch($type ,string $data, ...$args):void
     {
@@ -68,19 +70,16 @@ class Dispatcher
                 ));
                 if($controller instanceof Controller){
                     try{
-                        $controller->__hook($command->getAction());
-                        $res = $controller->getResponse()->__toString();
+                        $res = $controller->__hook($command->getAction());
                         if(!empty($res)){
                             $res = $this->parser->encode($res);
-                            if(!isset($res)){
+                            if(isset($res)){
                                 Response::response($client,$res);
                             }
                         }
                     }catch (\Exception $exception){
-                        if(is_callable($this->exceptionHandler)){
-                            call_user_func_array($this->exceptionHandler,array(
-                               $exception,$client,$command
-                            ));
+                        if($this->exceptionHandler instanceof ExceptionHandler){
+                            $this->exceptionHandler->handler($exception,$client,$command);
                         }else{
                             throw $exception;
                         }

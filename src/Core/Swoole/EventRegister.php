@@ -20,6 +20,9 @@ use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
+use EasySwoole\Core\Socket\Command\ParserInterface;
+use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 
 
 class EventRegister extends Container
@@ -136,6 +139,15 @@ class EventRegister extends Container
                     trigger_error($exception->getMessage());
                 }
             }
+        });
+    }
+
+    public function registerDefaultOnReceive(ParserInterface $parser,ExceptionHandler $exceptionHandler = null):void
+    {
+        $dispatch = new SocketDispatcher($parser);
+        $dispatch->setExceptionHandler($exceptionHandler);
+        $this->add(self::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($dispatch){
+            $dispatch->dispatch($dispatch::TCP,$data,$fd,$reactor_id);
         });
     }
 }
