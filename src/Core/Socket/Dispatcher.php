@@ -81,6 +81,8 @@ class Dispatcher
                             call_user_func_array($this->exceptionHandler,array(
                                $exception,$client,$command
                             ));
+                        }else{
+                            throw $exception;
                         }
                     }
                 }
