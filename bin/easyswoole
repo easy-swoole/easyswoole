@@ -92,15 +92,14 @@ function initConf()
 {
     $Conf = ROOT . '/Config.php';
     if (is_file($Conf)) {
-        echo 'Config.php has already existed, do you want to replace it? [Y/N]: ';
-        $answer = trim(strtoupper(fgets(STDIN)));
-        switch ($answer) {
-            case 'N':
-                return;
-            default:
+        echo 'Config.php has already existed, do you want to replace it? [ Y / N (default) ] : ';
+        $answer = strtolower(trim(strtoupper(fgets(STDIN))));
+        if (in_array($answer, ['y', 'yes'])) {
+            copy(__DIR__ . '/../src/Resource/Config.php', $Conf);
         }
+    } else {
+        copy(__DIR__ . '/../src/Resource/Config.php', $Conf);
     }
-    copy(__DIR__ . '/../src/Resource/Config.php', $Conf);
 }
 
 function showHelp($options)
@@ -200,6 +199,34 @@ function showTag($name, $value)
     echo "\e[32m" . str_pad($name, 20, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m\n";
 }
 
+function getRelativelyPath($a, $b)
+{
+    $arr1         = explode('/', $a);
+    $arr2         = explode('/', $b);
+    $intersection = array_intersect_assoc($arr1, $arr2);
+    $depth        = 0;
+    for ($i = 0, $len = count($intersection); $i < $len; $i++) {
+        $depth = $i;
+        if (!isset($intersection[$i])) {
+            break;
+        }
+    }
+
+    if ($i == count($intersection)) {
+        $depth++;
+    }
+
+    if (count($arr2) - $depth - 1 > 0) {
+        $prefix = array_fill(0, count($arr2) - $depth - 1, '..');
+    } else {
+        $prefix = array('.');
+    }
+
+    $tmp          = array_merge($prefix, array_slice($arr1, $depth));
+    $relativePath = implode('/', $tmp);
+    return $relativePath;
+}
+
 function serverStart($options)
 {
     showLogo();
@@ -296,6 +323,7 @@ function serverStop($options)
                 echo "server stop at " . date("y-m-d h:i:s") . "\n";
                 if (is_file($pidFile)) {
                     unlink($pidFile);
+
                 }
                 break;
             } else {
@@ -347,18 +375,37 @@ function serverInstall($options)
         $temPath = $Conf->getConf('TEMP_DIR');
         $logPath = $Conf->getConf('LOG_DIR');
 
-        if (!File::createDir($temPath)) {
-            die("create Temp Directory:{$temPath} fail");
+        if (is_dir($temPath)) {
+            echo 'Temp Directory has already existed, do you want to replace it? [ Y / N (default) ] : ';
+            $answer = strtolower(trim(strtoupper(fgets(STDIN))));
+            if (in_array($answer, ['y', 'yes'])) {
+                if (!File::createDir($temPath)) {
+                    die("create Temp Directory:{$temPath} fail");
+                }
+            }
+        } else {
+            if (!File::createDir($temPath)) {
+                die("create Temp Directory:{$temPath} fail");
+            }
         }
 
-        if (!File::createDir($logPath)) {
-            die("create Log Directory:{$logPath} fail");
+        if (is_dir($logPath)) {
+            echo 'Log Directory has already existed, do you want to replace it? [ Y / N (default) ] : ';
+            $answer = strtolower(trim(strtoupper(fgets(STDIN))));
+            if (in_array($answer, ['y', 'yes'])) {
+                if (!File::createDir($logPath)) {
+                    die("create Temp Directory:{$logPath} fail");
+                }
+            }
+        } else {
+            if (!File::createDir($logPath)) {
+                die("create Temp Directory:{$logPath} fail");
+            }
         }
-
         file_put_contents($lockFile, 'installed at ' . date('Y-m-d H:i:s'));
 
-        $realPath = __DIR__ . '/easyswoole';
-        file_put_contents(ROOT . '/easyswoole', "#!/usr/bin/env php\n<?php\nrequire '$realPath';");
+        $realPath = getRelativelyPath(__DIR__ . '/easyswoole', ROOT);
+        file_put_contents(ROOT . '/easyswoole', "<?php\nrequire '$realPath';");
 
         echo "easySwoole server install complete!\n";
     } else {
