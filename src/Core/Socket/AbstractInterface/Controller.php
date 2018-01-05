@@ -39,7 +39,7 @@ abstract class Controller
         return true;
     }
 
-    protected function getResponse():SplStream
+    protected function response():SplStream
     {
         return $this->response;
     }
@@ -102,6 +102,6 @@ abstract class Controller
                 $this->actionNotFound($actionName);
             }
         }
-        return $this->getResponse()->__toString();
+        return $this->response()->__toString();
     }
 }
