@@ -108,8 +108,8 @@ class EventRegister extends Container
             if(is_string($taskObj) && class_exists($taskObj)){
                 $taskObj = new $taskObj;
             }
-            try{
-                if($taskObj instanceof AbstractAsyncTask){
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
                     $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
                     //在有return或者设置了结果的时候  说明需要执行结束回调
                     $ret = is_null($ret) ? $taskObj->getResult() : $ret;
@@ -117,11 +117,15 @@ class EventRegister extends Container
                         $taskObj->setResult($ret);
                         return $taskObj;
                     }
-                }else if($taskObj instanceof SuperClosure){
-                    return $taskObj();
+                }catch (\Exception $exception){
+                    $taskObj->onException($exception);
                 }
-            }catch (\Exception $exception){
-                trigger_error($exception->getMessage());
+            }else if($taskObj instanceof SuperClosure){
+                try{
+                    return $taskObj();
+                }catch (\Exception $exception){
+                    trigger_error($exception->getMessage());
+                }
             }
             return null;
         });
@@ -136,7 +140,7 @@ class EventRegister extends Container
                 try{
                     $taskObj->finish($taskObj->getResult(),$taskId);
                 }catch (\Exception $exception){
-                    trigger_error($exception->getMessage());
+                    $taskObj->onException($exception);
                 }
             }
         });
