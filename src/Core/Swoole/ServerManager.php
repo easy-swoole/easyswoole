@@ -8,13 +8,14 @@
 
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
-use EasySwoole\Event;
+use EasySwoole\Core\Component\Event;
 
 class ServerManager
 {
     private static $instance;
     private $serverList = [];
     private $mainServer = null;
+    private $isStart = false;
 
     const TYPE_SERVER = 1;
     const TYPE_WEB_SERVER = 2;
@@ -28,7 +29,7 @@ class ServerManager
         return ServerManager::$instance;
     }
 
-    public function addServer(string $serverName,int $port,int $type,string $host = '0.0.0.0',array $setting = null):EventRegister
+    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = null):EventRegister
     {
         $eventRegister = new EventRegister();
         $this->serverList[$serverName] = [
@@ -41,10 +42,16 @@ class ServerManager
         return $eventRegister;
     }
 
+    public function isStart():bool
+    {
+        return $this->isStart;
+    }
+
     public function start():void
     {
        $this->createMainServer();
        $this->attachListener();
+       $this->isStart = true;
        $this->getServer()->start();
     }
 
@@ -55,6 +62,7 @@ class ServerManager
         foreach ($this->serverList as $serverName => $server){
             $subPort = $mainServer->addlistener($server['host'],$server['port'],$server['type']);
             if($subPort){
+                $this->serverList[$serverName] = $subPort;
                 if(is_array($server['setting'])){
                     $subPort->set($server['setting']);
                 }
@@ -96,7 +104,7 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        Event::mainServerCreate($this,$register);
+        Event::getInstance()->hook('mainServerCreate',$this,$register);
         //检查是否注册了默认的ontask与onfinish事件
         if(!$register->get($register::onTask)){
             $register->registerDefaultOnTask();
@@ -120,10 +128,16 @@ class ServerManager
     }
 
 
-    public function getServer():?\swoole_server
+    public function getServer($serverName = null):?\swoole_server
     {
          if($this->mainServer){
-             return $this->mainServer;
+             if($serverName === null){
+                 return $this->mainServer;
+             }else{
+                 if(isset($this->serverList[$serverName])){
+                     return $this->serverList[$serverName];
+                 }
+             }
          }else{
              throw  new \Exception('getServer cannot call before mainServer create');
          }

@@ -19,7 +19,7 @@ class Request  extends ServerRequest
 {
     private $request;
 
-    final function __construct(\swoole_http_request $request)
+    function __construct(\swoole_http_request $request)
     {
         $this->request = $request;
         $this->initHeaders();
@@ -37,40 +37,23 @@ class Request  extends ServerRequest
         $this->withCookieParams($this->initCookie())->withQueryParams($this->initGet())->withParsedBody($this->initPost())->withUploadedFiles($files);
     }
 
-    function getRequestParam($keyOrKeys = null, $default = null)
+    function getRequestParam(...$key)
     {
-        if($keyOrKeys !== null){
-            if(is_string($keyOrKeys)){
-                $ret = $this->getParsedBody($keyOrKeys);
-                if($ret === null){
-                    $ret = $this->getQueryParam($keyOrKeys);
-                    if ($ret === null){
-                        if ($default !== null){
-                            $ret = $default;
-                        }
-                    }
-                }
-                return $ret;
-            }else if(is_array($keyOrKeys)){
-                if (!is_array($default)){
-                    $default = array();
-                }
-                $data = $this->getRequestParam();
-                $keysNull = array_fill_keys(array_values($keyOrKeys), null);
-                if($keysNull === null){
-                    $keysNull = [];
-                }
-                $all =  array_merge($keysNull, $default, $data);
-                $all = array_intersect_key($all, $keysNull);
-                return $all;
-            }else{
-                return null;
-            }
+        $data = array_merge($this->getParsedBody(),$this->getQueryParams());;
+        if(empty($key)){
+            return $data;
         }else{
-            return array_merge($this->getParsedBody(),$this->getQueryParams());
+           $res = [];
+           foreach ($key as $item){
+               $res[$item] = isset($data[$item])? $data[$item] : null;
+           }
+           if(count($key) == 1){
+               return array_shift($res);
+           }else{
+               return $res;
+           }
         }
     }
-
 
     function getSwooleRequest()
     {
@@ -121,17 +104,17 @@ class Request  extends ServerRequest
 
     private function initCookie()
     {
-        return isset($this->swoole_http_request->cookie) ? $this->request->cookie : array();
+        return isset($this->request->cookie) ? $this->request->cookie : array();
     }
 
     private function initPost()
     {
-        return isset($this->swoole_http_request->post) ? $this->request->post : array();
+        return isset($this->request->post) ? $this->request->post : array();
     }
 
     private function initGet()
     {
-        return isset($this->swoole_http_request->get) ? $this->request->get : array();
+        return isset($this->request->get) ? $this->request->get : array();
     }
 
     final public function __toString():string

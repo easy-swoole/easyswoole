@@ -10,16 +10,20 @@ namespace EasySwoole\Core\Swoole;
 
 
 use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
-use EasySwoole\Core\AbstractInterface\HttpExceptionHandlerInterface;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\Logger;
+use EasySwoole\Core\Component\Event;
+use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
-use EasySwoole\Event;
+use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
+use EasySwoole\Core\Socket\Command\ParserInterface;
+use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
+
 
 class EventRegister extends Container
 {
@@ -73,12 +77,13 @@ class EventRegister extends Container
             $request_psr = new Request($request);
             $response_psr = new Response($response);
             try{
-                Event::onRequest($request_psr,$response_psr,$appNameSpace);
+                $event = Event::getInstance();
+                $event->hook('onRequest',$request_psr,$response_psr,$appNameSpace);
                 Dispatcher::getInstance($appNameSpace)->dispatch($request_psr,$response_psr);
-                Event::afterAction($request_psr,$response_psr,$appNameSpace);
+                $event->hook('afterAction',$request_psr,$response_psr,$appNameSpace);
             }catch (\Exception $exception){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
-                if($handler instanceof HttpExceptionHandlerInterface){
+                if($handler instanceof ExceptionHandlerInterface){
                     $handler->handle($exception,$request_psr,$response_psr);
                 }else{
                     $response_psr = new Response($response);
@@ -87,7 +92,12 @@ class EventRegister extends Container
                 }
             }
             //携程模式下  底层不会自动end
-            $response_psr->response();
+            if($response_psr->autoResponse()){
+                $response_psr->response();
+            }
+            if($response_psr->autoEnd()){
+                $response_psr->end(true);
+            }
         });
     }
 
@@ -98,8 +108,8 @@ class EventRegister extends Container
             if(is_string($taskObj) && class_exists($taskObj)){
                 $taskObj = new $taskObj;
             }
-            try{
-                if($taskObj instanceof AbstractAsyncTask){
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
                     $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
                     //在有return或者设置了结果的时候  说明需要执行结束回调
                     $ret = is_null($ret) ? $taskObj->getResult() : $ret;
@@ -107,9 +117,15 @@ class EventRegister extends Container
                         $taskObj->setResult($ret);
                         return $taskObj;
                     }
+                }catch (\Exception $exception){
+                    $taskObj->onException($exception);
                 }
-            }catch (\Exception $exception){
-
+            }else if($taskObj instanceof SuperClosure){
+                try{
+                    return $taskObj();
+                }catch (\Exception $exception){
+                    trigger_error($exception->getMessage());
+                }
             }
             return null;
         });
@@ -124,9 +140,27 @@ class EventRegister extends Container
                 try{
                     $taskObj->finish($taskObj->getResult(),$taskId);
                 }catch (\Exception $exception){
-
+                    $taskObj->onException($exception);
                 }
             }
+        });
+    }
+
+    public function registerDefaultOnReceive(ParserInterface $parser,ExceptionHandler $exceptionHandler = null):void
+    {
+        $dispatch = new SocketDispatcher($parser);
+        $dispatch->setExceptionHandler($exceptionHandler);
+        $this->add(self::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($dispatch){
+            $dispatch->dispatch($dispatch::TCP,$data,$fd,$reactor_id);
+        });
+    }
+
+    public function registerDefaultOnPacket(ParserInterface $parser,ExceptionHandler $exceptionHandler = null)
+    {
+        $dispatch = new SocketDispatcher($parser);
+        $dispatch->setExceptionHandler($exceptionHandler);
+        $this->add(self::onPacket,function (\swoole_server $server, string $data, array $client_info)use($dispatch){
+            $dispatch->dispatch($dispatch::UDP,$data,$client_info);
         });
     }
 }

@@ -10,12 +10,13 @@ namespace EasySwoole\Core;
 
 
 use EasySwoole\Config;
+use EasySwoole\Core\AbstractInterface\EventInterface;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Utility\File;
-use EasySwoole\Event;
 use EasySwoole\Core\Swoole\ServerManager;
 
 class Core
@@ -24,18 +25,18 @@ class Core
 
     public function __construct()
     {
-        defined('ROOT') or define("ROOT",realpath(__DIR__.'/../../'));
+        defined('ROOT') or define("ROOT",realpath(getcwd()));
     }
 
     public function initialize():Core
     {
         Di::getInstance()->set(SysConst::VERSION,'2.0.1');
-        Di::getInstance()->set(SysConst::APP_NAMESPACE,'App');
         Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH,3);
-        Event::frameInitialize();
+        //创建全局事件容器
+        $event = $this->eventHook();
         $this->sysDirectoryInit();
+        $event->hook('frameInitialize');
         $this->errorHandle();
-        Event::frameInitialized();
         return $this;
     }
 
@@ -44,27 +45,15 @@ class Core
         ServerManager::getInstance()->start();
     }
 
-
     private function sysDirectoryInit():void
     {
         //创建临时目录    请以绝对路径，不然守护模式运行会有问题
-        $tempDir = Di::getInstance()->get(SysConst::DIR_TEMP);
-        if(empty($tempDir)){
-            $tempDir = ROOT."/Temp";
-            Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
-        }
-        if(!File::createDir($tempDir)){
-            die("create Temp Directory:{$tempDir} fail");
-        }
-        //创建日志目录
-        $logDir = Di::getInstance()->get(SysConst::DIR_LOG);
-        if(empty($logDir)){
-            $logDir = ROOT."/Logs";
-            Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
-        }
-        if(!File::createDir($logDir)){
-            die("create log Directory:{$logDir} fail");
-        }
+        $tempDir = Config::getInstance()->getConf('TEMP_DIR');
+        $logDir = Config::getInstance()->getConf('LOG_DIR');
+        Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
+        Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
+        Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
+        Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
     }
 
     private function errorHandle():void
@@ -95,5 +84,21 @@ class Core
             };
         }
         register_shutdown_function($func);
+    }
+
+    private function eventHook():Event
+    {
+        $event = Event::getInstance();
+        $sysEvent = Config::getInstance()->getConf('SYS_EVENT_CLASS');
+        if(!empty($sysEvent) && class_exists($sysEvent)){
+            $sysEvent = new $sysEvent();
+            if($sysEvent instanceof EventInterface){
+                $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
+                $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
+                $event->add('onRequest',[$sysEvent,'onRequest']);
+                $event->add('afterAction',[$sysEvent,'afterAction']);
+            }
+        }
+        return $event;
     }
 }

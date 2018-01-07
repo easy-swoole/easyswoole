@@ -13,18 +13,58 @@ use EasySwoole\Core\Component\SuperClosure;
 
 class TaskManager
 {
-    static public function async($task,$finishCallback = null,$taskWorkerId = -1)
+    public static  function async($task,$finishCallback = null,$taskWorkerId = -1)
     {
         if($task instanceof \Closure){
-            $task = new SuperClosure($task);
+            try{
+                $task = new SuperClosure($task);
+            }catch (\Exception $exception){
+                trigger_error($exception->getMessage());
+                return false;
+            }
         }
-        Server::getInstance()->getServer()->task($task,$taskWorkerId,$finishCallback);
+        return ServerManager::getInstance()->getServer()->task($task,$taskWorkerId,$finishCallback);
     }
 
-    static public function sync($task,$timeout = 0.5,$taskWorkerId = -1){
+    public static  function sync($task,$timeout = 0.5,$taskWorkerId = -1)
+    {
         if($task instanceof \Closure){
-            $task = new SuperClosure($task);
+            try{
+                $task = new SuperClosure($task);
+            }catch (\Exception $exception){
+                trigger_error($exception->getMessage());
+                return false;
+            }
         }
-        return Server::getInstance()->getServer()->taskwait($task,$timeout,$taskWorkerId);
+        return ServerManager::getInstance()->getServer()->taskwait($task,$timeout,$taskWorkerId);
+    }
+
+    public static  function barrier(array $taskList,$timeout = 0.5)
+    {
+        $temp =[];
+        $map = [];
+        $result = [];
+        foreach ($taskList as $name => $task){
+            if($task instanceof \Closure){
+                try{
+                    $task = new SuperClosure($task);
+                }catch (\Exception $exception){
+                    trigger_error($exception->getMessage());
+                    continue;
+                }
+            }
+            $temp[] = $task;
+            $map[] = $name;
+        }
+        if(!empty($temp)){
+            $ret = ServerManager::getInstance()->getServer()->taskWaitMulti($temp,$timeout);
+            if(!empty($ret)){
+                //极端情况下  所有任务都超时
+                foreach ($ret as $index => $result){
+                    $result[$map[$index]] = $result;
+                }
+            }
+        }
+        return $result;
     }
 }

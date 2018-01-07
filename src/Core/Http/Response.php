@@ -21,6 +21,24 @@ class Response extends MessageResponse
     const STATUS_REAL_END = 2;
     private $isEndResponse = 0;//1 逻辑end  2真实end
 
+    private $autoEnd = false;
+    private $autoResponse = true;
+
+    final public function autoEnd(bool $bool = null):bool
+    {
+        if($bool !== null){
+            $this->autoEnd = $bool;
+        }
+        return $this->autoEnd;
+    }
+
+    final public function autoResponse(bool $bool = null):bool
+    {
+        if($bool !== null){
+            $this->autoResponse = $bool;
+        }
+        return $this->autoResponse;
+    }
 
     final public function __construct(\swoole_http_response $response)
     {
@@ -52,7 +70,7 @@ class Response extends MessageResponse
             }
             $cookies = $this->getCookies();
             foreach ($cookies as $cookie){
-                $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->getSecure(),$cookie->getHttponly());
+                $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
             }
             $write = $this->getBody()->__toString();
             if(!empty($write)){

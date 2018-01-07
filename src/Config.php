@@ -24,8 +24,9 @@ class Config
 
     final public function __construct()
     {
-        $conf = $this->sysConf()+$this->userConf();
-        $this->conf = new SplArray($conf);
+        //请在bin文件中执行 install命令，将Resource/Config.php释放至ROOT
+        $data = require ROOT.'/Config.php';
+        $this->conf = new SplArray($data);
     }
 
     public function getConf($keyPath)
@@ -41,30 +42,13 @@ class Config
         $this->conf->set($keyPath,$data);
     }
 
-    private function sysConf():array
+    public function toArray():array
     {
-        return array(
-            "MAIN_SERVER"=>array(
-                "HOST"=>"0.0.0.0",
-                "PORT"=>9501,
-                "SERVER_TYPE"=>ServerManager::TYPE_WEB_SERVER,
-                'SOCK_TYPE'=>SWOOLE_TCP,//该配置项当为SERVER_TYPE值为TYPE_SERVER时有效
-                'RUN_MODEL'=>SWOOLE_PROCESS,
-                "SETTING"=>array(
-                    'task_worker_num' => 8, //异步任务进程
-                    "task_max_request"=>10,
-                    'max_request'=>5000,//强烈建议设置此配置项
-                    'worker_num'=>8,
-                    'log_file'=>Di::getInstance()->get(SysConst::DIR_LOG).'/swoole.log',
-                    'pid_file'=>Di::getInstance()->get(SysConst::DIR_TEMP).'/pid.pid'
-                ),
-            ),
-            "DEBUG"=>true,
-        );
+        return $this->conf->getArrayCopy();
     }
 
-    private function userConf():array
+    public function load(array $conf):void
     {
-        return array();
+        $this->conf = new SplArray($conf);
     }
 }

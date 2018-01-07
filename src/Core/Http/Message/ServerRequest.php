@@ -13,7 +13,7 @@ class ServerRequest extends Request
 {
     private $attributes = [];
     private $cookieParams = [];
-    private $parsedBody;
+    private $parsedBody = [];
     private $queryParams = [];
     private $serverParams;
     private $uploadedFiles = [];

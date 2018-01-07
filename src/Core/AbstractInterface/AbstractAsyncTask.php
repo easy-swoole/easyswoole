@@ -42,4 +42,9 @@ abstract class AbstractAsyncTask
     abstract function run($taskData,$taskId,$fromWorkerId);
 
     abstract function finish($result,$task_id);
+
+    public function onException(\Exception $exception):void
+    {
+        throw $exception;
+    }
 }

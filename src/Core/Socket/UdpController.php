@@ -9,7 +9,22 @@
 namespace EasySwoole\Core\Socket;
 
 
-class UdpController
+use EasySwoole\Core\Socket\AbstractInterface\Controller;
+use EasySwoole\Core\Socket\Client\Udp;
+
+abstract class UdpController extends Controller
 {
 
+    private $client;
+    final function __construct(Udp $client,array $args)
+    {
+        parent::__construct($args);
+        $this->client = $client;
+    }
+
+    function client():Udp
+    {
+        // TODO: Implement client() method.
+        return $this->client;
+    }
 }

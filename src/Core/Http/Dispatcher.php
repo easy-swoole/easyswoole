@@ -9,9 +9,9 @@
 namespace EasySwoole\Core\Http;
 
 
-use EasySwoole\Core\AbstractInterface\AbstractController;
-use EasySwoole\Core\AbstractInterface\AbstractRouter;
-use EasySwoole\Core\AbstractInterface\Singleton;
+
+use EasySwoole\Core\Http\AbstractInterface\Controller;
+use EasySwoole\Core\Http\AbstractInterface\Router;
 use EasySwoole\Core\Http\Message\Status;
 use FastRoute\Dispatcher\GroupCountBased;
 use EasySwoole\Core\Component\Di;
@@ -35,13 +35,14 @@ class Dispatcher
 
     /*
      * 依赖IOC实现不同的app dispatcher实例单例
+     * 默认'App\\'
      */
     public static function getInstance($appNameSpace):Dispatcher
     {
-        $ins = Di::getInstance()->get(SysConst::APP_NAMESPACE.$appNameSpace);
+        $ins = Di::getInstance()->get($appNameSpace);
         if(!$ins instanceof Dispatcher){
             $ins = new Dispatcher($appNameSpace);
-            Di::getInstance()->set(SysConst::APP_NAMESPACE.$appNameSpace,$ins);
+            Di::getInstance()->set($appNameSpace,$ins);
         }
         return $ins;
     }
@@ -62,7 +63,7 @@ class Dispatcher
         $class = $this->controllerNameSpacePrefix.'\\Router';
         if(class_exists($class)){
             $router = new $class;
-            if($router instanceof AbstractRouter){
+            if($router instanceof Router){
                 return $router->getRouteCollector();
             }else{
                 return null;
@@ -147,7 +148,7 @@ class Dispatcher
         }
         if(class_exists($finalClass)){
             $controller = new $finalClass;
-            if($controller instanceof AbstractController){
+            if($controller instanceof Controller){
                 $controller->__hook($actionName,$request,$response);
             }else{
                 trigger_error("class@{$finalClass} not a controller class");
