@@ -154,4 +154,13 @@ class EventRegister extends Container
             $dispatch->dispatch($dispatch::TCP,$data,$fd,$reactor_id);
         });
     }
+
+    public function registerDefaultOnPacket(ParserInterface $parser,ExceptionHandler $exceptionHandler = null)
+    {
+        $dispatch = new SocketDispatcher($parser);
+        $dispatch->setExceptionHandler($exceptionHandler);
+        $this->add(self::onPacket,function (\swoole_server $server, string $data, array $client_info)use($dispatch){
+            $dispatch->dispatch($dispatch::UDP,$data,$client_info);
+        });
+    }
 }
