@@ -19,8 +19,7 @@ class TaskManager
             try{
                 $task = new SuperClosure($task);
             }catch (\Exception $exception){
-                trigger_error($exception->getMessage());
-                return false;
+                throw $exception;
             }
         }
         return ServerManager::getInstance()->getServer()->task($task,$taskWorkerId,$finishCallback);
@@ -32,8 +31,7 @@ class TaskManager
             try{
                 $task = new SuperClosure($task);
             }catch (\Exception $exception){
-                trigger_error($exception->getMessage());
-                return false;
+                throw $exception;
             }
         }
         return ServerManager::getInstance()->getServer()->taskwait($task,$timeout,$taskWorkerId);
@@ -49,8 +47,7 @@ class TaskManager
                 try{
                     $task = new SuperClosure($task);
                 }catch (\Exception $exception){
-                    trigger_error($exception->getMessage());
-                    continue;
+                    throw $exception;
                 }
             }
             $temp[] = $task;
