@@ -20,7 +20,7 @@ interface EventInterface
 
     public function mainServerCreate(ServerManager $server,EventRegister $register):void;
 
-    public  function onRequest(Request $request,Response $response,$appNameSpace):void;
+    public  function onRequest(Request $request,Response $response):void;
 
-    public  function afterAction(Request $request,Response $response,$appNameSpace):void;
+    public  function afterAction(Request $request,Response $response):void;
 }

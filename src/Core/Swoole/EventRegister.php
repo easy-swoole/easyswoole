@@ -71,16 +71,17 @@ class EventRegister extends Container
         return $this;
     }
 
-    public function registerDefaultOnRequest($appNameSpace = 'App\\'):void
+    public function registerDefaultOnRequest($controllerNameSpace = 'App\\Controller\\'):void
     {
-        $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($appNameSpace){
+        $dispatcher = new Dispatcher($controllerNameSpace);
+        $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
             $request_psr = new Request($request);
             $response_psr = new Response($response);
             try{
                 $event = Event::getInstance();
-                $event->hook('onRequest',$request_psr,$response_psr,$appNameSpace);
-                Dispatcher::getInstance($appNameSpace)->dispatch($request_psr,$response_psr);
-                $event->hook('afterAction',$request_psr,$response_psr,$appNameSpace);
+                $event->hook('onRequest',$request_psr,$response_psr);
+                $dispatcher->dispatch($request_psr,$response_psr);
+                $event->hook('afterAction',$request_psr,$response_psr);
             }catch (\Exception $exception){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
                 if($handler instanceof ExceptionHandlerInterface){
