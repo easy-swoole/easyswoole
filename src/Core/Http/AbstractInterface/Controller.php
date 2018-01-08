@@ -28,7 +28,10 @@ abstract class Controller
 
     protected abstract function afterAction($actionName):void;
 
-    protected abstract function onException(\Exception $exception,$actionName):void;
+    protected function onException(\Exception $exception,$actionName):void
+    {
+        throw $exception ;
+    }
 
     protected function onRequest($action):?bool
     {
