@@ -164,4 +164,13 @@ class EventRegister extends Container
             $dispatch->dispatch($dispatch::UDP,$data,$client_info);
         });
     }
+
+    public function registerDefaultOnMessage(ParserInterface $parser,ExceptionHandler $exceptionHandler = null)
+    {
+        $dispatch = new SocketDispatcher($parser);
+        $dispatch->setExceptionHandler($exceptionHandler);
+        $this->add(self::onMessage,function (\swoole_server $server, \swoole_websocket_frame $frame)use($dispatch){
+            $dispatch->dispatch($dispatch::WEB_SOCK,$frame->data,$frame);
+        });
+    }
 }

@@ -11,6 +11,6 @@ namespace EasySwoole\Core\Socket\Command;
 
 interface ParserInterface
 {
-    public function decode($raw):?CommandBean;
-    public function encode(?string $raw):?string ;
+    public function decode($raw,array $args):?CommandBean;
+    public function encode(?string $raw,array $args):?string ;
 }
