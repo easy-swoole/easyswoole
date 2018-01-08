@@ -23,9 +23,9 @@ abstract class Controller
 
     protected abstract function afterAction($actionName);
 
-    protected function onException(\Exception $exception):?string
+    protected function onException(\Throwable $throwable):?string
     {
-        return null;
+        throw $throwable;
     }
 
     protected function __construct(array $args)
@@ -95,8 +95,8 @@ abstract class Controller
                     try{
                         $this->$actionName();
                         $this->afterAction($this->getActionName());
-                    }catch (\Exception $exception){
-                        return $this->onException($exception);
+                    }catch (\Throwable $throwable){
+                        return $this->onException($throwable);
                     }
                 }else{
                     $this->actionNotFound($actionName);

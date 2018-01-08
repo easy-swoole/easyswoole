@@ -74,11 +74,11 @@ class Dispatcher
                 if($controller instanceof Controller){
                     try{
                         $res = $controller->__hook($command->getAction());
-                    }catch (\Exception $exception){
+                    }catch (\Throwable $throwable){
                         if($this->exceptionHandler instanceof ExceptionHandler){
-                            $res = $this->exceptionHandler->handler($exception,$client,$command);
+                            $res = $this->exceptionHandler->handler($throwable,$client,$command);
                         }else{
-                            throw $exception;
+                            throw $throwable;
                         }
                     }
                     $res = $this->parser->encode($res,$args);

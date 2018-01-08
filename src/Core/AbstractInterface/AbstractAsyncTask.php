@@ -43,8 +43,8 @@ abstract class AbstractAsyncTask
 
     abstract function finish($result,$task_id);
 
-    public function onException(\Exception $exception):void
+    public function onException(\Throwable $throwable):void
     {
-        throw $exception;
+        throw $throwable;
     }
 }

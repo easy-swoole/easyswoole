@@ -82,14 +82,14 @@ class EventRegister extends Container
                 $event->hook('onRequest',$request_psr,$response_psr);
                 $dispatcher->dispatch($request_psr,$response_psr);
                 $event->hook('afterAction',$request_psr,$response_psr);
-            }catch (\Exception $exception){
+            }catch (\Throwable $throwable){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
                 if($handler instanceof ExceptionHandlerInterface){
-                    $handler->handle($exception,$request_psr,$response_psr);
+                    $handler->handle($throwable,$request_psr,$response_psr);
                 }else{
                     $response_psr = new Response($response);
                     $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                    $response_psr->write($exception->getMessage());
+                    $response_psr->write($throwable->getMessage());
                 }
             }
             //携程模式下  底层不会自动end
@@ -118,14 +118,14 @@ class EventRegister extends Container
                         $taskObj->setResult($ret);
                         return $taskObj;
                     }
-                }catch (\Exception $exception){
-                    $taskObj->onException($exception);
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
                     return $taskObj();
-                }catch (\Exception $exception){
-                    trigger_error($exception->getMessage());
+                }catch (\Throwable $throwable){
+                    trigger_error($throwable->getMessage());
                 }
             }
             return null;
@@ -140,8 +140,8 @@ class EventRegister extends Container
             if($taskObj instanceof AbstractAsyncTask){
                 try{
                     $taskObj->finish($taskObj->getResult(),$taskId);
-                }catch (\Exception $exception){
-                    $taskObj->onException($exception);
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
                 }
             }
         });
