@@ -23,7 +23,10 @@ abstract class Controller
 
     protected abstract function afterAction($actionName);
 
-    protected abstract function onException(\Exception $exception):?string ;
+    protected function onException(\Exception $exception):?string
+    {
+        return null;
+    }
 
     protected function __construct(array $args)
     {

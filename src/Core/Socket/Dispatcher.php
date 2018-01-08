@@ -61,6 +61,9 @@ class Dispatcher
             }
         }
         $command = $this->parser->decode($data);
+        if($command == null){
+            return;
+        }
         $controller = $command->getControllerClass();
         if(!empty($controller)){
             if(class_exists($controller)){
@@ -71,18 +74,16 @@ class Dispatcher
                 if($controller instanceof Controller){
                     try{
                         $res = $controller->__hook($command->getAction());
-                        if(!empty($res)){
-                            $res = $this->parser->encode($res);
-                            if(isset($res)){
-                                Response::response($client,$res);
-                            }
-                        }
                     }catch (\Exception $exception){
                         if($this->exceptionHandler instanceof ExceptionHandler){
-                            $this->exceptionHandler->handler($exception,$client,$command);
+                            $res = $this->exceptionHandler->handler($exception,$client,$command);
                         }else{
                             throw $exception;
                         }
+                    }
+                    $res = $this->parser->encode($res);
+                    if(strlen($res) == 0){
+                        Response::response($client,$res);
                     }
                 }
             }
