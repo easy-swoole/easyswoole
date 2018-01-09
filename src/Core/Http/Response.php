@@ -87,6 +87,7 @@ class Response extends MessageResponse
     {
         return $this->isEndResponse;
     }
+
     function write($obj){
         if(!$this->isEndResponse()){
             if(is_object($obj)){
@@ -107,6 +108,7 @@ class Response extends MessageResponse
             return false;
         }
     }
+
     function writeJson($statusCode = 200,$result = null,$msg = null){
         if(!$this->isEndResponse()){
             $data = Array(
@@ -123,6 +125,7 @@ class Response extends MessageResponse
             return false;
         }
     }
+
     function redirect($url,$status = Status::CODE_MOVED_TEMPORARILY){
         if(!$this->isEndResponse()){
             //仅支持header重定向  不做meta定向
@@ -153,19 +156,6 @@ class Response extends MessageResponse
             return false;
         }
 
-    }
-
-    function forward($pathTo,Request $request,$appNameSpace = 'App\\'){
-        $pathTo = UrlParser::pathInfo($pathTo);
-        if(!$this->isEndResponse()){
-            if($pathTo == UrlParser::pathInfo($request->getUri()->getPath())){
-                trigger_error("you yor forward a request in the same path : {$pathTo}");
-            }
-            $request->getUri()->withPath($pathTo);
-            Dispatcher::getInstance($appNameSpace)->dispatch($request,$this);
-        }else{
-            trigger_error("response has end");
-        }
     }
 
     function getSwooleResponse()

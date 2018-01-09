@@ -14,5 +14,5 @@ use EasySwoole\Core\Http\Response;
 
 interface ExceptionHandlerInterface
 {
-    public function handle(\Exception $exception,Request $request,Response $response);
+    public function handle(\Throwable $throwable,Request $request,Response $response);
 }

@@ -19,11 +19,20 @@ abstract class Controller
 
     protected abstract function client();
 
-    protected abstract function actionNotFound(string $actionName);
+    protected function actionNotFound(string $actionName)
+    {
 
-    protected abstract function afterAction($actionName);
+    }
 
-    protected abstract function onException(\Exception $exception):?string ;
+    protected function afterAction($actionName)
+    {
+
+    }
+
+    protected function onException(\Throwable $throwable):?string
+    {
+        throw $throwable;
+    }
 
     protected function __construct(array $args)
     {
@@ -92,8 +101,8 @@ abstract class Controller
                     try{
                         $this->$actionName();
                         $this->afterAction($this->getActionName());
-                    }catch (\Exception $exception){
-                        return $this->onException($exception);
+                    }catch (\Throwable $throwable){
+                        return $this->onException($throwable);
                     }
                 }else{
                     $this->actionNotFound($actionName);

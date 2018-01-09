@@ -24,31 +24,21 @@ class Dispatcher
     private $controllerNameSpacePrefix;
     private $router = null;
     private $controllerPool = [];
-    function __construct($appNameSpace)
+    function __construct($controllerNameSpace)
     {
-        $this->controllerNameSpacePrefix = $appNameSpace.'Controller';
-        $collector = $this->checkRouter();
-        if($collector){
-            $this->router = new GroupCountBased($collector->getData());
-        }
-    }
-
-    /*
-     * 依赖IOC实现不同的app dispatcher实例单例
-     * 默认'App\\'
-     */
-    public static function getInstance($appNameSpace):Dispatcher
-    {
-        $ins = Di::getInstance()->get($appNameSpace);
-        if(!$ins instanceof Dispatcher){
-            $ins = new Dispatcher($appNameSpace);
-            Di::getInstance()->set($appNameSpace,$ins);
-        }
-        return $ins;
+        $this->controllerNameSpacePrefix = trim($controllerNameSpace,'\\');
     }
 
     public function dispatch(Request $request,Response $response):void
     {
+        if($this->router === null){
+            $collector = $this->checkRouter();
+            if($collector){
+                $this->router = new GroupCountBased($collector->getData());
+            }else{
+                $this->router = false;
+            }
+        }
         if(!$response->isEndResponse()){
             $this->router($request,$response);
         };
@@ -109,6 +99,9 @@ class Dispatcher
             $actionName = $this->controllerPool[$pathInfo]['action'];
             $finalClass = $this->controllerPool[$pathInfo]['class'];
         }else{
+            if(count($this->controllerPool) > 10240){
+                $this->controllerPool = [];
+            }
             $list = explode("/",$pathInfo);
             $actionName = null;
             $finalClass = null;
@@ -155,7 +148,8 @@ class Dispatcher
                 $response->withStatus(Status::CODE_NOT_FOUND);
             }
         }else{
-            $response->withStatus(Status::CODE_NOT_FOUND);
+            $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
+            $response->write($content);
         }
     }
 }
