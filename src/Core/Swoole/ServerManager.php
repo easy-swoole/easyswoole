@@ -150,7 +150,7 @@ class ServerManager
             //进程错误的时候返回-1
             $ret =  \Swoole\Coroutine::getuid();
             if($ret >= 0){
-                return $ret;
+                return (int)$ret;
             }else{
                 return null;
             }
