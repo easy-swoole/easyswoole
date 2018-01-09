@@ -6,7 +6,6 @@
  * Time: 下午5:16
  */
 
-declare(ticks = 1);
 namespace EasySwoole\Core\Component;
 
 
@@ -38,6 +37,7 @@ class Invoker
 
     public function exec(callable $callable,$timeOut = 100 * 1000)
     {
+        pcntl_async_signals(true);
         pcntl_signal(SIGALRM, function () {
             \Swoole\Process::alarm(-1);
             throw new \RuntimeException('func timeout');
