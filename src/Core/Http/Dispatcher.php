@@ -145,7 +145,8 @@ class Dispatcher
                 $response->withStatus(Status::CODE_NOT_FOUND);
             }
         }else{
-            $response->withStatus(Status::CODE_NOT_FOUND);
+            $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
+            $response->write($content);
         }
     }
 }
