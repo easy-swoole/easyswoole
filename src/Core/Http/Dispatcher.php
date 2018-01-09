@@ -99,6 +99,9 @@ class Dispatcher
             $actionName = $this->controllerPool[$pathInfo]['action'];
             $finalClass = $this->controllerPool[$pathInfo]['class'];
         }else{
+            if(count($this->controllerPool) > 10240){
+                $this->controllerPool = [];
+            }
             $list = explode("/",$pathInfo);
             $actionName = null;
             $finalClass = null;
