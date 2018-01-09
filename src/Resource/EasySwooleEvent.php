@@ -17,6 +17,7 @@ Class EasySwooleEvent implements EventInterface {
     public function frameInitialize(): void
     {
         // TODO: Implement frameInitialize() method.
+        date_default_timezone_set('Asia/Shanghai');
     }
 
     public function mainServerCreate(ServerManager $server,EventRegister $register): void

@@ -90,15 +90,26 @@ function installCheck()
 
 function initConf()
 {
-    $Conf = ROOT . '/Config.php';
-    if (is_file($Conf)) {
-        echo 'Config.php has already existed, do you want to replace it? [ Y / N (default) ] : ';
+    releaseResource(__DIR__ . '/../src/Resource/Config.php', ROOT . '/Config.php');
+    releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.php', ROOT . '/EasySwooleEvent.php');
+}
+
+function releaseResource($source, $destination)
+{
+    // 释放文件到目标位置
+    clearstatcache();
+    $replace = true;
+    if (is_file($destination)) {
+        $filename = basename($destination);
+        echo "{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ";
         $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-        if (in_array($answer, ['y', 'yes'])) {
-            copy(__DIR__ . '/../src/Resource/Config.php', $Conf);
+        if (!in_array($answer, ['y', 'yes'])) {
+            $replace = false;
         }
-    } else {
-        copy(__DIR__ . '/../src/Resource/Config.php', $Conf);
+    }
+
+    if ($replace) {
+        copy($source, $destination);
     }
 }
 
