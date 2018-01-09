@@ -24,9 +24,15 @@ abstract class Controller
 
     abstract function index();
 
-    protected abstract function actionNotFound($action = null):void;
+    protected function actionNotFound($action = null):void
+    {
+        $this->response()->withStatus(Status::CODE_NOT_FOUND);
+    }
 
-    protected abstract function afterAction($actionName):void;
+    protected function afterAction($actionName):void
+    {
+
+    }
 
     protected function onException(\Throwable $throwable,$actionName):void
     {

@@ -19,9 +19,15 @@ abstract class Controller
 
     protected abstract function client();
 
-    protected abstract function actionNotFound(string $actionName);
+    protected function actionNotFound(string $actionName)
+    {
 
-    protected abstract function afterAction($actionName);
+    }
+
+    protected function afterAction($actionName)
+    {
+
+    }
 
     protected function onException(\Throwable $throwable):?string
     {
