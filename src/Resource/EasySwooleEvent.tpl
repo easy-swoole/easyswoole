@@ -6,6 +6,8 @@
  * Time: 下午1:04
  */
 
+namespace EasySwoole;
+
 use \EasySwoole\Core\AbstractInterface\EventInterface;
 use \EasySwoole\Core\Swoole\ServerManager;
 use \EasySwoole\Core\Swoole\EventRegister;
