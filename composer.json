@@ -1,7 +1,10 @@
 {
     "name": "easyswoole/easyswoole",
-    "type": "easyswoole-framework",
-    "description": "none",
+    "type": "framework",
+    "description": "An efficient swoole framework",
+    "keywords" : ["swoole", "framework", "async","easyswoole"],
+    "homepage" : "https://www.easyswoole.com/",
+    "license" : "Apache 2.0",
     "bin": [
         "bin/easyswoole"
     ],
@@ -18,7 +21,8 @@
     },
     "autoload": {
         "psr-4": {
-            "EasySwoole\\": "src/"
+            "EasySwoole\\": "src/",
+            "EasySwoole\\Test\\":"test/"
         }
     },
     "repositories": {
@@ -28,6 +32,7 @@
         }
     },
     "require-dev": {
-        "eaglewu/swoole-ide-helper": "dev-master"
+        "eaglewu/swoole-ide-helper": "dev-master",
+        "phpunit/phpunit" : "^5.6"
     }
 }
