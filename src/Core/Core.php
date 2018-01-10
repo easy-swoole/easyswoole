@@ -10,14 +10,13 @@ namespace EasySwoole\Core;
 
 
 use EasySwoole\Config;
-use EasySwoole\Core\AbstractInterface\EventInterface;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
-use EasySwoole\Core\Utility\File;
 use EasySwoole\Core\Swoole\ServerManager;
+use EasySwoole\EasySwooleEvent;
 
 class Core
 {
@@ -90,7 +89,7 @@ class Core
     {
         $event = Event::getInstance();
         require ROOT.'/EasySwooleEvent.php';
-        $sysEvent = new \EasySwooleEvent();
+        $sysEvent = new EasySwooleEvent();
         $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
         $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
         $event->add('onRequest',[$sysEvent,'onRequest']);

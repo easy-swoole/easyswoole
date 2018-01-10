@@ -90,8 +90,8 @@ function installCheck()
 
 function initConf()
 {
-    releaseResource(__DIR__ . '/../src/Resource/Config.php', ROOT . '/Config.php');
-    releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.php', ROOT . '/EasySwooleEvent.php');
+    releaseResource(__DIR__ . '/../src/Resource/Config.tpl', ROOT . '/Config.php');
+    releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', ROOT . '/EasySwooleEvent.php');
 }
 
 function releaseResource($source, $destination)
