@@ -5,18 +5,22 @@
  * Date: 2017/12/12
  * Time: 下午6:03
  */
+
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Event;
+
 class ServerManager
 {
 	private static $instance;
 	private $serverList = [];
 	private $mainServer = null;
 	private $isStart = false;
+
 	const TYPE_SERVER = 1;
 	const TYPE_WEB_SERVER = 2;
 	const TYPE_WEB_SOCKET_SERVER = 3;
+
 	public static function getInstance():ServerManager
 	{
 		if(!isset(self::$instance)){
@@ -24,6 +28,7 @@ class ServerManager
 		}
 		return ServerManager::$instance;
 	}
+
 	public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = null):EventRegister
 	{
 		$eventRegister = new EventRegister();
@@ -36,10 +41,12 @@ class ServerManager
 		];
 		return $eventRegister;
 	}
+
 	public function isStart():bool
 	{
 		return $this->isStart;
 	}
+
 	public function start():void
 	{
 		$this->createMainServer();
@@ -47,6 +54,8 @@ class ServerManager
 		$this->isStart = true;
 		$this->getServer()->start();
 	}
+
+
 	private function attachListener():void
 	{
 		$mainServer = $this->getServer();
@@ -66,6 +75,7 @@ class ServerManager
 			}
 		}
 	}
+
 	private function createMainServer():\swoole_server
 	{
 		$conf = Config::getInstance()->getConf("MAIN_SERVER");
@@ -102,18 +112,22 @@ class ServerManager
 		if(!$register->get($register::onFinish)){
 			$register->registerDefaultOnFinish();
 		}
+
 		if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
 			//检查是否注册了onRequest,否则注册默认onRequest
 			if(!$register->get($register::onRequest)){
 				$register->registerDefaultOnRequest();
 			}
 		}
+
 		$events = $register->all();
 		foreach ($events as $event => $callback){
 			$this->mainServer->on($event,$callback);
 		}
 		return $this->mainServer;
 	}
+
+
 	public function getServer($serverName = null):?\swoole_server
 	{
 		if($this->mainServer){
@@ -128,6 +142,8 @@ class ServerManager
 			throw  new \Exception('getServer cannot call before mainServer create');
 		}
 	}
+
+
 	public function coroutineId():?int
 	{
 		if(class_exists('Swoole\Coroutine')){
@@ -142,6 +158,7 @@ class ServerManager
 			return null;
 		}
 	}
+
 	public function isCoroutine():bool
 	{
 		if($this->coroutineId() !== null){
