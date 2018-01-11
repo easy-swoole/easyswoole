@@ -10,6 +10,8 @@ namespace EasySwoole\Core\Component;
 
 
 use EasySwoole\Core\Swoole\ServerManager;
+use \Swoole\Process;
+use \Swoole\Async;
 
 class Invoker
 {
@@ -29,7 +31,7 @@ class Invoker
     final function __construct()
     {
         if(!ServerManager::getInstance()->isStart()){
-            \Swoole\Async::set([
+            Async::set([
                 'enable_signalfd' => false,
             ]);
         }
@@ -39,14 +41,14 @@ class Invoker
     {
         pcntl_async_signals(true);
         pcntl_signal(SIGALRM, function () {
-            \Swoole\Process::alarm(-1);
+            Process::alarm(-1);
             throw new \RuntimeException('func timeout');
         });
         try
         {
-            \Swoole\Process::alarm($timeOut);
+            Process::alarm($timeOut);
             $ret = call_user_func($callable);
-            \Swoole\Process::alarm(-1);
+            Process::alarm(-1);
             return $ret;
         }
         catch(\Throwable $throwable)
