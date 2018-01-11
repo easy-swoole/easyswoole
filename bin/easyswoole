@@ -358,11 +358,12 @@ function serverReload($options)
         $pidFile = $options['pid'];
     }
     if (file_exists($pidFile)) {
-        if (in_array('all', $options)) {
+        if (isset($options['all'])) {
             $sig = SIGUSR1;
         } else {
             $sig = SIGUSR2;
         }
+
         opCacheClear();
         $pid = file_get_contents($pidFile);
         if (!swoole_process::kill($pid, 0)) {
