@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/7
- * Time: 下午10:38
+ * Date: 2018/1/11
+ * Time: 下午9:16
  */
 
-namespace EasySwoole\Core\AbstractInterface;
+namespace EasySwoole\Core\Swoole\Task;
 
 
 abstract class AbstractAsyncTask

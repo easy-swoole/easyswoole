@@ -2,14 +2,13 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/7
- * Time: 下午10:35
+ * Date: 2018/1/11
+ * Time: 下午9:12
  */
 
-namespace EasySwoole\Core\Swoole;
-
-
+namespace EasySwoole\Core\Swoole\Task;
 use EasySwoole\Core\Component\SuperClosure;
+use EasySwoole\Core\Swoole\ServerManager;
 
 class TaskManager
 {

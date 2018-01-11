@@ -8,8 +8,6 @@
 
 namespace EasySwoole\Core\Swoole;
 
-
-use EasySwoole\Core\AbstractInterface\AbstractAsyncTask;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
@@ -23,6 +21,7 @@ use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Command\ParserInterface;
 use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
+use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 
 
 class EventRegister extends Container
