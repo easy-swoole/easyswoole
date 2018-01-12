@@ -69,8 +69,8 @@ function opCacheClear()
 
 function envCheck()
 {
-    if (phpversion() < 7.2) {
-        die("PHP version\e[31m must >= 7.2\e[0m\n");
+    if (phpversion() < 7.1) {
+        die("PHP version\e[31m must >= 7.1\e[0m\n");
     }
     if (phpversion('swoole') < 1.9) {
         die("Swoole extension version\e[31m must >= 1.9.5\e[0m\n");
