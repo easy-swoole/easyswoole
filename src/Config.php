@@ -25,7 +25,7 @@ class Config
     final public function __construct()
     {
         //请在bin文件中执行 install命令，将Resource/Config.php释放至ROOT
-        $data = require ROOT.'/Config.php';
+        $data = require EASYSWOOLE_ROOT.'/Config.php';
         $this->conf = new SplArray($data);
     }
 

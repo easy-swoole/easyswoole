@@ -24,7 +24,7 @@ class Core
 
     public function __construct()
     {
-        defined('ROOT') or define("ROOT",realpath(getcwd()));
+        defined('EASYSWOOLE_ROOT') or define("EASYSWOOLE_ROOT",realpath(getcwd()));
     }
 
     public function initialize():Core
@@ -88,7 +88,7 @@ class Core
     private function eventHook():Event
     {
         $event = Event::getInstance();
-        require ROOT.'/EasySwooleEvent.php';
+        require EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
         $sysEvent = new EasySwooleEvent();
         $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
         $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
