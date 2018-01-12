@@ -358,10 +358,10 @@ function serverReload($options)
         $pidFile = $options['pid'];
     }
     if (file_exists($pidFile)) {
-        if (isset($options['all'])) {
-            $sig = SIGUSR1;
-        } else {
+        if (isset($options['onlyTask'])) {
             $sig = SIGUSR2;
+        } else {
+            $sig = SIGUSR1;
         }
 
         opCacheClear();
