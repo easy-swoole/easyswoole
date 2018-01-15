@@ -32,12 +32,13 @@ class ErrorList
         return $this->error;
     }
 
-    function first():?ErrorBean
+    function first():ErrorBean
     {
         foreach ($this->error as $item){
             return $item;
         }
-        return null;
+        //防止未经判断调用
+        return new ErrorBean();
     }
 
     function addError($filed,ErrorBean $bean):ErrorList
