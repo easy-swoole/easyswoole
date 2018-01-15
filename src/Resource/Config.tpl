@@ -21,6 +21,6 @@ return [
         ],
     ],
     'DEBUG'=>true,
-    'TEMP_DIR'=>ROOT.'/Temp',
-    'LOG_DIR'=>ROOT.'/Log'
+    'TEMP_DIR'=>EASYSWOOLE_ROOT.'/Temp',
+    'LOG_DIR'=>EASYSWOOLE_ROOT.'/Log'
 ];
