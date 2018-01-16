@@ -79,7 +79,7 @@ class Request  extends ServerRequest
     {
         $headers = isset($this->request->header) ? $this->request->header :[];
         foreach ($headers as $header => $val){
-            $this->withAddedHeader($header,Utility::headerItemToArray($val));
+            $this->withAddedHeader($header,$val);
         }
     }
 
