@@ -65,4 +65,9 @@ class CommandBean extends SplBean
     {
         $this->args[$key] = $val;
     }
+
+    public function setArgs(array $data)
+    {
+        $this->args = $data;
+    }
 }
