@@ -10,7 +10,6 @@ namespace EasySwoole\Core\Swoole\Process;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Swoole\ServerManager;
 use \Swoole\Process;
 
 class ProcessManager
@@ -19,31 +18,42 @@ class ProcessManager
 
     private $processList = [];
 
-    //自 1.9.6 版本以后，参数 $create_pipe 默认值为 2，启用$redirect_stdin_and_stdout （即 redirect_stdin_and_stdout 为 true）后强制为 1
-    public function addProcess(string $processName,callable $callback, $redirect_stdin_stdout = false, $create_pipe = true):Process
+    public function addProcess(string $processClass):string
     {
-        $process = new Process($callback,$redirect_stdin_stdout,$create_pipe);
-        $process->name($processName);
-        $this->processList[$processName] = $process;
-        $ret = ServerManager::getInstance()->getServer()->addProcess($process);
-        if(!$ret){
-            throw new \Exception("add process :{$processName}fail");
-        }
-        return $process;
-    }
-
-    public function getProcess(string $processName):?Process
-    {
-        if(isset($this->processList[$processName])){
-            return $this->processList[$processName];
+        if(class_exists($processClass)){
+            $ins = new $processClass;
+            if($ins instanceof AbstractProcess){
+                $this->processList[$ins->getHash()] = $ins;
+                return $ins->getHash();
+            }else{
+                throw new \Exception('class '.$processClass.' not AbstractProcess class');
+            }
         }else{
-            return null;
+            throw new \Exception('class '.$processClass.' not exist');
         }
     }
 
-    public function write(string $processName,string $data):bool
+    public function getProcess(int $pid):?Process
     {
-        $process = $this->getProcess($processName);
+        foreach ($this->processList as $item){
+            if($item->getPid() == $pid){
+                return $item;
+            }
+        }
+        return null;
+    }
+
+    public function getProcessByHash(string $hash):?AbstractProcess
+    {
+        if(isset($this->processList[$hash])){
+            return $this->processList[$hash];
+        }
+        return null;
+    }
+
+    public function write(int $pid,string $data):bool
+    {
+        $process = $this->getProcess($pid);
         if($process){
             return (bool)$process->write($data);
         }else{
@@ -51,9 +61,9 @@ class ProcessManager
         }
     }
 
-    public function read(string $processName,float $timeOut = 1.0):?string
+    public function read(int $pid,float $timeOut = 1.0):?string
     {
-        $process = $this->getProcess($processName);
+        $process = $this->getProcess($pid);
         if($process){
             $read = array($process);
             $write = [];
@@ -68,7 +78,4 @@ class ProcessManager
             return null;
         }
     }
-
-
-
 }
