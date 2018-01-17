@@ -69,10 +69,10 @@ function opCacheClear()
 
 function envCheck()
 {
-    if (phpversion() < 7.1) {
+    if(version_compare(phpversion(),'7.1','<')){
         die("PHP version\e[31m must >= 7.1\e[0m\n");
     }
-    if (phpversion('swoole') < 1.9) {
+    if(version_compare(phpversion('swoole'),'1.9.5','<')){
         die("Swoole extension version\e[31m must >= 1.9.5\e[0m\n");
     }
     if (!class_exists('EasySwoole\Core\Core')) {
