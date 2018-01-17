@@ -36,6 +36,20 @@ abstract class AbstractProcess
         return $this->getProcess()->pid;
     }
 
+    /*
+     * 默认100ms
+     */
+    public function setTick(callable $callback,$time = 100)
+    {
+        Process::signal(SIGALRM, $callback);
+        Process::alarm($time * 1000);
+    }
+
+    public function clearTick()
+    {
+        Process::alarm(-1);
+    }
+
     function __start()
     {
         Process::signal(SIGTERM,function (){
