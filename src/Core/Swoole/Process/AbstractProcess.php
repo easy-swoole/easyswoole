@@ -57,6 +57,7 @@ abstract class AbstractProcess
 
     function __start()
     {
+        pcntl_async_signals(true);
         Process::signal(SIGTERM,function (){
             $this->onShutDown();
             $this->swooleProcess->exit(0);
