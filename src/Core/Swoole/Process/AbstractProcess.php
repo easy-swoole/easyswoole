@@ -21,6 +21,11 @@ abstract class AbstractProcess
         ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
     }
 
+    public function loadMsg(string $str)
+    {
+
+    }
+
     public function getProcess():Process
     {
         return $this->swooleProcess;
@@ -66,4 +71,5 @@ abstract class AbstractProcess
     public abstract function run(Process $process);
     public abstract function onShutDown();
     public abstract function onReceive(string $str);
+
 }
