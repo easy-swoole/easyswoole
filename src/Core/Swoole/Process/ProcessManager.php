@@ -21,7 +21,7 @@ class ProcessManager
     public function addProcess(string $processClass,$async = true,...$args):string
     {
         if(class_exists($processClass)){
-            $ins = new $processClass($async,$args);
+            $ins = new $processClass($async,...$args);
             if($ins instanceof AbstractProcess){
                 $this->processList[$ins->getHash()] = $ins;
                 return $ins->getHash();

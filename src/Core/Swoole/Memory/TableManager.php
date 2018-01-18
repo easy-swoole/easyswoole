@@ -30,8 +30,8 @@ class TableManager
             $table = new Table($size);
             foreach ($columns as $column => $item){
                 $table->column($column,$item['type'],$item['size']);
-                $table->create();
             }
+            $table->create();
             $this->list[$name] = $table;
         }
     }
