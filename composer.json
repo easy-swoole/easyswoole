@@ -1,10 +1,10 @@
 {
     "name": "easyswoole/easyswoole",
-    "type": "framework",
+    "type": "library",
     "description": "An efficient swoole framework",
     "keywords" : ["swoole", "framework", "async","easyswoole"],
     "homepage" : "https://www.easyswoole.com/",
-    "license" : "Apache 2.0",
+    "license" : "Apache-2.0",
     "bin": [
         "bin/easyswoole"
     ],
