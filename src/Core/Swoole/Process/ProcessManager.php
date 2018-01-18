@@ -18,10 +18,10 @@ class ProcessManager
 
     private $processList = [];
 
-    public function addProcess(string $processClass):string
+    public function addProcess(string $processClass,$async = true):string
     {
         if(class_exists($processClass)){
-            $ins = new $processClass;
+            $ins = new $processClass($async);
             if($ins instanceof AbstractProcess){
                 $this->processList[$ins->getHash()] = $ins;
                 return $ins->getHash();

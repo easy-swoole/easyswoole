@@ -15,8 +15,10 @@ use Swoole\Process;
 abstract class AbstractProcess
 {
     protected $swooleProcess;
-    final function __construct()
+    private $async = null;
+    final function __construct($async = true)
     {
+        $this->async = $async;
         $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
         ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
     }
@@ -44,10 +46,10 @@ abstract class AbstractProcess
     /*
      * 默认100ms
      */
-    public function setTick(callable $callback,$time = 100)
+    public function setTick(callable $callback,$time = 100*1000)
     {
         Process::signal(SIGALRM, $callback);
-        Process::alarm($time * 1000);
+        Process::alarm($time);
     }
 
     public function clearTick()
@@ -62,10 +64,12 @@ abstract class AbstractProcess
             $this->onShutDown();
             $this->swooleProcess->exit(0);
         });
-        swoole_event_add($this->swooleProcess->pipe, function(){
-            $msg = $this->swooleProcess->read(64 * 1024);
-            $this->onReceive($msg);
-        });
+        if($this->async){
+            swoole_event_add($this->swooleProcess->pipe, function(){
+                $msg = $this->swooleProcess->read(64 * 1024);
+                $this->onReceive($msg);
+            });
+        }
         $this->run($this->swooleProcess);
     }
 
