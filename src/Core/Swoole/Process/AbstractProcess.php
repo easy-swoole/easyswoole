@@ -16,7 +16,7 @@ abstract class AbstractProcess
 {
     protected $swooleProcess;
     private $async = null;
-    final function __construct($async = true)
+    function __construct($async = true)
     {
         $this->async = $async;
         $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
