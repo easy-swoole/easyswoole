@@ -16,9 +16,11 @@ abstract class AbstractProcess
 {
     protected $swooleProcess;
     private $async = null;
-    function __construct($async = true)
+    private $args = [];
+    function __construct($async = true,...$args)
     {
         $this->async = $async;
+        $this->args = $args;
         $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
         ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
     }
@@ -71,6 +73,11 @@ abstract class AbstractProcess
             });
         }
         $this->run($this->swooleProcess);
+    }
+
+    public function getArgs():array
+    {
+        return $this->args;
     }
 
     public abstract function run(Process $process);
