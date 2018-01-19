@@ -26,6 +26,10 @@ class Cache
     private $processNum;
     function __construct()
     {
+        $num = intval(Config::getInstance()->getConf("EASY_CACHE.PROCESS_NUM"));
+        if($num <= 0){
+           return;
+        }
         TableManager::getInstance()->add('process_cache_buff',[
             'data'=>[
                 'type'=>Table::TYPE_STRING,
@@ -36,10 +40,7 @@ class Cache
                 'size'=>10
             ]
         ],1024*128);
-        $num = intval(Config::getInstance()->getConf("EASY_CACHE.PROCESS_NUM"));
-        if($num <= 0){
-            $num = 1;
-        }
+
         $this->processNum = $num;
         for ($i=0;$i < $num;$i++){
             $processName = "process_cache_{$i}";
