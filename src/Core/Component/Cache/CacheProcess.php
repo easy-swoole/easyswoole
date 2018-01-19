@@ -23,11 +23,10 @@ class CacheProcess extends AbstractProcess
     private $cacheData = [];
     private $persistentTime = 0;
     private $lastPersistentTime = 0;
-    private $inPersistent = false;
     function __construct($async,$args)
     {
         $this->persistentTime = Config::getInstance()->getConf('EASY_CACHE.PERSISTENT_TIME');
-        parent::__construct(false, $args);
+        parent::__construct(true, $args);
     }
 
     public function run(Process $process)
@@ -38,61 +37,10 @@ class CacheProcess extends AbstractProcess
             Logger::getInstance()->console('loading data from file at process '.$processName);
             $this->loadData();
             Logger::getInstance()->console('loading data from file success at process '.$processName);
+            $this->setTick(function (){
+                $this->saveData();
+            },$this->persistentTime*1000*1000);
         }
-        //每1000us执行一次调度
-        $this->setTick(function (){
-            $processName = $this->getArgs()[0];
-            $channel = ChannelManager::getInstance()->get($processName);
-            while (1){
-                $data = $channel->pop();
-                if(empty($data)){
-                    break;
-                }
-                if(isset($data['command'])){
-                    $command = $data['command'];
-                    switch ($command){
-                        case 'set':{
-                            $key = $data['args']['key'];
-                            $data = $data['args']['data'];
-                            $this->cacheData[$key] = $data;
-                            break;
-                        }
-                        case 'get':{
-                            $key = $data['args']['key'];
-                            $token = $data['args']['token'];
-                            $ret = null;
-                            if(isset($this->cacheData[$key])){
-                                $ret = $this->cacheData[$key];
-                            }
-                            TableManager::getInstance()->get('process_cache_buff')->set($token,[
-                                'data'=>\swoole_serialize::pack($ret),
-                                'time'=>time()
-                            ]);
-                            break;
-                        }
-                        case 'del':{
-                            $key = $data['args']['key'];
-                            if(isset($this->cacheData[$key])){
-                                unset($this->cacheData[$key]);
-                            }
-                            break;
-                        }
-                        case 'flush':{
-                            $this->flush();
-                            break;
-                        }
-                    }
-                }
-            }
-            if($this->persistentTime > 0 && !$this->inPersistent){
-                if(time() - $this->lastPersistentTime > $this->persistentTime){
-                    $this->inPersistent = true;
-                    $this->lastPersistentTime = time();
-                    $this->saveData();
-                    $this->inPersistent = false;
-                }
-            }
-        },1000);
     }
 
     public function onShutDown()
@@ -106,6 +54,42 @@ class CacheProcess extends AbstractProcess
     public function onReceive(string $str)
     {
         // TODO: Implement onReceive() method.
+        $data = \swoole_serialize::unpack($str);
+        if(isset($data['command'])){
+            $command = $data['command'];
+            switch ($command){
+                case 'set':{
+                    $key = $data['args']['key'];
+                    $data = $data['args']['data'];
+                    $this->cacheData[$key] = $data;
+                    break;
+                }
+                case 'get':{
+                    $key = $data['args']['key'];
+                    $token = $data['args']['token'];
+                    $ret = null;
+                    if(isset($this->cacheData[$key])){
+                        $ret = $this->cacheData[$key];
+                    }
+                    TableManager::getInstance()->get('process_cache_buff')->set($token,[
+                        'data'=>\swoole_serialize::pack($ret),
+                        'time'=>time()
+                    ]);
+                    break;
+                }
+                case 'del':{
+                    $key = $data['args']['key'];
+                    if(isset($this->cacheData[$key])){
+                        unset($this->cacheData[$key]);
+                    }
+                    break;
+                }
+                case 'flush':{
+                    $this->flush();
+                    break;
+                }
+            }
+        }
     }
 
     private function saveData()

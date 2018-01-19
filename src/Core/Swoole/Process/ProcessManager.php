@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Swoole\Process;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Swoole\ServerManager;
 use \Swoole\Process;
 
 class ProcessManager
@@ -35,6 +36,9 @@ class ProcessManager
 
     public function getProcess(int $pid):?Process
     {
+        if(ServerManager::getInstance()->isStart()){
+            throw new \Exception('you cannot get process by pid before start server');
+        }
         foreach ($this->processList as $item){
             if($item->getPid() == $pid){
                 return $item;
@@ -70,7 +74,7 @@ class ProcessManager
             $error = [];
             $ret = swoole_select($read, $write,$error, $timeOut);
             if($ret){
-                return $process->read();
+                return $process->read(64 * 1024);
             }else{
                 return null;
             }

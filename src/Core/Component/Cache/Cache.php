@@ -24,6 +24,7 @@ class Cache
 {
     use Singleton;
     private $processNum;
+    private $processList = [];
     function __construct()
     {
         $num = intval(Config::getInstance()->getConf("EASY_CACHE.PROCESS_NUM"));
@@ -44,8 +45,8 @@ class Cache
         $this->processNum = $num;
         for ($i=0;$i < $num;$i++){
             $processName = "process_cache_{$i}";
-            ChannelManager::getInstance()->add($processName);
-            ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
+            $hash = ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
+            $this->processList[$processName] = ProcessManager::getInstance()->getProcessByHash($hash)->getProcess();
         }
     }
 
@@ -62,13 +63,13 @@ class Cache
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
             $token = Random::randStr(8);
-            ChannelManager::getInstance()->get("process_cache_{$num}")->push([
+            $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack([
                 'command'=>'get',
                 'args'=>[
                     'key'=>$key,
                     'token'=>$token
                 ]
-            ]);
+            ]));
             $wait = 0;
             $table = TableManager::getInstance()->get('process_cache_buff');
             while (1){
@@ -113,13 +114,13 @@ class Cache
     {
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
-            ChannelManager::getInstance()->get("process_cache_{$num}")->push([
+            $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack([
                 'command'=>'set',
                 'args'=>[
                     'key'=>$key,
                     'data'=>$data
                 ]
-            ]);
+            ]));
         }else{
             //为单元测试服务
             $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$num}.data";
@@ -137,12 +138,12 @@ class Cache
     {
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
-            ChannelManager::getInstance()->get("process_cache_{$num}")->push([
+            $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack([
                 'command'=>'del',
                 'args'=>[
                     'key'=>$key,
                 ]
-            ]);
+            ]));
         }else{
             //为单元测试服务
             $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$num}.data";
@@ -163,10 +164,10 @@ class Cache
     {
         for ($i=0;$i<$this->processNum;$i++){
             if(ServerManager::getInstance()->isStart()){
-                ChannelManager::getInstance()->get("process_cache_{$i}")->push([
+                $this->processList["process_cache_{i}"]->write(\swoole_serialize::pack([
                     'command'=>'flush',
                     'args'=>[]
-                ]);
+                ]));
             }else{
                 $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$i}.data";
                 file_put_contents($file,\swoole_serialize::pack([]));
