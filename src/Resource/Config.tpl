@@ -24,7 +24,7 @@ return [
     'TEMP_DIR'=>EASYSWOOLE_ROOT.'/Temp',
     'LOG_DIR'=>EASYSWOOLE_ROOT.'/Log',
     'EASY_CACHE'=>[
-        'PROCESS_NUM'=>3,
-        'PERSISTENT_TIME'=>10//每10秒做一次数据落地
+        'PROCESS_NUM'=>1,
+        'PERSISTENT_TIME'=>0//每10秒做一次数据落地
     ]
 ];

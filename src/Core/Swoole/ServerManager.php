@@ -8,6 +8,7 @@
 
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
+use EasySwoole\Core\Component\Cache\Cache;
 use EasySwoole\Core\Component\Event;
 
 class ServerManager
@@ -50,6 +51,8 @@ class ServerManager
     public function start():void
     {
        $this->createMainServer();
+       //默认开启缓存
+       Cache::getInstance();
        $this->attachListener();
        $this->isStart = true;
        $this->getServer()->start();
