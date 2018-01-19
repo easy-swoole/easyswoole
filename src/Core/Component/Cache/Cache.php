@@ -35,7 +35,7 @@ class Cache
                 'type'=>Table::TYPE_STRING,
                 'size'=>10
             ]
-        ]);
+        ],1024*128);
         $num = intval(Config::getInstance()->getConf("EASY_CACHE.PROCESS_NUM"));
         if($num <= 0){
             $num = 1;
