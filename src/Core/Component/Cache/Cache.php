@@ -41,17 +41,16 @@ class Cache
             $num = 1;
         }
         $this->processNum = $num;
-        for ($i=0;$i<$num;$i++){
+        for ($i=0;$i < $num;$i++){
             $processName = "process_cache_{$i}";
             ChannelManager::getInstance()->add($processName);
             ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
         }
-
     }
 
     private function keyToProcessNum($key):int
     {
-        return base_convert( md5( $key,true ), 16, 10 )%3;
+        return base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
     }
 
     /*
