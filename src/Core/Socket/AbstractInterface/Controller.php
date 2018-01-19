@@ -29,7 +29,7 @@ abstract class Controller
 
     }
 
-    protected function onException(\Throwable $throwable):?string
+    protected function onException(\Throwable $throwable):void
     {
         throw $throwable;
     }
@@ -102,7 +102,7 @@ abstract class Controller
                         $this->$actionName();
                         $this->afterAction($this->getActionName());
                     }catch (\Throwable $throwable){
-                        return $this->onException($throwable);
+                        $this->onException($throwable);
                     }
                 }else{
                     $this->actionNotFound($actionName);
