@@ -10,14 +10,26 @@ namespace EasySwoole\Core\Swoole\Process;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Swoole\ServerManager;
-use \Swoole\Process;
+use EasySwoole\Core\Swoole\Memory\TableManager;
+use Swoole\Table;
 
 class ProcessManager
 {
     use Singleton;
 
     private $processList = [];
+
+    function __construct()
+    {
+        TableManager::getInstance()->add(
+            'process_hash_map',[
+                'pid'=>[
+                    'type'=>Table::TYPE_INT,
+                    'size'=>10
+                ]
+            ],1024
+        );
+    }
 
     public function addProcess(string $processClass,$async = true,...$args):string
     {
@@ -41,6 +53,21 @@ class ProcessManager
             return $this->processList[$hash];
         }
         return null;
+    }
+
+    public function getProcess(int $pid):?AbstractProcess
+    {
+        foreach ($this->processList as $item){
+            if($item->getPid() == $pid){
+                return $item;
+            }
+        }
+        return null;
+    }
+
+    public function allProcess():array
+    {
+        return $this->processList;
     }
 
     public function writeByHash(string $hash,string $data):bool
@@ -71,4 +98,7 @@ class ProcessManager
             return null;
         }
     }
+
+
+
 }

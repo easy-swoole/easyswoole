@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Swoole\Process;
 
 
+use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\ServerManager;
 use Swoole\Process;
 
@@ -35,9 +36,15 @@ abstract class AbstractProcess
         return spl_object_hash($this->swooleProcess);
     }
 
-    protected function getPid()
+    public function getPid()
     {
-        return $this->getProcess()->pid;
+        if(empty($this->swooleProcess->pid)){
+            $pid = TableManager::getInstance()->get('process_hash_map')->get($this->getHash())['pid'];
+            $this->swooleProcess->pid = $pid;
+            return $pid;
+        }else{
+            return $this->getProcess()->pid;
+        }
     }
 
     /*
@@ -56,9 +63,13 @@ abstract class AbstractProcess
 
     function __start(Process $process)
     {
+        TableManager::getInstance()->get('process_hash_map')->set(
+            $this->getHash(),['pid'=>$process->pid]
+        );
         pcntl_async_signals(true);
         Process::signal(SIGTERM,function (){
             $this->onShutDown();
+            TableManager::getInstance()->get('process_hash_map')->del($this->getHash());
             $this->swooleProcess->exit(0);
         });
         if($this->async){
