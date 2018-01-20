@@ -81,12 +81,12 @@ abstract class Controller
         }
     }
 
-    final protected function request():Request
+    protected function request():Request
     {
         return $this->request;
     }
 
-    final protected function response():Response
+    protected function response():Response
     {
         return $this->response;
     }
