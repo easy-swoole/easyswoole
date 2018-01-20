@@ -27,7 +27,7 @@ class ProcessManager
                     'type'=>Table::TYPE_INT,
                     'size'=>10
                 ]
-            ],1024
+            ],256
         );
     }
 
