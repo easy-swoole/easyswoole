@@ -34,18 +34,6 @@ class ProcessManager
         }
     }
 
-    public function getProcess(int $pid):?Process
-    {
-        if(ServerManager::getInstance()->isStart()){
-            throw new \Exception('you cannot get process by pid before start server');
-        }
-        foreach ($this->processList as $item){
-            if($item->getPid() == $pid){
-                return $item;
-            }
-        }
-        return null;
-    }
 
     public function getProcessByHash(string $hash):?AbstractProcess
     {
@@ -55,20 +43,21 @@ class ProcessManager
         return null;
     }
 
-    public function write(int $pid,string $data):bool
+    public function writeByHash(string $hash,string $data):bool
     {
-        $process = $this->getProcess($pid);
+        $process = $this->getProcessByHash($hash);
         if($process){
-            return (bool)$process->write($data);
+            return (bool)$process->getProcess()->write($data);
         }else{
             return false;
         }
     }
 
-    public function read(int $pid,float $timeOut = 1.0):?string
+    public function readByHash(string $hash,float $timeOut = 0.1):?string
     {
-        $process = $this->getProcess($pid);
+        $process = $this->getProcessByHash($hash);
         if($process){
+            $process = $process->getProcess();
             $read = array($process);
             $write = [];
             $error = [];

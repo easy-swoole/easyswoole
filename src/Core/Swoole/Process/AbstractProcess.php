@@ -25,11 +25,6 @@ abstract class AbstractProcess
         ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
     }
 
-    public function loadMsg(string $str)
-    {
-
-    }
-
     public function getProcess():Process
     {
         return $this->swooleProcess;
@@ -40,7 +35,7 @@ abstract class AbstractProcess
         return spl_object_hash($this->swooleProcess);
     }
 
-    public function getPid()
+    protected function getPid()
     {
         return $this->getProcess()->pid;
     }
@@ -59,7 +54,7 @@ abstract class AbstractProcess
         Process::alarm(-1);
     }
 
-    function __start()
+    function __start(Process $process)
     {
         pcntl_async_signals(true);
         Process::signal(SIGTERM,function (){

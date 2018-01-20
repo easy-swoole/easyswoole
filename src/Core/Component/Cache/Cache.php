@@ -13,12 +13,9 @@ use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\SysConst;
-use EasySwoole\Core\Swoole\Memory\ChannelManager;
-use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\Process\ProcessManager;
 use EasySwoole\Core\Swoole\ServerManager;
 use EasySwoole\Core\Utility\Random;
-use Swoole\Table;
 
 class Cache
 {
@@ -31,22 +28,11 @@ class Cache
         if($num <= 0){
            return;
         }
-        TableManager::getInstance()->add('process_cache_buff',[
-            'data'=>[
-                'type'=>Table::TYPE_STRING,
-                'size'=>1024*63
-            ],
-            'time'=>[
-                'type'=>Table::TYPE_STRING,
-                'size'=>10
-            ]
-        ],1024*128);
-
         $this->processNum = $num;
         for ($i=0;$i < $num;$i++){
             $processName = "process_cache_{$i}";
             $hash = ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
-            $this->processList[$processName] = ProcessManager::getInstance()->getProcessByHash($hash)->getProcess();
+            $this->processList[$processName] = ProcessManager::getInstance()->getProcessByHash($hash);
         }
     }
 
@@ -56,42 +42,36 @@ class Cache
     }
 
     /*
-     * 默认等待100ms的调度
+     * 默认等待0.01秒的调度
      */
-    public function get($key,$timeOut = 100)
+    public function get($key,$timeOut = 0.01)
     {
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
-            $token = Random::randStr(8);
-            $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack([
+            $token = Random::randStr(9);
+            $process = $this->processList["process_cache_{$num}"];
+            $process->getProcess()->write(\swoole_serialize::pack([
                 'command'=>'get',
                 'args'=>[
                     'key'=>$key,
                     'token'=>$token
-                ]
+                ],
+                'timeOut'=>$timeOut
             ]));
-            $wait = 0;
-            $table = TableManager::getInstance()->get('process_cache_buff');
             while (1){
-                if($wait > $timeOut){
-                    //发生超时的时候，随机执行老数据清理
-                    if(mt_rand(0,9) == 1){
-                        foreach ($table as $key => $item){
-                            if($item['time'] > 2){
-                                $table->del($key);
-                            }
-                        }
+                $info = ProcessManager::getInstance()->readByHash($process->getHash(),$timeOut);
+                if(!empty($info)){
+                    $data = \swoole_serialize::unpack($info);
+                    if(isset($data['token']) && $data['token'] == $token){
+                        return $data['data'];
+                    }else{
+                        //参与重新调度  兼容携程
+                        $data['command'] = 'reDispatch';
+                        $process->getProcess()->write(\swoole_serialize::pack($data));
                     }
-                    return null;
                 }else{
-                    if($table->exist($token)){
-                        $data = $table->get($token);
-                        $table->del($token);
-                        return \swoole_serialize::unpack($data['data']);
-                    }
+                    return null;
                 }
-                usleep(1000);
-                $wait++;
             }
         }else{
             //为单元测试服务
@@ -114,7 +94,7 @@ class Cache
     {
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
-            $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack([
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack([
                 'command'=>'set',
                 'args'=>[
                     'key'=>$key,

@@ -66,15 +66,18 @@ class CacheProcess extends AbstractProcess
                 }
                 case 'get':{
                     $key = $data['args']['key'];
-                    $token = $data['args']['token'];
                     $ret = null;
                     if(isset($this->cacheData[$key])){
                         $ret = $this->cacheData[$key];
                     }
-                    TableManager::getInstance()->get('process_cache_buff')->set($token,[
-                        'data'=>\swoole_serialize::pack($ret),
-                        'time'=>time()
-                    ]);
+                    $this->getProcess()->write(\swoole_serialize::pack(
+                        [
+                            'data'=>$ret,
+                            'time'=>microtime(true),
+                            'token'=> $data['args']['token'],
+                            'timeOut'=>$data['timeOut']
+                        ]
+                    ));
                     break;
                 }
                 case 'del':{
@@ -86,6 +89,14 @@ class CacheProcess extends AbstractProcess
                 }
                 case 'flush':{
                     $this->flush();
+                    break;
+                }
+                case 'reDispatch':{
+                    $msgTime = $data['time'];
+                    $time = microtime(true);
+                    if(round($time - $msgTime,4) < $data['timeOut']){
+                        $this->getProcess()->write($str);
+                    }
                     break;
                 }
             }
