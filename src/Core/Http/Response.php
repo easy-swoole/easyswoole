@@ -88,37 +88,9 @@ class Response extends MessageResponse
         return $this->isEndResponse;
     }
 
-    function write($obj){
+    function write(string $str){
         if(!$this->isEndResponse()){
-            if(is_object($obj)){
-                if(method_exists($obj,"__toString")){
-                    $obj = $obj->__toString();
-                }else if(method_exists($obj,'jsonSerialize')){
-                    $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-                }else{
-                    $obj = var_export($obj,true);
-                }
-            }else if(is_array($obj)){
-                $obj = json_encode($obj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-            }
-            $this->getBody()->write($obj);
-            return true;
-        }else{
-            trigger_error("response has end");
-            return false;
-        }
-    }
-
-    function writeJson($statusCode = 200,$result = null,$msg = null){
-        if(!$this->isEndResponse()){
-            $data = Array(
-                "code"=>$statusCode,
-                "result"=>$result,
-                "msg"=>$msg
-            );
-            $this->getBody()->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-            $this->withHeader('Content-type','application/json;charset=utf-8');
-            $this->withStatus($statusCode);
+            $this->getBody()->write($str);
             return true;
         }else{
             trigger_error("response has end");
