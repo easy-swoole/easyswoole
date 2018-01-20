@@ -13,7 +13,7 @@ trait Singleton
 {
     private static $instanceList = [];
 
-    static function getInstance($saveInCoroutine = false)
+    static function getInstance($saveInCoroutine = false,...$args)
     {
         if($saveInCoroutine == false){
             $cid = 0;
@@ -21,7 +21,7 @@ trait Singleton
             $cid = self::getInstanceId();
         }
         if(!isset(self::$instanceList[$cid])){
-            $ins = new static();
+            $ins = new static(...$args);
             self::$instanceList[$cid] = $ins;
         }else{
             /*
