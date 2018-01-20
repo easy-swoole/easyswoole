@@ -64,7 +64,6 @@ abstract class Controller
         $this->response = $response;
         $this->actionName = $actionName;
         if($this->onRequest($actionName) !== false){
-            $this->onRequest($actionName);
             //防止onRequest中   对actionName 进行修改
             $actionName = $this->actionName;
             //支持在子类控制器中以private，protected来修饰某个方法不可见
