@@ -12,6 +12,7 @@ namespace EasySwoole\Core\Component\Cache;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Logger;
+use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Swoole\Memory\ChannelManager;
 use EasySwoole\Core\Swoole\Memory\TableManager;
@@ -20,11 +21,12 @@ use Swoole\Process;
 
 class CacheProcess extends AbstractProcess
 {
-    private $cacheData = [];
+    private $cacheData = null;
     private $persistentTime = 0;
     private $lastPersistentTime = 0;
     function __construct($async,$args)
     {
+        $this->cacheData = new SplArray();
         $this->persistentTime = Config::getInstance()->getConf('EASY_CACHE.PERSISTENT_TIME');
         parent::__construct(true, $args);
     }
@@ -61,15 +63,12 @@ class CacheProcess extends AbstractProcess
                 case 'set':{
                     $key = $data['args']['key'];
                     $data = $data['args']['data'];
-                    $this->cacheData[$key] = $data;
+                    $this->cacheData->set($key,$data);
                     break;
                 }
                 case 'get':{
                     $key = $data['args']['key'];
-                    $ret = null;
-                    if(isset($this->cacheData[$key])){
-                        $ret = $this->cacheData[$key];
-                    }
+                    $ret = $this->cacheData->get($key);
                     $this->getProcess()->write(\swoole_serialize::pack(
                         [
                             'data'=>$ret,
@@ -82,9 +81,7 @@ class CacheProcess extends AbstractProcess
                 }
                 case 'del':{
                     $key = $data['args']['key'];
-                    if(isset($this->cacheData[$key])){
-                        unset($this->cacheData[$key]);
-                    }
+                    $this->cacheData->delete($key);
                     break;
                 }
                 case 'flush':{
@@ -107,7 +104,7 @@ class CacheProcess extends AbstractProcess
     {
         $processName = $this->getArgs()[0];
         $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
-        file_put_contents($file,\swoole_serialize::pack($this->cacheData),LOCK_EX);
+        file_put_contents($file,\swoole_serialize::pack($this->cacheData->getArrayCopy()),LOCK_EX);
     }
 
     private function loadData()
@@ -115,14 +112,18 @@ class CacheProcess extends AbstractProcess
         $processName = $this->getArgs()[0];
         $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
         if(file_exists($file)){
-            $this->cacheData = \swoole_serialize::unpack(file_get_contents($file));
+            $data = \swoole_serialize::unpack(file_get_contents($file));
+            if(!is_array($data)){
+                $data = [];
+            }
+            $this->cacheData->loadArray($data);
         }
 
     }
 
     private function flush()
     {
-        $this->cacheData = [];
+        $this->cacheData->flush();
         $this->saveData();
     }
 }
