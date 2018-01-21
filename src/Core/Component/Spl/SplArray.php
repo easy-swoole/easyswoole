@@ -92,7 +92,11 @@ class SplArray extends \ArrayObject
         $data = $this->getArrayCopy();
         $copy = &$data;
         while ($key = array_shift($path)){
-            $copy = &$copy[$key];
+            if(isset($copy[$key])){
+                $copy = &$copy[$key];
+            }else{
+                return;
+            }
         }
         unset($copy[$lastKey]);
         parent::__construct($data);
