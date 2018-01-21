@@ -201,4 +201,12 @@ class SplArray extends \ArrayObject
     {
         return new SplArray(array_values($this->getArrayCopy()));
     }
+
+    public function flush():SplArray
+    {
+        foreach ($this as $key => $item){
+            unset($this[$key]);
+        }
+        return $this;
+    }
 }
