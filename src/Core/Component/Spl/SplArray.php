@@ -46,43 +46,18 @@ class SplArray extends \ArrayObject
         $temp = $value;
     }
 
-    function get($path, $security = false)
+    function get($path)
     {
         $paths = explode(".", $path);
-        $func  = function ($data, $pathArr, $security = false) use (&$func) {
-            $path = array_shift($pathArr);
-            if ($path == "*") {
-                if ($security) {
-                    if (isset($data['*'])) {
-                        return $data["*"];
-                    }
-                }
-                if (!empty($pathArr)) {
-                    $temp = [];
-                    foreach ($data as $key => $item) {
-                        if (is_array($item) && !empty($item)) {
-                            $temp[$key] = $func($item, $pathArr, $security);
-                        }
-                        //对于非数组无下级则不再搜索
-                    }
-                    return $temp;
-                } else {
-                    return $data;
-                }
-            } else {
-                if (isset($data[$path])) {
-                    if (!empty($pathArr)) {
-                        //继续搜索。
-                        return $func($data[$path], $pathArr, $security);
-                    } else {
-                        return $data[$path];
-                    }
-                } else {
-                    return null;
-                }
+        $data = $this->getArrayCopy();
+        while ($key = array_shift($paths)){
+            if(isset($data[$key])){
+                $data = $data[$key];
+            }else{
+                return null;
             }
-        };
-        return $func($this->getArrayCopy(), $paths, $security);
+        }
+        return $data;
     }
 
     public function delete($key): void
