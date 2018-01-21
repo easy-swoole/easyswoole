@@ -62,21 +62,38 @@ class CacheProcess extends AbstractProcess
             switch ($command){
                 case 'set':{
                     $key = $data['args']['key'];
-                    $data = $data['args']['data'];
+                    if(isset($data['args']['tempFile'])){
+                        //还原数据以节约内存
+                        $data = \swoole_serialize::unpack(Utility::readFile($data['args']['tempFile']));
+                    }else{
+                        $data = $data['args']['data'];
+                    }
                     $this->cacheData->set($key,$data);
                     break;
                 }
                 case 'get':{
                     $key = $data['args']['key'];
                     $ret = $this->cacheData->get($key);
-                    $this->getProcess()->write(\swoole_serialize::pack(
-                        [
-                            'data'=>$ret,
-                            'time'=>microtime(true),
-                            'token'=> $data['args']['token'],
-                            'timeOut'=>$data['timeOut']
-                        ]
-                    ));
+                    $is = Utility::isOutOfLength($ret);
+                    if($is){
+                        $this->getProcess()->write(\swoole_serialize::pack(
+                            [
+                                'tempFile'=>Utility::writeFile($is),
+                                'time'=>microtime(true),
+                                'token'=> $data['args']['token'],
+                                'timeOut'=>$data['timeOut']
+                            ]
+                        ));
+                    }else{
+                        $this->getProcess()->write(\swoole_serialize::pack(
+                            [
+                                'data'=>$ret,
+                                'time'=>microtime(true),
+                                'token'=> $data['args']['token'],
+                                'timeOut'=>$data['timeOut']
+                            ]
+                        ));
+                    }
                     break;
                 }
                 case 'del':{

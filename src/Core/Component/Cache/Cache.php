@@ -63,7 +63,12 @@ class Cache
                 if(!empty($info)){
                     $data = \swoole_serialize::unpack($info);
                     if(isset($data['token']) && $data['token'] == $token){
-                        return $data['data'];
+                        if(isset($data['tempFile'])){
+                            $data = Utility::readFile($data['tempFile']);
+                            return \swoole_serialize::unpack($data);
+                        }else{
+                            return $data['data'];
+                        }
                     }else{
                         //参与重新调度  兼容携程
                         $data['command'] = 'reDispatch';
@@ -94,12 +99,22 @@ class Cache
     {
         $num = $this->keyToProcessNum($key);
         if(ServerManager::getInstance()->isStart()){
-            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack([
-                'command'=>'set',
-                'args'=>[
+            $is = Utility::isOutOfLength($data);
+            if($is){
+                $tempFile = Utility::writeFile($is);
+                $args = [
+                    'key'=>$key,
+                    'tempFile'=>$tempFile
+                ];
+            }else{
+                $args = [
                     'key'=>$key,
                     'data'=>$data
-                ]
+                ];
+            }
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack([
+                'command'=>'set',
+                'args'=>$args
             ]));
         }else{
             //为单元测试服务
