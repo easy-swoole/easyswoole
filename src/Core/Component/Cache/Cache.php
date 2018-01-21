@@ -38,6 +38,9 @@ class Cache
 
     private function keyToProcessNum($key):int
     {
+        //当以多维路径作为key的时候，以第一个路径为主。
+        $list = explode('.',$key);
+        $key = array_shift($list);
         return base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
     }
 
