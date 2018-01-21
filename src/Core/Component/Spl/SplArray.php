@@ -220,4 +220,9 @@ class SplArray extends \ArrayObject
         }
         return $this;
     }
+
+    public function loadArray(array $data)
+    {
+        parent::__construct($data);
+    }
 }
