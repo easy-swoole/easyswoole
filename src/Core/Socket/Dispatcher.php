@@ -8,8 +8,6 @@
 
 namespace EasySwoole\Core\Socket;
 
-
-use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
