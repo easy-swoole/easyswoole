@@ -9,10 +9,10 @@
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
 
-use EasySwoole\Core\Socket\Command\CommandBean;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 interface ParserInterface
 {
     public function decode($raw,array $args):?CommandBean;
-    public function encode(?string $raw,array $args):?string ;
+    public function encode(?CommandBean $raw,array $args):?string ;
 }

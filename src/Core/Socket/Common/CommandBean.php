@@ -2,13 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/25
- * Time: 上午11:47
+ * Date: 2018/1/22
+ * Time: 下午1:18
  */
 
-namespace EasySwoole\Core\Socket\Command;
-
-
+namespace EasySwoole\Core\Socket\Common;
 use EasySwoole\Core\Component\Spl\SplBean;
 
 class CommandBean extends SplBean

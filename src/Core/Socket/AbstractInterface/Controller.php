@@ -8,8 +8,7 @@
 
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
-
-use EasySwoole\Core\Component\Spl\SplStream;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class Controller
 {
@@ -36,7 +35,7 @@ abstract class Controller
 
     protected function __construct(array $args)
     {
-        $this->response = new SplStream();
+        $this->response = new CommandBean();
         $this->args = $args;
     }
 
@@ -48,14 +47,9 @@ abstract class Controller
         return true;
     }
 
-    protected function response():SplStream
+    protected function response():CommandBean
     {
         return $this->response;
-    }
-
-    protected function write(string $message):void
-    {
-        $this->response->write($message);
     }
 
     protected function getArg($key)
@@ -88,7 +82,7 @@ abstract class Controller
         $this->actionName = $actionName;
     }
 
-    public function __hook(string $actionName):?string
+    public function __hook(string $actionName):?CommandBean
     {
         if($actionName == '__hook'){
             return null;
@@ -111,6 +105,6 @@ abstract class Controller
                 $this->actionNotFound($actionName);
             }
         }
-        return $this->response()->__toString();
+        return $this->response();
     }
 }
