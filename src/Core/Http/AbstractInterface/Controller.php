@@ -91,11 +91,6 @@ abstract class Controller
         return $this->response;
     }
 
-    protected function write(string $str)
-    {
-        $this->response()->write($str);
-    }
-
     protected function writeJson($statusCode = 200,$result = null,$msg = null){
         if(!$this->response()->isEndResponse()){
             $data = Array(
