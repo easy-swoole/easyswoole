@@ -18,7 +18,7 @@ use EasySwoole\Core\Swoole\ServerManager;
 
 class Config
 {
-    private $conf;
+    protected $conf;
 
     use Singleton;
 

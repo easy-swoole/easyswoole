@@ -126,8 +126,9 @@ class Cache
                 $content = file_get_contents($file);
                 $data = \swoole_serialize::unpack($content);
             }else{
-                $data[$key] = $data;
+                $data = [];
             }
+            $data[$key] = $data;
             file_put_contents($file,\swoole_serialize::pack($data));
         }
     }
@@ -171,5 +172,105 @@ class Cache
                 file_put_contents($file,\swoole_serialize::pack([]));
             }
         }
+    }
+
+    public function deQueue($key,$timeOut = 0.01)
+    {
+        $num = $this->keyToProcessNum($key);
+        if(ServerManager::getInstance()->isStart()){
+            $token = Random::randStr(9);
+            $process = $this->processList["process_cache_{$num}"];
+            $process->getProcess()->write(\swoole_serialize::pack([
+                'command'=>'deQueue',
+                'args'=>[
+                    'key'=>$key,
+                    'token'=>$token
+                ],
+                'timeOut'=>$timeOut
+            ]));
+            while (1){
+                $info = ProcessManager::getInstance()->readByHash($process->getHash(),$timeOut);
+                if(!empty($info)){
+                    $data = \swoole_serialize::unpack($info);
+                    if(isset($data['token']) && $data['token'] == $token){
+                        if(isset($data['tempFile'])){
+                            $data = Utility::readFile($data['tempFile']);
+                            return \swoole_serialize::unpack($data);
+                        }else{
+                            return $data['data'];
+                        }
+                    }else{
+                        //参与重新调度  兼容携程
+                        $data['command'] = 'reDispatch';
+                        $process->getProcess()->write(\swoole_serialize::pack($data));
+                    }
+                }else{
+                    return null;
+                }
+            }
+        }else{
+            //为单元测试服务
+            $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$num}.data";
+            if(file_exists($file)){
+                $content = file_get_contents($file);
+                $data = \swoole_serialize::unpack($content);
+                if(isset($data[$key]) && $data[$key] instanceof \SplQueue){
+                    if(!$data[$key]->isEmpty()){
+                        $ret =  $data[$key]->dequeue();
+                        file_put_contents($file,\swoole_serialize::pack($data));
+                        return $ret;
+                    }else{
+                        return null;
+                    }
+                }else{
+                    return null;
+                }
+            }else{
+                return null;
+            }
+        }
+    }
+
+    public function enQueue($key,$data)
+    {
+        $num = $this->keyToProcessNum($key);
+        if(ServerManager::getInstance()->isStart()){
+            $is = Utility::isOutOfLength($data);
+            if($is){
+                $tempFile = Utility::writeFile($is);
+                $args = [
+                    'key'=>$key,
+                    'tempFile'=>$tempFile
+                ];
+            }else{
+                $args = [
+                    'key'=>$key,
+                    'data'=>$data
+                ];
+            }
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack([
+                'command'=>'enQueue',
+                'args'=>$args
+            ]));
+        }else{
+            //为单元测试服务
+            $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$num}.data";
+            if(file_exists($file)){
+                $content = file_get_contents($file);
+                $data = \swoole_serialize::unpack($content);
+            }else{
+                $data[] = [];
+            }
+            if(!isset($data[$key]) || !$data[$key] instanceof \SplQueue){
+                $data[$key] = new \SplQueue();
+            }
+            $data[$key]->push($data);
+            file_put_contents($file,\swoole_serialize::pack($data));
+        }
+    }
+
+    public function clearQueue($key)
+    {
+        $this->del($key);
     }
 }

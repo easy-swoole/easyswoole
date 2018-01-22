@@ -23,7 +23,6 @@ class CacheProcess extends AbstractProcess
 {
     private $cacheData = null;
     private $persistentTime = 0;
-    private $lastPersistentTime = 0;
     function __construct($async,$args)
     {
         $this->cacheData = new SplArray();
@@ -103,6 +102,56 @@ class CacheProcess extends AbstractProcess
                 }
                 case 'flush':{
                     $this->flush();
+                    break;
+                }
+                case 'enQueue':{
+                    $key = $data['args']['key'];
+                    if(isset($data['args']['tempFile'])){
+                        //还原数据以节约内存
+                        $data = \swoole_serialize::unpack(Utility::readFile($data['args']['tempFile']));
+                    }else{
+                        $data = $data['args']['data'];
+                    }
+                    $que = $this->cacheData->get($key);
+                    if(!$que instanceof \SplQueue){
+                        $que = new \SplQueue();
+                        $this->cacheData->set($key,$que);
+                    }
+                    $que->enqueue($data);
+                    break;
+                }
+                case 'deQueue':{
+                    $key = $data['args']['key'];
+                    $ret = $this->cacheData->get($key);
+                    if($ret instanceof \SplQueue){
+                        if(!$ret->isEmpty()){
+                            $ret = $ret->dequeue();
+                        }else{
+                            $ret = null;
+                        }
+                    }else{
+                        $ret = null;
+                    }
+                    $is = Utility::isOutOfLength($ret);
+                    if($is){
+                        $this->getProcess()->write(\swoole_serialize::pack(
+                            [
+                                'tempFile'=>Utility::writeFile($is),
+                                'time'=>microtime(true),
+                                'token'=> $data['args']['token'],
+                                'timeOut'=>$data['timeOut']
+                            ]
+                        ));
+                    }else{
+                        $this->getProcess()->write(\swoole_serialize::pack(
+                            [
+                                'data'=>$ret,
+                                'time'=>microtime(true),
+                                'token'=> $data['args']['token'],
+                                'timeOut'=>$data['timeOut']
+                            ]
+                        ));
+                    }
                     break;
                 }
                 case 'reDispatch':{
