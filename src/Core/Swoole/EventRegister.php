@@ -62,15 +62,38 @@ class EventRegister extends Container
             if(is_callable($item)){
                 parent::add($key, $item);
             }else{
-                trigger_error("event {$key} is not a callable");
+                throw new \Exception("event {$key} is not a callable");
             }
         }else{
-            trigger_error("event {$key} is not allow");
+            throw new \Exception("event {$key} is not allow");
         }
         return $this;
     }
 
-    public function registerDefaultOnRequest($controllerNameSpace = 'App\\Controller\\'):void
+    function withAdd($key, $item)
+    {
+        if(in_array($key,$this->allows)){
+            if(is_callable($item)){
+                $old = $this->get($key);
+                if(is_array($old)){
+                    $old[] = $item;
+                    parent::add($key,$old);
+                }else if($old != null){
+                    $old = [$old];
+                    $old[] = $item;
+                    parent::add($key,$old);
+                }else{
+                    parent::add($key,[$item]);
+                }
+            }else{
+                throw new \Exception("event {$key} is not a callable");
+            }
+        }else{
+            throw new \Exception("event {$key} is not allow");
+        }
+    }
+
+    public function registerDefaultOnRequest($controllerNameSpace = 'App\\HttpController\\'):void
     {
         $dispatcher = new Dispatcher($controllerNameSpace);
         $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
