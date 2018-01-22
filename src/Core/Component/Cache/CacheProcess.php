@@ -48,7 +48,7 @@ class CacheProcess extends AbstractProcess
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-       if($this->lastPersistentTime > 0){
+       if($this->persistentTime > 0){
            $this->saveData();
        }
     }
