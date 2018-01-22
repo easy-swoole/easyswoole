@@ -24,6 +24,16 @@ abstract class Controller
 
     abstract function index();
 
+    public function __construct(string $actionName,Request $request,Response $response)
+    {
+        if($actionName == '__hook'){
+            $this->response()->withStatus(Status::CODE_BAD_REQUEST);
+        }else{
+            $this->actionName = $actionName;
+            $this->__hook( $request, $response);
+        }
+    }
+
     protected function actionNotFound($action = null):void
     {
         $this->response()->withStatus(Status::CODE_NOT_FOUND);
@@ -54,16 +64,11 @@ abstract class Controller
         $this->actionName = $action;
     }
 
-    function __hook(string $actionName,Request $request,Response $response):void
+    private function __hook(Request $request,Response $response):void
     {
-        if($actionName == '__hook'){
-            $this->response()->withStatus(Status::CODE_BAD_REQUEST);
-            return;
-        }
         $this->request = $request;
         $this->response = $response;
-        $this->actionName = $actionName;
-        if($this->onRequest($actionName) !== false){
+        if($this->onRequest($this->actionName) !== false){
             //防止onRequest中   对actionName 进行修改
             $actionName = $this->actionName;
             //支持在子类控制器中以private，protected来修饰某个方法不可见
