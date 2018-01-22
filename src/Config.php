@@ -22,7 +22,7 @@ class Config
 
     use Singleton;
 
-    final public function __construct()
+    public function __construct()
     {
         //请在bin文件中执行 install命令，将Resource/Config.php释放至ROOT
         $data = require EASYSWOOLE_ROOT.'/Config.php';
