@@ -2,12 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/25
- * Time: 上午11:26
+ * Date: 2018/1/22
+ * Time: 下午1:00
  */
 
-namespace EasySwoole\Core\Socket\Command;
+namespace EasySwoole\Core\Socket\AbstractInterface;
 
+
+use EasySwoole\Core\Socket\Command\CommandBean;
 
 interface ParserInterface
 {

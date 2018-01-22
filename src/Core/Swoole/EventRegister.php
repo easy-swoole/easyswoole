@@ -19,7 +19,7 @@ use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
-use EasySwoole\Core\Socket\Command\ParserInterface;
+use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
 use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 

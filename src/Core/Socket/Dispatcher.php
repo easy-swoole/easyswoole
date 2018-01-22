@@ -14,7 +14,7 @@ use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
-use EasySwoole\Core\Socket\Command\ParserInterface;
+use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
 
 class Dispatcher
 {
