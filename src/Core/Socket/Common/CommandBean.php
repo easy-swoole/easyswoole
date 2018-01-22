@@ -13,6 +13,8 @@ class CommandBean extends SplBean
 {
     protected $controllerClass = null;
     protected $action = 'index';
+    protected $error;
+    protected $result;
     protected $args = [];
 
     public function getControllerClass():?string
@@ -68,4 +70,38 @@ class CommandBean extends SplBean
     {
         $this->args = $data;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * @param mixed $error
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * @param mixed $result
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
+    }
+
+
 }

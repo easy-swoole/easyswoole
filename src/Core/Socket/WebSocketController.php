@@ -11,13 +11,14 @@ namespace EasySwoole\Core\Socket;
 
 use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\WebSocket;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class WebSocketController extends Controller
 {
     private $client;
-    final function __construct(WebSocket $client,array $args)
+    final function __construct(WebSocket $client,CommandBean $request,CommandBean $response)
     {
-        parent::__construct($args);
+        parent::__construct( $request, $response);
         $this->client = $client;
     }
 

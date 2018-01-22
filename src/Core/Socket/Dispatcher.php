@@ -15,6 +15,7 @@ use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Dispatcher
 {
@@ -66,26 +67,19 @@ class Dispatcher
         }
         $controller = $command->getControllerClass();
         if(!empty($controller)){
-            if(class_exists($controller)){
-                $ref = new \ReflectionClass($controller);
-                $controller = $ref->newInstanceArgs(array(
-                    $client,$command->getArgs()
-                ));
-                if($controller instanceof Controller){
-                    try{
-                        $res = $controller->__hook($command->getAction());
-                    }catch (\Throwable $throwable){
-                        if($this->exceptionHandler instanceof ExceptionHandler){
-                            $res = $this->exceptionHandler->handler($throwable,$client,$command);
-                        }else{
-                            throw $throwable;
-                        }
-                    }
-                    $res = $this->parser->encode($res,$args);
-                    if(strlen($res) != 0){
-                        Response::response($client,$res);
-                    }
+            try{
+                $resCommand = new CommandBean();
+                (new $controller($client,$command,$resCommand));
+            }catch (\Throwable $throwable){
+                if($this->exceptionHandler instanceof ExceptionHandler){
+                    $resCommand = $this->exceptionHandler->handler($throwable,$client,$command);
+                }else{
+                    throw $throwable;
                 }
+            }
+            $res = $this->parser->encode($resCommand,$args);
+            if(strlen($res) != 0){
+                Response::response($client,$res);
             }
         }
     }

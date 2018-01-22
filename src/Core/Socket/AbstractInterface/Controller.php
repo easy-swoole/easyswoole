@@ -13,10 +13,20 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 abstract class Controller
 {
     private $response;
-    private $actionName;
-    private $args;
+    private $request;
 
     protected abstract function client();
+
+    function __construct(CommandBean $request,CommandBean $response)
+    {
+        $this->request = $request;
+        $this->response = $response;
+        if($request->getAction() != '__construct'){
+            $this->__hook($request->getAction());
+        }else{
+            $response->setError('do not try to call __construct');
+        }
+    }
 
     protected function actionNotFound(string $actionName)
     {
@@ -33,11 +43,7 @@ abstract class Controller
         throw $throwable;
     }
 
-    protected function __construct(array $args)
-    {
-        $this->response = new CommandBean();
-        $this->args = $args;
-    }
+
 
     /*
      * 返回false的时候为拦截
@@ -52,49 +58,17 @@ abstract class Controller
         return $this->response;
     }
 
-    protected function getArg($key)
-    {
-        if(isset($this->args[$key])){
-            return $this->args[$key];
-        }else{
-            return null;
-        }
-    }
 
-    protected function getArgs():array
+    private function __hook(string $actionName)
     {
-        return $this->args;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getActionName():string
-    {
-        return $this->actionName;
-    }
-
-    /**
-     * @param string $actionName
-     */
-    protected function setActionName(string $actionName)
-    {
-        $this->actionName = $actionName;
-    }
-
-    public function __hook(string $actionName):?CommandBean
-    {
-        if($actionName == '__hook'){
-            return null;
-        }
-        $this->actionName = $actionName;
         if($this->onRequest($actionName) !== false){
             $ref = new \ReflectionClass(static::class);
             if($ref->hasMethod($actionName)){
                 if($ref->getMethod($actionName)->isPublic()){
                     try{
+                        $actionName = $this->request->getAction();
                         $this->$actionName();
-                        $this->afterAction($this->getActionName());
+                        $this->afterAction($actionName);
                     }catch (\Throwable $throwable){
                         $this->onException($throwable);
                     }
@@ -105,6 +79,5 @@ abstract class Controller
                 $this->actionNotFound($actionName);
             }
         }
-        return $this->response();
     }
 }
