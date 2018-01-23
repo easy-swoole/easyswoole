@@ -55,109 +55,54 @@ class CacheProcess extends AbstractProcess
     public function onReceive(string $str)
     {
         // TODO: Implement onReceive() method.
-        $data = \swoole_serialize::unpack($str);
-        if(isset($data['command'])){
-            $command = $data['command'];
-            switch ($command){
+        $msg = \swoole_serialize::unpack($str);
+        if($msg instanceof Msg){
+            switch ($msg->getCommand()){
                 case 'set':{
-                    $key = $data['args']['key'];
-                    if(isset($data['args']['tempFile'])){
-                        //还原数据以节约内存
-                        $data = \swoole_serialize::unpack(Utility::readFile($data['args']['tempFile']));
-                    }else{
-                        $data = $data['args']['data'];
-                    }
-                    $this->cacheData->set($key,$data);
+                    $this->cacheData->set($msg->getArg('key'),$msg->getData());
                     break;
                 }
                 case 'get':{
-                    $key = $data['args']['key'];
-                    $ret = $this->cacheData->get($key);
-                    $is = Utility::isOutOfLength($ret);
-                    if($is){
-                        $this->getProcess()->write(\swoole_serialize::pack(
-                            [
-                                'tempFile'=>Utility::writeFile($is),
-                                'time'=>microtime(true),
-                                'token'=> $data['args']['token'],
-                                'timeOut'=>$data['timeOut']
-                            ]
-                        ));
-                    }else{
-                        $this->getProcess()->write(\swoole_serialize::pack(
-                            [
-                                'data'=>$ret,
-                                'time'=>microtime(true),
-                                'token'=> $data['args']['token'],
-                                'timeOut'=>$data['timeOut']
-                            ]
-                        ));
-                    }
+                    $ret = $this->cacheData->get($msg->getArg('key'));
+                    $msg->setData($ret);
+                    $this->getProcess()->write(\swoole_serialize::pack($msg));
                     break;
                 }
                 case 'del':{
-                    $key = $data['args']['key'];
-                    $this->cacheData->delete($key);
+                    $this->cacheData->delete($msg->getArg('key'));
                     break;
                 }
                 case 'flush':{
-                    $this->flush();
+                    $this->cacheData->flush();
                     break;
                 }
                 case 'enQueue':{
-                    $key = $data['args']['key'];
-                    if(isset($data['args']['tempFile'])){
-                        //还原数据以节约内存
-                        $data = \swoole_serialize::unpack(Utility::readFile($data['args']['tempFile']));
-                    }else{
-                        $data = $data['args']['data'];
-                    }
-                    $que = $this->cacheData->get($key);
+                    $que = $this->cacheData->get($msg->getArg('key'));
                     if(!$que instanceof \SplQueue){
                         $que = new \SplQueue();
-                        $this->cacheData->set($key,$que);
+                        $this->cacheData->set($msg->getArg('key'),$que);
                     }
-                    $que->enqueue($data);
+                    $que->enqueue($msg->getData());
                     break;
                 }
                 case 'deQueue':{
-                    $key = $data['args']['key'];
-                    $ret = $this->cacheData->get($key);
-                    if($ret instanceof \SplQueue){
-                        if(!$ret->isEmpty()){
-                            $ret = $ret->dequeue();
-                        }else{
-                            $ret = null;
-                        }
-                    }else{
-                        $ret = null;
+                    $que = $this->cacheData->get($msg->getArg('key'));
+                    if(!$que instanceof \SplQueue){
+                        $que = new \SplQueue();
+                        $this->cacheData->set($msg->getArg('key'),$que);
                     }
-                    $is = Utility::isOutOfLength($ret);
-                    if($is){
-                        $this->getProcess()->write(\swoole_serialize::pack(
-                            [
-                                'tempFile'=>Utility::writeFile($is),
-                                'time'=>microtime(true),
-                                'token'=> $data['args']['token'],
-                                'timeOut'=>$data['timeOut']
-                            ]
-                        ));
-                    }else{
-                        $this->getProcess()->write(\swoole_serialize::pack(
-                            [
-                                'data'=>$ret,
-                                'time'=>microtime(true),
-                                'token'=> $data['args']['token'],
-                                'timeOut'=>$data['timeOut']
-                            ]
-                        ));
+                    $ret = null;
+                    if(!$que->isEmpty()){
+                        $ret = $que->dequeue();
                     }
+                    $msg->setData($ret);
+                    $this->getProcess()->write(\swoole_serialize::pack($msg));
                     break;
                 }
                 case 'reDispatch':{
-                    $msgTime = $data['time'];
+                    $msgTime = $msg->getTime();
                     $time = microtime(true);
-                    if(round($time - $msgTime,4) < $data['timeOut']){
+                    if(round($time - $msgTime,4) < $msg->getArg('timeOut')){
                         $this->getProcess()->write($str);
                     }
                     break;
@@ -184,12 +129,5 @@ class CacheProcess extends AbstractProcess
             }
             $this->cacheData->loadArray($data);
         }
-
-    }
-
-    private function flush()
-    {
-        $this->cacheData->flush();
-        $this->saveData();
     }
 }

@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Component\Cache;
 
 
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Utility\Random;
 
@@ -48,5 +49,26 @@ class Utility
         }else{
             return null;
         }
+    }
+
+    static function readProcessFileData(int $processNum):SplArray
+    {
+        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$processNum}.data";
+        if(file_exists($file)){
+            $content = file_get_contents($file);
+            if(!empty($content)){
+                $array = \swoole_serialize::unpack($content);
+                if(is_array($array)){
+                    return new SplArray($array);
+                }
+            }
+        }
+        return new SplArray();
+    }
+
+    static function writeProcessFileData(int $processNum,SplArray $array):bool
+    {
+        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$processNum}.data";
+        return (bool)file_put_contents($file,\swoole_serialize::pack($array->getArrayCopy()),LOCK_EX);
     }
 }
