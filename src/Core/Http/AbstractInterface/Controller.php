@@ -64,7 +64,7 @@ abstract class Controller
         $this->actionName = $action;
     }
 
-    private function __hook(Request $request,Response $response):void
+    protected function __hook(Request $request,Response $response):void
     {
         $this->request = $request;
         $this->response = $response;
