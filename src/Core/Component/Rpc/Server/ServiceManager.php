@@ -18,23 +18,23 @@ use EasySwoole\Core\Swoole\ServerManager;
 class ServiceManager
 {
     use Singleton;
-    private const cacheKey = '__RpcService';
+    private $cacheKey = '__RpcService';
 
     public function addServiceNode(ServiceNode $bean):void
     {
-        $key = "{self::cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
+        $key = "{$this->cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
         Cache::getInstance()->set($key,$bean);
     }
 
     public function deleteServiceNode(ServiceNode $bean):void
     {
-        $key = "{self::cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
+        $key = "{$this->cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
         Cache::getInstance()->del($key);
     }
 
     public function allServiceNodes():?array
     {
-        return Cache::getInstance()->get(self::cacheKey);
+        return Cache::getInstance()->get($this->cacheKey);
     }
 
     public function allService():?array
@@ -49,16 +49,19 @@ class ServiceManager
 
     public function deleteService(string $serviceName):void
     {
-        $key = "{self::cacheKey}.{$serviceName}";
+        $key = "{$this->cacheKey}.{$serviceName}";
         Cache::getInstance()->del($key);
     }
 
     public function getServiceNodes(string $serviceName):?array
     {
-        $key = "{self::cacheKey}.{$serviceName}";
+        $key = "{$this->cacheKey}.{$serviceName}";
         return Cache::getInstance()->get($key);
     }
 
+    /*
+     * 随机获得一个服务的节点
+     */
     public function getServiceNode(string $serviceName):?ServiceNode
     {
         $list = $this->getServiceNodes($serviceName);
@@ -71,7 +74,36 @@ class ServiceManager
 
     public function getServiceNodeById(string $serviceName,string $id):?ServiceNode
     {
-        $key = "{self::cacheKey}.{$serviceName}.{$id}";
+        $key = "{$this->cacheKey}.{$serviceName}.{$id}";
         return Cache::getInstance()->get($key);
+    }
+
+    public function deleteServiceById(string $serviceName,string $id)
+    {
+        $key = "{$this->cacheKey}.{$serviceName}.{$id}";
+        Cache::getInstance()->del($key);
+    }
+
+    public function gc($timeOut = 15):array
+    {
+        $failList = [];
+        $time = time();
+        $list = $this->allServiceNodes();
+        if(is_array($list)){
+            foreach ($list as $service){
+                foreach ($service as $item){
+                    if($item instanceof ServiceNode){
+                        if($item->getAddress() == '127.0.0.1'){
+                            continue;
+                        }
+                        if($time - $item->getLastHeartBeat() > $timeOut){
+                            $failList[] = $item;
+                            $this->deleteServiceById($item->getServiceName(),$item->getServiceId());
+                        }
+                    }
+                }
+            }
+        }
+        return $failList;
     }
 }

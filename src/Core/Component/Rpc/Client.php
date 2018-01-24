@@ -33,6 +33,7 @@ class Client
     {
         $map = [];
         $clients = [];
+        $nodeMap = [];
         foreach ($this->taskList as $task){
             if($task instanceof TaskObj){
                 if($task->getServiceId()){
@@ -53,9 +54,9 @@ class Client
                     ]);
                     if (! $clients[$index]->connect($node->getAddress(), $node->getPort())) {
                         $res = new ResponseObj();
+                        $res->setServiceNode($node);
                         $res->setStatus(Status::CONNECT_FAIL);
                         $res->setAction($task->getServiceAction());
-                        $res->setServiceName($task->getServiceName());
                         $this->callFunc($res,$task);
                         $clients[$index]->close();
                         unset($clients[$index]);
@@ -67,9 +68,11 @@ class Client
                         $data = pack('N', strlen($sendStr)).$sendStr;
                         $clients[$index]->send($data);
                         $map[$index] = $task;
+                        $nodeMap[$index] = $node;
                     }
                 }else{
                     $res = new ResponseObj();
+                    $res->setAction("{$task->getServiceName()}@{$task->getServiceAction()}");
                     $res->setStatus(Status::SERVICE_NOT_FOUND);
                     $this->callFunc($res,$task);
                 }
@@ -86,11 +89,10 @@ class Client
                     $data = $client->recv();
                     $resp = substr($data, 4);
                     $commandBean = \swoole_serialize::unpack($resp);
-                    $resp = new ResponseObj($commandBean->toArray());
-                    $resp->setAction($map[$index]->getServiceAction());
-                    $resp->setAction($map[$index]->getServiceAction());
-                    $resp->setServiceName($map[$index]->getServiceName());
-                    $this->callFunc($resp,$map[$index]);
+                    $res = new ResponseObj($commandBean->toArray());
+                    $res->setAction($map[$index]->getServiceAction());
+                    $res->setServiceNode($nodeMap[$index]);
+                    $this->callFunc($res,$map[$index]);
                     $client->close();
                     unset($clients[$index]);
                 }
@@ -101,8 +103,8 @@ class Client
                 foreach ($clients as $index => $client){
                     $res = new ResponseObj();
                     $res->setStatus(Status::TIMEOUT);
-                    $resp->setAction($map[$index]->getServiceAction());
-                    $resp->setServiceName($map[$index]->getServiceName());
+                    $res->setAction($map[$index]->getServiceAction());
+                    $res->setServiceNode($nodeMap[$index]);
                     $this->callFunc($res,$map[$index]);
                     $client->close();
                     unset($clients[$index]);

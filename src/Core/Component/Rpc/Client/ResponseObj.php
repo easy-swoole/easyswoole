@@ -9,16 +9,17 @@
 namespace EasySwoole\Core\Component\Rpc\Client;
 
 
+use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 use EasySwoole\Core\Component\Spl\SplBean;
 
 class ResponseObj extends SplBean
 {
-    protected $serviceName;
     protected $action;
     protected $error;
     protected $result;
     protected $args = [];
     protected $status;
+    protected $serviceNode = null;
 
     /**
      * @return mixed
@@ -100,20 +101,14 @@ class ResponseObj extends SplBean
         $this->status = $status;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getServiceName()
+    public function getServiceNode():?ServiceNode
     {
-        return $this->serviceName;
+        return $this->serviceNode;
     }
 
-    /**
-     * @param mixed $serviceName
-     */
-    public function setServiceName($serviceName): void
+    public function setServiceNode(ServiceNode $serviceNode): void
     {
-        $this->serviceName = $serviceName;
+        $this->serviceNode = $serviceNode;
     }
 
 }
