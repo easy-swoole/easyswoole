@@ -158,12 +158,12 @@ class ServerManager
                  if(isset($this->serverList[$serverName])){
                      return $this->serverList[$serverName];
                  }
+                 return null;
              }
          }else{
-             throw  new \Exception('getServer cannot call before mainServer create');
+             return null;
          }
     }
-
 
     public function coroutineId():?int
     {
