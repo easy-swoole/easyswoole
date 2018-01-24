@@ -103,7 +103,7 @@ class Cache
         $msg = new Msg();
         $msg->setCommand('del');
         $msg->setArg('key',$key);
-        $this->processList["process_cache_{$num}"]->write(\swoole_serialize::pack($msg));
+        $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
     }
 
     function flush()
@@ -114,7 +114,7 @@ class Cache
         $msg = new Msg();
         $msg->setCommand('flush');
         for ($i=0;$i<$this->processNum;$i++){
-            $this->processList["process_cache_{i}"]->write(\swoole_serialize::pack($msg));
+            $this->processList["process_cache_{i}"]->getProcess()->write(\swoole_serialize::pack($msg));
         }
     }
 
