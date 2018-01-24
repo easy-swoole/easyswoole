@@ -32,11 +32,14 @@ class Cache
            return;
         }
         $this->cliTemp = new SplArray();
-        $this->processNum = $num;
-        for ($i=0;$i < $num;$i++){
-            $processName = "process_cache_{$i}";
-            $hash = ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
-            $this->processList[$processName] = ProcessManager::getInstance()->getProcessByHash($hash);
+        //若是在主服务创建，而非单元测试调用
+        if(ServerManager::getInstance()->getServer()){
+            $this->processNum = $num;
+            for ($i=0;$i < $num;$i++){
+                $processName = "process_cache_{$i}";
+                $hash = ProcessManager::getInstance()->addProcess(CacheProcess::class,false,$processName);
+                $this->processList[$processName] = ProcessManager::getInstance()->getProcessByHash($hash);
+            }
         }
     }
 
@@ -86,12 +89,14 @@ class Cache
         if(!ServerManager::getInstance()->isStart()){
             $this->cliTemp->set($key,$data);
         }
-        $num = $this->keyToProcessNum($key);
-        $msg = new Msg();
-        $msg->setCommand('set');
-        $msg->setArg('key',$key);
-        $msg->setData($data);
-        $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        if(ServerManager::getInstance()->getServer()){
+            $num = $this->keyToProcessNum($key);
+            $msg = new Msg();
+            $msg->setCommand('set');
+            $msg->setArg('key',$key);
+            $msg->setData($data);
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        }
     }
 
     function del($key)
@@ -99,11 +104,13 @@ class Cache
         if(!ServerManager::getInstance()->isStart()){
             $this->cliTemp->delete($key);
         }
-        $num = $this->keyToProcessNum($key);
-        $msg = new Msg();
-        $msg->setCommand('del');
-        $msg->setArg('key',$key);
-        $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        if(ServerManager::getInstance()->getServer()){
+            $num = $this->keyToProcessNum($key);
+            $msg = new Msg();
+            $msg->setCommand('del');
+            $msg->setArg('key',$key);
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        }
     }
 
     function flush()
@@ -111,24 +118,18 @@ class Cache
         if(!ServerManager::getInstance()->isStart()){
             $this->cliTemp->flush();
         }
-        $msg = new Msg();
-        $msg->setCommand('flush');
-        for ($i=0;$i<$this->processNum;$i++){
-            $this->processList["process_cache_{i}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        if(ServerManager::getInstance()->getServer()){
+            $msg = new Msg();
+            $msg->setCommand('flush');
+            for ($i=0;$i<$this->processNum;$i++){
+                $this->processList["process_cache_{i}"]->getProcess()->write(\swoole_serialize::pack($msg));
+            }
         }
     }
 
     public function deQueue($key,$timeOut = 0.01)
     {
         if(!ServerManager::getInstance()->isStart()){
-            //依旧发送队列,但不发token
-            $num = $this->keyToProcessNum($key);
-            $process = $this->processList["process_cache_{$num}"];
-            $msg = new  Msg();
-            $msg->setArg('timeOut',$timeOut);
-            $msg->setArg('key',$key);
-            $msg->setCommand('deQueue');
-            $process->getProcess()->write(\swoole_serialize::pack($msg));
             $que = $this->cliTemp->get($key);
             if(!$que instanceof \SplQueue){
                 $que = new \SplQueue();
@@ -137,6 +138,16 @@ class Cache
             $ret = null;
             if(!$que->isEmpty()){
                 $ret = $que->dequeue();
+            }
+            if(ServerManager::getInstance()->getServer()){
+                //依旧发送队列,但不发token
+                $num = $this->keyToProcessNum($key);
+                $process = $this->processList["process_cache_{$num}"];
+                $msg = new  Msg();
+                $msg->setArg('timeOut',$timeOut);
+                $msg->setArg('key',$key);
+                $msg->setCommand('deQueue');
+                $process->getProcess()->write(\swoole_serialize::pack($msg));
             }
             return $ret;
         }
@@ -182,12 +193,14 @@ class Cache
             }
             $que->enqueue($data);
         }
-        $num = $this->keyToProcessNum($key);
-        $msg = new Msg();
-        $msg->setCommand('enQueue');
-        $msg->setArg('key',$key);
-        $msg->setData($data);
-        $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        if(ServerManager::getInstance()->getServer()){
+            $num = $this->keyToProcessNum($key);
+            $msg = new Msg();
+            $msg->setCommand('enQueue');
+            $msg->setArg('key',$key);
+            $msg->setData($data);
+            $this->processList["process_cache_{$num}"]->getProcess()->write(\swoole_serialize::pack($msg));
+        }
     }
 
     public function clearQueue($key)
