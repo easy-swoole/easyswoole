@@ -6,7 +6,7 @@
  * Time: 下午3:22
  */
 
-namespace EasySwoole\Core\Component\Rpc;
+namespace EasySwoole\Core\Component\Rpc\Server;
 
 
 use EasySwoole\Core\Component\Spl\SplBean;
@@ -15,8 +15,8 @@ use EasySwoole\Core\Utility\Random;
 class ServiceNode extends SplBean
 {
     protected $serviceId;
-    protected $serverName;
-    protected $address;
+    protected $serviceName;
+    protected $address = '127.0.0.1';
     protected $port;
     protected $lastHeartBeat;
 
@@ -39,17 +39,17 @@ class ServiceNode extends SplBean
     /**
      * @return mixed
      */
-    public function getServerName()
+    public function getServiceName()
     {
-        return $this->serverName;
+        return $this->serviceName;
     }
 
     /**
-     * @param mixed $serverName
+     * @param mixed $serviceName
      */
-    public function setServerName($serverName)
+    public function setServiceName($serviceName)
     {
-        $this->serverName = $serverName;
+        $this->serviceName = $serviceName;
     }
 
     /**

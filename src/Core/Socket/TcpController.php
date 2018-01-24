@@ -18,8 +18,8 @@ abstract class TcpController extends Controller
     private $client;
     final function __construct(Tcp $client,CommandBean $request,CommandBean $response)
     {
-        parent::__construct( $request, $response);
         $this->client = $client;
+        parent::__construct( $request, $response);
     }
 
     function client():Tcp

@@ -16,6 +16,24 @@ class CommandBean extends SplBean
     protected $error;
     protected $result;
     protected $args = [];
+    protected $status;
+
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus($status): void
+    {
+        $this->status = $status;
+    }
+
 
     public function getControllerClass():?string
     {

@@ -58,8 +58,13 @@ abstract class Controller
         return $this->response;
     }
 
+    protected function request():CommandBean
+    {
+        return $this->request;
+    }
 
-    private function __hook(string $actionName)
+
+    protected function __hook(string $actionName)
     {
         if($this->onRequest($actionName) !== false){
             $ref = new \ReflectionClass(static::class);
