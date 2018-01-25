@@ -88,6 +88,6 @@ abstract class AbstractProcess
 
     public abstract function run(Process $process);
     public abstract function onShutDown();
-    public abstract function onReceive(string $str);
+    public abstract function onReceive(string $str,...$args);
 
 }

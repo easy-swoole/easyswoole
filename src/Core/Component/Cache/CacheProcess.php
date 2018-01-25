@@ -52,7 +52,7 @@ class CacheProcess extends AbstractProcess
        }
     }
 
-    public function onReceive(string $str)
+    public function onReceive(string $str,...$agrs)
     {
         // TODO: Implement onReceive() method.
         $msg = \swoole_serialize::unpack($str);
