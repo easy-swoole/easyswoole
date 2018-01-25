@@ -31,8 +31,11 @@ return [
         'enable'=>false,
         'token'=>null,
         'broadcastAddress'=>['255.255.255.255:9556'],
+        'listenAddress'=>'0.0.0.0',
         'listenPort'=>9556,
         'broadcastTTL'=>5,
-        'serviceTTL'=>10
+        'serviceTTL'=>10,
+        'nodeName'=>'',
+        'nodeId'=>''
     ]
 ];
