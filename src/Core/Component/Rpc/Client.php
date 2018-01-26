@@ -63,6 +63,8 @@ class Client
                     }else{
                         $commandBean = new CommandBean();
                         $commandBean->setArgs($task->getArgs());
+                        //controllerClass作为服务名称
+                        $commandBean->setControllerClass($node->getServiceName());
                         $commandBean->setAction($task->getServiceAction());
                         $sendStr = \swoole_serialize::pack($commandBean);
                         $data = pack('N', strlen($sendStr)).$sendStr;
@@ -98,7 +100,7 @@ class Client
                 }
             }
             $now = microtime(1);
-            $spend = intval(($now-$startTime)*1000);
+            $spend = round($now-$startTime,4);
             if($spend > $timeOut){
                 foreach ($clients as $index => $client){
                     $res = new ResponseObj();

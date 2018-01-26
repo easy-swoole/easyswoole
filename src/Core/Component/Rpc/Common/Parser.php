@@ -14,10 +14,10 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Parser implements ParserInterface
 {
-    protected $serviceClass;
-    function __construct(string $serviceClass)
+    protected $services = [];
+    function __construct(array $services)
     {
-        $this->serviceClass = $serviceClass;
+        $this->services = $services;
     }
 
     public function decode($raw, array $args):?CommandBean
@@ -28,7 +28,12 @@ class Parser implements ParserInterface
         if(!$bean instanceof CommandBean){
             $bean = new CommandBean();
         }
-        $bean->setControllerClass($this->serviceClass);
+        //controllerClass作为服务名称
+        if(isset($this->services[$bean->getControllerClass()])){
+            $bean->setControllerClass($this->services[$bean->getControllerClass()]);
+        }else{
+            $bean->setControllerClass(null);
+        }
         return $bean;
 
     }
