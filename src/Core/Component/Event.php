@@ -15,15 +15,16 @@ class Event extends Container
 {
     use Singleton;
 
-    public function hook($event,...$args):bool
+    public function hook($event,...$args)
     {
         $call = $this->get($event);
-        if(is_callable($call)){
-            call_user_func_array($call,$args);
-            return true;
-        }else{
-            return false;
+        if($call != null){
+            if(is_callable($call)){
+                return call_user_func_array($call,$args);
+            }else{
+                trigger_error("{$event} call is not a callable");
+                return false;
+            }
         }
-
     }
 }
