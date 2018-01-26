@@ -26,7 +26,7 @@ class Parser implements ParserInterface
         $raw = substr($raw, 4);
         $bean = \swoole_serialize::unpack($raw);
         if(!$bean instanceof CommandBean){
-            $bean = new CommandBean();
+           return null;
         }
         //controllerClass作为服务名称
         if(isset($this->services[$bean->getControllerClass()])){
@@ -41,9 +41,6 @@ class Parser implements ParserInterface
     public function encode(?CommandBean $raw, array $args):?string
     {
         // TODO: Implement encode() method.
-        if(!$raw instanceof CommandBean){
-            $raw = new CommandBean();
-        }
         if($raw->getStatus() === null){
             $raw->setStatus(Status::OK);
         }

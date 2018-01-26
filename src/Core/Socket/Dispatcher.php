@@ -64,7 +64,7 @@ class Dispatcher
             return;
         }
         $controller = $command->getControllerClass();
-        if(!empty($controller)){
+        if(class_exists($controller)){
             try{
                 $resCommand = new CommandBean();
                 (new $controller($client,$command,$resCommand));
@@ -78,6 +78,10 @@ class Dispatcher
             $res = $this->parser->encode($resCommand,$args);
             if(strlen($res) != 0){
                 Response::response($client,$res);
+            }
+        }else{
+            if(!empty($controller)){
+                trigger_error("{$controller} not a tcp controller class");
             }
         }
     }

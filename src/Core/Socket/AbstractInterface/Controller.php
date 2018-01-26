@@ -66,23 +66,22 @@ abstract class Controller
 
     protected function __hook(string $actionName)
     {
-        if($this->onRequest($actionName) !== false){
-            $ref = new \ReflectionClass(static::class);
-            if($ref->hasMethod($actionName)){
-                if($ref->getMethod($actionName)->isPublic()){
-                    try{
-                        $actionName = $this->request->getAction();
-                        $this->$actionName();
-                        $this->afterAction($actionName);
-                    }catch (\Throwable $throwable){
-                        $this->onException($throwable);
-                    }
-                }else{
-                    $this->actionNotFound($actionName);
+        //这里面的class一定存在
+        $ref = new \ReflectionClass(static::class);
+        if($ref->hasMethod($actionName)){
+            if($ref->getMethod($actionName)->isPublic()){
+                try{
+                    $actionName = $this->request->getAction();
+                    $this->$actionName();
+                    $this->afterAction($actionName);
+                }catch (\Throwable $throwable){
+                    $this->onException($throwable);
                 }
             }else{
                 $this->actionNotFound($actionName);
             }
+        }else{
+            $this->actionNotFound($actionName);
         }
     }
 }
