@@ -85,7 +85,7 @@ class Client
         while (!empty($clients)){
             $write = $error = array();
             $read = $clients;
-            $n = swoole_client_select($read, $write, $error, $timeOut);
+            $n = swoole_client_select($read, $write, $error, 0.01);
             if($n > 0){
                 foreach ($read as $index =>$client){
                     $data = $client->recv();
