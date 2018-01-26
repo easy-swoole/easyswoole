@@ -29,8 +29,7 @@ abstract class Controller
         if($actionName == '__hook'){
             $this->response()->withStatus(Status::CODE_BAD_REQUEST);
         }else{
-            $this->actionName = $actionName;
-            $this->__hook( $request, $response);
+            $this->__hook( $actionName);
         }
     }
 
@@ -64,25 +63,24 @@ abstract class Controller
         $this->actionName = $action;
     }
 
-    protected function __hook(Request $request,Response $response):void
+    protected function __hook(?string $actionName):void
     {
-        $this->request = $request;
-        $this->response = $response;
-        if($this->onRequest($this->actionName) !== false){
-            //防止onRequest中   对actionName 进行修改
-            $actionName = $this->actionName;
-            //支持在子类控制器中以private，protected来修饰某个方法不可见
-            $ref = new \ReflectionClass(static::class);
-            if($ref->hasMethod($actionName) && $ref->getMethod($actionName)->isPublic()){
-                try{
-                    $this->$actionName();
-                }catch (\Exception $exception){
-                    $this->onException($exception,$actionName);
-                }
+        if($this->onRequest($actionName) === false){
+            return;
+        }
+        $actionName = $this->actionName ;
+        //支持在子类控制器中以private，protected来修饰某个方法不可见
+        $ref = new \ReflectionClass(static::class);
+        if($ref->hasMethod( $actionName) && $ref->getMethod( $actionName)->isPublic()){
+            try{
+                $this->$actionName();
                 $this->afterAction($actionName);
-            }else{
-                $this->actionNotFound($actionName);
+            }catch (\Exception $exception){
+                $this->onException($exception,$actionName);
             }
+            $this->afterAction($actionName);
+        }else{
+            $this->actionNotFound($actionName);
         }
     }
 
