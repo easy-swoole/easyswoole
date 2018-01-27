@@ -17,7 +17,7 @@ class Timer
         return ServerManager::getInstance()->getServer()->tick($microSeconds,$func,$args);
     }
     public static function delay($microSeconds,\Closure $func,$args = null){
-        ServerManager::getInstance()->getServer()->after($microSeconds,$func,$args);
+       return  ServerManager::getInstance()->getServer()->after($microSeconds,$func,$args);
     }
     /*
      * @param $timerId

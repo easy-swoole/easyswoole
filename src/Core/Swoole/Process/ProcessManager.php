@@ -11,12 +11,13 @@ namespace EasySwoole\Core\Swoole\Process;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Swoole\Memory\TableManager;
+use EasySwoole\Core\Swoole\ServerManager;
 use Swoole\Table;
+
 
 class ProcessManager
 {
     use Singleton;
-
     private $processList = [];
 
     function __construct()
@@ -31,48 +32,71 @@ class ProcessManager
         );
     }
 
-    public function addProcess(string $processClass,$async = true,...$args):string
+    public function addProcess(string $processName,string $processClass,$async = true,array $args = []):bool
     {
-        if(class_exists($processClass)){
-            $ins = new $processClass($async,...$args);
-            if($ins instanceof AbstractProcess){
-                $this->processList[$ins->getHash()] = $ins;
-                return $ins->getHash();
-            }else{
-                throw new \Exception('class '.$processClass.' not AbstractProcess class');
+        if(ServerManager::getInstance()->isStart()){
+            trigger_error('you can not add a process after server start');
+            return false;
+        }
+        $key = md5($processName);
+        if(!isset($this->processList[$key])){
+            try{
+                $process = new $processClass($processName,$async,$args);
+                $this->processList[$key] = $process;
+                return true;
+            }catch (\Throwable $throwable){
+                trigger_error($throwable->getMessage().$throwable->getTraceAsString());
+                return false;
             }
         }else{
-            throw new \Exception('class '.$processClass.' not exist');
+            trigger_error('you can not add the same name process : '.$processName);
+            return false;
+        }
+    }
+
+    public function getProcessByName(string $processName):?AbstractProcess
+    {
+        $key = md5($processName);
+        if(isset($this->processList[$key])){
+            return $this->processList[$key];
+        }else{
+            return null;
         }
     }
 
 
-    public function getProcessByHash(string $hash):?AbstractProcess
+    public function getProcessByPid(int $pid):?AbstractProcess
     {
-        if(isset($this->processList[$hash])){
-            return $this->processList[$hash];
-        }
-        return null;
-    }
-
-    public function getProcess(int $pid):?AbstractProcess
-    {
-        foreach ($this->processList as $item){
-            if($item->getPid() == $pid){
-                return $item;
+        $table = TableManager::getInstance()->get('process_hash_map');
+        foreach ($table as $key => $item){
+            if($item['pid'] == $pid){
+                return $this->processList[$key];
             }
         }
         return null;
     }
 
-    public function allProcess():array
+
+    public function setProcess(string $processName,AbstractProcess $process)
     {
-        return $this->processList;
+        $key = md5($processName);
+        $this->processList[$key] = $process;
     }
 
-    public function writeByHash(string $hash,string $data):bool
+    public function reboot(string $processName):bool
     {
-        $process = $this->getProcessByHash($hash);
+        $p = $this->getProcessByName($processName);
+        if($p){
+            \swoole_process::kill($p->getPid(),SIGTERM);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function writeByProcessName(string $name,string $data):bool
+    {
+        $process = $this->getProcessByName($name);
         if($process){
             return (bool)$process->getProcess()->write($data);
         }else{
@@ -80,9 +104,9 @@ class ProcessManager
         }
     }
 
-    public function readByHash(string $hash,float $timeOut = 0.1):?string
+    public function readByProcessName(string $name,float $timeOut = 0.1):?string
     {
-        $process = $this->getProcessByHash($hash);
+        $process = $this->getProcessByName($name);
         if($process){
             $process = $process->getProcess();
             $read = array($process);
@@ -98,7 +122,5 @@ class ProcessManager
             return null;
         }
     }
-
-
 
 }
