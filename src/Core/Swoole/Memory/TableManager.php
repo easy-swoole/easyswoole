@@ -24,7 +24,7 @@ class TableManager
      * @param array $columns    ['col'=>['type'=>Table::TYPE_STRING,'size'=>1]]
      * @param int $size
      */
-    public function add($name,array $columns,$size = 1024 * 256):void
+    public function add($name,array $columns,$size = 1024):void
     {
         if(!isset($this->list[$name])){
             $table = new Table($size);
