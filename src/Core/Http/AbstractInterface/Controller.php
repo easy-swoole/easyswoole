@@ -36,7 +36,7 @@ abstract class Controller
         }
     }
 
-    protected function actionNotFound($action = null):void
+    protected function actionNotFound($action):void
     {
         $this->response()->withStatus(Status::CODE_NOT_FOUND);
     }
