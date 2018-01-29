@@ -103,7 +103,7 @@ class ServiceNode extends SplBean
     protected function initialize(): void
     {
         if(empty($this->serviceId)){
-            $this->serviceId = md5(Random::randStr(8));
+            $this->serviceId = Random::randStr(16);
         }
     }
 }

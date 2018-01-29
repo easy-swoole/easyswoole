@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Component\Rpc;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Cluster\Common\Config;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
@@ -27,10 +28,12 @@ class Server
 
     public function attach(int $port,string $address = '0.0.0.0')
     {
+        $nodeId = Config::getInstance()->get('nodeId');
         foreach ($this->list as $name => $item){
             $node = new ServiceNode();
             $node->setPort($port);
             $node->setServiceName($name);
+            $node->setServiceId($nodeId);
             ServiceManager::getInstance()->addServiceNode($node);
         }
 

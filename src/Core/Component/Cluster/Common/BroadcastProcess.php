@@ -19,7 +19,12 @@ class BroadcastProcess extends AbstractProcess
     public function run(Process $process)
     {
         // TODO: Implement run() method.
-        $this->listen();
+        $this->setTick(function (){
+           if(!$this->listener){
+               $this->listen();
+           }
+            \EasySwoole\Core\Component\Cluster\NetWork\Udp::broadcast('broadcast',9556);
+        },5*1000*1000);
     }
 
     public function onShutDown()
@@ -31,7 +36,7 @@ class BroadcastProcess extends AbstractProcess
     public function onReceive(string $str,...$args)
     {
         // TODO: Implement onReceive() method.
-        var_dump($args);
+        var_dump($str,$args);
     }
 
     private function createListen($port,$address = '0.0.0.0')
@@ -55,10 +60,10 @@ class BroadcastProcess extends AbstractProcess
             $this->createListen(Config::getInstance()->get('listenPort'),Config::getInstance()->get('listenAddress'));
             swoole_event_add($this->listener,function($listen){
                 $data = stream_socket_recvfrom($listen,8192,0,$address);
-                $this->onReceive($data);
+                $this->onReceive($data,$address);
             });
         }catch (\Throwable $exception){
-            trigger_error('fail to start  broadcast listener');
+            trigger_error($exception->getMessage());
         }
     }
 }
