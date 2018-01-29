@@ -69,14 +69,17 @@ function opCacheClear()
 
 function envCheck()
 {
-    if(version_compare(phpversion(),'7.1','<')){
+    if (version_compare(phpversion(), '7.1', '<')) {
         die("PHP version\e[31m must >= 7.1\e[0m\n");
     }
-    if(version_compare(phpversion('swoole'),'1.9.5','<')){
+    if (version_compare(phpversion('swoole'), '1.9.5', '<')) {
         die("Swoole extension version\e[31m must >= 1.9.5\e[0m\n");
     }
     if (!class_exists('EasySwoole\Core\Core')) {
         die("Autoload fail!\nPlease try to run\e[31m composer install\e[0m in " . EASYSWOOLE_ROOT . "\n");
+    }
+    if (!extension_loaded('pcntl')) {
+        die("\e[31mpcntl extension\e[0m\n has not been loaded");
     }
 }
 
