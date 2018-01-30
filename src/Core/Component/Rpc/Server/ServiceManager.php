@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Component\Rpc\Server;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Swoole\Memory\TableManager;
 use Swoole\Table;
 
@@ -92,9 +93,9 @@ class ServiceManager
     {
         $list = [];
         $all = $this->allServiceNodes();
-        foreach ($all as $item){
+        foreach ($all as $key => $item){
             if($item['serviceName'] === $serviceName){
-                $list[] = $item;
+                $list[$key] = $item;
             }
         }
         return $list;
@@ -103,9 +104,17 @@ class ServiceManager
     /*
      * 随机获得一个服务的节点
      */
-    public function getServiceNode(string $serviceName):?ServiceNode
+    public function getServiceNode(string $serviceName,$exceptId = null):?ServiceNode
     {
         $list = $this->getServiceNodes($serviceName);
+        if($exceptId !== null){
+            foreach ($list as $key => $item){
+                if($key === $exceptId){
+                    unset($list[$key]);
+                    break;
+                }
+            }
+        }
         if(!empty($list)){
             $data = $list[array_rand($list)];
             return new ServiceNode($data);
@@ -130,19 +139,21 @@ class ServiceManager
 
     public function gc($timeOut = 15):array
     {
+        $serverId = Config::getInstance()->getServerId();
         $failList = [];
         $time = time();
         $list = $this->allServiceNodes();
         if(is_array($list)){
             foreach ($list as $service){
-                foreach ($service as $item){
+                foreach ($service as $key => $item){
                     if($item instanceof ServiceNode){
-                        if($item->getAddress() == '127.0.0.1'){
+                        //不对自身节点做gc
+                        if($key === substr(md5($serverId.$item->getServiceName()), 8, 16)){
                             continue;
                         }
                         if($time - $item->getLastHeartBeat() > $timeOut){
-                            $failList[] = $item;
-                            $this->deleteServiceById($item->getServiceId());
+                            $failList[$key] = $item;
+                            $this->deleteServiceById($key);
                         }
                     }
                 }
