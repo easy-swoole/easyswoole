@@ -130,6 +130,7 @@ class Client
             }
             $now = microtime(1);
             $spend = round($now-$startTime,4);
+            //服务端超时响应自动重试暂未处理
             if($spend > $timeOut){
                 foreach ($clients as $index => $client){
                     $res = new ResponseObj();
