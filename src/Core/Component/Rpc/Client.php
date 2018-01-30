@@ -29,7 +29,10 @@ class Client
         return $obj;
     }
 
-    public function call($timeOut = 0.1)
+    /*
+     * 当开启自动重试，对连接失败或者是超时的任务，进行获取另外一个服务节点二次尝试，若不存在其他服务节点则判定失败
+     */
+    public function call($timeOut = 0.1, $reTry = false)
     {
         $map = [];
         $clients = [];
@@ -44,23 +47,49 @@ class Client
                 }
                 if($node instanceof ServiceNode){
                     $index = count($clients);
-                    $clients[$index] = new \swoole_client(SWOOLE_TCP,SWOOLE_SOCK_SYNC);
-                    $clients[$index]->set([
-                        'open_length_check' => true,
-                        'package_length_type'   => 'N',
-                        'package_length_offset' => 0,
-                        'package_body_offset'   => 4,
-                        'package_max_length'    => 1024*64
-                    ]);
-                    if (! $clients[$index]->connect($node->getAddress(), $node->getPort())) {
-                        $res = new ResponseObj();
-                        $res->setServiceNode($node);
-                        $res->setStatus(Status::CONNECT_FAIL);
-                        $res->setAction($task->getServiceAction());
-                        $this->callFunc($res,$task);
-                        $clients[$index]->close();
-                        unset($clients[$index]);
+                    $client = $this->connect($node);
+                    if (!$client) {
+                        //若未指定节点   尝试再去获取一个节点
+                        if ($reTry && empty($task->getServiceId())) {
+                            $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName(), $node->getServiceId());
+                            if ($node) {
+                                $client = $this->connect($node);
+                                if (!$client) {
+                                    $res = new ResponseObj();
+                                    $res->setServiceNode($node);
+                                    $res->setStatus(Status::CONNECT_FAIL);
+                                    $res->setAction($task->getServiceAction());
+                                    $this->callFunc($res, $task);
+                                } else {
+                                    $clients[$index] = $client;
+                                    $commandBean = new CommandBean();
+                                    $commandBean->setArgs($task->getArgs());
+                                    //controllerClass作为服务名称
+                                    $commandBean->setControllerClass($node->getServiceName());
+                                    $commandBean->setAction($task->getServiceAction());
+                                    $sendStr = \swoole_serialize::pack($commandBean);
+                                    $data = pack('N', strlen($sendStr)) . $sendStr;
+                                    $clients[$index]->send($data);
+                                    $map[$index] = $task;
+                                    $nodeMap[$index] = $node;
+                                }
+                            } else {
+                                //因为仅存一个失败节点,因此判定为CONNECT_FAIL
+                                $res = new ResponseObj();
+                                $res->setServiceNode($node);
+                                $res->setStatus(Status::CONNECT_FAIL);
+                                $res->setAction($task->getServiceAction());
+                                $this->callFunc($res, $task);
+                            }
+                        } else {
+                            $res = new ResponseObj();
+                            $res->setServiceNode($node);
+                            $res->setStatus(Status::CONNECT_FAIL);
+                            $res->setAction($task->getServiceAction());
+                            $this->callFunc($res, $task);
+                        }
                     }else{
+                        $clients[$index] = $client;
                         $commandBean = new CommandBean();
                         $commandBean->setArgs($task->getArgs());
                         //controllerClass作为服务名称
@@ -128,6 +157,24 @@ class Client
             }catch (\Throwable $exception){
                 trigger_error($exception->getMessage().'@'.$exception->getTraceAsString());
             }
+        }
+    }
+
+    private function connect(ServiceNode $node): ?\swoole_client
+    {
+        $client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_SYNC);
+        $client->set([
+            'open_length_check' => true,
+            'package_length_type' => 'N',
+            'package_length_offset' => 0,
+            'package_body_offset' => 4,
+            'package_max_length' => 1024 * 64
+        ]);
+        if ($client->connect($node->getAddress(), $node->getPort())) {
+            return $client;
+        } else {
+            $client->close();
+            return null;
         }
     }
 }
