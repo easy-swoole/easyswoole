@@ -81,7 +81,9 @@ abstract class AbstractProcess
             md5($this->processName),['pid'=>$this->swooleProcess->pid]
         );
         ProcessManager::getInstance()->setProcess($this->getProcessName(),$this);
-        pcntl_async_signals(true);
+        if (extension_loaded('pcntl')) {
+            pcntl_async_signals(true);
+        }
         Process::signal(SIGTERM,function ()use($process){
             $this->onShutDown();
             TableManager::getInstance()->get('process_hash_map')->del(md5($this->processName));
