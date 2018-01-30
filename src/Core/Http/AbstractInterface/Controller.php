@@ -79,7 +79,6 @@ abstract class Controller
                 }catch (\Exception $exception){
                     $this->onException($exception,$actionName);
                 }
-                $this->afterAction($actionName);
             }else{
                 $this->actionNotFound($actionName);
             }
