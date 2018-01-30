@@ -9,8 +9,8 @@
 namespace EasySwoole\Core\Component\Rpc\Server;
 
 
+use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Spl\SplBean;
-use EasySwoole\Core\Utility\Random;
 
 class ServiceNode extends SplBean
 {
@@ -50,6 +50,7 @@ class ServiceNode extends SplBean
     public function setServiceName($serviceName)
     {
         $this->serviceName = $serviceName;
+        $this->generateServiceId();
     }
 
     /**
@@ -100,10 +101,9 @@ class ServiceNode extends SplBean
         $this->lastHeartBeat = $lastHeartBeat;
     }
 
-    protected function initialize(): void
-    {
-        if(empty($this->serviceId)){
-            $this->serviceId = Random::randStr(16);
-        }
+    private function generateServiceId(){
+        $serverId = Config::getInstance()->getServerId();
+        $this->serviceId = substr(md5($serverId.$this->serviceName), 8, 16);
     }
+
 }

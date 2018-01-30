@@ -10,9 +10,10 @@ namespace EasySwoole\Core\Component\Cluster;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Spl\SplArray;
+use EasySwoole\Core\Component\Spl\SplBean;
+use EasySwoole\Core\Utility\Random;
 
-class Config extends SplArray
+class Config extends SplBean
 {
     use Singleton;
     protected $enable;
@@ -22,13 +23,13 @@ class Config extends SplArray
     protected $listenPort;
     protected $broadcastTTL;
     protected $serviceTTL;
-    protected $nodeName;
-    protected $nodeId;
+    protected $serverName;
+    protected $serverId;
 
-    function __construct($input = array(), int $flags = 0, string $iterator_class = "ArrayIterator")
+    function __construct()
     {
         $conf = \EasySwoole\Config::getInstance()->getConf('CLUSTER');
-        parent::__construct($conf, $flags, $iterator_class);
+        parent::__construct($conf);
     }
 
     /**
@@ -146,33 +147,39 @@ class Config extends SplArray
     /**
      * @return mixed
      */
-    public function getNodeName()
+    public function getServerName()
     {
-        return $this->nodeName;
+        return $this->serverName;
     }
 
     /**
-     * @param mixed $nodeName
+     * @param mixed $serverName
      */
-    public function setNodeName($nodeName): void
+    public function setServerName($serverName): void
     {
-        $this->nodeName = $nodeName;
+        $this->serverName = $serverName;
     }
 
     /**
      * @return mixed
      */
-    public function getNodeId()
+    public function getServerId()
     {
-        return $this->nodeId;
+        return $this->serverId;
     }
 
     /**
-     * @param mixed $nodeId
+     * @param mixed $serverId
      */
-    public function setNodeId($nodeId): void
+    public function setServerId($serverId): void
     {
-        $this->nodeId = $nodeId;
+        $this->serverId = $serverId;
     }
 
+    protected function initialize(): void
+    {
+        if(empty($this->serverId)){
+            $this->serverId = Random::randStr(8);
+        }
+    }
 }

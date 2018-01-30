@@ -103,7 +103,7 @@ class ServiceManager
     /*
      * 随机获得一个服务的节点
      */
-    public function getServiceNode(string $serviceName):ServiceNode
+    public function getServiceNode(string $serviceName):?ServiceNode
     {
         $list = $this->getServiceNodes($serviceName);
         if(!empty($list)){
@@ -123,7 +123,7 @@ class ServiceManager
         }
     }
 
-    public function deleteServiceById(string $serviceName,string $id)
+    public function deleteServiceById(string $id)
     {
         $this->getTable()->del($id);
     }
@@ -142,7 +142,7 @@ class ServiceManager
                         }
                         if($time - $item->getLastHeartBeat() > $timeOut){
                             $failList[] = $item;
-                            $this->deleteServiceById($item->getServiceName(),$item->getServiceId());
+                            $this->deleteServiceById($item->getServiceId());
                         }
                     }
                 }

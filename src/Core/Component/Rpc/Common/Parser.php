@@ -32,7 +32,7 @@ class Parser implements ParserInterface
         if(isset($this->services[$bean->getControllerClass()])){
             $bean->setControllerClass($this->services[$bean->getControllerClass()]);
         }else{
-            $bean->setControllerClass(null);
+            return null;
         }
         return $bean;
 

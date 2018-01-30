@@ -38,7 +38,7 @@ class Client
             if($task instanceof TaskObj){
                 if($task->getServiceId()){
                     //若指定了节点
-                    $node = ServiceManager::getInstance()->getServiceNodeById($task->getServiceName(),$task->getServiceId());
+                    $node = ServiceManager::getInstance()->getServiceNodeById($task->getServiceId());
                 }else{
                     $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName());
                 }

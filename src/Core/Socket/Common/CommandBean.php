@@ -43,7 +43,7 @@ class CommandBean extends SplBean
     /**
      * @param string $controllerClass
      */
-    public function setControllerClass(string $controllerClass)
+    public function setControllerClass(?string $controllerClass)
     {
         $this->controllerClass = $controllerClass;
     }
