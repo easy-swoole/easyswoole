@@ -71,16 +71,12 @@ class ServerManager
                 }
                 $events = $server['eventRegister']->all();
                 foreach ($events as $event => $callback){
-                    if(is_callable($callback)){
-                        $subPort->on($event,$callback);
-                    }else if(is_array($callback)){
-                        $subPort->on($event,function()use($callback){
-                            $args = func_get_args();
-                            foreach ($callback as $item){
-                                call_user_func($item,$args);
-                            }
-                        });
-                    }
+                    $subPort->on($event, function () use ($callback) {
+                        $args = func_get_args();
+                        foreach ($callback as $item) {
+                            call_user_func($item, $args);
+                        }
+                    });
                 }
             }else{
                 throw new \Exception("addListener with server name:{$serverName} at host:{$server['host']} port:{$server['port']} fail");
@@ -116,7 +112,7 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        Event::getInstance()->hook('mainServerCreate',$this,$register);
+
         //检查是否注册了默认的ontask与onfinish事件
         if(!$register->get($register::onTask)){
             $register->registerDefaultOnTask();
@@ -131,19 +127,16 @@ class ServerManager
                 $register->registerDefaultOnRequest();
             }
         }
-
+        Event::getInstance()->hook('mainServerCreate', $this, $register);
         $events = $register->all();
+
         foreach ($events as $event => $callback){
-            if(is_callable($callback)){
-                $this->mainServer->on($event,$callback);
-            }else if(is_array($callback)){
-                $this->mainServer->on($event,function()use($callback){
-                    $args = func_get_args();
-                    foreach ($callback as $item){
-                        call_user_func_array($item,$args);
-                    }
-                });
-            }
+            $this->mainServer->on($event, function () use ($callback) {
+                $args = func_get_args();
+                foreach ($callback as $item) {
+                    call_user_func_array($item, $args);
+                }
+            });
         }
         return $this->mainServer;
     }

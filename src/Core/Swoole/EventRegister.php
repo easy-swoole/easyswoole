@@ -24,7 +24,7 @@ use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 
 
-class EventRegister extends Container
+class EventRegister
 {
     const onStart = 'start';
     const onShutdown = 'shutdown';
@@ -44,11 +44,11 @@ class EventRegister extends Container
     const onWorkerError = 'workerError';
     const onManagerStart = 'managerStart';
     const onManagerStop = 'managerStop';
-
     const onRequest = 'request';
     const onHandShake = 'handShake';
     const onMessage = 'message';
     const onOpen = 'open';
+
     private $allows = [
         'start','shutdown','workerStart','workerStop','workerExit','timer',
         'connect','receive','packet','close','bufferFull','bufferEmpty','task',
@@ -56,41 +56,54 @@ class EventRegister extends Container
         'request','handShake','message','open'
     ];
 
-    function add($key, $item): Container
+    private $eventList = [];
+
+    function add($key, $item): EventRegister
     {
         if(in_array($key,$this->allows)){
             if(is_callable($item)){
-                parent::add($key, $item);
+                $this->eventList[$key] = [$item];
             }else{
-                throw new \Exception("event {$key} is not a callable");
+                trigger_error("event {$key} is not a callable");
             }
         }else{
-            throw new \Exception("event {$key} is not allow");
+            trigger_error("event {$key} is not allow");
         }
         return $this;
+    }
+
+    public function get($key)
+    {
+        if (isset($this->eventList[$key])) {
+            return $this->eventList[$key];
+        } else {
+            return null;
+        }
     }
 
     function withAdd($key, $item)
     {
         if(in_array($key,$this->allows)){
             if(is_callable($item)){
-                $old = $this->get($key);
-                if(is_array($old)){
-                    $old[] = $item;
-                    parent::add($key,$old);
-                }else if($old != null){
-                    $old = [$old];
-                    $old[] = $item;
-                    parent::add($key,$old);
+                if (isset($this->eventList[$key])) {
+                    $old = $this->eventList[$key];
                 }else{
-                    parent::add($key,[$item]);
+                    $old = [];
                 }
+                $old[] = $item;
+                $this->eventList[$key] = $old;
             }else{
-                throw new \Exception("event {$key} is not a callable");
+                trigger_error("event {$key} is not a callable");
             }
         }else{
-            throw new \Exception("event {$key} is not allow");
+            trigger_error("event {$key} is not allow");
         }
+        return $this;
+    }
+
+    function all(): array
+    {
+        return $this->eventList;
     }
 
     public function registerDefaultOnRequest($controllerNameSpace = 'App\\HttpController\\'):void

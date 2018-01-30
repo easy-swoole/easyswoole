@@ -9,7 +9,16 @@
 namespace EasySwoole\Core\Component\Cluster;
 
 
+use EasySwoole\Core\AbstractInterface\Singleton;
+
 class Cluster
 {
+    use Singleton;
 
+    function run()
+    {
+        if (Config::getInstance()->getEnable()) {
+            //执行进程注册
+        }
+    }
 }
