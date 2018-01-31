@@ -10,8 +10,9 @@ namespace EasySwoole\Core\Component\Rpc;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Cluster\Config;
+use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
+use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -44,6 +45,12 @@ class Server
             'heartbeat_idle_time' => 15,
             'heartbeat_check_interval' => 2,
         ]);
-        $sub->registerDefaultOnReceive(new Parser($this->list));
+        $sub->registerDefaultOnReceive(new Parser($this->list),function (){
+            $bean = new ResponseObj();
+            $bean->setError("package parser error");
+            $bean->setStatus(Status::ACTION_NOT_FOUND);
+            return $bean->__toString();
+        });
+
     }
 }

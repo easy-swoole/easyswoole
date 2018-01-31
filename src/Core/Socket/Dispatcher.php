@@ -8,20 +8,23 @@
 
 namespace EasySwoole\Core\Socket;
 
+use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
-use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Dispatcher
 {
     const TCP = 1;
     const WEB_SOCK = 2;
     const UDP = 3;
+    const PACKAGE_PARSER_ERROR = 'PACKAGE_PARSER_ERROR';
+    const TARGET_CONTROLLER_NOT_FOUND = 'TARGET_CONTROLLER_NOT_FOUND';
     private $parser;
     private $exceptionHandler;
+    private $errorHandler = null;
 
     function __construct(ParserInterface $parser)
     {
@@ -32,6 +35,11 @@ class Dispatcher
     {
         $this->exceptionHandler = $handler;
         return $this;
+    }
+
+    public function onError(callable $callable = null)
+    {
+        $this->errorHandler = $callable;
     }
 
     /*
@@ -61,27 +69,56 @@ class Dispatcher
         }
         $command = $this->parser->decode($data,$client);
         if($command == null){
+            if(is_callable($this->errorHandler)){
+                try{
+                    $ret = call_user_func($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
+                    if($ret !== null){
+                        $res = $this->parser->encode($ret,$client);
+                        if($res !== null){
+                            Response::response($client,$res);
+                        }
+                    }
+                }catch (\Throwable $exception){
+                    trigger_error($exception->getTraceAsString());
+                    Response::response($client,$exception->getTraceAsString());
+                }
+            }
             return;
         }
         $controller = $command->getControllerClass();
         if(class_exists($controller)){
+            $response = new SplStream();
             try{
-                $resCommand = new CommandBean();
-                (new $controller($client,$command,$resCommand));
+                (new $controller($client,$command,$response));
             }catch (\Throwable $throwable){
                 if($this->exceptionHandler instanceof ExceptionHandler){
-                    $resCommand = $this->exceptionHandler->handler($throwable,$client,$command);
+                    $data = $this->exceptionHandler->handler($throwable,$client,$command);
+                    if($data !== null){
+                        $response->write($data);
+                    }
                 }else{
-                    throw $throwable;
+                    trigger_error($throwable->getTraceAsString());
+                    $response->write($throwable->getMessage().$throwable->getTraceAsString());
                 }
             }
-            $res = $this->parser->encode($resCommand,$client);
-            if(strlen($res) != 0){
+            $res = $this->parser->encode($response,$client);
+            if($res !== null){
                 Response::response($client,$res);
             }
         }else{
-            if(!empty($controller)){
-                trigger_error("{$controller} not a tcp controller class");
+            if(is_callable($this->errorHandler)){
+                try{
+                    $ret = call_user_func($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
+                    if($ret !== null){
+                        $res = $this->parser->encode($ret,$client);
+                        if($res !== null){
+                            Response::response($client,$res);
+                        }
+                    }
+                }catch (\Throwable $exception){
+                    trigger_error($exception->getTraceAsString());
+                    Response::response($client,$exception->getTraceAsString());
+                }
             }
         }
     }

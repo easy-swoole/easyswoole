@@ -14,5 +14,5 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 interface ParserInterface
 {
     public function decode($raw,$client):?CommandBean;
-    public function encode(?CommandBean $raw,$client):?string ;
+    public function encode(string $raw,$client):?string ;
 }

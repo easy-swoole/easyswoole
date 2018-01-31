@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Common\CommandBean;
@@ -17,13 +18,13 @@ abstract class UdpController extends Controller
 {
 
     private $client;
-    final function __construct(Udp $client,CommandBean $request,CommandBean $response)
+    function __construct(Udp $client,CommandBean $request,SplStream $response)
     {
         parent::__construct($request, $response);
         $this->client = $client;
     }
 
-    function client():Udp
+    protected function client():Udp
     {
         // TODO: Implement client() method.
         return $this->client;

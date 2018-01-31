@@ -13,5 +13,5 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 
 interface ExceptionHandler
 {
-    public function handler(\Throwable $throwable,$client,CommandBean $bean):?CommandBean ;
+    public function handler(\Throwable $throwable,$client,CommandBean $bean):?string ;
 }

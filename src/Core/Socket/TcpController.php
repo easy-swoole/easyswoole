@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Socket;
 
 
+use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Common\CommandBean;
@@ -16,13 +17,13 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 abstract class TcpController extends Controller
 {
     private $client;
-    final function __construct(Tcp $client,CommandBean $request,CommandBean $response)
+    function __construct(Tcp $client,CommandBean $request,SplStream $response)
     {
         $this->client = $client;
         parent::__construct( $request, $response);
     }
 
-    function client():Tcp
+    protected function client():Tcp
     {
         // TODO: Implement client() method.
         return $this->client;

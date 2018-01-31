@@ -181,27 +181,30 @@ class EventRegister
         });
     }
 
-    public function registerDefaultOnReceive(ParserInterface $parser,ExceptionHandler $exceptionHandler = null):void
+    public function registerDefaultOnReceive(ParserInterface $parser,callable $onError = null,ExceptionHandler $exceptionHandler = null):void
     {
         $dispatch = new SocketDispatcher($parser);
+        $dispatch->onError($onError);
         $dispatch->setExceptionHandler($exceptionHandler);
         $this->add(self::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($dispatch){
             $dispatch->dispatch($dispatch::TCP,$data,$fd,$reactor_id);
         });
     }
 
-    public function registerDefaultOnPacket(ParserInterface $parser,ExceptionHandler $exceptionHandler = null)
+    public function registerDefaultOnPacket(ParserInterface $parser,callable $onError = null,ExceptionHandler $exceptionHandler = null)
     {
         $dispatch = new SocketDispatcher($parser);
+        $dispatch->onError($onError);
         $dispatch->setExceptionHandler($exceptionHandler);
         $this->add(self::onPacket,function (\swoole_server $server, string $data, array $client_info)use($dispatch){
             $dispatch->dispatch($dispatch::UDP,$data,$client_info);
         });
     }
 
-    public function registerDefaultOnMessage(ParserInterface $parser,ExceptionHandler $exceptionHandler = null)
+    public function registerDefaultOnMessage(ParserInterface $parser,callable $onError = null,ExceptionHandler $exceptionHandler = null)
     {
         $dispatch = new SocketDispatcher($parser);
+        $dispatch->onError($onError);
         $dispatch->setExceptionHandler($exceptionHandler);
         $this->add(self::onMessage,function (\swoole_server $server, \swoole_websocket_frame $frame)use($dispatch){
             $dispatch->dispatch($dispatch::WEB_SOCK,$frame->data,$frame);

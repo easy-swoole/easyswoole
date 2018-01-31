@@ -9,6 +9,9 @@
 namespace EasySwoole\Core\Component\Rpc\Common;
 
 
+use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Socket\Common\CommandBean;
+
 class Signature
 {
     static function signature()
@@ -16,8 +19,8 @@ class Signature
 
     }
 
-    static function check()
+    static function check(CommandBean $bean,ServiceNode $node)
     {
-
+        $time = time();
     }
 }

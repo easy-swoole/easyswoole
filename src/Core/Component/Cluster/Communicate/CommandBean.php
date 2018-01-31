@@ -88,5 +88,4 @@ class CommandBean extends SplBean
             $this->time = time();
         }
     }
-
 }

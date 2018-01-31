@@ -8,6 +8,7 @@
 
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
+use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class Controller
@@ -17,14 +18,14 @@ abstract class Controller
 
     protected abstract function client();
 
-    function __construct(CommandBean $request,CommandBean $response)
+    function __construct(CommandBean $request,SplStream $response)
     {
         $this->request = $request;
         $this->response = $response;
         if($request->getAction() != '__construct'){
             $this->__hook($request->getAction());
         }else{
-            $response->setError('do not try to call __construct');
+            $response->write('do not try to call __construct');
         }
     }
 
@@ -53,7 +54,7 @@ abstract class Controller
         return true;
     }
 
-    protected function response():CommandBean
+    protected function response()
     {
         return $this->response;
     }
