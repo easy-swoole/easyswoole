@@ -124,7 +124,7 @@ class EventRegister
                 }else{
                     $response_psr = new Response($response);
                     $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                    $response_psr->write($throwable->getMessage());
+                    $response_psr->write($throwable->getMessage() . $throwable->getTraceAsString());
                 }
             }
             //携程模式下  底层不会自动end
