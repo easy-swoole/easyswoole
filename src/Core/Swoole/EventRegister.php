@@ -122,7 +122,6 @@ class EventRegister
                 if($handler instanceof ExceptionHandlerInterface){
                     $handler->handle($throwable,$request_psr,$response_psr);
                 }else{
-                    $response_psr = new Response($response);
                     $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
                     $response_psr->write($throwable->getMessage() . $throwable->getTraceAsString());
                 }
