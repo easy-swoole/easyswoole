@@ -74,7 +74,7 @@ class ServerManager
                     $subPort->on($event, function () use ($callback) {
                         $args = func_get_args();
                         foreach ($callback as $item) {
-                            call_user_func($item, $args);
+                            call_user_func_array($item, $args);
                         }
                     });
                 }
