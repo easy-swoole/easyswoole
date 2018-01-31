@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Component\Cluster\Communicate;
 
 
+use EasySwoole\Core\Component\Cluster\Common\EventRegister;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Cluster\NetWork\Udp;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
@@ -23,6 +24,14 @@ class Detector extends AbstractProcess
 
     public function run(Process $process)
     {
+        $call = EventRegister::getInstance()->get(EventRegister::CLUSTER_START);
+        if (is_callable($call)) {
+            try {
+                call_user_func($call);
+            } catch (\Throwable $throwable) {
+                trigger_error($throwable->getTraceAsString());
+            }
+        }
         // TODO: Implement run() method.
         $this->addTick(5 * 1000 * 1000, function () {
             if (!$this->listener) {
@@ -42,7 +51,11 @@ class Detector extends AbstractProcess
     public function onReceive(string $str, ...$args)
     {
         // TODO: Implement onReceive() method.
-        var_dump($str, $args);
+        try {
+
+        } catch (\Throwable $throwable) {
+
+        }
     }
 
     private function createListen($port, $address = '0.0.0.0')
