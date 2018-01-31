@@ -59,7 +59,7 @@ class Dispatcher
                 throw new \Exception('dispatch type error');
             }
         }
-        $command = $this->parser->decode($data,$args);
+        $command = $this->parser->decode($data,$client);
         if($command == null){
             return;
         }
@@ -75,7 +75,7 @@ class Dispatcher
                     throw $throwable;
                 }
             }
-            $res = $this->parser->encode($resCommand,$args);
+            $res = $this->parser->encode($resCommand,$client);
             if(strlen($res) != 0){
                 Response::response($client,$res);
             }

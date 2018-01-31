@@ -20,7 +20,7 @@ class Parser implements ParserInterface
         $this->services = $services;
     }
 
-    public function decode($raw, array $args):?CommandBean
+    public function decode($raw, $client):?CommandBean
     {
         // TODO: Implement decode() method.
         $raw = substr($raw, 4);
@@ -38,7 +38,7 @@ class Parser implements ParserInterface
 
     }
 
-    public function encode(?CommandBean $raw, array $args):?string
+    public function encode(?CommandBean $raw, $client):?string
     {
         // TODO: Implement encode() method.
         if($raw->getStatus() === null){

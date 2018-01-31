@@ -13,6 +13,6 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 
 interface ParserInterface
 {
-    public function decode($raw,array $args):?CommandBean;
-    public function encode(?CommandBean $raw,array $args):?string ;
+    public function decode($raw,$client):?CommandBean;
+    public function encode(?CommandBean $raw,$client):?string ;
 }
