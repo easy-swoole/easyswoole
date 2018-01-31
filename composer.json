@@ -23,7 +23,7 @@
     "autoload": {
         "psr-4": {
             "EasySwoole\\": "src/",
-          "EasySwoole\\Test\\": "test/"
+            "EasySwoole\\Test\\": "test/"
         }
     },
     "require-dev": {
