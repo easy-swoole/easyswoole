@@ -30,7 +30,9 @@ class ServerManager
         return ServerManager::$instance;
     }
 
-    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = null):EventRegister
+    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = [
+        "open_eof_check"=>false,
+    ]):EventRegister
     {
         $eventRegister = new EventRegister();
         $this->serverList[$serverName] = [
