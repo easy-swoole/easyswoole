@@ -21,13 +21,13 @@ class Parser implements ParserInterface
         $this->services = $services;
     }
 
-    public function decode($raw, $client):?CommandBean
+    public function decode($raw, $client)
     {
         // TODO: Implement decode() method.
-        $raw = substr($raw, 4);
+        $raw = $this->decodeRawData($raw);
         $json = json_decode($raw,true);
         if(is_array($json)){
-            $bean = new Command($json);
+            $bean = new CommandBean($json);
             if(isset($this->services[$bean->getControllerClass()])){
                 $bean->setControllerClass($this->services[$bean->getControllerClass()]);
                 return $bean;
@@ -37,6 +37,16 @@ class Parser implements ParserInterface
         }else{
             return null;
         }
+    }
+
+    public function decodeRawData($raw)
+    {
+        return substr($raw, 4);
+    }
+
+    public function encodeRawData($sendStr)
+    {
+        return pack('N', strlen($sendStr)).$sendStr;
     }
 
     public function encode(string $sendStr, $client):?string

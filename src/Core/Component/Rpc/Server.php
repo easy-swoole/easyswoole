@@ -47,7 +47,7 @@ class Server
         ]);
         $sub->registerDefaultOnReceive(new Parser($this->list),function (){
             $bean = new ResponseObj();
-            $bean->setError("package parser error");
+            $bean->setError("package parser error Or server not exist");
             $bean->setStatus(Status::ACTION_NOT_FOUND);
             return $bean->__toString();
         });

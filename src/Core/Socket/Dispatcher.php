@@ -14,6 +14,7 @@ use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Dispatcher
 {
@@ -68,7 +69,7 @@ class Dispatcher
             }
         }
         $command = $this->parser->decode($data,$client);
-        if($command == null){
+        if($command === null){
             if(is_callable($this->errorHandler)){
                 try{
                     $ret = call_user_func($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
@@ -84,41 +85,47 @@ class Dispatcher
                 }
             }
             return;
-        }
-        $controller = $command->getControllerClass();
-        if(class_exists($controller)){
-            $response = new SplStream();
-            try{
-                (new $controller($client,$command,$response));
-            }catch (\Throwable $throwable){
-                if($this->exceptionHandler instanceof ExceptionHandler){
-                    $data = $this->exceptionHandler->handler($throwable,$client,$command);
-                    if($data !== null){
-                        $response->write($data);
+        }else if($command instanceof CommandBean){
+            $controller = $command->getControllerClass();
+            if(class_exists($controller)){
+                $response = new SplStream();
+                try{
+                    (new $controller($client,$command,$response));
+                }catch (\Throwable $throwable){
+                    if($this->exceptionHandler instanceof ExceptionHandler){
+                        $data = $this->exceptionHandler->handler($throwable,$client,$command);
+                        if($data !== null){
+                            $response->write($data);
+                        }
+                    }else{
+                        trigger_error($throwable->getTraceAsString());
+                        $response->write($throwable->getMessage().$throwable->getTraceAsString());
                     }
-                }else{
-                    trigger_error($throwable->getTraceAsString());
-                    $response->write($throwable->getMessage().$throwable->getTraceAsString());
                 }
-            }
-            $res = $this->parser->encode($response,$client);
-            if($res !== null){
-                Response::response($client,$res);
+                $res = $this->parser->encode($response,$client);
+                if($res !== null){
+                    Response::response($client,$res);
+                }
+            }else{
+                if(is_callable($this->errorHandler)){
+                    try{
+                        $ret = call_user_func($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
+                        if($ret !== null){
+                            $res = $this->parser->encode($ret,$client);
+                            if($res !== null){
+                                Response::response($client,$res);
+                            }
+                        }
+                    }catch (\Throwable $exception){
+                        trigger_error($exception->getTraceAsString());
+                        Response::response($client,$exception->getTraceAsString());
+                    }
+                }
             }
         }else{
-            if(is_callable($this->errorHandler)){
-                try{
-                    $ret = call_user_func($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
-                    if($ret !== null){
-                        $res = $this->parser->encode($ret,$client);
-                        if($res !== null){
-                            Response::response($client,$res);
-                        }
-                    }
-                }catch (\Throwable $exception){
-                    trigger_error($exception->getTraceAsString());
-                    Response::response($client,$exception->getTraceAsString());
-                }
+            $res = $this->parser->encode($command,$client);
+            if($res !== null){
+                Response::response($client,$res);
             }
         }
     }

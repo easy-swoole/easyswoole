@@ -11,6 +11,8 @@ namespace EasySwoole\Core\Component\Rpc;
 
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Client\TaskObj;
+use EasySwoole\Core\Component\Rpc\Common\Command;
+use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
@@ -34,6 +36,7 @@ class Client
      */
     public function call($timeOut = 0.1, $reTry = false)
     {
+        $encoder = new Parser([]);
         $map = [];
         $clients = [];
         $nodeMap = [];
@@ -67,8 +70,7 @@ class Client
                                     //controllerClass作为服务名称
                                     $commandBean->setControllerClass($node->getServiceName());
                                     $commandBean->setAction($task->getServiceAction());
-                                    $sendStr = \swoole_serialize::pack($commandBean);
-                                    $data = pack('N', strlen($sendStr)) . $sendStr;
+                                    $data = $encoder->encodeRawData($commandBean->__toString());
                                     $clients[$index]->send($data);
                                     $map[$index] = $task;
                                     $nodeMap[$index] = $node;
@@ -95,8 +97,7 @@ class Client
                         //controllerClass作为服务名称
                         $commandBean->setControllerClass($node->getServiceName());
                         $commandBean->setAction($task->getServiceAction());
-                        $sendStr = \swoole_serialize::pack($commandBean);
-                        $data = pack('N', strlen($sendStr)).$sendStr;
+                        $data = $encoder->encodeRawData($commandBean->__toString());
                         $clients[$index]->send($data);
                         $map[$index] = $task;
                         $nodeMap[$index] = $node;
@@ -118,9 +119,9 @@ class Client
             if($n > 0){
                 foreach ($read as $index =>$client){
                     $data = $client->recv();
-                    $resp = substr($data, 4);
-                    $commandBean = \swoole_serialize::unpack($resp);
-                    $res = new ResponseObj($commandBean->toArray());
+                    $data = json_decode($encoder->decodeRawData($data),true);
+                    $data = $data ?: [];
+                    $res = new ResponseObj($data);
                     $res->setAction($map[$index]->getServiceAction());
                     $res->setServiceNode($nodeMap[$index]);
                     $this->callFunc($res,$map[$index]);
