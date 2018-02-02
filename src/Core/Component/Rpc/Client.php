@@ -54,7 +54,7 @@ class Client
                     if (!$client) {
                         //若未指定节点   尝试再去获取一个节点
                         if ($reTry && empty($task->getServiceId())) {
-                            $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName(), $node->getServiceId());
+                            $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName(), $node->getServerId());
                             if ($node) {
                                 $client = $this->connect($node);
                                 if (!$client) {

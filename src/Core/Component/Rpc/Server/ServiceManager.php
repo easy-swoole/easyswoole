@@ -26,7 +26,7 @@ class ServiceManager
                 'size'=>35,
                 'type'=>Table::TYPE_STRING
             ],
-            'serviceId'=>[
+            'serverId'=>[
                 'size'=>16,
                 'type'=>Table::TYPE_STRING
             ],
@@ -49,14 +49,14 @@ class ServiceManager
 
     public function addServiceNode(ServiceNode $bean):void
     {
-        $this->getTable()->set($bean->getServiceId(),$bean->toArray());
+        $this->getTable()->set($this->generateKey($bean),$bean->toArray());
     }
 
 
 
     public function deleteServiceNode(ServiceNode $bean):void
     {
-        $this->getTable()->del($bean->getServiceId());
+        $this->getTable()->del($this->generateKey($bean));
     }
 
     public function allServiceNodes():array
@@ -124,7 +124,7 @@ class ServiceManager
 
     public function getServiceNodeById(string $id):?ServiceNode
     {
-        $data = $this->getTable()->del($id);
+        $data = $this->getTable()->get($id);
         if($data){
             return new ServiceNode($data);
         }else{
@@ -148,7 +148,7 @@ class ServiceManager
                 foreach ($service as $key => $item){
                     if($item instanceof ServiceNode){
                         //不对自身节点做gc
-                        if($key === substr(md5($serverId.$item->getServiceName()), 8, 16)){
+                        if($key === $this->generateKey($item)){
                             continue;
                         }
                         if($time - $item->getLastHeartBeat() > $timeOut){
@@ -165,5 +165,10 @@ class ServiceManager
     private function getTable():Table
     {
         return TableManager::getInstance()->get($this->tableName);
+    }
+
+    private function generateKey(ServiceNode $serviceNode):string
+    {
+        return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
     }
 }
