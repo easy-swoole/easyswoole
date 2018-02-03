@@ -45,9 +45,9 @@ class Server
             'heartbeat_idle_time' => 15,
             'heartbeat_check_interval' => 2,
         ]);
-        $sub->registerDefaultOnReceive(new Parser($this->list),function (){
+        $sub->registerDefaultOnReceive(new Parser($this->list),function ($err){
             $bean = new ResponseObj();
-            $bean->setError("package parser error Or server not exist");
+            $bean->setError($err);
             $bean->setStatus(Status::ACTION_NOT_FOUND);
             return $bean->__toString();
         });

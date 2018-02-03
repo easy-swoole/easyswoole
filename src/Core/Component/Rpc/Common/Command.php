@@ -13,24 +13,7 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Command extends CommandBean
 {
-    protected $time;
     protected $signature;
-
-    /**
-     * @return mixed
-     */
-    public function getTime()
-    {
-        return $this->time;
-    }
-
-    /**
-     * @param mixed $time
-     */
-    public function setTime($time): void
-    {
-        $this->time = $time;
-    }
 
     /**
      * @return mixed

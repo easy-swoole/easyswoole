@@ -35,7 +35,7 @@ return [
         'listenPort'=>9556,
         'broadcastTTL'=>5,
         'serviceTTL'=>10,
-        'nodeName'=>'',
-        'nodeId'=>''
+        'serverName'=>'',
+        'serverId'=>''
     ]
 ];

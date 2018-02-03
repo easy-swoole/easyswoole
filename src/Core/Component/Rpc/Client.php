@@ -65,11 +65,12 @@ class Client
                                     $this->callFunc($res, $task);
                                 } else {
                                     $clients[$index] = $client;
-                                    $commandBean = new CommandBean();
+                                    $commandBean = new Command();
                                     $commandBean->setArgs($task->getArgs());
                                     //controllerClass作为服务名称
                                     $commandBean->setControllerClass($node->getServiceName());
                                     $commandBean->setAction($task->getServiceAction());
+                                    $commandBean = $encoder->signature($commandBean);
                                     $data = $encoder->encodeRawData($commandBean->__toString());
                                     $clients[$index]->send($data);
                                     $map[$index] = $task;
@@ -92,11 +93,12 @@ class Client
                         }
                     }else{
                         $clients[$index] = $client;
-                        $commandBean = new CommandBean();
+                        $commandBean = new Command();
                         $commandBean->setArgs($task->getArgs());
                         //controllerClass作为服务名称
                         $commandBean->setControllerClass($node->getServiceName());
                         $commandBean->setAction($task->getServiceAction());
+                        $commandBean = $encoder->signature($commandBean);
                         $data = $encoder->encodeRawData($commandBean->__toString());
                         $clients[$index]->send($data);
                         $map[$index] = $task;
@@ -118,10 +120,14 @@ class Client
             $n = swoole_client_select($read, $write, $error, 0.01);
             if($n > 0){
                 foreach ($read as $index =>$client){
-                    $data = $client->recv();
-                    $data = json_decode($encoder->decodeRawData($data),true);
-                    $data = $data ?: [];
-                    $res = new ResponseObj($data);
+                    $msg = $client->recv();
+                    $data = json_decode($encoder->decodeRawData($msg),true);
+                    if(is_array($data)){
+                        $res = new ResponseObj($data);
+                    }else{
+                        $res = new ResponseObj([]);
+                        $res->setError($msg);
+                    }
                     $res->setAction($map[$index]->getServiceAction());
                     $res->setServiceNode($nodeMap[$index]);
                     $this->callFunc($res,$map[$index]);
