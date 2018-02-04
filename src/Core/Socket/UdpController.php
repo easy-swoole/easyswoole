@@ -20,8 +20,8 @@ abstract class UdpController extends Controller
     private $client;
     function __construct(Udp $client,CommandBean $request,SplStream $response)
     {
-        parent::__construct($request, $response);
         $this->client = $client;
+        parent::__construct($request, $response);
     }
 
     protected function client():Udp
