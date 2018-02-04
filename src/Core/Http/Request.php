@@ -85,7 +85,7 @@ class Request  extends ServerRequest
 
     private function initFiles()
     {
-        if(isset($this->swoole_http_request->files)){
+        if(isset($this->request->files)){
             $normalized = array();
             foreach ($this->request->files as $key => $value) {
                 $normalized[$key] = new UploadFile(
