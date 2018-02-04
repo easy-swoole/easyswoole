@@ -4,7 +4,7 @@ use EasySwoole\Core\Core;
 use EasySwoole\Config as Conf;
 use EasySwoole\Core\Utility\File;
 
-define('ROOT', realpath(getcwd()));
+define('EASYSWOOLE_ROOT', realpath(getcwd()));
 
 foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
@@ -69,20 +69,20 @@ function opCacheClear()
 
 function envCheck()
 {
-    if (phpversion() < 7.2) {
-        die("PHP version\e[31m must >= 7.2\e[0m\n");
+    if(version_compare(phpversion(),'7.1','<')){
+        die("PHP version\e[31m must >= 7.1\e[0m\n");
     }
-    if (phpversion('swoole') < 1.9) {
+    if(version_compare(phpversion('swoole'),'1.9.5','<')){
         die("Swoole extension version\e[31m must >= 1.9.5\e[0m\n");
     }
     if (!class_exists('EasySwoole\Core\Core')) {
-        die("Autoload fail!\nPlease try to run\e[31m composer install\e[0m in " . ROOT . "\n");
+        die("Autoload fail!\nPlease try to run\e[31m composer install\e[0m in " . EASYSWOOLE_ROOT . "\n");
     }
 }
 
 function installCheck()
 {
-    $lockFile = ROOT . '/easyswoole.install';
+    $lockFile = EASYSWOOLE_ROOT . '/easyswoole.install';
     if (!is_file($lockFile)) {
         die("easySwoole framework has not been installed, Please run\e[031m easyswoole install\e[0m\n");
     }
@@ -90,8 +90,8 @@ function installCheck()
 
 function initConf()
 {
-    releaseResource(__DIR__ . '/../src/Resource/Config.tpl', ROOT . '/Config.php');
-    releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', ROOT . '/EasySwooleEvent.php');
+    releaseResource(__DIR__ . '/../src/Resource/Config.tpl', EASYSWOOLE_ROOT . '/Config.php');
+    releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
 }
 
 function releaseResource($source, $destination)
@@ -358,11 +358,12 @@ function serverReload($options)
         $pidFile = $options['pid'];
     }
     if (file_exists($pidFile)) {
-        if (in_array('all', $options)) {
-            $sig = SIGUSR1;
-        } else {
+        if (isset($options['onlyTask'])) {
             $sig = SIGUSR2;
+        } else {
+            $sig = SIGUSR1;
         }
+
         opCacheClear();
         $pid = file_get_contents($pidFile);
         if (!swoole_process::kill($pid, 0)) {
@@ -379,7 +380,7 @@ function serverReload($options)
 
 function serverInstall($options)
 {
-    $lockFile = ROOT . '/easyswoole.install';
+    $lockFile = EASYSWOOLE_ROOT . '/easyswoole.install';
     if (!is_file($lockFile)) {
         initConf();
         $Conf    = Conf::getInstance();
@@ -415,8 +416,8 @@ function serverInstall($options)
         }
         file_put_contents($lockFile, 'installed at ' . date('Y-m-d H:i:s'));
 
-        $realPath = getRelativelyPath(__DIR__ . '/easyswoole', ROOT);
-        file_put_contents(ROOT . '/easyswoole', "<?php\nrequire '$realPath';");
+        $realPath = getRelativelyPath(__DIR__ . '/easyswoole', EASYSWOOLE_ROOT);
+        file_put_contents(EASYSWOOLE_ROOT . '/easyswoole', "<?php\nrequire '$realPath';");
 
         echo "easySwoole server install complete!\n";
     } else {

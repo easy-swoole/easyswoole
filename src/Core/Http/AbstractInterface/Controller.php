@@ -24,6 +24,16 @@ abstract class Controller
 
     abstract function index();
 
+    public function __construct(string $actionName,Request $request,Response $response)
+    {
+        if($actionName == '__hook'){
+            $this->response()->withStatus(Status::CODE_BAD_REQUEST);
+        }else{
+            $this->actionName = $actionName;
+            $this->__hook( $request, $response);
+        }
+    }
+
     protected function actionNotFound($action = null):void
     {
         $this->response()->withStatus(Status::CODE_NOT_FOUND);
@@ -54,17 +64,11 @@ abstract class Controller
         $this->actionName = $action;
     }
 
-    function __hook(string $actionName,Request $request,Response $response):void
+    protected function __hook(Request $request,Response $response):void
     {
-        if($actionName == '__hook'){
-            $this->response()->withStatus(Status::CODE_BAD_REQUEST);
-            return;
-        }
         $this->request = $request;
         $this->response = $response;
-        $this->actionName = $actionName;
-        if($this->onRequest($actionName) !== false){
-            $this->onRequest($actionName);
+        if($this->onRequest($this->actionName) !== false){
             //防止onRequest中   对actionName 进行修改
             $actionName = $this->actionName;
             //支持在子类控制器中以private，protected来修饰某个方法不可见
@@ -82,14 +86,31 @@ abstract class Controller
         }
     }
 
-    final protected function request():Request
+    protected function request():Request
     {
         return $this->request;
     }
 
-    final protected function response():Response
+    protected function response():Response
     {
         return $this->response;
+    }
+
+    protected function writeJson($statusCode = 200,$result = null,$msg = null){
+        if(!$this->response()->isEndResponse()){
+            $data = Array(
+                "code"=>$statusCode,
+                "result"=>$result,
+                "msg"=>$msg
+            );
+            $this->response()->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+            $this->response()->withHeader('Content-type','application/json;charset=utf-8');
+            $this->response()->withStatus($statusCode);
+            return true;
+        }else{
+            trigger_error("response has end");
+            return false;
+        }
     }
 
     /*

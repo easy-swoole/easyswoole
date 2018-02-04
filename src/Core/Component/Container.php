@@ -13,13 +13,13 @@ class Container
 {
     private $container = [];
 
-    function add($key,$item):Container
+    function add($key,$item)
     {
         $this->container[$key] = $item;
         return $this;
     }
 
-    function delete($key):Container
+    function delete($key)
     {
         if(isset($this->container[$key])){
             unset($this->container[$key]);

@@ -8,16 +8,25 @@
 
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
-
-use EasySwoole\Core\Component\Spl\SplStream;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class Controller
 {
     private $response;
-    private $actionName;
-    private $args;
+    private $request;
 
     protected abstract function client();
+
+    function __construct(CommandBean $request,CommandBean $response)
+    {
+        $this->request = $request;
+        $this->response = $response;
+        if($request->getAction() != '__construct'){
+            $this->__hook($request->getAction());
+        }else{
+            $response->setError('do not try to call __construct');
+        }
+    }
 
     protected function actionNotFound(string $actionName)
     {
@@ -29,16 +38,12 @@ abstract class Controller
 
     }
 
-    protected function onException(\Throwable $throwable):?string
+    protected function onException(\Throwable $throwable):void
     {
         throw $throwable;
     }
 
-    protected function __construct(array $args)
-    {
-        $this->response = new SplStream();
-        $this->args = $args;
-    }
+
 
     /*
      * 返回false的时候为拦截
@@ -48,61 +53,29 @@ abstract class Controller
         return true;
     }
 
-    protected function response():SplStream
+    protected function response():CommandBean
     {
         return $this->response;
     }
 
-    protected function write(string $message):void
+    protected function request():CommandBean
     {
-        $this->response->write($message);
+        return $this->request;
     }
 
-    protected function getArg($key)
-    {
-        if(isset($this->args[$key])){
-            return $this->args[$key];
-        }else{
-            return null;
-        }
-    }
 
-    protected function getArgs():array
+    protected function __hook(string $actionName)
     {
-        return $this->args;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getActionName():string
-    {
-        return $this->actionName;
-    }
-
-    /**
-     * @param string $actionName
-     */
-    protected function setActionName(string $actionName)
-    {
-        $this->actionName = $actionName;
-    }
-
-    public function __hook(string $actionName):?string
-    {
-        if($actionName == '__hook'){
-            return null;
-        }
-        $this->actionName = $actionName;
         if($this->onRequest($actionName) !== false){
             $ref = new \ReflectionClass(static::class);
             if($ref->hasMethod($actionName)){
                 if($ref->getMethod($actionName)->isPublic()){
                     try{
+                        $actionName = $this->request->getAction();
                         $this->$actionName();
-                        $this->afterAction($this->getActionName());
+                        $this->afterAction($actionName);
                     }catch (\Throwable $throwable){
-                        return $this->onException($throwable);
+                        $this->onException($throwable);
                     }
                 }else{
                     $this->actionNotFound($actionName);
@@ -111,6 +84,5 @@ abstract class Controller
                 $this->actionNotFound($actionName);
             }
         }
-        return $this->response()->__toString();
     }
 }

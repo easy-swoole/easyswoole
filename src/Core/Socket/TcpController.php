@@ -11,14 +11,15 @@ namespace EasySwoole\Core\Socket;
 
 use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Tcp;
+use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class TcpController extends Controller
 {
     private $client;
-    final function __construct(Tcp $client,array $args)
+    final function __construct(Tcp $client,CommandBean $request,CommandBean $response)
     {
-        parent::__construct($args);
         $this->client = $client;
+        parent::__construct( $request, $response);
     }
 
     function client():Tcp

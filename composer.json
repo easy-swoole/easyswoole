@@ -1,10 +1,10 @@
 {
     "name": "easyswoole/easyswoole",
-    "type": "framework",
+    "type": "library",
     "description": "An efficient swoole framework",
     "keywords" : ["swoole", "framework", "async","easyswoole"],
     "homepage" : "https://www.easyswoole.com/",
-    "license" : "Apache 2.0",
+    "license" : "Apache-2.0",
     "bin": [
         "bin/easyswoole"
     ],
@@ -15,6 +15,7 @@
         }
     ],
     "require": {
+        "php": ">=7.1.0",
         "nikic/fast-route": "^1.2",
         "nikic/php-parser": "^3.1",
         "jeremeamia/SuperClosure": "^2.3"
@@ -23,12 +24,6 @@
         "psr-4": {
             "EasySwoole\\": "src/",
             "EasySwoole\\Test\\":"test/"
-        }
-    },
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://packagist.phpcomposer.com"
         }
     },
     "require-dev": {

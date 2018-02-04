@@ -140,13 +140,7 @@ class Dispatcher
             }
         }
         if(class_exists($finalClass)){
-            $controller = new $finalClass;
-            if($controller instanceof Controller){
-                $controller->__hook($actionName,$request,$response);
-            }else{
-                trigger_error("class@{$finalClass} not a controller class");
-                $response->withStatus(Status::CODE_NOT_FOUND);
-            }
+            (new $finalClass($actionName,$request,$response));
         }else{
             $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
             $response->write($content);

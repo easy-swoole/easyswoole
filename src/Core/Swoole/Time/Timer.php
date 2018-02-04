@@ -2,12 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2018/1/2
- * Time: 下午5:16
+ * Date: 2018/1/11
+ * Time: 下午9:14
  */
 
-namespace EasySwoole\Core\Swoole;
+namespace EasySwoole\Core\Swoole\Time;
 
+
+use EasySwoole\Core\Swoole\ServerManager;
 
 class Timer
 {

@@ -2,20 +2,38 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/25
- * Time: 上午11:47
+ * Date: 2018/1/22
+ * Time: 下午1:18
  */
 
-namespace EasySwoole\Core\Socket\Command;
-
-
+namespace EasySwoole\Core\Socket\Common;
 use EasySwoole\Core\Component\Spl\SplBean;
 
 class CommandBean extends SplBean
 {
     protected $controllerClass = null;
     protected $action = 'index';
+    protected $error;
+    protected $result;
     protected $args = [];
+    protected $status;
+
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus($status): void
+    {
+        $this->status = $status;
+    }
+
 
     public function getControllerClass():?string
     {
@@ -65,4 +83,43 @@ class CommandBean extends SplBean
     {
         $this->args[$key] = $val;
     }
+
+    public function setArgs(array $data)
+    {
+        $this->args = $data;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * @param mixed $error
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * @param mixed $result
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
+    }
+
+
 }
