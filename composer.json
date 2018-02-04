@@ -23,11 +23,11 @@
     "autoload": {
         "psr-4": {
             "EasySwoole\\": "src/",
-            "EasySwoole\\Test\\":"test/"
+            "EasySwoole\\Test\\": "test/"
         }
     },
     "require-dev": {
-        "eaglewu/swoole-ide-helper": "dev-master",
+        "easyswoole/swoole-ide-helper": "^1.0",
         "phpunit/phpunit" : "^5.6"
     }
 }

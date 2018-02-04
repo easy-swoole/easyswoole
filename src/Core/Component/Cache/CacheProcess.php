@@ -23,11 +23,11 @@ class CacheProcess extends AbstractProcess
 {
     private $cacheData = null;
     private $persistentTime = 0;
-    function __construct($async,$args)
+    function __construct(string $processName, bool $async = true, array $args)
     {
         $this->cacheData = new SplArray();
         $this->persistentTime = Config::getInstance()->getConf('EASY_CACHE.PERSISTENT_TIME');
-        parent::__construct(true, $args);
+        parent::__construct($processName, $async, $args);
     }
 
     public function run(Process $process)
@@ -38,9 +38,9 @@ class CacheProcess extends AbstractProcess
             Logger::getInstance()->console('loading data from file at process '.$processName);
             $this->loadData();
             Logger::getInstance()->console('loading data from file success at process '.$processName);
-            $this->setTick(function (){
+            $this->addTick($this->persistentTime*1000,function (){
                 $this->saveData();
-            },$this->persistentTime*1000*1000);
+            });
         }
     }
 

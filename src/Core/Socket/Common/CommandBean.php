@@ -13,37 +13,20 @@ class CommandBean extends SplBean
 {
     protected $controllerClass = null;
     protected $action = 'index';
-    protected $error;
-    protected $result;
     protected $args = [];
-    protected $status;
 
     /**
-     * @return mixed
+     * @return null
      */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param mixed $status
-     */
-    public function setStatus($status): void
-    {
-        $this->status = $status;
-    }
-
-
-    public function getControllerClass():?string
+    public function getControllerClass()
     {
         return $this->controllerClass;
     }
 
     /**
-     * @param string $controllerClass
+     * @param null $controllerClass
      */
-    public function setControllerClass(string $controllerClass)
+    public function setControllerClass($controllerClass): void
     {
         $this->controllerClass = $controllerClass;
     }
@@ -59,9 +42,30 @@ class CommandBean extends SplBean
     /**
      * @param string $action
      */
-    public function setAction(string $action)
+    public function setAction(string $action): void
     {
         $this->action = $action;
+    }
+
+    /**
+     * @return array
+     */
+    public function getArgs(): array
+    {
+        return $this->args;
+    }
+
+    /**
+     * @param array $args
+     */
+    public function setArgs(array $args): void
+    {
+        $this->args = $args;
+    }
+
+    public function setArg($key,$item)
+    {
+        $this->args[$key] = $item;
     }
 
     public function getArg($key)
@@ -72,54 +76,4 @@ class CommandBean extends SplBean
             return null;
         }
     }
-
-    public function getArgs():array
-    {
-        return $this->args;
-    }
-
-
-    public function addArg($key,$val)
-    {
-        $this->args[$key] = $val;
-    }
-
-    public function setArgs(array $data)
-    {
-        $this->args = $data;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getError()
-    {
-        return $this->error;
-    }
-
-    /**
-     * @param mixed $error
-     */
-    public function setError($error)
-    {
-        $this->error = $error;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getResult()
-    {
-        return $this->result;
-    }
-
-    /**
-     * @param mixed $result
-     */
-    public function setResult($result)
-    {
-        $this->result = $result;
-    }
-
-
 }

@@ -11,17 +11,20 @@ namespace EasySwoole\Core\Swoole\Process;
 
 use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\ServerManager;
+use EasySwoole\Core\Swoole\Time\Timer;
 use Swoole\Process;
 
 abstract class AbstractProcess
 {
-    protected $swooleProcess;
+    private $swooleProcess;
+    private $processName;
     private $async = null;
     private $args = [];
-    function __construct($async = true,...$args)
+    function __construct(string $processName,$async = true,array $args)
     {
         $this->async = $async;
         $this->args = $args;
+        $this->processName = $processName;
         $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
         ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
     }
@@ -31,45 +34,60 @@ abstract class AbstractProcess
         return $this->swooleProcess;
     }
 
-    public function getHash()
+    /*
+     * 仅仅为了提示:在自定义进程中依旧可以使用定时器
+     */
+    public function addTick($ms,callable $call):?int
     {
-        return spl_object_hash($this->swooleProcess);
+        return Timer::loop(
+            $ms,$call
+        );
     }
 
-    public function getPid()
+    public function clearTick(int $timerId)
     {
-        if(empty($this->swooleProcess->pid)){
-            $pid = TableManager::getInstance()->get('process_hash_map')->get($this->getHash())['pid'];
-            $this->swooleProcess->pid = $pid;
-            return $pid;
-        }else{
-            return $this->getProcess()->pid;
-        }
+        Timer::clear($timerId);
+    }
+
+    public function delay($ms,callable $call):?int
+    {
+        return Timer::delay(
+            $ms,$call
+        );
     }
 
     /*
-     * 默认100ms
+     * 服务启动后才能获得到pid
      */
-    public function setTick(callable $callback,$time = 100*1000)
+    public function getPid():?int
     {
-        Process::signal(SIGALRM, $callback);
-        Process::alarm($time);
+        if(isset($this->swooleProcess->pid)){
+            return $this->swooleProcess->pid;
+        }else{
+            $key = md5($this->processName);
+            $pid = TableManager::getInstance()->get('process_hash_map')->get($key);
+            if($pid){
+                return $pid['pid'];
+            }else{
+                return null;
+            }
+        }
     }
 
-    public function clearTick()
-    {
-        Process::alarm(-1);
-    }
 
     function __start(Process $process)
     {
         TableManager::getInstance()->get('process_hash_map')->set(
-            $this->getHash(),['pid'=>$process->pid]
+            md5($this->processName),['pid'=>$this->swooleProcess->pid]
         );
-        pcntl_async_signals(true);
-        Process::signal(SIGTERM,function (){
+        ProcessManager::getInstance()->setProcess($this->getProcessName(),$this);
+        if (extension_loaded('pcntl')) {
+            pcntl_async_signals(true);
+        }
+        Process::signal(SIGTERM,function ()use($process){
             $this->onShutDown();
-            TableManager::getInstance()->get('process_hash_map')->del($this->getHash());
+            TableManager::getInstance()->get('process_hash_map')->del(md5($this->processName));
+            swoole_event_del($process->pipe);
             $this->swooleProcess->exit(0);
         });
         if($this->async){
@@ -84,6 +102,11 @@ abstract class AbstractProcess
     public function getArgs():array
     {
         return $this->args;
+    }
+
+    public function getProcessName()
+    {
+        return $this->processName;
     }
 
     public abstract function run(Process $process);

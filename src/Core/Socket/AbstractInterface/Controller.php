@@ -8,6 +8,7 @@
 
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
+use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Socket\Common\CommandBean;
 
 abstract class Controller
@@ -17,14 +18,14 @@ abstract class Controller
 
     protected abstract function client();
 
-    function __construct(CommandBean $request,CommandBean $response)
+    function __construct(CommandBean $request,SplStream $response)
     {
         $this->request = $request;
         $this->response = $response;
         if($request->getAction() != '__construct'){
             $this->__hook($request->getAction());
         }else{
-            $response->setError('do not try to call __construct');
+            $response->write('do not try to call __construct');
         }
     }
 
@@ -53,7 +54,7 @@ abstract class Controller
         return true;
     }
 
-    protected function response():CommandBean
+    protected function response()
     {
         return $this->response;
     }
@@ -66,23 +67,25 @@ abstract class Controller
 
     protected function __hook(string $actionName)
     {
-        if($this->onRequest($actionName) !== false){
-            $ref = new \ReflectionClass(static::class);
-            if($ref->hasMethod($actionName)){
-                if($ref->getMethod($actionName)->isPublic()){
-                    try{
-                        $actionName = $this->request->getAction();
-                        $this->$actionName();
-                        $this->afterAction($actionName);
-                    }catch (\Throwable $throwable){
-                        $this->onException($throwable);
-                    }
-                }else{
-                    $this->actionNotFound($actionName);
+        //这里面的class一定存在
+        if($this->onRequest($actionName) === false){
+            return;
+        }
+        $actionName = $this->request->getAction();
+        $ref = new \ReflectionClass(static::class);
+        if($ref->hasMethod($actionName)){
+            if($ref->getMethod($actionName)->isPublic()){
+                try{
+                    $this->$actionName();
+                    $this->afterAction($actionName);
+                }catch (\Throwable $throwable){
+                    $this->onException($throwable);
                 }
             }else{
                 $this->actionNotFound($actionName);
             }
+        }else{
+            $this->actionNotFound($actionName);
         }
     }
 }

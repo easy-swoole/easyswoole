@@ -14,7 +14,7 @@ class SplBean implements \JsonSerializable
     const FILTER_NOT_NULL = 1;
     const FILTER_NOT_EMPTY = 2;//0 不算empty
 
-    final public function __construct(array $data = null,$autoCreateProperty = false)
+    public function __construct(array $data = null,$autoCreateProperty = false)
     {
         if($data){
             $this->arrayToBean($data,$autoCreateProperty);

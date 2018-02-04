@@ -13,6 +13,12 @@ use EasySwoole\Core\Socket\Common\CommandBean;
 
 interface ParserInterface
 {
-    public function decode($raw,array $args):?CommandBean;
-    public function encode(?CommandBean $raw,array $args):?string ;
+    /*
+     * 若返回EasySwoole\Core\Socket\Common\CommandBean，则为解析成功，
+     * 若返回NULL，则调用parser error 回调
+     * 若返回string，则encode后返回给客户端
+     */
+    public function decode($raw,$client);
+
+    public function encode(string $raw,$client):?string ;
 }

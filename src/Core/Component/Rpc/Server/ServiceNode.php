@@ -9,12 +9,12 @@
 namespace EasySwoole\Core\Component\Rpc\Server;
 
 
+use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Spl\SplBean;
-use EasySwoole\Core\Utility\Random;
 
 class ServiceNode extends SplBean
 {
-    protected $serviceId;
+    protected $serverId;
     protected $serviceName;
     protected $address = '127.0.0.1';
     protected $port;
@@ -23,17 +23,17 @@ class ServiceNode extends SplBean
     /**
      * @return mixed
      */
-    public function getServiceId()
+    public function getServerId()
     {
-        return $this->serviceId;
+        return $this->serverId;
     }
 
     /**
-     * @param mixed $serviceId
+     * @param mixed $serverId
      */
-    public function setServiceId($serviceId)
+    public function setServerId($serverId)
     {
-        $this->serviceId = $serviceId;
+        $this->serverId = $serverId;
     }
 
     /**
@@ -50,6 +50,7 @@ class ServiceNode extends SplBean
     public function setServiceName($serviceName)
     {
         $this->serviceName = $serviceName;
+        $this->generateServiceId();
     }
 
     /**
@@ -100,10 +101,8 @@ class ServiceNode extends SplBean
         $this->lastHeartBeat = $lastHeartBeat;
     }
 
-    protected function initialize(): void
-    {
-        if(empty($this->serviceId)){
-            $this->serviceId = md5(Random::randStr(8));
-        }
+    private function generateServiceId(){
+        $this->serverId = Config::getInstance()->getServerId();
     }
+
 }

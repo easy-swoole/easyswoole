@@ -23,7 +23,6 @@ class Dispatcher
 
     private $controllerNameSpacePrefix;
     private $router = null;
-    private $controllerPool = [];
     function __construct($controllerNameSpace)
     {
         $this->controllerNameSpacePrefix = trim($controllerNameSpace,'\\');
@@ -95,51 +94,35 @@ class Dispatcher
     private function controllerHandler(Request $request,Response $response)
     {
         $pathInfo = ltrim(UrlParser::pathInfo($request->getUri()->getPath()),"/");
-        if(isset($this->controllerPool[$pathInfo])){
-            $actionName = $this->controllerPool[$pathInfo]['action'];
-            $finalClass = $this->controllerPool[$pathInfo]['class'];
-        }else{
-            if(count($this->controllerPool) > 10240){
-                $this->controllerPool = [];
+        $list = explode("/",$pathInfo);
+        $actionName = null;
+        $finalClass = null;
+        $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
+        $currentDepth = count($list);
+        $maxDepth = $currentDepth < $controlMaxDepth ? $currentDepth : $controlMaxDepth;
+        while ($maxDepth >= 0){
+            $className = '';
+            for ($i=0 ;$i<$maxDepth;$i++){
+                $className = $className."\\".ucfirst($list[$i] ?: 'Index');//为一级控制器Index服务
             }
-            $list = explode("/",$pathInfo);
-            $actionName = null;
-            $finalClass = null;
-            $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
-            $currentDepth = count($list);
-            $maxDepth = $currentDepth < $controlMaxDepth ? $currentDepth : $controlMaxDepth;
-            while ($maxDepth >= 0){
-                $className = '';
-                for ($i=0 ;$i<$maxDepth;$i++){
-                    $className = $className."\\".ucfirst($list[$i] ?: 'Index');//为一级控制器Index服务
-                }
-                if(class_exists($this->controllerNameSpacePrefix.$className)){
+            if(class_exists($this->controllerNameSpacePrefix.$className)){
+                //尝试获取该class后的actionName
+                $actionName = empty($list[$i]) ? 'index' : $list[$i];
+                $finalClass = $this->controllerNameSpacePrefix.$className;
+                break;
+            }else{
+                //尝试搜搜index控制器
+                $temp = $className."\\Index";
+                if(class_exists($this->controllerNameSpacePrefix.$temp)){
+                    $finalClass = $this->controllerNameSpacePrefix.$temp;
                     //尝试获取该class后的actionName
                     $actionName = empty($list[$i]) ? 'index' : $list[$i];
-                    $finalClass = $this->controllerNameSpacePrefix.$className;
-                    $this->controllerPool[$pathInfo] = array(
-                        'action'=>$actionName,
-                        'class'=>$finalClass
-                    );
                     break;
-                }else{
-                    //尝试搜搜index控制器
-                    $temp = $className."\\Index";
-                    if(class_exists($this->controllerNameSpacePrefix.$temp)){
-                        $finalClass = $this->controllerNameSpacePrefix.$temp;
-                        //尝试获取该class后的actionName
-                        $actionName = empty($list[$i]) ? 'index' : $list[$i];
-                        $this->controllerPool[$pathInfo] = array(
-                            'action'=>$actionName,
-                            'class'=>$finalClass
-                        );
-                        break;
-                    }
                 }
-                $maxDepth--;
             }
+            $maxDepth--;
         }
-        if(class_exists($finalClass)){
+        if(!empty($finalClass)){
             (new $finalClass($actionName,$request,$response));
         }else{
             $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');

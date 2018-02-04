@@ -8,102 +8,167 @@
 
 namespace EasySwoole\Core\Component\Rpc\Server;
 
-
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Cache\Cache;
-use EasySwoole\Core\Component\Spl\SplArray;
-use EasySwoole\Core\Swoole\ServerManager;
-
+use EasySwoole\Core\Component\Cluster\Config;
+use EasySwoole\Core\Swoole\Memory\TableManager;
+use Swoole\Table;
 
 class ServiceManager
 {
     use Singleton;
-    private $cacheKey = '__RpcService';
+
+    private $tableName = '__RpcService';
+
+    function __construct()
+    {
+        TableManager::getInstance()->add($this->tableName,[
+            'serviceName'=>[
+                'size'=>35,
+                'type'=>Table::TYPE_STRING
+            ],
+            'serverId'=>[
+                'size'=>16,
+                'type'=>Table::TYPE_STRING
+            ],
+            'address'=>[
+                'size'=>15,
+                'type'=>Table::TYPE_STRING
+            ],
+            'port'=>[
+                'size'=>10,
+                'type'=>Table::TYPE_INT
+            ],
+            'lastHeartBeat'=>[
+                'size'=>10,
+                'type'=>Table::TYPE_INT
+            ]
+        ],4096);
+    }
+
+
 
     public function addServiceNode(ServiceNode $bean):void
     {
-        $key = "{$this->cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
-        Cache::getInstance()->set($key,$bean);
+        $this->getTable()->set($this->generateKey($bean),$bean->toArray());
     }
+
+
 
     public function deleteServiceNode(ServiceNode $bean):void
     {
-        $key = "{$this->cacheKey}.{$bean->getServiceName()}.{$bean->getServiceId()}";
-        Cache::getInstance()->del($key);
+        $this->getTable()->del($this->generateKey($bean));
     }
 
-    public function allServiceNodes():?array
+    public function allServiceNodes():array
     {
-        return Cache::getInstance()->get($this->cacheKey);
+        $list = [];
+        foreach ($this->getTable() as $key => $item) {
+            $list[$key] = $item;
+        }
+        return $list;
     }
 
     public function allService():?array
     {
-        $list = $this->allServiceNodes();
-        if(is_array($list)){
-            return array_keys($list);
-        }else{
-            return null;
+        $list = [];
+        $all = $this->allServiceNodes();
+        foreach ($all as $item)
+        {
+            $list[$item['serviceName']] = true;
         }
+        return array_keys($list);
     }
 
     public function deleteService(string $serviceName):void
     {
-        $key = "{$this->cacheKey}.{$serviceName}";
-        Cache::getInstance()->del($key);
+        $all = $this->allServiceNodes();
+        foreach ($all as $key => $item){
+            if($item['serviceName'] === $serviceName){
+                $this->getTable()->del($key);
+            }
+        }
     }
 
-    public function getServiceNodes(string $serviceName):?array
+    public function getServiceNodes(string $serviceName):array
     {
-        $key = "{$this->cacheKey}.{$serviceName}";
-        return Cache::getInstance()->get($key);
+        $list = [];
+        $all = $this->allServiceNodes();
+        foreach ($all as $key => $item){
+            if($item['serviceName'] === $serviceName){
+                $list[$key] = $item;
+            }
+        }
+        return $list;
     }
 
     /*
      * 随机获得一个服务的节点
      */
-    public function getServiceNode(string $serviceName):?ServiceNode
+    public function getServiceNode(string $serviceName,$exceptId = null):?ServiceNode
     {
         $list = $this->getServiceNodes($serviceName);
-        if(is_array($list)){
-            $list = array_values($list);
-            return $list[mt_rand(0,count($list)-1)];
+        if($exceptId !== null){
+            foreach ($list as $key => $item){
+                if($key === $exceptId){
+                    unset($list[$key]);
+                    break;
+                }
+            }
+        }
+        if(!empty($list)){
+            $data = $list[array_rand($list)];
+            return new ServiceNode($data);
         }
         return null;
     }
 
-    public function getServiceNodeById(string $serviceName,string $id):?ServiceNode
+    public function getServiceNodeById(string $id):?ServiceNode
     {
-        $key = "{$this->cacheKey}.{$serviceName}.{$id}";
-        return Cache::getInstance()->get($key);
+        $data = $this->getTable()->get($id);
+        if($data){
+            return new ServiceNode($data);
+        }else{
+            return null;
+        }
     }
 
-    public function deleteServiceById(string $serviceName,string $id)
+    public function deleteServiceById(string $id)
     {
-        $key = "{$this->cacheKey}.{$serviceName}.{$id}";
-        Cache::getInstance()->del($key);
+        $this->getTable()->del($id);
     }
 
     public function gc($timeOut = 15):array
     {
+        $serverId = Config::getInstance()->getServerId();
         $failList = [];
         $time = time();
         $list = $this->allServiceNodes();
         if(is_array($list)){
             foreach ($list as $service){
-                foreach ($service as $item){
+                foreach ($service as $key => $item){
                     if($item instanceof ServiceNode){
-                        if($item->getAddress() == '127.0.0.1'){
+                        //不对自身节点做gc
+                        if($key === $this->generateKey($item)){
                             continue;
                         }
                         if($time - $item->getLastHeartBeat() > $timeOut){
-                            $failList[] = $item;
-                            $this->deleteServiceById($item->getServiceName(),$item->getServiceId());
+                            $failList[$key] = $item;
+                            $this->deleteServiceById($key);
                         }
                     }
                 }
             }
         }
         return $failList;
+    }
+
+    private function getTable():Table
+    {
+        return TableManager::getInstance()->get($this->tableName);
+    }
+
+    private function generateKey(ServiceNode $serviceNode):string
+    {
+        return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
     }
 }

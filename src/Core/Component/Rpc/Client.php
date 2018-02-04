@@ -11,6 +11,8 @@ namespace EasySwoole\Core\Component\Rpc;
 
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Client\TaskObj;
+use EasySwoole\Core\Component\Rpc\Common\Command;
+use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
@@ -29,8 +31,12 @@ class Client
         return $obj;
     }
 
-    public function call($timeOut = 0.1)
+    /*
+     * 当开启自动重试，对连接失败或者是超时的任务，进行获取另外一个服务节点二次尝试，若不存在其他服务节点则判定失败
+     */
+    public function call($timeOut = 0.1, $reTry = false)
     {
+        $encoder = new Parser([]);
         $map = [];
         $clients = [];
         $nodeMap = [];
@@ -38,34 +44,62 @@ class Client
             if($task instanceof TaskObj){
                 if($task->getServiceId()){
                     //若指定了节点
-                    $node = ServiceManager::getInstance()->getServiceNodeById($task->getServiceName(),$task->getServiceId());
+                    $node = ServiceManager::getInstance()->getServiceNodeById($task->getServiceId());
                 }else{
                     $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName());
                 }
                 if($node instanceof ServiceNode){
                     $index = count($clients);
-                    $clients[$index] = new \swoole_client(SWOOLE_TCP,SWOOLE_SOCK_SYNC);
-                    $clients[$index]->set([
-                        'open_length_check' => true,
-                        'package_length_type'   => 'N',
-                        'package_length_offset' => 0,
-                        'package_body_offset'   => 4,
-                        'package_max_length'    => 1024*64
-                    ]);
-                    if (! $clients[$index]->connect($node->getAddress(), $node->getPort())) {
-                        $res = new ResponseObj();
-                        $res->setServiceNode($node);
-                        $res->setStatus(Status::CONNECT_FAIL);
-                        $res->setAction($task->getServiceAction());
-                        $this->callFunc($res,$task);
-                        $clients[$index]->close();
-                        unset($clients[$index]);
+                    $client = $this->connect($node);
+                    if (!$client) {
+                        //若未指定节点   尝试再去获取一个节点
+                        if ($reTry && empty($task->getServiceId())) {
+                            $node = ServiceManager::getInstance()->getServiceNode($task->getServiceName(), $node->getServerId());
+                            if ($node) {
+                                $client = $this->connect($node);
+                                if (!$client) {
+                                    $res = new ResponseObj();
+                                    $res->setServiceNode($node);
+                                    $res->setStatus(Status::CONNECT_FAIL);
+                                    $res->setAction($task->getServiceAction());
+                                    $this->callFunc($res, $task);
+                                } else {
+                                    $clients[$index] = $client;
+                                    $commandBean = new Command();
+                                    $commandBean->setArgs($task->getArgs());
+                                    //controllerClass作为服务名称
+                                    $commandBean->setControllerClass($node->getServiceName());
+                                    $commandBean->setAction($task->getServiceAction());
+                                    $commandBean = $encoder->signature($commandBean);
+                                    $data = $encoder->encodeRawData($commandBean->__toString());
+                                    $clients[$index]->send($data);
+                                    $map[$index] = $task;
+                                    $nodeMap[$index] = $node;
+                                }
+                            } else {
+                                //因为仅存一个失败节点,因此判定为CONNECT_FAIL
+                                $res = new ResponseObj();
+                                $res->setServiceNode($node);
+                                $res->setStatus(Status::CONNECT_FAIL);
+                                $res->setAction($task->getServiceAction());
+                                $this->callFunc($res, $task);
+                            }
+                        } else {
+                            $res = new ResponseObj();
+                            $res->setServiceNode($node);
+                            $res->setStatus(Status::CONNECT_FAIL);
+                            $res->setAction($task->getServiceAction());
+                            $this->callFunc($res, $task);
+                        }
                     }else{
-                        $commandBean = new CommandBean();
+                        $clients[$index] = $client;
+                        $commandBean = new Command();
                         $commandBean->setArgs($task->getArgs());
+                        //controllerClass作为服务名称
+                        $commandBean->setControllerClass($node->getServiceName());
                         $commandBean->setAction($task->getServiceAction());
-                        $sendStr = \swoole_serialize::pack($commandBean);
-                        $data = pack('N', strlen($sendStr)).$sendStr;
+                        $commandBean = $encoder->signature($commandBean);
+                        $data = $encoder->encodeRawData($commandBean->__toString());
                         $clients[$index]->send($data);
                         $map[$index] = $task;
                         $nodeMap[$index] = $node;
@@ -83,13 +117,17 @@ class Client
         while (!empty($clients)){
             $write = $error = array();
             $read = $clients;
-            $n = swoole_client_select($read, $write, $error, $timeOut);
+            $n = swoole_client_select($read, $write, $error, 0.01);
             if($n > 0){
                 foreach ($read as $index =>$client){
-                    $data = $client->recv();
-                    $resp = substr($data, 4);
-                    $commandBean = \swoole_serialize::unpack($resp);
-                    $res = new ResponseObj($commandBean->toArray());
+                    $msg = $client->recv();
+                    $data = json_decode($encoder->decodeRawData($msg),true);
+                    if(is_array($data)){
+                        $res = new ResponseObj($data);
+                    }else{
+                        $res = new ResponseObj([]);
+                        $res->setError($msg);
+                    }
                     $res->setAction($map[$index]->getServiceAction());
                     $res->setServiceNode($nodeMap[$index]);
                     $this->callFunc($res,$map[$index]);
@@ -98,7 +136,8 @@ class Client
                 }
             }
             $now = microtime(1);
-            $spend = intval(($now-$startTime)*1000);
+            $spend = round($now-$startTime,4);
+            //服务端超时响应自动重试暂未处理
             if($spend > $timeOut){
                 foreach ($clients as $index => $client){
                     $res = new ResponseObj();
@@ -126,6 +165,24 @@ class Client
             }catch (\Throwable $exception){
                 trigger_error($exception->getMessage().'@'.$exception->getTraceAsString());
             }
+        }
+    }
+
+    private function connect(ServiceNode $node): ?\swoole_client
+    {
+        $client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_SYNC);
+        $client->set([
+            'open_length_check' => true,
+            'package_length_type' => 'N',
+            'package_length_offset' => 0,
+            'package_body_offset' => 4,
+            'package_max_length' => 1024 * 64
+        ]);
+        if ($client->connect($node->getAddress(), $node->getPort())) {
+            return $client;
+        } else {
+            $client->close();
+            return null;
         }
     }
 }

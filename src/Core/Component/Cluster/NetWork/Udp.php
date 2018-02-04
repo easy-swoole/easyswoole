@@ -11,7 +11,7 @@ namespace EasySwoole\Core\Component\Cluster\NetWork;
 
 class Udp
 {
-    static function broadcast(string $str,int $port,$address = '255.255.255.255'):void
+    static function broadcast(string $str,int $port,$address = '127.0.0.1'):void
     {
         if(!($sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)))
         {
@@ -39,18 +39,16 @@ class Udp
 
     static function listen(int $port,string $address = '0.0.0.0')
     {
-        if(!($sock = socket_create(AF_INET, SOCK_DGRAM, 0)))
-        {
-            $errorcode = socket_last_error();
-            $errormsg = socket_strerror($errorcode);
-            throw new \Exception("Couldn't create socket: [$errorcode] $errormsg ");
+        $error = $errMsg = null;
+        $stream = stream_socket_server(
+            "udp://{$address}:{$port}",
+            $error,
+            $errMsg,
+            STREAM_SERVER_BIND
+        );
+        if($errMsg){
+            throw new \Exception("cluster server bind error on msg :{$errMsg}");
         }
-        if( !socket_bind($sock, $address , $port) )
-        {
-            $errorcode = socket_last_error();
-            $errormsg = socket_strerror($errorcode);
-            throw new \Exception("Couldn't bind socket: [$errorcode] $errormsg ");
-        }
-        return $sock;
+        return $stream;
     }
 }
