@@ -19,10 +19,9 @@ class Response extends MessageResponse
     const STATUS_NOT_END = 0;
     const STATUS_LOGICAL_END = 1;
     const STATUS_REAL_END = 2;
-    private $isEndResponse = 0;//1 逻辑end  2真实end
+    private $isEndResponse = self::STATUS_NOT_END;//1 逻辑end  2真实end
 
     private $autoEnd = false;
-    private $autoResponse = true;
 
     final public function autoEnd(bool $bool = null):bool
     {
@@ -30,14 +29,6 @@ class Response extends MessageResponse
             $this->autoEnd = $bool;
         }
         return $this->autoEnd;
-    }
-
-    final public function autoResponse(bool $bool = null):bool
-    {
-        if($bool !== null){
-            $this->autoResponse = $bool;
-        }
-        return $this->autoResponse;
     }
 
     final public function __construct(\swoole_http_response $response)
@@ -58,7 +49,7 @@ class Response extends MessageResponse
 
     function response():bool
     {
-        if(!$this->isEndResponse()){
+        if($this->isEndResponse !== self::STATUS_REAL_END){
             //结束处理
             $status = $this->getStatusCode();
             $this->response->status($status);
@@ -77,6 +68,7 @@ class Response extends MessageResponse
                 $this->response->write($write);
             }
             $this->getBody()->close();
+            $this->end();
             return true;
         }else{
             return false;

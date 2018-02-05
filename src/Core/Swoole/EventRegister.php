@@ -127,9 +127,7 @@ class EventRegister
                 }
             }
             //携程模式下  底层不会自动end
-            if($response_psr->autoResponse()){
-                $response_psr->response();
-            }
+            $response_psr->response();
             if($response_psr->autoEnd()){
                 $response_psr->end(true);
             }
