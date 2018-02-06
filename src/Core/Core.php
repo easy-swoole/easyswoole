@@ -96,10 +96,10 @@ class Core
         $event = Event::getInstance();
         require EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
         $sysEvent = new EasySwooleEvent();
-        $event->add('frameInitialize',[$sysEvent,'frameInitialize']);
-        $event->add('mainServerCreate',[$sysEvent,'mainServerCreate']);
-        $event->add('onRequest',[$sysEvent,'onRequest']);
-        $event->add('afterAction',[$sysEvent,'afterAction']);
+        $event->set('frameInitialize',[$sysEvent,'frameInitialize']);
+        $event->set('mainServerCreate',[$sysEvent,'mainServerCreate']);
+        $event->set('onRequest',[$sysEvent,'onRequest']);
+        $event->set('afterAction',[$sysEvent,'afterAction']);
         return $event;
     }
 }

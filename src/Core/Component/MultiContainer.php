@@ -2,14 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/4
- * Time: 下午2:46
+ * Date: 2018/2/6
+ * Time: 下午4:23
  */
 
 namespace EasySwoole\Core\Component;
 
 
-class Container
+class MultiContainer
 {
     private $container = [];
     private $allowKeys = null;
@@ -19,12 +19,21 @@ class Container
         $this->allowKeys = $allowKeys;
     }
 
-    function set($key, $item)
+    function add($key,$item)
     {
         if(is_array($this->allowKeys) && !in_array($key,$this->allowKeys)){
             return false;
         }
-        $this->container[$key] = $item;
+        $this->container[$key][] = $item;
+        return $this;
+    }
+
+    function set($key,$item)
+    {
+        if(is_array($this->allowKeys) && !in_array($key,$this->allowKeys)){
+            return false;
+        }
+        $this->container[$key] = [$item];
         return $this;
     }
 
@@ -36,7 +45,7 @@ class Container
         return $this;
     }
 
-    function get($key)
+    function get($key):?array
     {
         if(isset($this->container[$key])){
             return $this->container[$key];
@@ -49,5 +58,4 @@ class Container
     {
         return $this->container;
     }
-
 }

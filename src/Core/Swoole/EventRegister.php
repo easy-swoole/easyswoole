@@ -8,9 +8,9 @@
 
 namespace EasySwoole\Core\Swoole;
 
-use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
+use EasySwoole\Core\Component\MultiContainer;
 use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
@@ -24,7 +24,7 @@ use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 
 
-class EventRegister
+class EventRegister extends MultiContainer
 {
     const onStart = 'start';
     const onShutdown = 'shutdown';
@@ -49,61 +49,39 @@ class EventRegister
     const onMessage = 'message';
     const onOpen = 'open';
 
-    private $allows = [
-        'start','shutdown','workerStart','workerStop','workerExit','timer',
-        'connect','receive','packet','close','bufferFull','bufferEmpty','task',
-        'finish','pipeMessage','workerError','managerStart','managerStop',
-        'request','handShake','message','open'
-    ];
+    function __construct(array $allowKeys = null)
+    {
+        parent::__construct([
+            'start','shutdown','workerStart','workerStop','workerExit','timer',
+            'connect','receive','packet','close','bufferFull','bufferEmpty','task',
+            'finish','pipeMessage','workerError','managerStart','managerStop',
+            'request','handShake','message','open'
+        ]);
+    }
 
-    private $eventList = [];
 
     function add($key, $item): EventRegister
     {
-        if(in_array($key,$this->allows)){
-            if(is_callable($item)){
-                $this->eventList[$key] = [$item];
-            }else{
-                trigger_error("event {$key} is not a callable");
+        if(is_callable($item)){
+            if(!parent::add($key,$item)){
+                trigger_error("event {$key} is not allow");
             }
         }else{
-            trigger_error("event {$key} is not allow");
+            trigger_error("event {$key} is not a callable");
         }
         return $this;
     }
 
-    public function get($key)
+    function set($key, $item)
     {
-        if (isset($this->eventList[$key])) {
-            return $this->eventList[$key];
-        } else {
-            return null;
-        }
-    }
-
-    function withAdd($key, $item)
-    {
-        if(in_array($key,$this->allows)){
-            if(is_callable($item)){
-                if (isset($this->eventList[$key])) {
-                    $old = $this->eventList[$key];
-                }else{
-                    $old = [];
-                }
-                $old[] = $item;
-                $this->eventList[$key] = $old;
-            }else{
-                trigger_error("event {$key} is not a callable");
+        if(is_callable($item)){
+            if(!parent::set($key,$item)){
+                trigger_error("event {$key} is not allow");
             }
         }else{
-            trigger_error("event {$key} is not allow");
+            trigger_error("event {$key} is not a callable");
         }
         return $this;
-    }
-
-    function all(): array
-    {
-        return $this->eventList;
     }
 
     public function registerDefaultOnRequest($controllerNameSpace = 'App\\HttpController\\'):void
