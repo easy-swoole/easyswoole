@@ -49,10 +49,12 @@ class Detector extends AbstractProcess
     public function onReceive(string $str, ...$args)
     {
         // TODO: Implement onReceive() method.
-        try {
-
-        } catch (\Throwable $throwable) {
-
+        $json = json_decode($str,true);
+        if(is_array($json)){
+            $command = new CommandBean($json);
+            if(Signature::check($command)){
+                EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
+            }
         }
     }
 
