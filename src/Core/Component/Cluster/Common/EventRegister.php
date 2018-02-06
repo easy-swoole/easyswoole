@@ -22,7 +22,7 @@ class EventRegister
 
     private $allow = ['CLUSTER_START', 'CLUSTER_SHUTDOWN', 'CLUSTER_ON_COMMAND'];
 
-    public function add($key, $item)
+    public function add($key, callable $item)
     {
         if (in_array($key, $this->allow)) {
             if (is_callable($item)) {
@@ -35,7 +35,7 @@ class EventRegister
         }
     }
 
-    public function withAdd($key, $item)
+    public function withAdd($key,callable $item)
     {
         if (in_array($key, $this->allow)) {
             if (is_callable($item)) {
@@ -60,5 +60,19 @@ class EventRegister
             return $this->list[$key];
         }
         return null;
+    }
+
+    public function hook(string $event,...$args)
+    {
+        $calls = EventRegister::getInstance()->get($event);
+        if (is_array($calls)) {
+            foreach ($calls as $call){
+                try {
+                    call_user_func_array($call,$args);
+                } catch (\Throwable $throwable) {
+                    trigger_error($throwable->getTraceAsString());
+                }
+            }
+        }
     }
 }

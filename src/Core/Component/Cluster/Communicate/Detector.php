@@ -24,28 +24,26 @@ class Detector extends AbstractProcess
 
     public function run(Process $process)
     {
-        $call = EventRegister::getInstance()->get(EventRegister::CLUSTER_START);
-        if (is_callable($call)) {
-            try {
-                call_user_func($call);
-            } catch (\Throwable $throwable) {
-                trigger_error($throwable->getTraceAsString());
-            }
-        }
+        EventRegister::getInstance()->hook(EventRegister::CLUSTER_START);
         // TODO: Implement run() method.
-        $this->addTick(5 * 1000 * 1000, function () {
+        $conf = Config::getInstance();
+        $this->addTick($conf->getBroadcastTTL() * 1000 * 1000, function ()use($conf) {
             if (!$this->listener) {
                 $this->listen();
             }
-            //test
-            Udp::broadcast('broadcast', 9556);
+            //广播自身节点
+            $command = new CommandBean();
+            $command->setCommand('nodeBroadcast');
+            $command->setArgs($conf->toArray());
+            Signature::sign($command);
+            Udp::broadcast($command->__toString(), $conf->getListenPort());
         });
     }
 
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-
+        EventRegister::getInstance()->hook(EventRegister::CLUSTER_SHUTDOWN);
     }
 
     public function onReceive(string $str, ...$args)

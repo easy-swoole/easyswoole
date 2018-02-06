@@ -11,12 +11,12 @@ namespace EasySwoole\Core\Component\Cluster\Communicate;
 
 class Signature
 {
-    static function sign()
+    static function sign(CommandBean &$bean):CommandBean
     {
 
     }
 
-    static function check(CommandBean $bean, $ttl = 10)
+    static function check(CommandBean $bean, $ttl = 10):bool
     {
 
     }
