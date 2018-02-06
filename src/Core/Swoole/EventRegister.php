@@ -24,7 +24,7 @@ use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 
 
-class EventRegister extends MultiContainer
+class EventRegister extends Event
 {
     const onStart = 'start';
     const onShutdown = 'shutdown';
@@ -62,24 +62,16 @@ class EventRegister extends MultiContainer
 
     function add($key, $item): EventRegister
     {
-        if(is_callable($item)){
-            if(!parent::add($key,$item)){
-                trigger_error("event {$key} is not allow");
-            }
-        }else{
-            trigger_error("event {$key} is not a callable");
+        if(!parent::add($key,$item)){
+            trigger_error("event {$key} invalid or not allow");
         }
         return $this;
     }
 
     function set($key, $item)
     {
-        if(is_callable($item)){
-            if(!parent::set($key,$item)){
-                trigger_error("event {$key} is not allow");
-            }
-        }else{
-            trigger_error("event {$key} is not a callable");
+        if(!parent::set($key,$item)){
+            trigger_error("event {$key} invalid or not allow");
         }
         return $this;
     }

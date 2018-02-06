@@ -18,14 +18,18 @@ class Event extends MultiContainer
     function add($key, $item)
     {
         if(is_callable($item)){
-            parent::add($key, $item);
+            return parent::add($key, $item);
+        }else{
+            return false;
         }
     }
 
     function set($key, $item)
     {
         if(is_callable($item)){
-            parent::set($key, $item);
+            return parent::set($key, $item);
+        }else{
+            return false;
         }
     }
 
