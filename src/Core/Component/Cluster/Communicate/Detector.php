@@ -12,6 +12,7 @@ namespace EasySwoole\Core\Component\Cluster\Communicate;
 use EasySwoole\Core\Component\Cluster\Common\EventRegister;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Cluster\NetWork\Udp;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
 use Swoole\Process;
 
@@ -25,9 +26,8 @@ class Detector extends AbstractProcess
     public function run(Process $process)
     {
         EventRegister::getInstance()->hook(EventRegister::CLUSTER_START);
-        // TODO: Implement run() method.
         $conf = Config::getInstance();
-        $this->addTick($conf->getBroadcastTTL() * 1000 * 1000, function ()use($conf) {
+        $this->addTick($conf->getBroadcastTTL() * 1000, function ()use($conf) {
             if (!$this->listener) {
                 $this->listen();
             }
@@ -51,6 +51,7 @@ class Detector extends AbstractProcess
         $json = json_decode($str,true);
         if(is_array($json)){
             $command = new CommandBean($json);
+            var_dump($args);
             EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
         }
     }
@@ -65,7 +66,7 @@ class Detector extends AbstractProcess
         try {
             $this->listener = Udp::listen($port, $address);
         } catch (\Throwable $throwable) {
-            trigger_error($throwable->getMessage());
+            Trigger::throwable($throwable);
         }
     }
 
@@ -75,11 +76,11 @@ class Detector extends AbstractProcess
             $conf = Config::getInstance();
             $this->createListen($conf->getListenPort(), $conf->getListenAddress());
             swoole_event_add($this->listener, function ($listen) {
-                $data = stream_socket_recvfrom($listen, 8192, 0, $address);
+                $data = stream_socket_recvfrom($listen, 65533, 0, $address);
                 $this->onReceive($data, $address);
             });
         } catch (\Throwable $exception) {
-            trigger_error($exception->getMessage());
+            Trigger::throwable($exception);
         }
     }
 }

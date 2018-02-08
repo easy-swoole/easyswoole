@@ -9,6 +9,8 @@
 namespace EasySwoole\Core\Component\Cluster\NetWork;
 
 
+use EasySwoole\Core\Component\Trigger;
+
 class Udp
 {
     static function broadcast(string $str,int $port,$address = '127.0.0.1'):void
@@ -17,11 +19,12 @@ class Udp
         {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
-            throw new \Exception("Couldn't create socket: [$errorcode] $errormsg ");
+            Trigger::error("Couldn't create socket: [{$errorcode}] {$errormsg} ",__FILE__,__LINE__);
+        }else{
+            socket_set_option($sock,65535,SO_BROADCAST,1);
+            socket_sendto($sock,$str,strlen($str),0,$address,$port);
+            socket_close($sock);
         }
-        socket_set_option($sock,65535,SO_BROADCAST,1);
-        socket_sendto($sock,$str,strlen($str),0,$address,$port);
-        socket_close($sock);
     }
 
     static function sendTo(string $str,int $port,$address):bool
@@ -30,7 +33,8 @@ class Udp
         {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
-            throw new \Exception("Couldn't create socket: [$errorcode] $errormsg ");
+            Trigger::error("Couldn't create socket: [{$errorcode}] {$errormsg} ",__FILE__,__LINE__);
+            return false;
         }
         $bool =  (bool)socket_sendto($sock, $str , strlen($str) , 0 , $address , $port);
         socket_close($sock);
@@ -47,7 +51,7 @@ class Udp
             STREAM_SERVER_BIND
         );
         if($errMsg){
-            throw new \Exception("cluster server bind error on msg :{$errMsg}");
+            Trigger::error("cluster server bind error on msg :{$errMsg}",__FILE__,__LINE__);
         }
         return $stream;
     }

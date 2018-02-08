@@ -16,7 +16,6 @@ class CommandBean extends SplBean
     protected $command;
     protected $args = [];
     protected $time;
-    protected $signature;
 
     /**
      * @return mixed
@@ -64,22 +63,6 @@ class CommandBean extends SplBean
     public function setTime($time): void
     {
         $this->time = $time;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSignature()
-    {
-        return $this->signature;
-    }
-
-    /**
-     * @param mixed $signature
-     */
-    public function setSignature($signature): void
-    {
-        $this->signature = $signature;
     }
 
     protected function initialize(): void

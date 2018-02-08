@@ -9,15 +9,28 @@
 namespace EasySwoole\Core\Component\Cluster\Communicate;
 
 
+use EasySwoole\Core\Component\Cluster\Config;
+use EasySwoole\Core\Component\Cluster\NetWork\Udp;
+use EasySwoole\Core\Component\Trigger;
+
 class Publisher
 {
-    static function sendTo()
+    static function sendTo(CommandBean $commandBean)
     {
 
     }
 
-    static function broadcast()
+    static function broadcast(CommandBean $commandBean)
     {
-
+        $list = Config::getInstance()->getBroadcastAddress();
+        if(is_array($list) && !empty($list)){
+            foreach ($list as $item){
+                $item = explode(':',$item);
+                $str = Encrypt::getInstance()->getEncoder()->encrypt($commandBean->__toString());
+                Udp::broadcast($str,$item[1],$item[0]);
+            }
+        }else{
+            Trigger::error('cluster broadcast address illegal or empty',__FILE__,__LINE__,E_WARNING);
+        }
     }
 }

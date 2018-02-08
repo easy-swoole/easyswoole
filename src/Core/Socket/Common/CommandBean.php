@@ -42,7 +42,7 @@ class CommandBean extends SplBean
     /**
      * @param string $action
      */
-    public function setAction(string $action): void
+    public function setAction(?string $action): void
     {
         $this->action = $action;
     }

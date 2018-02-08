@@ -10,6 +10,8 @@ namespace EasySwoole\Core\Component\Cluster;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Cluster\Communicate\Detector;
+use EasySwoole\Core\Swoole\Process\ProcessManager;
 
 class Cluster
 {
@@ -17,8 +19,8 @@ class Cluster
 
     function run()
     {
-        if (Config::getInstance()->getEnable()) {
-            //执行进程注册
+        if(Config::getInstance()->getEnable()) {
+            ProcessManager::getInstance()->addProcess('__CLUSTER',Detector::class);
         }
     }
 }
