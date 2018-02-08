@@ -16,7 +16,7 @@ class Signature
 
     }
 
-    static function check(CommandBean $bean, $ttl = 10):bool
+    static function check(CommandBean $bean, $ttl = 5):bool
     {
 
     }

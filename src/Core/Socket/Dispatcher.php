@@ -69,12 +69,17 @@ class Dispatcher
             }
         }
         $command = $this->parser->decode($data,$client);
+        if(is_object($command)){
+            $commandCopy = clone $command;
+        }else{
+            $commandCopy = $command;
+        }
         if($command === null){
             if(is_callable($this->errorHandler)){
                 try{
                     $ret = call_user_func($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
                     if($ret !== null){
-                        $res = $this->parser->encode($ret,$client);
+                        $res = $this->parser->encode($ret,$client,$commandCopy);
                         if($res !== null){
                             Response::response($client,$res);
                         }
@@ -102,7 +107,7 @@ class Dispatcher
                         $response->write($throwable->getMessage().$throwable->getTraceAsString());
                     }
                 }
-                $res = $this->parser->encode($response,$client);
+                $res = $this->parser->encode($response,$client,$commandCopy);
                 if($res !== null){
                     Response::response($client,$res);
                 }
@@ -111,7 +116,7 @@ class Dispatcher
                     try{
                         $ret = call_user_func($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
                         if($ret !== null){
-                            $res = $this->parser->encode($ret,$client);
+                            $res = $this->parser->encode($ret,$client,$commandCopy);
                             if($res !== null){
                                 Response::response($client,$res);
                             }
@@ -123,7 +128,7 @@ class Dispatcher
                 }
             }
         }else{
-            $res = $this->parser->encode($command,$client);
+            $res = $this->parser->encode($command,$client,$commandCopy);
             if($res !== null){
                 Response::response($client,$res);
             }

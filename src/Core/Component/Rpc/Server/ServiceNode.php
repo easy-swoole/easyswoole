@@ -50,7 +50,6 @@ class ServiceNode extends SplBean
     public function setServiceName($serviceName)
     {
         $this->serviceName = $serviceName;
-        $this->generateServiceId();
     }
 
     /**
@@ -101,8 +100,12 @@ class ServiceNode extends SplBean
         $this->lastHeartBeat = $lastHeartBeat;
     }
 
-    private function generateServiceId(){
-        $this->serverId = Config::getInstance()->getServerId();
+    protected function initialize(): void
+    {
+        if(empty($this->serverId)){
+            $this->serverId = Config::getInstance()->getServerId();
+        }
     }
+
 
 }

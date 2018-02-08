@@ -8,9 +8,6 @@
 
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
-
-use EasySwoole\Core\Socket\Common\CommandBean;
-
 interface ParserInterface
 {
     /*
@@ -20,5 +17,8 @@ interface ParserInterface
      */
     public function decode($raw,$client);
 
-    public function encode(string $raw,$client):?string ;
+    /*
+     * $commandBean为请求decode后的结果，解决需要客户端主动动态密钥的加密传输场景，
+     */
+    public function encode(string $raw,$client,$commandBean):?string ;
 }

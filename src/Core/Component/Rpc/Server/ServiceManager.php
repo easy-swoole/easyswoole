@@ -41,6 +41,10 @@ class ServiceManager
             'lastHeartBeat'=>[
                 'size'=>10,
                 'type'=>Table::TYPE_INT
+            ],
+            'encrypt'=>[
+                'size'=>5,
+                'type'=>Table::TYPE_STRING
             ]
         ],4096);
     }
@@ -139,7 +143,6 @@ class ServiceManager
 
     public function gc($timeOut = 15):array
     {
-        $serverId = Config::getInstance()->getServerId();
         $failList = [];
         $time = time();
         $list = $this->allServiceNodes();

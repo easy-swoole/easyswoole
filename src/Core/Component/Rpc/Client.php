@@ -11,11 +11,11 @@ namespace EasySwoole\Core\Component\Rpc;
 
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Client\TaskObj;
-use EasySwoole\Core\Component\Rpc\Common\Command;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Socket\Common\CommandBean;
 
 class Client
@@ -65,12 +65,11 @@ class Client
                                     $this->callFunc($res, $task);
                                 } else {
                                     $clients[$index] = $client;
-                                    $commandBean = new Command();
+                                    $commandBean = new CommandBean();
                                     $commandBean->setArgs($task->getArgs());
                                     //controllerClass作为服务名称
                                     $commandBean->setControllerClass($node->getServiceName());
                                     $commandBean->setAction($task->getServiceAction());
-                                    $commandBean = $encoder->signature($commandBean);
                                     $data = $encoder->encodeRawData($commandBean->__toString());
                                     $clients[$index]->send($data);
                                     $map[$index] = $task;
@@ -93,12 +92,11 @@ class Client
                         }
                     }else{
                         $clients[$index] = $client;
-                        $commandBean = new Command();
+                        $commandBean = new CommandBean();
                         $commandBean->setArgs($task->getArgs());
                         //controllerClass作为服务名称
                         $commandBean->setControllerClass($node->getServiceName());
                         $commandBean->setAction($task->getServiceAction());
-                        $commandBean = $encoder->signature($commandBean);
                         $data = $encoder->encodeRawData($commandBean->__toString());
                         $clients[$index]->send($data);
                         $map[$index] = $task;
@@ -163,7 +161,7 @@ class Client
             try{
                 call_user_func($func,$obj);
             }catch (\Throwable $exception){
-                trigger_error($exception->getMessage().'@'.$exception->getTraceAsString());
+                Trigger::throwable($exception);
             }
         }
     }

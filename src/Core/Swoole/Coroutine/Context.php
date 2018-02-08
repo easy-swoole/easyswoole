@@ -35,7 +35,6 @@ class Context
         {
             self::$pool[$cid][$key] = $item;
         }
-
     }
 
     static function delete($key = null)

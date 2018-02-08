@@ -41,7 +41,7 @@ class Event extends MultiContainer
                 try{
                     call_user_func_array($call,$args);
                 }catch (\Throwable $throwable){
-                    trigger_error($throwable->getMessage().$throwable->getTraceAsString());
+                    Trigger::throwable($throwable);
                 }
             }
         }

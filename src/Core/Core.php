@@ -15,6 +15,7 @@ use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\ServerManager;
 use EasySwoole\EasySwooleEvent;
 
@@ -66,11 +67,7 @@ class Core
         $userHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
         if(!is_callable($userHandler)){
             $userHandler = function($errorCode, $description, $file = null, $line = null){
-                $debug = debug_backtrace();
-                $func = isset($debug[1]['function']) ? $debug[1]['function']: 'unKnown';
-                $debug = "file[{$file}] function[{$func}] line[$line]";
-                $str = "{$debug} message: [{$description}]";
-                Logger::getInstance()->console($str);
+                Trigger::error($description,$file,$line,$errorCode);
             };
         }
         set_error_handler($userHandler);
@@ -80,11 +77,7 @@ class Core
             $func = function ()use($conf){
                 $error = error_get_last();
                 if(!empty($error)){
-                    $debug = debug_backtrace();
-                    $func = isset($debug[1]['function']) ? $debug[1]['function']: 'unKnown';
-                    $debug = "file[{$error['file']}] function[{$func}] line[{$error['line']}]";
-                    $str = "{$debug} message: [{$error['message']}]";
-                    Logger::getInstance()->console($str);
+                    Trigger::error($error['message'],$error['file'],$error['line']);
                 }
             };
         }
