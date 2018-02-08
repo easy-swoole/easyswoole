@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Socket;
 
 use EasySwoole\Core\Component\Spl\SplStream;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Client\Udp;
@@ -65,7 +66,8 @@ class Dispatcher
                 break;
             }
             default:{
-                throw new \Exception('dispatch type error');
+                Trigger::error('dispatcher type error',__FILE__,__LINE__);
+                return;
             }
         }
         $command = $this->parser->decode($data,$client);

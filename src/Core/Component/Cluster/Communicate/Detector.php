@@ -35,7 +35,6 @@ class Detector extends AbstractProcess
             $command = new CommandBean();
             $command->setCommand('nodeBroadcast');
             $command->setArgs($conf->toArray());
-            Signature::sign($command);
             Udp::broadcast($command->__toString(), $conf->getListenPort());
         });
     }
@@ -52,9 +51,7 @@ class Detector extends AbstractProcess
         $json = json_decode($str,true);
         if(is_array($json)){
             $command = new CommandBean($json);
-            if(Signature::check($command)){
-                EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
-            }
+            EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
         }
     }
 

@@ -10,7 +10,6 @@ namespace EasySwoole\Core\Swoole;
 
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
-use EasySwoole\Core\Component\MultiContainer;
 use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
