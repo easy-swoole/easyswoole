@@ -34,7 +34,7 @@ class CommandBean extends SplBean
     /**
      * @return string
      */
-    public function getAction(): string
+    public function getAction(): ?string
     {
         return $this->action;
     }

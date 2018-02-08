@@ -29,7 +29,7 @@ abstract class Controller
         }
     }
 
-    protected function actionNotFound(string $actionName)
+    protected function actionNotFound(?string $actionName)
     {
 
     }
@@ -49,7 +49,7 @@ abstract class Controller
     /*
      * 返回false的时候为拦截
      */
-    protected function onRequest(string $actionName):bool
+    protected function onRequest(?string $actionName):bool
     {
         return true;
     }
@@ -65,7 +65,7 @@ abstract class Controller
     }
 
 
-    protected function __hook(string $actionName)
+    protected function __hook(?string $actionName)
     {
         //这里面的class一定存在
         if($this->onRequest($actionName) === false){
