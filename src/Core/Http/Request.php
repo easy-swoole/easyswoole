@@ -8,6 +8,7 @@
 
 namespace EasySwoole\Core\Http;
 
+use EasySwoole\Config;
 use EasySwoole\Core\Http\Message\ServerRequest;
 use EasySwoole\Core\Http\Message\Stream;
 use EasySwoole\Core\Http\Message\UploadFile;
@@ -67,10 +68,17 @@ class Request  extends ServerRequest
         $uri->withPath($this->request->server['path_info']);
         $query = isset($this->request->server['query_string']) ? $this->request->server['query_string'] : '';
         $uri->withQuery($query);
-        $host = $this->request->header['host'];
-        $host = explode(":",$host);
-        $uri->withHost($host[0]);
-        $port = isset($host[1]) ? $host[1] : 80;
+        //host与port以header为准，防止经过proxy
+        if(isset($this->request->header['host'])){
+            $host = $this->request->header['host'];
+            $host = explode(":",$host);
+            $realHost = $host[0];
+            $port = isset($host[1]) ? $host[1] : 80;
+        }else{
+            $realHost = '127.0.0.1';
+            $port = $this->request->server['server_port'];
+        }
+        $uri->withHost($realHost);
         $uri->withPort($port);
         return $uri;
     }
