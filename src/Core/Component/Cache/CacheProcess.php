@@ -55,7 +55,20 @@ class CacheProcess extends AbstractProcess
     public function onReceive(string $str,...$agrs)
     {
         // TODO: Implement onReceive() method.
+
         $msg = \swoole_serialize::unpack($str);
+        $table = TableManager::getInstance()->get(Cache::EXCHANGE_TABLE_NAME);
+        if(count($table) > 1900){
+            //接近阈值的时候进行gc检测
+            //遍历Table 依赖pcre 如果发现无法遍历table,检查机器是否安装pcre-devel
+            //超过0.1s 基本上99.99%为无用数据。
+            $time = microtime(true);
+            foreach ($table as $key => $item){
+                if(round($time - $item['microTime']) > 0.1){
+                    $table->del($key);
+                }
+            }
+        }
         if($msg instanceof Msg){
             switch ($msg->getCommand()){
                 case 'set':{
@@ -65,7 +78,10 @@ class CacheProcess extends AbstractProcess
                 case 'get':{
                     $ret = $this->cacheData->get($msg->getArg('key'));
                     $msg->setData($ret);
-                    $this->getProcess()->write(\swoole_serialize::pack($msg));
+                    $table->set($msg->getToken(),[
+                        'data'=>\swoole_serialize::pack($msg),
+                        'microTime'=>microtime(true)
+                    ]);
                     break;
                 }
                 case 'del':{
@@ -86,6 +102,7 @@ class CacheProcess extends AbstractProcess
                     break;
                 }
                 case 'deQueue':{
+
                     $que = $this->cacheData->get($msg->getArg('key'));
                     if(!$que instanceof \SplQueue){
                         $que = new \SplQueue();
@@ -96,7 +113,13 @@ class CacheProcess extends AbstractProcess
                         $ret = $que->dequeue();
                     }
                     $msg->setData($ret);
-                    $this->getProcess()->write(\swoole_serialize::pack($msg));
+                    //deQueue 有cli 服务未启动的请求，但无token
+                    if(!empty($msg->getToken())){
+                        $table->set($msg->getToken(),[
+                            'data'=>\swoole_serialize::pack($msg),
+                            'microTime'=>microtime(true)
+                        ]);
+                    }
                     break;
                 }
                 case 'queueSize':{
@@ -105,15 +128,10 @@ class CacheProcess extends AbstractProcess
                         $que = new \SplQueue();
                     }
                     $msg->setData($que->count());
-                    $this->getProcess()->write(\swoole_serialize::pack($msg));
-                    break;
-                }
-                case 'reDispatch':{
-                    $msgTime = $msg->getTime();
-                    $time = microtime(true);
-                    if(round($time - $msgTime,4) < $msg->getArg('timeOut')){
-                        $this->getProcess()->write($str);
-                    }
+                    $table->set($msg->getToken(),[
+                        'data'=>\swoole_serialize::pack($msg),
+                        'microTime'=>microtime(true)
+                    ]);
                     break;
                 }
             }

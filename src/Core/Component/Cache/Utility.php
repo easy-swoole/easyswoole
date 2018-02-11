@@ -16,17 +16,6 @@ use EasySwoole\Core\Utility\Random;
 
 class Utility
 {
-    static function isOutOfLength($data)
-    {
-        $str = \swoole_serialize::pack($data);
-        $len = strlen($str);
-        if($len > 28*1024){
-            return $str;
-        }else{
-            return false;
-        }
-    }
-
     /*
      * 返回文件名
      */
@@ -51,24 +40,4 @@ class Utility
         }
     }
 
-    static function readProcessFileData(int $processNum):SplArray
-    {
-        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$processNum}.data";
-        if(file_exists($file)){
-            $content = file_get_contents($file);
-            if(!empty($content)){
-                $array = \swoole_serialize::unpack($content);
-                if(is_array($array)){
-                    return new SplArray($array);
-                }
-            }
-        }
-        return new SplArray();
-    }
-
-    static function writeProcessFileData(int $processNum,SplArray $array):bool
-    {
-        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/process_cache_{$processNum}.data";
-        return (bool)file_put_contents($file,\swoole_serialize::pack($array->getArrayCopy()),LOCK_EX);
-    }
 }

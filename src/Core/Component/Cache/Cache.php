@@ -11,16 +11,17 @@ namespace EasySwoole\Core\Component\Cache;
 
 use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Spl\SplArray;
-use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\Process\ProcessManager;
 use EasySwoole\Core\Swoole\ServerManager;
 use EasySwoole\Core\Utility\Random;
+use Swoole\Table;
 
 class Cache
 {
     use Singleton;
+    const EXCHANGE_TABLE_NAME = '__Cache';
     private $processNum;
     private $cliTemp = null;//支持单元测试和服务启动前的临时数据存储
 
@@ -33,6 +34,17 @@ class Cache
         $this->cliTemp = new SplArray();
         //若是在主服务创建，而非单元测试调用
         if(ServerManager::getInstance()->getServer()){
+            //创建table用于数据传递
+            TableManager::getInstance()->add(self::EXCHANGE_TABLE_NAME,[
+                'data'=>[
+                    'type'=>Table::TYPE_STRING,
+                    'size'=>10*1024
+                ],
+                'microTime'=>[
+                    'type'=>Table::TYPE_STRING,
+                    'size'=>15
+                ]
+            ],2048);
             $this->processNum = $num;
             for ($i=0;$i < $num;$i++){
                 $processName = "cache_process_{$i}";
@@ -58,28 +70,7 @@ class Cache
         $msg->setCommand('get');
         $msg->setToken($token);
         $process->getProcess()->write(\swoole_serialize::pack($msg));
-        while (1){
-            $msg = ProcessManager::getInstance()->readByProcessName("cache_process_{$num}",$timeOut);
-            if(!empty($msg)){
-                $msg = \swoole_serialize::unpack($msg);
-                if($msg instanceof Msg){
-                    if($msg->getToken() == $token){
-                        return $msg->getData();
-                    }else{
-                        //参与重新调度
-                        if($msg->getToken()){
-                            $msg->setCommand('reDispatch');
-                            $process->getProcess()->write(\swoole_serialize::pack($msg));
-                        }
-                    }
-                }else{
-                    return null;
-                }
-            }else{
-                return null;
-            }
-
-        }
+        return $this->read($token,$timeOut);
     }
 
     public function set($key,$data)
@@ -158,27 +149,7 @@ class Cache
         $msg->setCommand('deQueue');
         $msg->setToken($token);
         $process->getProcess()->write(\swoole_serialize::pack($msg));
-        while (1){
-            $msg = ProcessManager::getInstance()->readByProcessName("cache_process_{$num}",$timeOut);
-            if(!empty($msg)){
-                $msg = \swoole_serialize::unpack($msg);
-                if($msg instanceof Msg){
-                    if($msg->getToken() == $token){
-                        return $msg->getData();
-                    }else{
-                        //参与重新调度
-                        if($msg->getToken()){
-                            $msg->setCommand('reDispatch');
-                            $process->getProcess()->write(\swoole_serialize::pack($msg));
-                        }
-                    }
-                }else{
-                    return null;
-                }
-            }else{
-                return null;
-            }
-        }
+        return $this->read($token,$timeOut);
     }
 
     public function enQueue($key,$data)
@@ -219,28 +190,7 @@ class Cache
             $msg->setCommand('queueSize');
             $msg->setToken($token);
             $process->getProcess()->write(\swoole_serialize::pack($msg));
-            while (1){
-                $msg = ProcessManager::getInstance()->readByProcessName("cache_process_{$num}",$timeOut);
-                if(!empty($msg)){
-                    $msg = \swoole_serialize::unpack($msg);
-                    if($msg instanceof Msg){
-                        if($msg->getToken() == $token){
-                            return intval($msg->getData());
-                        }else{
-                            //参与重新调度
-                            if($msg->getToken()){
-                                $msg->setCommand('reDispatch');
-                                $process->getProcess()->write(\swoole_serialize::pack($msg));
-                            }
-                        }
-                    }else{
-                        return 0;
-                    }
-                }else{
-                    return 0;
-                }
-            }
-            return 0;
+            return intval($this->read($token,$timeOut));
         }
     }
 
@@ -255,5 +205,32 @@ class Cache
         $list = explode('.',$key);
         $key = array_shift($list);
         return base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
+    }
+
+    private function read($token,$timeOut)
+    {
+        $table = TableManager::getInstance()->get(self::EXCHANGE_TABLE_NAME);
+        $start = microtime(true);
+        $data = null;
+        while(true){
+            usleep(1);
+            if($table->exist($token)){
+                $data = $table->get($token)['data'];
+                $data = \swoole_serialize::unpack($data);
+                if(!$data instanceof Msg){
+                    $data = null;
+                }
+                break;
+            }
+            if(round($start - microtime(true),3) > $timeOut){
+                break;
+            }
+        }
+        $table->del($token);
+        if($data){
+            return $data->getData();
+        }else{
+            return null;
+        }
     }
 }

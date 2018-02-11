@@ -78,7 +78,7 @@ class Msg extends SplBean
         $this->setArg('__isCache',false);
         $data = \swoole_serialize::pack($data);
         $len = strlen($data);
-        if($len > 28*1024){
+        if($len > 8*1024){
             $this->data = Utility::writeFile($data);
             $this->setArg('__isCache',true);
         }else{
@@ -136,7 +136,6 @@ class Msg extends SplBean
     {
         if(empty($this->time)){
             $this->time = microtime(true);
-            $this->token = Random::randStr(9);
         }
     }
 
