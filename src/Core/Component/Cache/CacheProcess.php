@@ -99,6 +99,15 @@ class CacheProcess extends AbstractProcess
                     $this->getProcess()->write(\swoole_serialize::pack($msg));
                     break;
                 }
+                case 'queueSize':{
+                    $que = $this->cacheData->get($msg->getArg('key'));
+                    if(!$que instanceof \SplQueue){
+                        $que = new \SplQueue();
+                    }
+                    $msg->setData($que->count());
+                    $this->getProcess()->write(\swoole_serialize::pack($msg));
+                    break;
+                }
                 case 'reDispatch':{
                     $msgTime = $msg->getTime();
                     $time = microtime(true);

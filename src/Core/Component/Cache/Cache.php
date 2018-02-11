@@ -201,6 +201,49 @@ class Cache
         }
     }
 
+    function queueSize($key,$timeOut = 0.01):int
+    {
+        if(!ServerManager::getInstance()->isStart()){
+            $que = $this->cliTemp->get($key);
+            if($que instanceof \SplQueue){
+                return $que->count();
+            }
+            return 0;
+        }else{
+            $num = $this->keyToProcessNum($key);
+            $token = Random::randStr(9);
+            $process = ProcessManager::getInstance()->getProcessByName("cache_process_{$num}");
+            $msg = new  Msg();
+            $msg->setArg('timeOut',$timeOut);
+            $msg->setArg('key',$key);
+            $msg->setCommand('queueSize');
+            $msg->setToken($token);
+            $process->getProcess()->write(\swoole_serialize::pack($msg));
+            while (1){
+                $msg = ProcessManager::getInstance()->readByProcessName("cache_process_{$num}",$timeOut);
+                if(!empty($msg)){
+                    $msg = \swoole_serialize::unpack($msg);
+                    if($msg instanceof Msg){
+                        if($msg->getToken() == $token){
+                            return intval($msg->getData());
+                        }else{
+                            //参与重新调度
+                            if($msg->getToken()){
+                                $msg->setCommand('reDispatch');
+                                $process->getProcess()->write(\swoole_serialize::pack($msg));
+                            }
+                        }
+                    }else{
+                        return 0;
+                    }
+                }else{
+                    return 0;
+                }
+            }
+            return 0;
+        }
+    }
+
     public function clearQueue($key)
     {
         $this->del($key);
