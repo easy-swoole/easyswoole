@@ -78,7 +78,7 @@ class EventRegister extends Event
     public function registerDefaultOnRequest($controllerNameSpace = 'App\\HttpController\\'):void
     {
         $dispatcher = new Dispatcher($controllerNameSpace);
-        $this->add(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
+        $this->set(self::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
             $request_psr = new Request($request);
             $response_psr = new Response($response);
             try{
@@ -105,7 +105,7 @@ class EventRegister extends Event
 
     public function registerDefaultOnTask():void
     {
-        $this->add(self::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj)
+        $this->set(self::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj)
         {
             if(is_string($taskObj) && class_exists($taskObj)){
                 $taskObj = new $taskObj;
@@ -135,7 +135,7 @@ class EventRegister extends Event
 
     public function registerDefaultOnFinish():void
     {
-        $this->add(self::onFinish,function (\swoole_server $server, $taskId, $taskObj)
+        $this->set(self::onFinish,function (\swoole_server $server, $taskId, $taskObj)
         {
             //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
             if($taskObj instanceof AbstractAsyncTask){
@@ -163,7 +163,7 @@ class EventRegister extends Event
         $dispatch = new SocketDispatcher($parser);
         $dispatch->onError($onError);
         $dispatch->setExceptionHandler($exceptionHandler);
-        $this->add(self::onPacket,function (\swoole_server $server, string $data, array $client_info)use($dispatch){
+        $this->set(self::onPacket,function (\swoole_server $server, string $data, array $client_info)use($dispatch){
             $dispatch->dispatch($dispatch::UDP,$data,$client_info);
         });
     }
@@ -173,7 +173,7 @@ class EventRegister extends Event
         $dispatch = new SocketDispatcher($parser);
         $dispatch->onError($onError);
         $dispatch->setExceptionHandler($exceptionHandler);
-        $this->add(self::onMessage,function (\swoole_server $server, \swoole_websocket_frame $frame)use($dispatch){
+        $this->set(self::onMessage,function (\swoole_server $server, \swoole_websocket_frame $frame)use($dispatch){
             $dispatch->dispatch($dispatch::WEB_SOCK,$frame->data,$frame);
         });
     }
