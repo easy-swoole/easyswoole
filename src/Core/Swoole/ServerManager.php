@@ -122,14 +122,13 @@ class ServerManager
         if(!$register->get($register::onFinish)){
             $register->registerDefaultOnFinish();
         }
-
+        Event::getInstance()->hook('mainServerCreate', $this, $register);
         if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
             //检查是否注册了onRequest,否则注册默认onRequest
             if(!$register->get($register::onRequest)){
                 $register->registerDefaultOnRequest();
             }
         }
-        Event::getInstance()->hook('mainServerCreate', $this, $register);
         $events = $register->all();
 
         foreach ($events as $event => $callback){
