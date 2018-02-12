@@ -77,6 +77,9 @@ abstract class AbstractProcess
 
     function __start(Process $process)
     {
+        if(PHP_OS != 'Darwin'){
+            $process->name($this->getProcessName());
+        }
         TableManager::getInstance()->get('process_hash_map')->set(
             md5($this->processName),['pid'=>$this->swooleProcess->pid]
         );
