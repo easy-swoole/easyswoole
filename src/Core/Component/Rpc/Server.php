@@ -15,28 +15,40 @@ use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\ServerManager;
 
 class Server
 {
     use Singleton;
+
+    private $encrypt;
+    private $token;
     private $list = [];
 
     /**
      * @param string $name
      * @param string $serviceClass
-     * @param mixed $encrypt false,or openssl method ,like DES-EDE3
      * @return $this|bool
      */
-    function addService(string $name, string $serviceClass, $encrypt = false)
+    function addService(string $name, string $serviceClass)
     {
         //一个EasySwoole服务上不允许同名服务
         $this->list[$name] = $serviceClass;
         return $this;
     }
 
-    public function attach(int $port,string $address = '0.0.0.0')
+    /*
+     * * @param mixed $encrypt false,or openssl method ,like DES-EDE3
+     */
+    public function attach(int $port,$encrypt = false,$token = null,string $address = '0.0.0.0')
     {
+        if(!empty($encrypt) && empty($token)){
+            Trigger::error("Rpc Server auto disable because encrypt token is empty");
+            $encrypt = false;
+        }
+        $this->encrypt = $encrypt;
+        $this->token = $token;
         foreach ($this->list as $name => $item){
             $node = new ServiceNode();
             $node->setPort($port);
@@ -60,6 +72,15 @@ class Server
             $bean->setStatus(Status::ACTION_NOT_FOUND);
             return $bean->__toString();
         });
+    }
 
+    function encrypt()
+    {
+        return $this->encrypt;
+    }
+
+    function token()
+    {
+        return $this->token;
     }
 }

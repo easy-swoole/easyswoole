@@ -21,7 +21,7 @@ class Udp
             $errormsg = socket_strerror($errorcode);
             Trigger::error("Couldn't create socket: [{$errorcode}] {$errormsg} ",__FILE__,__LINE__);
         }else{
-            socket_set_option($sock,65535,SO_BROADCAST,1);
+            socket_set_option($sock,65535,SO_BROADCAST,true);
             socket_sendto($sock,$str,strlen($str),0,$address,$port);
             socket_close($sock);
         }

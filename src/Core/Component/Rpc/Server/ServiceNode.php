@@ -19,6 +19,8 @@ class ServiceNode extends SplBean
     protected $address = '127.0.0.1';
     protected $port;
     protected $lastHeartBeat;
+    protected $encrypt = 'false';
+    protected $token = null;
 
     /**
      * @return mixed
@@ -100,12 +102,42 @@ class ServiceNode extends SplBean
         $this->lastHeartBeat = $lastHeartBeat;
     }
 
+    /**
+     * @return string
+     */
+    public function getEncrypt(): string
+    {
+        return $this->encrypt;
+    }
+
+    /**
+     * @param string $encrypt
+     */
+    public function setEncrypt(string $encrypt): void
+    {
+        $this->encrypt = $encrypt;
+    }
+
+    /**
+     * @return null
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param null $token
+     */
+    public function setToken($token): void
+    {
+        $this->token = $token;
+    }
+
     protected function initialize(): void
     {
         if(empty($this->serverId)){
             $this->serverId = Config::getInstance()->getServerId();
         }
     }
-
-
 }

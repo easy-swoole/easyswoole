@@ -19,8 +19,14 @@ class Cluster
 
     function run()
     {
-        if(Config::getInstance()->getEnable()) {
-            ProcessManager::getInstance()->addProcess('__CLUSTER',Detector::class);
+        $conf = Config::getInstance();
+        if($conf->getEnable()) {
+            ProcessManager::getInstance()->addProcess("{$conf->getServerName()}_Cluster_Detector",Detector::class);
         }
+    }
+
+    function config():Config
+    {
+        return Config::getInstance();
     }
 }

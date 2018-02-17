@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Component\Rpc;
 
 
+use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Client\TaskObj;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
@@ -65,13 +66,7 @@ class Client
                                     $this->callFunc($res, $task);
                                 } else {
                                     $clients[$index] = $client;
-                                    $commandBean = new CommandBean();
-                                    $commandBean->setArgs($task->getArgs());
-                                    //controllerClass作为服务名称
-                                    $commandBean->setControllerClass($node->getServiceName());
-                                    $commandBean->setAction($task->getServiceAction());
-                                    $data = $encoder->encodeRawData($commandBean->__toString());
-                                    $clients[$index]->send($data);
+                                    $clients[$index]->send($this->buildData($node,$task));
                                     $map[$index] = $task;
                                     $nodeMap[$index] = $node;
                                 }
@@ -92,19 +87,16 @@ class Client
                         }
                     }else{
                         $clients[$index] = $client;
-                        $commandBean = new CommandBean();
-                        $commandBean->setArgs($task->getArgs());
-                        //controllerClass作为服务名称
-                        $commandBean->setControllerClass($node->getServiceName());
-                        $commandBean->setAction($task->getServiceAction());
-                        $data = $encoder->encodeRawData($commandBean->__toString());
-                        $clients[$index]->send($data);
+                        $clients[$index]->send($this->buildData($node,$task));
                         $map[$index] = $task;
                         $nodeMap[$index] = $node;
                     }
                 }else{
                     $res = new ResponseObj();
-                    $res->setAction("{$task->getServiceName()}@{$task->getServiceAction()}");
+                    $node = new ServiceNode();
+                    $node->setServiceName($task->getServiceName());
+                    $res->setAction($task->getServiceAction());
+                    $res->setServiceNode($node);
                     $res->setStatus(Status::SERVICE_NOT_FOUND);
                     $this->callFunc($res,$task);
                 }
@@ -119,7 +111,8 @@ class Client
             if($n > 0){
                 foreach ($read as $index =>$client){
                     $msg = $client->recv();
-                    $data = json_decode($encoder->decodeRawData($msg),true);
+                    $node = $nodeMap[$index];
+                    $data = json_decode($this->decodeData($node,$msg),true);
                     if(is_array($data)){
                         $res = new ResponseObj($data);
                     }else{
@@ -182,5 +175,32 @@ class Client
             $client->close();
             return null;
         }
+    }
+
+    private function buildData(ServiceNode $node,TaskObj $taskObj)
+    {
+        $commandBean = new CommandBean();
+        $commandBean->setArgs($taskObj->getArgs());
+        //controllerClass作为服务名称
+        $commandBean->setControllerClass($node->getServiceName());
+        $commandBean->setAction($taskObj->getServiceAction());
+        $data = $commandBean->__toString();
+        //在swoole table中获取boolean出来的值，变为string
+        if($node->getEncrypt() != 'false'){
+            $openssl = new Openssl($node->getToken(),$node->getEncrypt());
+            $data = $openssl->encrypt($data);
+        }
+        return Parser::pack($data);
+    }
+
+    private function decodeData(ServiceNode $node,?string $raw)
+    {
+        $raw = Parser::unPack($raw);
+        //在swoole table中获取boolean出来的值，变为string
+        if($node->getEncrypt() != 'false'){
+            $openssl = new Openssl($node->getToken(),$node->getEncrypt());
+            $raw = $openssl->encrypt($raw);
+        }
+        return $raw;
     }
 }

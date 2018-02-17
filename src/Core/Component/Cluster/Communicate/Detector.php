@@ -35,7 +35,7 @@ class Detector extends AbstractProcess
             $command = new CommandBean();
             $command->setCommand('nodeBroadcast');
             $command->setArgs($conf->toArray());
-            Udp::broadcast($command->__toString(), $conf->getListenPort());
+            Publisher::broadcast($command);
         });
     }
 
@@ -48,10 +48,11 @@ class Detector extends AbstractProcess
     public function onReceive(string $str, ...$args)
     {
         // TODO: Implement onReceive() method.
+        $str = Encrypt::getInstance()->getEncoder()->decrypt($str);
         $json = json_decode($str,true);
         if(is_array($json)){
+            var_dump($json);
             $command = new CommandBean($json);
-            var_dump($args);
             EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
         }
     }

@@ -11,6 +11,7 @@ namespace EasySwoole\Core\Component\Cluster;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Spl\SplBean;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Utility\Random;
 
 class Config extends SplBean
@@ -179,6 +180,10 @@ class Config extends SplBean
     protected function initialize(): void
     {
         if(empty($this->serverId)){
+            if($this->enable && empty($this->token)){
+                Trigger::throwable(new \Exception('cluster config token could not be empty and set cluster mode disable automatic'));
+                $this->enable = false;
+            }
             $this->serverId = Random::randStr(8);
         }
     }

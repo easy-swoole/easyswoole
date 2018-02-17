@@ -46,8 +46,9 @@ class Cache
                 ]
             ],2048);
             $this->processNum = $num;
+            $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
             for ($i=0;$i < $num;$i++){
-                $processName = "cache_process_{$i}";
+                $processName = "{$name}_Cache_Process_{$i}";
                 ProcessManager::getInstance()->addProcess($processName,CacheProcess::class,true);
             }
         }

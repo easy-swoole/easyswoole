@@ -43,10 +43,14 @@ class ServiceManager
                 'type'=>Table::TYPE_INT
             ],
             'encrypt'=>[
-                'size'=>5,
+                'size'=>15,
+                'type'=>Table::TYPE_STRING
+            ],
+            'token'=>[
+                'size'=>32,
                 'type'=>Table::TYPE_STRING
             ]
-        ],4096);
+        ],2048);
     }
 
 

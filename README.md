@@ -126,7 +126,7 @@ Percentage of the requests served within a certain time (ms)
 
 - 官方QQ交流群 : **633921431**
 
-- [捐赠](donate.md)
+- [捐赠](https://www.easyswoole.com/Manual/2.x/Cn/_book/donate.html)
     您的捐赠是对Swoole项目开发组最大的鼓励和支持。我们会坚持开发维护下去。 您的捐赠将被用于:
         
   - 持续和深入地开发
