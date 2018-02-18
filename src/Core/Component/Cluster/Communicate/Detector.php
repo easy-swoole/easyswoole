@@ -51,9 +51,9 @@ class Detector extends AbstractProcess
         $str = Encrypt::getInstance()->getEncoder()->decrypt($str);
         $json = json_decode($str,true);
         if(is_array($json)){
-            var_dump($json);
             $command = new CommandBean($json);
-            EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,...$args);
+            //仅仅需要一个UDP客户端
+            EventRegister::getInstance()->hook(EventRegister::CLUSTER_ON_COMMAND,$command,array_shift($args));
         }
     }
 

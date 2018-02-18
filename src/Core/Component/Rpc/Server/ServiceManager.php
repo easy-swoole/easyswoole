@@ -53,14 +53,10 @@ class ServiceManager
         ],2048);
     }
 
-
-
     public function addServiceNode(ServiceNode $bean):void
     {
         $this->getTable()->set($this->generateKey($bean),$bean->toArray());
     }
-
-
 
     public function deleteServiceNode(ServiceNode $bean):void
     {
@@ -167,6 +163,24 @@ class ServiceManager
             }
         }
         return $failList;
+    }
+
+    public function getLocalServices():array
+    {
+        $result = [];
+        $list = $this->allServiceNodes();
+        if(is_array($list)){
+            foreach ($list as $service){
+                foreach ($service as $key => $item){
+                    if($item instanceof ServiceNode){
+                        if($key === $this->generateKey($item)){
+                            $result[$key] = $item;
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
     private function getTable():Table

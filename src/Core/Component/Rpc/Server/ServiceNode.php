@@ -19,7 +19,7 @@ class ServiceNode extends SplBean
     protected $address = '127.0.0.1';
     protected $port;
     protected $lastHeartBeat;
-    protected $encrypt = 'false';
+    protected $encrypt = false;
     protected $token = null;
 
     /**
@@ -138,6 +138,10 @@ class ServiceNode extends SplBean
     {
         if(empty($this->serverId)){
             $this->serverId = Config::getInstance()->getServerId();
+            //在swoole table 中以string存储
+            if($this->encrypt == 'false'){
+                $this->encrypt = false;
+            }
         }
     }
 }

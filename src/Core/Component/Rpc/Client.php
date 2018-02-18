@@ -186,7 +186,7 @@ class Client
         $commandBean->setAction($taskObj->getServiceAction());
         $data = $commandBean->__toString();
         //在swoole table中获取boolean出来的值，变为string
-        if($node->getEncrypt() != 'false'){
+        if($node->getEncrypt()){
             $openssl = new Openssl($node->getToken(),$node->getEncrypt());
             $data = $openssl->encrypt($data);
         }
@@ -196,8 +196,7 @@ class Client
     private function decodeData(ServiceNode $node,?string $raw)
     {
         $raw = Parser::unPack($raw);
-        //在swoole table中获取boolean出来的值，变为string
-        if($node->getEncrypt() != 'false'){
+        if($node->getEncrypt()){
             $openssl = new Openssl($node->getToken(),$node->getEncrypt());
             $raw = $openssl->encrypt($raw);
         }
