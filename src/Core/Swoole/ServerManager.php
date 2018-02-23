@@ -33,6 +33,11 @@ class ServerManager
         return ServerManager::$instance;
     }
 
+    public function __construct()
+    {
+        $this->createMainServer();
+    }
+
     public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = [
         "open_eof_check"=>false,
     ]):EventRegister
@@ -55,12 +60,11 @@ class ServerManager
 
     public function start():void
     {
-       $this->createMainServer();
-       //默认开启缓存
-       Cache::getInstance();
-       $this->attachListener();
-       $this->isStart = true;
-       $this->getServer()->start();
+        Cache::getInstance();
+        Cluster::getInstance()->run();
+        $this->attachListener();
+        $this->isStart = true;
+        $this->getServer()->start();
     }
 
 
@@ -140,10 +144,7 @@ class ServerManager
             }
         });
 
-        Cluster::getInstance()->run();
-
         $events = $register->all();
-
         foreach ($events as $event => $callback){
             $this->mainServer->on($event, function () use ($callback) {
                 $args = func_get_args();

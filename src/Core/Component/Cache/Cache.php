@@ -46,10 +46,8 @@ class Cache
                 ]
             ],2048);
             $this->processNum = $num;
-            $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
             for ($i=0;$i < $num;$i++){
-                $processName = "{$name}_Cache_Process_{$i}";
-                ProcessManager::getInstance()->addProcess($processName,CacheProcess::class,true);
+                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class,true);
             }
         }
     }
@@ -64,7 +62,7 @@ class Cache
         }
         $num = $this->keyToProcessNum($key);
         $token = Random::randStr(9);
-        $process = ProcessManager::getInstance()->getProcessByName("cache_process_{$num}");
+        $process = ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num));
         $msg = new  Msg();
         $msg->setArg('timeOut',$timeOut);
         $msg->setArg('key',$key);
@@ -85,7 +83,7 @@ class Cache
             $msg->setCommand('set');
             $msg->setArg('key',$key);
             $msg->setData($data);
-            ProcessManager::getInstance()->getProcessByName("cache_process_{$num}")->getProcess()->write(\swoole_serialize::pack($msg));
+            ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num))->getProcess()->write(\swoole_serialize::pack($msg));
         }
     }
 
@@ -99,7 +97,7 @@ class Cache
             $msg = new Msg();
             $msg->setCommand('del');
             $msg->setArg('key',$key);
-            ProcessManager::getInstance()->getProcessByName("cache_process_{$num}")->getProcess()->write(\swoole_serialize::pack($msg));
+            ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num))->getProcess()->write(\swoole_serialize::pack($msg));
         }
     }
 
@@ -112,7 +110,7 @@ class Cache
             $msg = new Msg();
             $msg->setCommand('flush');
             for ($i=0;$i<$this->processNum;$i++){
-                ProcessManager::getInstance()->getProcessByName("cache_process_{$i}")->getProcess()->write(\swoole_serialize::pack($msg));
+                ProcessManager::getInstance()->getProcessByName($this->generateProcessName($i))->getProcess()->write(\swoole_serialize::pack($msg));
             }
         }
     }
@@ -132,7 +130,7 @@ class Cache
             if(ServerManager::getInstance()->getServer()){
                 //依旧发送队列,但不发token
                 $num = $this->keyToProcessNum($key);
-                $process = ProcessManager::getInstance()->getProcessByName("cache_process_{$num}");
+                $process = ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num));
                 $msg = new  Msg();
                 $msg->setArg('timeOut',$timeOut);
                 $msg->setArg('key',$key);
@@ -143,7 +141,7 @@ class Cache
         }
         $num = $this->keyToProcessNum($key);
         $token = Random::randStr(9);
-        $process = ProcessManager::getInstance()->getProcessByName("cache_process_{$num}");
+        $process = ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num));
         $msg = new  Msg();
         $msg->setArg('timeOut',$timeOut);
         $msg->setArg('key',$key);
@@ -169,7 +167,7 @@ class Cache
             $msg->setCommand('enQueue');
             $msg->setArg('key',$key);
             $msg->setData($data);
-            ProcessManager::getInstance()->getProcessByName("cache_process_{$num}")->getProcess()->write(\swoole_serialize::pack($msg));
+            ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num))->getProcess()->write(\swoole_serialize::pack($msg));
         }
     }
 
@@ -184,7 +182,7 @@ class Cache
         }else{
             $num = $this->keyToProcessNum($key);
             $token = Random::randStr(9);
-            $process = ProcessManager::getInstance()->getProcessByName("cache_process_{$num}");
+            $process = ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num));
             $msg = new  Msg();
             $msg->setArg('timeOut',$timeOut);
             $msg->setArg('key',$key);
@@ -233,5 +231,11 @@ class Cache
         }else{
             return null;
         }
+    }
+
+    private function generateProcessName(int $processId):string
+    {
+        $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
+        return "{$name}_Cache_Process_{$processId}";
     }
 }
