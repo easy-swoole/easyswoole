@@ -119,6 +119,7 @@ class ServerManager
         $register = new EventRegister();
         $register->registerDefaultOnTask();
         $register->registerDefaultOnFinish();
+        $register->registerDefaultOnPipeMessage();
         Event::getInstance()->hook('mainServerCreate', $this, $register);
         if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
             //检查是否注册了onRequest,否则注册默认onRequest

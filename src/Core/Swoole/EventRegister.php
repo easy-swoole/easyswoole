@@ -12,6 +12,7 @@ use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Dispatcher;
 use EasySwoole\Core\Http\Message\Status;
@@ -20,7 +21,9 @@ use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
 use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
 use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
+use EasySwoole\Core\Swoole\PipeMessage\Message;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
+use \EasySwoole\Core\Swoole\PipeMessage\EventRegister as PipeMessageEventRegister;
 
 
 class EventRegister extends Event
@@ -126,7 +129,7 @@ class EventRegister extends Event
                 try{
                     return $taskObj();
                 }catch (\Throwable $throwable){
-                    trigger_error($throwable->getMessage());
+                    Trigger::throwable($throwable);
                 }
             }
             return null;
@@ -175,6 +178,18 @@ class EventRegister extends Event
         $dispatch->setExceptionHandler($exceptionHandler);
         $this->set(self::onMessage,function (\swoole_server $server, \swoole_websocket_frame $frame)use($dispatch){
             $dispatch->dispatch($dispatch::WEB_SOCK,$frame->data,$frame);
+        });
+    }
+
+    public function registerDefaultOnPipeMessage():void
+    {
+        $this->set(self::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
+            $message = \swoole_serialize::unpack($data);
+            if($message instanceof Message){
+                PipeMessageEventRegister::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
+            }else{
+                Trigger::error("data :{$data} not packet by swoole_serialize or not a Message Instance");
+            }
         });
     }
 }
