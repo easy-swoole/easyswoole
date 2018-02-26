@@ -93,8 +93,8 @@ class Request
         if(isset($this->fields['post'])){
             //若用户已经设置了POST  则opt中的优先级最高
             if(!isset($opt[CURLOPT_POSTFIELDS])){
-                $opt[CURLOPT_POSTFIELDS] = $this->fields['post'];
-                $opt[CURLOPT_POST] = true;
+	            $opt[CURLOPT_POST] = true;
+	            $opt[CURLOPT_POSTFIELDS] = $this->fields['post'];
             }
         }
         if(!empty($this->cookies))
