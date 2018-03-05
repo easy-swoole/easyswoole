@@ -124,6 +124,8 @@ Percentage of the requests served within a certain time (ms)
 
 - [项目文档仓库](https://github.com/easy-swoole/doc)
 
+- [HTTP基础DEMO](https://github.com/easy-swoole/demo)
+
 - 官方QQ交流群 : **633921431**
 
 - [捐赠](https://www.easyswoole.com/Manual/2.x/Cn/_book/donate.html)
