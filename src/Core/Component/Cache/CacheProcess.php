@@ -34,7 +34,7 @@ class CacheProcess extends AbstractProcess
     {
         // TODO: Implement run() method.
         if($this->persistentTime > 0){
-            $processName = $this->getArgs()[0];
+            $processName = $this->getProcessName();
             Logger::getInstance()->console('loading data from file at process '.$processName);
             $this->loadData();
             Logger::getInstance()->console('loading data from file success at process '.$processName);
@@ -140,14 +140,14 @@ class CacheProcess extends AbstractProcess
 
     private function saveData()
     {
-        $processName = $this->getArgs()[0];
+        $processName = $this->getProcessName();
         $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
         file_put_contents($file,\swoole_serialize::pack($this->cacheData->getArrayCopy()),LOCK_EX);
     }
 
     private function loadData()
     {
-        $processName = $this->getArgs()[0];
+        $processName = $this->getProcessName();
         $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
         if(file_exists($file)){
             $data = \swoole_serialize::unpack(file_get_contents($file));
