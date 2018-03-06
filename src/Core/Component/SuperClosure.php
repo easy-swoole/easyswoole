@@ -39,6 +39,11 @@ class SuperClosure
     {
         // TODO: Implement __invoke() method.
         $args = func_get_args();
-        return  call_user_func_array($this->closure,$args);
+        return call_user_func_array($this->closure,$args);
+    }
+
+    final function call(...$args)
+    {
+        return call_user_func_array($this->closure,$args);
     }
 }
