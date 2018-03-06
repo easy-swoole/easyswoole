@@ -76,7 +76,7 @@ abstract class Controller
                 try{
                     $this->$actionName();
                     $this->afterAction($actionName);
-                }catch (\Exception $exception){
+                }catch (\Throwable $exception){
                     $this->onException($exception,$actionName);
                 }
             }else{
