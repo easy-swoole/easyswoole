@@ -13,6 +13,7 @@ namespace EasySwoole\Core\Http\AbstractInterface;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Http\Session\Session;
 use EasySwoole\Core\Utility\Validate\Rules;
 use EasySwoole\Core\Utility\Validate\Validate;
 
@@ -21,7 +22,7 @@ abstract class Controller
     private $request;
     private $response;
     private $actionName;
-
+    private $session = null;
     abstract function index();
 
     public function __construct(string $actionName,Request $request,Response $response)
@@ -119,5 +120,13 @@ abstract class Controller
     {
         $validate = new Validate();
         return $validate->validate($this->request()->getRequestParam(),$rules);
+    }
+
+    function session():Session
+    {
+        if($this->session == null){
+            $this->session = new Session($this->request(),$this->response());
+        }
+        return $this->session;
     }
 }

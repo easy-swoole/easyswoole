@@ -54,7 +54,7 @@ class Cookie
     /**
      * @return int
      */
-    public function getExpire(): int
+    public function getExpire(): ?int
     {
         return $this->expire;
     }
@@ -62,7 +62,7 @@ class Cookie
     /**
      * @param int $expire
      */
-    public function setExpire(int $expire)
+    public function setExpire(?int $expire)
     {
         $this->expire = $expire;
     }
@@ -136,6 +136,4 @@ class Cookie
         // TODO: Implement __toString() method.
         return "{$this->name}={$this->value};";
     }
-
-
 }

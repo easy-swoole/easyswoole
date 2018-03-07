@@ -97,7 +97,7 @@ class Dispatcher
         $list = explode("/",$pathInfo);
         $actionName = null;
         $finalClass = null;
-        $controlMaxDepth = Di::getInstance()->get(SysConst::CONTROLLER_MAX_DEPTH);
+        $controlMaxDepth = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_MAX_DEPTH);
         $currentDepth = count($list);
         $maxDepth = $currentDepth < $controlMaxDepth ? $currentDepth : $controlMaxDepth;
         while ($maxDepth >= 0){
