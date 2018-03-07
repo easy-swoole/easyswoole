@@ -179,6 +179,7 @@ class Session
     {
         if($this->isStart){
             $this->sessionHandler->destroy($this->sessionId);
+            $this->sessionHandler->close();
             $this->isStart = false;
             return true;
         }else{
