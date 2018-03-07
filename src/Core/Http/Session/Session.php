@@ -178,8 +178,8 @@ class Session
     function destroy()
     {
         if($this->isStart){
-            $this->close();
             $this->sessionHandler->destroy($this->sessionId);
+            $this->isStart = false;
             return true;
         }else{
             return false;
@@ -189,6 +189,7 @@ class Session
     function close():bool
     {
         if($this->isStart){
+            $this->isStart = false;
             $this->sessionHandler->write($this->sessionId,\swoole_serialize::pack($this->sessionData->getArrayCopy()));
             $this->sessionHandler->close();
             return true;
