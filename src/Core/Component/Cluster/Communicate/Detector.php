@@ -33,7 +33,7 @@ class Detector extends AbstractProcess
             }
             //广播自身节点
             $command = new CommandBean();
-            $command->setCommand('nodeBroadcast');
+            $command->setCommand(SysCommand::NODE_BROADCAST);
             $command->setArgs($conf->toArray());
             Publisher::broadcast($command);
         });

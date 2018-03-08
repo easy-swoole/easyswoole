@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2018/2/8
- * Time: 下午4:05
+ * Date: 2018/3/8
+ * Time: 下午12:03
  */
 
-namespace EasySwoole\Core\Component\Cluster\Common;
+namespace EasySwoole\Core\Component\Cluster\Server;
 
 
 use EasySwoole\Core\Component\Spl\SplBean;

@@ -9,9 +9,9 @@
 namespace EasySwoole\Core\Component\Cluster\Communicate;
 
 
-use EasySwoole\Core\Component\Cluster\Common\NodeBean;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Cluster\NetWork\Udp;
+use EasySwoole\Core\Component\Cluster\Server\NodeBean;
 use EasySwoole\Core\Component\Trigger;
 
 class Publisher
