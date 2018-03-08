@@ -39,7 +39,7 @@ class Event extends MultiContainer
         if(is_array($calls)){
             foreach ($calls as $call){
                 try{
-                    call_user_func_array($call,$args);
+                    Invoker::callUserFunc($call,...$args);
                 }catch (\Throwable $throwable){
                     Trigger::throwable($throwable);
                 }

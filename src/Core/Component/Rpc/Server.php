@@ -16,6 +16,7 @@ use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Swoole\EventHelper;
 use EasySwoole\Core\Swoole\ServerManager;
 
 class Server
@@ -66,7 +67,7 @@ class Server
             'heartbeat_check_interval' => 2,
         ]);
 
-        $sub->registerDefaultOnReceive(new Parser($this->list),function ($err){
+        EventHelper::registerDefaultOnReceive($sub,new Parser($this->list),function ($err){
             $bean = new ResponseObj();
             $bean->setError($err);
             $bean->setStatus(Status::ACTION_NOT_FOUND);

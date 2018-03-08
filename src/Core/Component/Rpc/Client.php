@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Component\Rpc;
 
 
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Client\TaskObj;
@@ -152,7 +153,7 @@ class Client
         }
         if(is_callable($func)){
             try{
-                call_user_func($func,$obj);
+                Invoker::callUserFunc($func,$obj);
             }catch (\Throwable $exception){
                 Trigger::throwable($exception);
             }

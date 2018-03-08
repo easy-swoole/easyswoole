@@ -8,6 +8,7 @@
 
 namespace EasySwoole\Core\Socket;
 
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Spl\SplStream;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler;
@@ -79,7 +80,7 @@ class Dispatcher
         if($command === null){
             if(is_callable($this->errorHandler)){
                 try{
-                    $ret = call_user_func($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
+                    $ret = Invoker::callUserFunc($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
                     if($ret !== null){
                         $res = $this->parser->encode($ret,$client,$commandCopy);
                         if($res !== null){
@@ -116,7 +117,7 @@ class Dispatcher
             }else{
                 if(is_callable($this->errorHandler)){
                     try{
-                        $ret = call_user_func($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
+                        $ret = Invoker::callUserFunc($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
                         if($ret !== null){
                             $res = $this->parser->encode($ret,$client,$commandCopy);
                             if($res !== null){

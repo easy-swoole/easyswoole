@@ -11,6 +11,7 @@ use EasySwoole\Config;
 use EasySwoole\Core\Component\Cache\Cache;
 use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Event;
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
 use Swoole\Coroutine;
 
@@ -79,7 +80,7 @@ class ServerManager
                     $subPort->on($event, function () use ($callback) {
                         $args = func_get_args();
                         foreach ($callback as $item) {
-                            call_user_func_array($item, $args);
+                            Invoker::callUserFuncArray($item, $args);
                         }
                     });
                 }
@@ -117,14 +118,14 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        $register->registerDefaultOnTask();
-        $register->registerDefaultOnFinish();
-        $register->registerDefaultOnPipeMessage();
+        EventHelper::registerDefaultOnTask($register);
+        EventHelper::registerDefaultOnFinish($register);
+        EventHelper::registerDefaultOnPipeMessage($register);
         Event::getInstance()->hook('mainServerCreate', $this, $register);
         if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
             //检查是否注册了onRequest,否则注册默认onRequest
             if(!$register->get($register::onRequest)){
-                $register->registerDefaultOnRequest();
+                EventHelper::registerDefaultOnRequest($register);
             }
         }
 
@@ -146,7 +147,7 @@ class ServerManager
             $this->mainServer->on($event, function () use ($callback) {
                 $args = func_get_args();
                 foreach ($callback as $item) {
-                    call_user_func_array($item, $args);
+                    Invoker::callUserFuncArray($item, $args);
                 }
             });
         }

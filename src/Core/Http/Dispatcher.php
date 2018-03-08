@@ -10,13 +10,16 @@ namespace EasySwoole\Core\Http;
 
 
 
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Http\AbstractInterface\Controller;
 use EasySwoole\Core\Http\AbstractInterface\Router;
 use EasySwoole\Core\Http\Message\Status;
+use EasySwoole\Core\Swoole\ServerManager;
 use FastRoute\Dispatcher\GroupCountBased;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\SysConst;
 use FastRoute\RouteCollector;
+use \Swoole\Coroutine;
 
 class Dispatcher
 {
@@ -68,17 +71,18 @@ class Dispatcher
             $routeInfo = $this->router->dispatch($request->getMethod(),UrlParser::pathInfo($request->getUri()->getPath()));
             if($routeInfo !== false){
                 switch ($routeInfo[0]) {
-                    case \FastRoute\Dispatcher::NOT_FOUND:
+                    case \FastRoute\Dispatcher::NOT_FOUND:{
                         break;
-                    case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+                    }
+                    case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:{
                         $response->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
                         break;
-                    case \FastRoute\Dispatcher::FOUND:
+                    }
+                    case \FastRoute\Dispatcher::FOUND:{
                         $handler = $routeInfo[1];
                         $vars = $routeInfo[2];
                         if(is_callable($handler)){
-                            //这里需要传递对象
-                            call_user_func_array($handler,array_merge([$request,$response],array_values($vars)));
+                            Invoker::callUserFuncArray($handler,array_merge([$request,$response],array_values($vars)));
                         }else if(is_string($handler)){
                             $data = $request->getQueryParams();
                             $request->withQueryParams($vars+$data);
@@ -86,6 +90,10 @@ class Dispatcher
                             $request->getUri()->withPath($pathInfo);
                         }
                         break;
+                    }
+                    default:{
+                        break;
+                    }
                 }
             }
         }
