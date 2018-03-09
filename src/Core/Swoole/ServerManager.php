@@ -173,7 +173,7 @@ class ServerManager
     public function coroutineId():?int
     {
         if(class_exists('Swoole\Coroutine')){
-            //进程错误的时候返回-1
+            //进程错误或不在协程中的时候返回-1
             $ret =  Coroutine::getuid();
             if($ret >= 0){
                 return $ret;
