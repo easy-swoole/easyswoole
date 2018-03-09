@@ -11,7 +11,7 @@ namespace EasySwoole\Core\AbstractInterface;
 
 abstract class AbstractCoroutinePool
 {
-    private static $instance;
+    use Singleton;
 
     protected $minNum = 3;
     protected $maxNum = 10;
@@ -19,8 +19,10 @@ abstract class AbstractCoroutinePool
 
     private $queue = null;
 
-    function __construct()
+    function __construct(int $min = 3,int $max = 20)
     {
+        $this->minNum = $min;
+        $this->maxNum = $max;
         $this->queue = new \SplQueue();
         for ($i=0 ; $i < $this->minNum ; $i++){
             $obj = $this->createObject();
@@ -29,14 +31,6 @@ abstract class AbstractCoroutinePool
                 $this->currentNum++;
             }
         }
-    }
-
-    public static function getInstance()
-    {
-        if(!isset(self::$instance)){
-            self::$instance = new static();
-        }
-        return self::$instance;
     }
 
     public function getObj()
@@ -61,7 +55,6 @@ abstract class AbstractCoroutinePool
             $this->queue->enqueue($obj);
         }
     }
-
 
     public function poolSize()
     {
