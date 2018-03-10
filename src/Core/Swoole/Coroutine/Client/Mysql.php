@@ -43,7 +43,7 @@ class Mysql
     private $_join;
     private $_stmtError;
     private $_stmtErrno;
-
+    private $_tableLockMethod = "READ";
     private $_alias = null;
 
 
@@ -302,12 +302,19 @@ class Mysql
 
     protected function exec($stmt)
     {
-        if (!empty($this->_bindParams)) {
-            $data = $this->_bindParams;
+        if(!$this->client->connected && $this->reConnectTimes === 0){
+            $this->connect();
+            return $this->exec($stmt);
+        }else if($this->client->connected){
+            if (!empty($this->_bindParams)) {
+                $data = $this->_bindParams;
+            }else{
+                $data = [];
+            }
+            return $stmt->execute($data);
         }else{
-            $data = [];
+            return null;
         }
-        return $stmt->execute($data);
     }
 
     protected function _buildJoin () {
@@ -795,6 +802,74 @@ class Mysql
         $this->_groupBy[] = $groupByField;
         return $this;
     }
+    //swoole mysql client暂时不支持锁表
+//    public function lock($table)
+//    {
+//        // Main Query
+//        $this->_query = "LOCK TABLES";
+//
+//        // Is the table an array?
+//        if(gettype($table) == "array") {
+//            // Loop trough it and attach it to the query
+//            foreach($table as $key => $value) {
+//                if(gettype($value) == "string") {
+//                    if($key > 0) {
+//                        $this->_query .= ",";
+//                    }
+//                    $this->_query .= " ".$value." ".$this->_tableLockMethod;
+//                }
+//            }
+//        }
+//        else{
+//            // Build the query
+//            $this->_query = "LOCK TABLES ".$table." ".$this->_tableLockMethod;
+//        }
+//
+//        // Exceute the query unprepared because LOCK only works with unprepared statements.
+//        $result = $this->rawQuery($this->_query);
+//        $errno  = $this->client()->errno;
+//
+//        // Reset the query
+//        $this->reset();
+//
+//        // Are there rows modified?
+//        if($result) {
+//            return true;
+//        }
+//        // Something went wrong
+//        else {
+//            throw new \Exception("Locking of table ".$table." failed", $errno);
+//        }
+//
+//        // Return the success value
+//        return false;
+//    }
+//
+//
+//    public function unlock()
+//    {
+//        // Build the query
+//        $this->_query = "UNLOCK TABLES";
+//
+//        // Exceute the query unprepared because UNLOCK and LOCK only works with unprepared statements.
+//        $result = $this->rawQuery($this->_query);
+//        $errno  = $this->client()->errno;
+//
+//        // Reset the query
+//        $this->reset();
+//
+//        // Are there rows modified?
+//        if($result) {
+//            // return self
+//            return $this;
+//        }
+//        // Something went wrong
+//        else {
+//            throw new \Exception("Unlocking of tables failed", $errno);
+//        }
+//
+//        return $this;
+//    }
 
 
 
