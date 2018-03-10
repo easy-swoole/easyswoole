@@ -11,8 +11,6 @@ namespace EasySwoole\Core\AbstractInterface;
 
 abstract class AbstractCoroutinePool
 {
-    use Singleton;
-
     protected $minNum = 3;
     protected $maxNum = 10;
     protected $currentNum = 0;
