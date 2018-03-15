@@ -11,6 +11,7 @@ namespace EasySwoole\Core\Http\Message;
 
 class UploadFile
 {
+    private $tempName;
     private $stream;
     private $size;
     private $error;
@@ -18,12 +19,18 @@ class UploadFile
     private $clientMediaType;
     function __construct( $tempName,$size, $errorStatus, $clientFilename = null, $clientMediaType = null)
     {
+        $this->tempName = $tempName;
         $this->stream = new Stream(fopen($tempName,"r+"));
         $this->error = $errorStatus;
         $this->size = $size;
         $this->clientFileName = $clientFilename;
         $this->clientMediaType = $clientMediaType;
     }
+    
+    public function getTempName() {
+		// TODO: Implement getTempName() method.
+		return $this->tempName;
+	}
 
     public function getStream()
     {
