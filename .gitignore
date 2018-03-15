@@ -6,11 +6,6 @@
 composer.lock
 
 # easySwoole
-/Log/
-/Temp/
-/Config.php
-/easyswoole
-easyswoole.install
-src/swoole_log.txt
+
 
 
