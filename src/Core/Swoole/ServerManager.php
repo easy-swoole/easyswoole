@@ -13,6 +13,7 @@ use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Swoole\Coroutine\PoolManager;
 use Swoole\Coroutine;
 
 class ServerManager
@@ -121,27 +122,8 @@ class ServerManager
         EventHelper::registerDefaultOnTask($register);
         EventHelper::registerDefaultOnFinish($register);
         EventHelper::registerDefaultOnPipeMessage($register);
+        $this->finalHook($register);
         Event::getInstance()->hook('mainServerCreate', $this, $register);
-        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
-            //检查是否注册了onRequest,否则注册默认onRequest
-            if(!$register->get($register::onRequest)){
-                EventHelper::registerDefaultOnRequest($register);
-            }
-        }
-
-        $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
-            if(PHP_OS != 'Darwin'){
-                $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
-                $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
-                if($workerId <= ($workerNum -1)){
-                    $name = "{$name}_Worker_".$workerId;
-                }else{
-                    $name = "{$name}_Task_Worker_".$workerId;
-                }
-                cli_set_process_title($name);
-            }
-        });
-
         $events = $register->all();
         foreach ($events as $event => $callback){
             $this->mainServer->on($event, function () use ($callback) {
@@ -192,5 +174,31 @@ class ServerManager
         }else{
             return false;
         }
+    }
+
+
+    private function finalHook(EventRegister $register)
+    {
+        //实例化对象池管理
+        PoolManager::getInstance();
+        $conf = Config::getInstance()->getConf("MAIN_SERVER");
+        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
+            if(!$register->get($register::onRequest)){
+                EventHelper::registerDefaultOnRequest($register);
+            }
+        }
+        $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
+            if(PHP_OS != 'Darwin'){
+                $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
+                $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
+                if($workerId <= ($workerNum -1)){
+                    $name = "{$name}_Worker_".$workerId;
+                }else{
+                    $name = "{$name}_Task_Worker_".$workerId;
+                }
+                cli_set_process_title($name);
+            }
+            PoolManager::getInstance()->workerStartClean($workerId);
+        });
     }
 }

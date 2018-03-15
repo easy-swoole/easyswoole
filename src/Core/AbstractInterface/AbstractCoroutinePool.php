@@ -9,24 +9,28 @@
 namespace EasySwoole\Core\AbstractInterface;
 
 
+use EasySwoole\Core\Swoole\Coroutine\PoolManager;
+use EasySwoole\Core\Swoole\Memory\TableManager;
+use EasySwoole\Core\Swoole\ServerManager;
+
 abstract class AbstractCoroutinePool
 {
     protected $minNum = 3;
     protected $maxNum = 10;
-    protected $currentNum = 0;
-
     private $queue = null;
 
     function __construct(int $min = 3,int $max = 20)
     {
+        $table = TableManager::getInstance()->get(PoolManager::TABLE_NAME);
+        $key = PoolManager::generateTableKey(static::class);
         $this->minNum = $min;
         $this->maxNum = $max;
         $this->queue = new \SplQueue();
         for ($i=0 ; $i < $this->minNum ; $i++){
             $obj = $this->createObject();
             if($obj){
+                $table->incr($key,'currentNum');
                 $this->queue->enqueue($obj);
-                $this->currentNum++;
             }
         }
     }
@@ -34,12 +38,20 @@ abstract class AbstractCoroutinePool
     public function getObj()
     {
         if($this->queue->isEmpty()){
-            if($this->currentNum < $this->maxNum){
-                $obj = $this->createObject();
-                if($obj){
-                    $this->currentNum++;
+            $key = PoolManager::generateTableKey(static::class);
+            $table = TableManager::getInstance()->get(PoolManager::TABLE_NAME);
+            $testNum = $table->incr($key,'currentNum');
+            if($testNum !== false){
+                if($testNum <= $this->maxNum){
+                    $obj = $this->createObject();
+                    if($obj){
+                        return $obj;
+                    }else{
+                        $table->decr($key,'currentNum');
+                    }
+                }else{
+                    $table->decr($key,'currentNum');
                 }
-                return $obj;
             }
             return null;
         }else{
@@ -63,6 +75,8 @@ abstract class AbstractCoroutinePool
 
     function destroyObj($obj){
         unset($obj);
-        $this->currentNum--;
+        $table = TableManager::getInstance()->get(PoolManager::TABLE_NAME);
+        $key = PoolManager::generateTableKey(static::class);
+        $table->decr($key,'currentNum');
     }
 }
