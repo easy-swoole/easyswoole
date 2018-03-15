@@ -81,7 +81,7 @@ class ServerRequest extends Request
         return $this->uploadedFiles;
     }
 
-    public function getUploadedFile($name)
+    public function getUploadedFile($name):?UploadFile
     {
         // TODO: Implement getUploadedFiles() method.
         if(isset($this->uploadedFiles[$name])){
