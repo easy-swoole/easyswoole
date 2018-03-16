@@ -90,8 +90,18 @@ class PoolManager
                 }else{
                     return null;
                 }
+            }else{
+                try{
+                    $this->addPool($class);
+                    if($this->init($class)){
+                        return $this->getPool($class);
+                    }else{
+                        return null;
+                    }
+                }catch (\Throwable $throwable){
+                    return null;
+                }
             }
-            return null;
         }
     }
 
