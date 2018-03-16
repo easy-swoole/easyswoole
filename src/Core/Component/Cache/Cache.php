@@ -233,6 +233,15 @@ class Cache
         }
     }
 
+
+    function reBootProcess()
+    {
+        $num = $this->processNum;
+        for ($i=0;$i < $num;$i++){
+            ProcessManager::getInstance()->reboot($this->generateProcessName($i));
+        }
+    }
+
     private function generateProcessName(int $processId):string
     {
         $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
