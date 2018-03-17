@@ -77,7 +77,7 @@ class EventHelper
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
-                    return $taskObj();
+                    return $taskObj( $server, $taskId, $fromWorkerId);
                 }catch (\Throwable $throwable){
                     Trigger::throwable($throwable);
                 }
