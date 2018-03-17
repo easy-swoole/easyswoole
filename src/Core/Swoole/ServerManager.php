@@ -79,10 +79,15 @@ class ServerManager
                 $events = $server['eventRegister']->all();
                 foreach ($events as $event => $callback){
                     $subPort->on($event, function () use ($callback) {
+                        $ret = [];
                         $args = func_get_args();
                         foreach ($callback as $item) {
-                            Invoker::callUserFuncArray($item, $args);
+                            array_push($ret,Invoker::callUserFuncArray($item, $args));
                         }
+                        if(count($ret) > 1){
+                            return $ret;
+                        }
+                        return array_shift($ret);
                     });
                 }
             }else{
@@ -127,10 +132,15 @@ class ServerManager
         $events = $register->all();
         foreach ($events as $event => $callback){
             $this->mainServer->on($event, function () use ($callback) {
+                $ret = [];
                 $args = func_get_args();
                 foreach ($callback as $item) {
-                    Invoker::callUserFuncArray($item, $args);
+                    array_push($ret,Invoker::callUserFuncArray($item, $args));
                 }
+                if(count($ret) > 1){
+                    return $ret;
+                }
+                return array_shift($ret);
             });
         }
         return $this->mainServer;
