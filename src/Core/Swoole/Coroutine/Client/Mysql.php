@@ -85,6 +85,8 @@ class Mysql
             ]);
             if($this->client->connected){
                 $this->reConnectTimes = 0;
+            }else{
+                $this->reConnectTimes++;
             }
         }
     }
