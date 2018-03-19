@@ -63,6 +63,7 @@ class Http
         $data = parse_url($url);
         if($data['scheme'] == 'https'){
             $this->ssl = true;
+            $this->port = 443;
         }
         if(isset($data['host'])){
             $this->host = $data['host'];
