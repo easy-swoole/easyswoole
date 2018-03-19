@@ -35,7 +35,7 @@ abstract class AbstractCoroutinePool
         }
     }
 
-    public function getObj()
+    public function getObj($timeOut = 0.1)
     {
         if($this->queue->isEmpty()){
             $key = PoolManager::generateTableKey(static::class);
@@ -51,6 +51,10 @@ abstract class AbstractCoroutinePool
                     }
                 }else{
                     $table->decr($key,'currentNum');
+                    \co::sleep($timeOut);
+                    if(!$this->queue->isEmpty()){
+                        return $this->queue->dequeue();
+                    }
                 }
             }
             return null;
