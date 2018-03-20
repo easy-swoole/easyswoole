@@ -61,7 +61,8 @@ class Redis
             return $this->client->$method(...$args);
         } else {
             if (is_callable($this->errorHandler)) {
-                return $this->errorHandler('redis connect fail');
+                $errorHandler = $this->errorHandler;
+                return $errorHandler('redis connect fail');
             } else {
                 throw new \Exception('redis connect fail');
             }
