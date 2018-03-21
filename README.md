@@ -36,7 +36,7 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP�
 ## 常用功能与组件
 
 - HTTP控制器与自定义路由
-— TCP、UDP、WEB_SOCKET控制器
+- TCP、UDP、WEB_SOCKET控制器
 - 多种混合协议通讯
 - 异步客户端与协程对象池
 - 异步进程、自定义进程、定时器
