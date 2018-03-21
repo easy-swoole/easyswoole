@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Swoole\Coroutine\AbstractInterface;
 use EasySwoole\Core\Swoole\Coroutine\PoolManager;
 use EasySwoole\Core\Swoole\Memory\TableManager;
+use EasySwoole\Core\Swoole\Time\Timer;
 
 
 abstract class CoroutinePool
@@ -16,6 +17,7 @@ abstract class CoroutinePool
     protected $minNum = 3;
     protected $maxNum = 10;
     private $queue = null;
+    private $suspend = [];
 
     function __construct(int $min = 3,int $max = 10)
     {
@@ -49,17 +51,15 @@ abstract class CoroutinePool
                     }
                 }else{
                     $table->decr($key,'currentNum');
-                    $current = microtime(true);
-                    while (1){
-                        if(round((microtime(true) - $current),3) > $timeOut){
-                            break;
-                        }
-                        \co::sleep(0.001);
-                        if(!$this->queue->isEmpty()){
-                            return $this->queue->dequeue();
-                        }
+                    $cid = co::getUid();
+                    $this->suspend[$cid] = $cid;
+                    Timer::delay($timeOut * 1000, function () use ($cid) {
+                        co::resume($cid);
+                    });
+                    co::suspend($cid);
+                    if(!$this->queue->isEmpty()){
+                        return $this->queue->dequeue();
                     }
-
                 }
             }
             return null;
@@ -72,6 +72,11 @@ abstract class CoroutinePool
     {
         if($obj){
             $this->queue->enqueue($obj);
+            if (count($this->suspend) > 0) {
+                $cid = current($this->suspend);
+                unset($this->suspend[$cid]);
+                co::resume($cid);
+            }
         }
     }
 
