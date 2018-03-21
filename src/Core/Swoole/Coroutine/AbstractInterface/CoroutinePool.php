@@ -2,24 +2,22 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2018/3/8
- * Time: 下午2:43
+ * Date: 2018/3/21
+ * Time: 下午12:53
  */
 
-namespace EasySwoole\Core\AbstractInterface;
-
-
+namespace EasySwoole\Core\Swoole\Coroutine\AbstractInterface;
 use EasySwoole\Core\Swoole\Coroutine\PoolManager;
 use EasySwoole\Core\Swoole\Memory\TableManager;
-use EasySwoole\Core\Swoole\ServerManager;
 
-abstract class AbstractCoroutinePool
+
+abstract class CoroutinePool
 {
     protected $minNum = 3;
     protected $maxNum = 10;
     private $queue = null;
 
-    function __construct(int $min = 3,int $max = 20)
+    function __construct(int $min = 3,int $max = 10)
     {
         $table = TableManager::getInstance()->get(PoolManager::TABLE_NAME);
         $key = PoolManager::generateTableKey(static::class);
@@ -51,10 +49,17 @@ abstract class AbstractCoroutinePool
                     }
                 }else{
                     $table->decr($key,'currentNum');
-                    \co::sleep($timeOut);
-                    if(!$this->queue->isEmpty()){
-                        return $this->queue->dequeue();
+                    $current = microtime(true);
+                    while (1){
+                        if(round((microtime(true) - $current),3) > $timeOut){
+                            break;
+                        }
+                        \co::sleep(0.001);
+                        if(!$this->queue->isEmpty()){
+                            return $this->queue->dequeue();
+                        }
                     }
+
                 }
             }
             return null;

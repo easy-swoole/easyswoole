@@ -7,14 +7,13 @@
  */
 
 namespace EasySwoole\Core\Swoole\Coroutine;
-
-
-use EasySwoole\Core\AbstractInterface\AbstractCoroutinePool;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Swoole\Coroutine\AbstractInterface\CoroutinePool;
 use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\ServerManager;
 use Swoole\Table;
+
 
 class PoolManager
 {
@@ -40,7 +39,7 @@ class PoolManager
     {
         try{
             $ref = new \ReflectionClass($class);
-            if($ref->isSubclassOf(AbstractCoroutinePool::class)){
+            if($ref->isSubclassOf(CoroutinePool::class)){
                 $this->poolList[$class] = [
                     'min'=>$minNum,
                     'max'=>$maxNum,
@@ -78,7 +77,7 @@ class PoolManager
         }
     }
 
-    function getPool(string $class):?AbstractCoroutinePool
+    function getPool(string $class):?CoroutinePool
     {
         if(isset($this->processPool[$class])){
             return $this->processPool[$class];

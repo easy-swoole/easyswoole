@@ -7,6 +7,7 @@
  */
 
 namespace EasySwoole\Core\Swoole\Coroutine\Client;
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
 use \Swoole\Coroutine\Redis as SwooleRedis;
 
@@ -61,8 +62,7 @@ class Redis
             return $this->client->$method(...$args);
         } else {
             if (is_callable($this->errorHandler)) {
-                $errorHandler = $this->errorHandler;
-                return $errorHandler('redis connect fail');
+                return Invoker::callUserFunc($this->errorHandler,$method,...$args);
             } else {
                 throw new \Exception('redis connect fail');
             }
@@ -89,7 +89,7 @@ class Redis
         return $this->client->recv();
     }
 
-    public function setErrorHandler($call)
+    public function setErrorHandler(callable $call)
     {
         $this->errorHandler = $call;
     }
