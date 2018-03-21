@@ -18,8 +18,7 @@
         "php": ">=7.1.0",
         "nikic/fast-route": "^1.2",
         "nikic/php-parser": "^3.1",
-        "jeremeamia/SuperClosure": "^2.3",
-        "joshcam/mysqli-database-class": "^2.9"
+        "jeremeamia/SuperClosure": "^2.3"
     },
     "autoload": {
         "psr-4": {
