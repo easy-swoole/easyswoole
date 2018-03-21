@@ -11,12 +11,18 @@
 ```
 # EasySwoole
 
-EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专为API而生，摆脱传统PHP运行模式在进程唤起和文件加载上带来的性能损失。EasySwoole 高度封装了 Swoole Server 而依旧维持 Swoole Server 原有特性，支持同时混合监听HTTP、自定义TCP、UDP协议，让开发者以最低的学习成本和精力编写出多进程，可异步，高可用的应用服务
+EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP框架，专为API而生，摆脱传统PHP运行模式在进程唤起和文件加载上带来的性能损失。EasySwoole 高度封装了 Swoole Server 而依旧维持 Swoole Server 原有特性，支持同时混合监听HTTP、自定义TCP、UDP协议，让开发者以最低的学习成本和精力编写出多进程，可异步，高可用的应用服务
 
 ## 特性
 
 - 强大的 TCP/UDP Server 框架，多线程，EventLoop，事件驱动，异步，Worker进程组，Task异步任务，毫秒定时器，SSL/TLS隧道加密
 - EventLoop API，让用户可以直接操作底层的事件循环，将socket，stream，管道等Linux文件加入到事件循环中
+- 定时器、协程对象池、HTTP\SOCK控制器、分布式微服务、RPC支持
+
+## 入门成本
+
+相比传统的FPM框架来说，EasySwoole是有一点的入门成本的，许多设计理念及和环境均与传统的FPM不同，
+对于长时间使用LAMP（LANP）技术的开发人员来说会有一段时间的适应期，而在众多的Swoole框架中，EasySwoole上手还是比较容易，根据简单的例子和文档几乎立即就能开启EasySwoole的探索之旅。
 
 ## 优势
 
@@ -26,6 +32,16 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型PHP框架，专�
 - 支持异步/同步/协程
 - 支持多进程/多线程
 - CPU亲和性/守护进程
+
+## 常用功能与组件
+
+- HTTP控制器与自定义路由
+— TCP、UDP、WEB_SOCKET控制器
+- 多种混合协议通讯
+- 异步客户端与协程对象池
+- 异步进程、自定义进程、定时器
+- 集群分布式支持，例如集群节点通讯，服务发现，RPC
+- 全开放系统事件注册器与EventHook
 
 ## 基准测试
 
