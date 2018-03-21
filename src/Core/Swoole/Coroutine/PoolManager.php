@@ -107,7 +107,7 @@ class PoolManager
     public function workerStartClean($workerId)
     {
         foreach ($this->poolList as $class => $item){
-            $key = self::generateTableKey($workerId);
+            $key = self::generateTableKey($class, $workerId);
             $table = TableManager::getInstance()->get(self::TABLE_NAME);
             $table->del($key);
         }
