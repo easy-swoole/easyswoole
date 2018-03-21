@@ -54,12 +54,14 @@ abstract class CoroutinePool
                     $cid = \co::getUid();
                     $this->suspend[$cid] = $cid;
                     $suspend = true;
-                    Timer::delay($timeOut * 1000, function () use (&$suspend, $cid) {
-                        if ($suspend) {
-                            unset($this->suspend[$cid]);
-                            \co::resume($cid);
-                        }
-                    });
+                    if ($timeOut > 0) {
+                        Timer::delay($timeOut * 1000, function () use (&$suspend, $cid) {
+                            if ($suspend) {
+                                unset($this->suspend[$cid]);
+                                \co::resume($cid);
+                            }
+                        });
+                    }
                     \co::suspend($cid);
                     $suspend = false;
                     if(!$this->queue->isEmpty()){
