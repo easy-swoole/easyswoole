@@ -51,12 +51,17 @@ abstract class CoroutinePool
                     }
                 }else{
                     $table->decr($key,'currentNum');
-                    $cid = co::getUid();
+                    $cid = \co::getUid();
                     $this->suspend[$cid] = $cid;
-                    Timer::delay($timeOut * 1000, function () use ($cid) {
-                        co::resume($cid);
+                    $suspend = true;
+                    Timer::delay($timeOut * 1000, function () use (&$suspend, $cid) {
+                        if ($suspend) {
+                            unset($this->suspend[$cid]);
+                            \co::resume($cid);
+                        }
                     });
-                    co::suspend($cid);
+                    \co::suspend($cid);
+                    $suspend = false;
                     if(!$this->queue->isEmpty()){
                         return $this->queue->dequeue();
                     }
@@ -75,7 +80,7 @@ abstract class CoroutinePool
             if (count($this->suspend) > 0) {
                 $cid = current($this->suspend);
                 unset($this->suspend[$cid]);
-                co::resume($cid);
+                \co::resume($cid);
             }
         }
     }
