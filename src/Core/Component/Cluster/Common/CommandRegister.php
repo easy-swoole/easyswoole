@@ -10,9 +10,20 @@ namespace EasySwoole\Core\Component\Cluster\Common;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Event;
+use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
 
 class CommandRegister extends Event
 {
     use Singleton;
+
+    function __construct(array $allowKeys = null)
+    {
+        parent::__construct($allowKeys);
+        $this->set(SysCommand::NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
+            var_dump($commandBean->toArray(),$udpAddress);
+        });
+    }
+
 }
