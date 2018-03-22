@@ -47,6 +47,9 @@ class TickEvent extends Container
         $this->set('gc',function (){
             //清理过期的RPC节点和集群节点
             $node = ServerManager::getAllNodes();
+            if (empty($node)) {
+                return;
+            }
             $time = time();
             foreach ($node as $v) {
                 if (($time - $v['broadcastTime']) > (3 * $v['broadcastTTL'])) {
