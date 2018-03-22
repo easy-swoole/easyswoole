@@ -36,7 +36,7 @@ class ServerManager
         $args = $commandBean->getArgs();
         $serviceManager = ServiceManager::getInstance();
         foreach (self::$node[$args['serverId']]['service'] as $nodeBean) {
-            $serviceManager->deleteServiceNode($nodeBean);
+            $serviceManager->deleteServiceNode(new ServiceNode($nodeBean));
         }
         unset(self::$node[$args['serverId']]);
     }
