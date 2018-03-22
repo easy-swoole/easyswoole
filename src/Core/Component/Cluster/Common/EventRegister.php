@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Component\Cluster\Common;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
+use EasySwoole\Core\Component\Cluster\Communicate\Publisher;
 use EasySwoole\Core\Component\Event;
 
 
@@ -28,8 +29,8 @@ class EventRegister extends Event
         $this->set(self::CLUSTER_ON_COMMAND,function (CommandBean $commandBean,...$args){
             CommandRegister::getInstance()->hook($commandBean->getCommand(),$commandBean,...$args);
         });
-        $this->set(self::CLUSTER_SHUTDOWN, function(){
-            
+        $this->set(self::CLUSTER_SHUTDOWN, function (CommandBean $commandBean){
+            Publisher::broadcast($commandBean);
         });
     }
 }
