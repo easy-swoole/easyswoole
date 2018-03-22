@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Component\Cluster\Common;
 
 use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
+use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 
 class ServerManager
 {
@@ -45,26 +46,18 @@ class ServerManager
         $args = $commandBean->getArgs();
         if (self::exists($args['serverId'])) {
             $nodeService = self::$node[$args['serverId']]['service'];
-            $del = [];
-            $add = [];
+            $serviceManager = ServiceManager::getInstance();
             foreach ($args['service'] as $k => $v) {
                 if (!isset($nodeService[$k])) {
-                    $add[$k] = $v;
+                    $serviceManager->addServiceNode(new ServiceNode($v));
                 }
             }
             foreach ($nodeService as $k => $v) {
                 if (!isset($args['service'][$k])) {
-                    $del[$k] = $v;
+                    $serviceManager->deleteServiceNode(new ServiceNode($v));
                 }
             }
             self::$node[$args['serverId']]['service'] = $args['service'];
-            $serviceManager = ServiceManager::getInstance();
-            foreach ($add as $nodeBean) {
-                $serviceManager->addServiceNode($nodeBean);
-            }
-            foreach ($del as $nodeBean) {
-                $serviceManager->deleteServiceNode($nodeBean);
-            }
         }
     }
 
