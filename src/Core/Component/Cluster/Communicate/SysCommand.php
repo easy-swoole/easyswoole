@@ -13,4 +13,5 @@ class SysCommand
 {
     const NODE_BROADCAST = 'NODE_BROADCAST';
     const NODE_SHUTDOWN = 'NODE_SHUTDOWN';
+    const RPC_NODE_BROADCAST = 'RPC_NODE_BROADCAST';
 }
