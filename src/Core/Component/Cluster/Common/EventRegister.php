@@ -28,5 +28,8 @@ class EventRegister extends Event
         $this->set(self::CLUSTER_ON_COMMAND,function (CommandBean $commandBean,...$args){
             CommandRegister::getInstance()->hook($commandBean->getCommand(),$commandBean,...$args);
         });
+        $this->set(self::CLUSTER_SHUTDOWN, function(){
+            
+        });
     }
 }

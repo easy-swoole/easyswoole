@@ -17,15 +17,19 @@ use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
 class CommandRegister extends Event
 {
     use Singleton;
+    private $node = [];
 
     function __construct(array $allowKeys = null)
     {
         parent::__construct($allowKeys);
         $this->set(SysCommand::NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            var_dump($commandBean->toArray(),$udpAddress);
+            ServerManager::addNode($commandBean);
         });
         $this->set(SysCommand::RPC_NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            var_dump($commandBean->toArray(),$udpAddress);
+            ServerManager::addNodeServices($commandBean);
+        });
+        $this->set(SysCommand::NODE_SHUTDOWN, function (CommandBean $commandBean,$udpAddress) {
+            ServerManager::delNode($commandBean);
         });
     }
 
