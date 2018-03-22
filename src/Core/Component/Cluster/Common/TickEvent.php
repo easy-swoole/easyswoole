@@ -15,6 +15,7 @@ use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
+use EasySwoole\Core\Component\Cluster\Server\ServerManager;
 
 class TickEvent extends Container
 {

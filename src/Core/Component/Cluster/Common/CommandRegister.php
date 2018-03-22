@@ -13,11 +13,11 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
+use EasySwoole\Core\Component\Cluster\Server\ServerManager;
 
 class CommandRegister extends Event
 {
     use Singleton;
-    private $node = [];
 
     function __construct(array $allowKeys = null)
     {
