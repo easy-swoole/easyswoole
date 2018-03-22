@@ -24,6 +24,9 @@ class CommandRegister extends Event
         $this->set(SysCommand::NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
             var_dump($commandBean->toArray(),$udpAddress);
         });
+        $this->set(SysCommand::RPC_NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
+            var_dump($commandBean->toArray(),$udpAddress);
+        });
     }
 
 }

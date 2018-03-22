@@ -10,8 +10,10 @@ namespace EasySwoole\Core\Component\Cluster\Communicate;
 
 
 use EasySwoole\Core\Component\Cluster\Common\EventRegister;
+use EasySwoole\Core\Component\Cluster\Common\TickEvent;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Cluster\NetWork\Udp;
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
 use Swoole\Process;
@@ -31,11 +33,13 @@ class Detector extends AbstractProcess
             if (!$this->listener) {
                 $this->listen();
             }
-            //广播自身节点
-            $command = new CommandBean();
-            $command->setCommand(SysCommand::NODE_BROADCAST);
-            $command->setArgs($conf->toArray());
-            Publisher::broadcast($command);
+            $events = TickEvent::getInstance()->all();
+            foreach ($events as $event => $call){
+                $ret = Invoker::callUserFunc($call);
+                if($ret instanceof CommandBean){
+                    Publisher::broadcast($ret);
+                }
+            }
         });
     }
 

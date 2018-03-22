@@ -14,4 +14,5 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 class ServerManager
 {
     use Singleton;
+    //学习rpc存储到swoole table
 }

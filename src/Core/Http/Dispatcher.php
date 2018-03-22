@@ -76,6 +76,7 @@ class Dispatcher
                     }
                     case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:{
                         $response->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
+                        $response->end();
                         break;
                     }
                     case \FastRoute\Dispatcher::FOUND:{
