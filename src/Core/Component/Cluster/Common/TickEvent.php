@@ -53,7 +53,9 @@ class TickEvent extends Container
             $time = time();
             foreach ($node as $v) {
                 if (($time - $v['broadcastTime']) > (3 * $v['broadcastTTL'])) {
-                    CommandRegister::getInstance()->hook(SysCommand::NODE_SHUTDOWN, $v, null);
+                    $command = new CommandBean();
+                    $command->setArgs(['serverId' => $v['serverId']]);
+                    CommandRegister::getInstance()->hook(SysCommand::NODE_SHUTDOWN, $command, null);
                 }
             }
         });
