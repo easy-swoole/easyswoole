@@ -11,21 +11,19 @@ namespace EasySwoole\Core\Http;
 
 
 use EasySwoole\Core\Component\Invoker;
-use EasySwoole\Core\Http\AbstractInterface\Controller;
 use EasySwoole\Core\Http\AbstractInterface\Router;
 use EasySwoole\Core\Http\Message\Status;
-use EasySwoole\Core\Swoole\ServerManager;
 use FastRoute\Dispatcher\GroupCountBased;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\SysConst;
 use FastRoute\RouteCollector;
-use \Swoole\Coroutine;
 
 class Dispatcher
 {
 
     private $controllerNameSpacePrefix;
     private $router = null;
+    private $routerMethodNotAllowCallBack = null;
     function __construct($controllerNameSpace)
     {
         $this->controllerNameSpacePrefix = trim($controllerNameSpace,'\\');
@@ -34,9 +32,10 @@ class Dispatcher
     public function dispatch(Request $request,Response $response):void
     {
         if($this->router === null){
-            $collector = $this->checkRouter();
-            if($collector){
-                $this->router = new GroupCountBased($collector->getData());
+            $router = $this->checkRouter();
+            if($router){
+                $this->routerMethodNotAllowCallBack = $router->getMethodNotAllowCallBack();
+                $this->router = new GroupCountBased($router->getRouteCollector()->getData());
             }else{
                 $this->router = false;
             }
@@ -50,13 +49,13 @@ class Dispatcher
         };
     }
 
-    private function checkRouter():?RouteCollector
+    private function checkRouter():?Router
     {
         $class = $this->controllerNameSpacePrefix.'\\Router';
         if(class_exists($class)){
             $router = new $class;
             if($router instanceof Router){
-                return $router->getRouteCollector();
+                return $router;
             }else{
                 return null;
             }
@@ -67,7 +66,7 @@ class Dispatcher
 
     private function router(Request $request,Response $response):void
     {
-        if($this->router){
+        if($this->router instanceof GroupCountBased){
             $routeInfo = $this->router->dispatch($request->getMethod(),UrlParser::pathInfo($request->getUri()->getPath()));
             if($routeInfo !== false){
                 switch ($routeInfo[0]) {
@@ -75,8 +74,12 @@ class Dispatcher
                         break;
                     }
                     case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:{
-                        $response->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
-                        $response->end();
+                        if($this->routerMethodNotAllowCallBack){
+                            Invoker::callUserFunc($this->routerMethodNotAllowCallBack,$request,$response);
+                        }else{
+                            $response->withStatus(Status::CODE_METHOD_NOT_ALLOWED);
+                            $response->end();
+                        }
                         break;
                     }
                     case \FastRoute\Dispatcher::FOUND:{
