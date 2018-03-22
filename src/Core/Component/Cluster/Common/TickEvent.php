@@ -15,6 +15,7 @@ use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Component\Container;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
+use EasySwoole\Core\Component\Cluster\Server\ServerManager;
 
 class TickEvent extends Container
 {
@@ -38,13 +39,26 @@ class TickEvent extends Container
             $list = ServiceManager::getInstance()->getLocalServices();
             $command = new CommandBean();
             $command->setCommand(SysCommand::RPC_NODE_BROADCAST);
-            $command->setArgs($list);
+            $args = ['serverId' => Config::getInstance()->getServerId(), 'service' => $list];
+            $command->setArgs($args);
             return $command;
         });
 
         //gc命令不用广播 ，不返回command
         $this->set('gc',function (){
             //清理过期的RPC节点和集群节点
+            $node = ServerManager::getAllNodes();
+            if (empty($node)) {
+                return;
+            }
+            $time = time();
+            foreach ($node as $v) {
+                if (($time - $v['broadcastTime']) > (3 * $v['broadcastTTL'])) {
+                    $command = new CommandBean();
+                    $command->setArgs(['serverId' => $v['serverId']]);
+                    CommandRegister::getInstance()->hook(SysCommand::NODE_SHUTDOWN, $command, null);
+                }
+            }
         });
     }
 

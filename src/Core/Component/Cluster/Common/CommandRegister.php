@@ -13,6 +13,7 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
+use EasySwoole\Core\Component\Cluster\Server\ServerManager;
 
 class CommandRegister extends Event
 {
@@ -22,10 +23,13 @@ class CommandRegister extends Event
     {
         parent::__construct($allowKeys);
         $this->set(SysCommand::NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            var_dump($commandBean->toArray(),$udpAddress);
+            ServerManager::addNode($commandBean);
         });
         $this->set(SysCommand::RPC_NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            var_dump($commandBean->toArray(),$udpAddress);
+            ServerManager::addNodeServices($commandBean);
+        });
+        $this->set(SysCommand::NODE_SHUTDOWN, function (CommandBean $commandBean,$udpAddress) {
+            ServerManager::delNode($commandBean);
         });
     }
 

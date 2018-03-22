@@ -46,7 +46,10 @@ class Detector extends AbstractProcess
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-        EventRegister::getInstance()->hook(EventRegister::CLUSTER_SHUTDOWN);
+        $command = new CommandBean();
+        $command->setCommand(SysCommand::NODE_SHUTDOWN);
+        $command->setArgs(['serverId' => Config::getInstance()->getServerId()]);
+        EventRegister::getInstance()->hook(EventRegister::CLUSTER_SHUTDOWN, $command);
     }
 
     public function onReceive(string $str, ...$args)

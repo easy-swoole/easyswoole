@@ -147,18 +147,15 @@ class ServiceManager
         $time = time();
         $list = $this->allServiceNodes();
         if(is_array($list)){
-            foreach ($list as $service){
-                foreach ($service as $key => $item){
-                    if($item instanceof ServiceNode){
-                        //不对自身节点做gc
-                        if($key === $this->generateKey($item)){
-                            continue;
-                        }
-                        if($time - $item->getLastHeartBeat() > $timeOut){
-                            $failList[$key] = $item;
-                            $this->deleteServiceById($key);
-                        }
-                    }
+            foreach ($list as $key => $item){
+                $item = new ServiceNode($item);
+                //不对自身节点做gc
+                if($key === $this->generateKey($item, true)){
+                    continue;
+                }
+                if($time - $item->getLastHeartBeat() > $timeOut){
+                    $failList[$key] = $item;
+                    $this->deleteServiceById($key);
                 }
             }
         }
@@ -170,13 +167,10 @@ class ServiceManager
         $result = [];
         $list = $this->allServiceNodes();
         if(is_array($list)){
-            foreach ($list as $service){
-                foreach ($service as $key => $item){
-                    if($item instanceof ServiceNode){
-                        if($key === $this->generateKey($item)){
-                            $result[$key] = $item;
-                        }
-                    }
+            foreach ($list as $key => $item){
+                $item = new ServiceNode($item);
+                if($key === $this->generateKey($item, true)){
+                    $result[$key] = $item;
                 }
             }
         }
@@ -188,8 +182,12 @@ class ServiceManager
         return TableManager::getInstance()->get($this->tableName);
     }
 
-    private function generateKey(ServiceNode $serviceNode):string
+    private function generateKey(ServiceNode $serviceNode, $local = false):string
     {
-        return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
+        if ($local) {
+            return substr(md5(Config::getInstance()->getServerId().$serviceNode->getServiceName()), 8, 16);
+        } else {
+            return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
+        }
     }
 }
