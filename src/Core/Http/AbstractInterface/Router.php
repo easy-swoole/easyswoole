@@ -14,6 +14,7 @@ use FastRoute\RouteParser\Std;
 abstract class Router
 {
     private $routeCollector;
+    private $methodNotAllowCallBack = null;
     final function __construct()
     {
         $this->routeCollector = new RouteCollector(new Std(),new GroupCountBased());
@@ -25,5 +26,16 @@ abstract class Router
     function getRouteCollector():RouteCollector
     {
         return $this->routeCollector;
+    }
+
+
+    function setMethodNotAllowCallBack(callable $call)
+    {
+        $this->methodNotAllowCallBack = $call;
+    }
+
+    function getMethodNotAllowCallBack()
+    {
+        return $this->methodNotAllowCallBack;
     }
 }
