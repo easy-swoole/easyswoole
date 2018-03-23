@@ -22,7 +22,7 @@ Class EasySwooleEvent implements EventInterface {
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
-        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
+        Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH, 5);
     }
 
     public function mainServerCreate(ServerManager $server,EventRegister $register): void
