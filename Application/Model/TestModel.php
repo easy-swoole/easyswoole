@@ -12,6 +12,6 @@ namespace App\Model;
 class TestModel extends BaseModel
 {
     function test(){
-        return $this->readDb->get("administrative_region");
+        return $this->readDb->get("test");
     }
 }
