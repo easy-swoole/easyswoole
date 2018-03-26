@@ -138,9 +138,8 @@ Percentage of the requests served within a certain time (ms)
 ## 其他
 
 - [项目官网主页](https://www.easyswoole.com)
-
+- [码云](https://gitee.com/easyswoole/easyswoole)
 - [项目文档仓库](https://github.com/easy-swoole/doc)
-
 - [HTTP基础DEMO](https://github.com/easy-swoole/demo)
 
 - 官方QQ交流群 : **633921431**
