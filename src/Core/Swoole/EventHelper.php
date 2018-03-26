@@ -46,11 +46,8 @@ class EventHelper
                     $response_psr->write(nl2br($throwable->getMessage() ."\n". $throwable->getTraceAsString()));
                 }
             }
-            //携程模式下  底层不会自动end
             $response_psr->response();
-            if($response_psr->autoEnd()){
-                $response_psr->end(true);
-            }
+            $response_psr->end(true);
         });
     }
 
