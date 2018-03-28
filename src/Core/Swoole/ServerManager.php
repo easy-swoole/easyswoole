@@ -58,9 +58,9 @@ class ServerManager
     public function start():void
     {
         $this->createMainServer();
+        $this->attachListener();
         Cache::getInstance();
         Cluster::getInstance()->run();
-        $this->attachListener();
         $this->isStart = true;
         $this->getServer()->start();
     }
