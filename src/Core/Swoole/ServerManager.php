@@ -124,9 +124,6 @@ class ServerManager
         $this->mainServer->set($setting);
         //创建默认的事件注册器
         $register = new EventRegister();
-        EventHelper::registerDefaultOnTask($register);
-        EventHelper::registerDefaultOnFinish($register);
-        EventHelper::registerDefaultOnPipeMessage($register);
         $this->finalHook($register);
         Event::getInstance()->hook('mainServerCreate', $this, $register);
         $events = $register->all();
@@ -190,13 +187,6 @@ class ServerManager
     private function finalHook(EventRegister $register)
     {
         //实例化对象池管理
-        PoolManager::getInstance();
-        $conf = Config::getInstance()->getConf("MAIN_SERVER");
-        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
-            if(!$register->get($register::onRequest)){
-                EventHelper::registerDefaultOnRequest($register);
-            }
-        }
         $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
             if(PHP_OS != 'Darwin'){
                 $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
@@ -210,5 +200,15 @@ class ServerManager
             }
             PoolManager::getInstance()->workerStartClean($workerId);
         });
+        PoolManager::getInstance();
+        EventHelper::registerDefaultOnTask($register);
+        EventHelper::registerDefaultOnFinish($register);
+        EventHelper::registerDefaultOnPipeMessage($register);
+        $conf = Config::getInstance()->getConf("MAIN_SERVER");
+        if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
+            if(!$register->get($register::onRequest)){
+                EventHelper::registerDefaultOnRequest($register);
+            }
+        }
     }
 }
