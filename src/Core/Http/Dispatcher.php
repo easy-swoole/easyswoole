@@ -137,7 +137,11 @@ class Dispatcher
         if(!empty($finalClass)){
             (new $finalClass($actionName,$request,$response));
         }else{
-            $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
+            if(in_array($request->getUri()->getPath(),['/','/index.html'])){
+                $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
+            }else{
+                $content = file_get_contents(__DIR__.'/../../Resource/404.html');
+            }
             $response->write($content);
         }
     }
