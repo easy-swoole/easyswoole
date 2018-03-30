@@ -140,6 +140,7 @@ class Dispatcher
             if(in_array($request->getUri()->getPath(),['/','/index.html'])){
                 $content = file_get_contents(__DIR__.'/../../Resource/welcome.html');
             }else{
+                $response->withStatus(Status::CODE_NOT_FOUND);
                 $content = file_get_contents(__DIR__.'/../../Resource/404.html');
             }
             $response->write($content);
