@@ -31,7 +31,7 @@ class PoolManager
             [
                 'currentNum'=>['type'=>Table::TYPE_INT,'size'=>2],
             ],
-            1024
+            4096
         );
     }
 
@@ -82,25 +82,7 @@ class PoolManager
         if(isset($this->processPool[$class])){
             return $this->processPool[$class];
         }else{
-            //看看是否是当前进程未初始化的
-            if(isset($this->poolList[$class])){
-                if($this->init($class)){
-                    return $this->getPool($class);
-                }else{
-                    return null;
-                }
-            }else{
-                try{
-                    $this->addPool($class);
-                    if($this->init($class)){
-                        return $this->getPool($class);
-                    }else{
-                        return null;
-                    }
-                }catch (\Throwable $throwable){
-                    return null;
-                }
-            }
+            return null;
         }
     }
 
@@ -110,6 +92,7 @@ class PoolManager
             $key = self::generateTableKey($class, $workerId);
             $table = TableManager::getInstance()->get(self::TABLE_NAME);
             $table->del($key);
+            $this->init($class);
         }
     }
 

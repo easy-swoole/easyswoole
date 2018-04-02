@@ -188,9 +188,9 @@ class ServerManager
     {
         //实例化对象池管理
         $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
+            $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
+            $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
             if(PHP_OS != 'Darwin'){
-                $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
-                $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
                 if($workerId <= ($workerNum -1)){
                     $name = "{$name}_Worker_".$workerId;
                 }else{
@@ -198,7 +198,9 @@ class ServerManager
                 }
                 cli_set_process_title($name);
             }
-            PoolManager::getInstance()->workerStartClean($workerId);
+            if($workerId <= ($workerNum -1)){
+                PoolManager::getInstance()->workerStartClean($workerId);
+            }
         });
         PoolManager::getInstance();
         EventHelper::registerDefaultOnTask($register);
