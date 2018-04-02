@@ -35,7 +35,7 @@ class ProcessManager
     public function addProcess(string $processName,string $processClass,$async = true,array $args = []):bool
     {
         if(ServerManager::getInstance()->isStart()){
-            trigger_error('you can not add a process after server start');
+            trigger_error("you can not add a process {$processName}.{$processClass} after server start");
             return false;
         }
         $key = md5($processName);
@@ -49,7 +49,7 @@ class ProcessManager
                 return false;
             }
         }else{
-            trigger_error('you can not add the same name process : '.$processName);
+            trigger_error("you can not add the same name process : {$processName}.{$processClass}");
             return false;
         }
     }
