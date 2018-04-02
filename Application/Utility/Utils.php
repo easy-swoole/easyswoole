@@ -312,13 +312,13 @@ class Utils
      * @param $data
      */
     static function initPageAndPageSize(&$data){
-        if(isset($data['page'])){
+        if(isset($data['page']) && $data['page'] >= 0){
             $data['page'] = (int)$data['page'];
         }
         else{
             $data['page'] = 0;
         }
-        if(isset($data['pageSize'])){
+        if(isset($data['pageSize']) && $data['pageSize'] >= 0){
             $data['pageSize'] = (int)$data['pageSize'];
         }
         else{
