@@ -65,6 +65,12 @@ class BaseController extends Controller
     protected $redis;
 
     /**
+     * 异步redis
+     * @var \App\Vendor\Db\AsyncRedis
+     */
+    protected $asyncRedis;
+
+    /**
      * 返回false 则终止后续调用控制器方法, 直接返回
      * @param $action
      * @return bool|null
@@ -73,7 +79,8 @@ class BaseController extends Controller
     {
         //redis 初始化
         $this->redis = Di::getInstance()->get("REDIS")->getConnect();
-
+        //异步redis初始化
+//        $this->asyncRedis = Di::getInstance()->get("ASYNC_REDIS");
 //        $this->shareMemory = ShareMemory::getInstance();
 //        $this->memory = Di::getInstance()->get("memory")->getTable();
         /*初始化session超级全局变量*/

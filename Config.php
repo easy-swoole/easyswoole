@@ -56,9 +56,9 @@ return [
     "REDIS" => [
         "host"=>'127.0.0.1',
         "port"=>6379,
-        "auth"=>'yang_123',
+        "auth"=>'',
         "db" => 1,
-        "timeout" => 2.0
+        "timeout" => 5.0
     ],
     "MONGODB" => [
         "host" =>'127.0.0.1',

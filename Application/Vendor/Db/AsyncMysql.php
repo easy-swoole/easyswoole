@@ -52,12 +52,11 @@ class AsyncMysql
         $this->db->connect($conf, function (\swoole_mysql $db, bool $result) use ($sql){
             if($result === false){
                 //执行失败处理 TODO
+                return;
             }
-            else{
-                $db->query($sql, function (\swoole_mysql $db, $result){
-                    $db->close();//需要关闭异步mysql连接
-                });
-            }
+            $db->query($sql, function (\swoole_mysql $db, $result){
+                $db->close();//需要关闭异步mysql连接
+            });
         });
         return true;
     }

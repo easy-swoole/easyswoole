@@ -39,6 +39,8 @@ Class EasySwooleEvent implements EventInterface {
         Di::getInstance()->set('ASYNC_MYSQL_MASTER',\App\Vendor\Db\AsyncMysql::class);
         //redis客户端连接
         Di::getInstance()->set('REDIS',\App\Vendor\Db\Redis::class);
+        //异步redis客户端
+        Di::getInstance()->set('ASYNC_REDIS',\App\Vendor\Db\AsyncRedis::class);
     }
 
     public function onRequest(Request $request,Response $response): void
