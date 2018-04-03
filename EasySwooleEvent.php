@@ -22,19 +22,23 @@ Class EasySwooleEvent implements EventInterface {
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
-        Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH, 5);
+        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
     }
 
     public function mainServerCreate(ServerManager $server,EventRegister $register): void
     {
         // TODO: Implement mainServerCreate() method.
         $instance = Config::getInstance();
+        //mysql主服务器
         $masterMysqlConf = $instance->getConf("MASTER_MYSQL");
         Di::getInstance()->set('MYSQL_MASTER',\MysqliDb::class, $masterMysqlConf);
+        //mysql从服务器
         $slaveMysqlConf = $instance->getConf("SLAVE_MYSQL");
         Di::getInstance()->set('MYSQL_SLAVE',\MysqliDb::class, $slaveMysqlConf);
-        $redisConf = $instance->getConf("REDIS");
-        Di::getInstance()->set('REDIS',\App\Vendor\Db\Redis::class, $redisConf);
+        //异步mysql主服务器
+        Di::getInstance()->set('ASYNC_MYSQL_MASTER',\App\Vendor\Db\AsyncMysql::class);
+        //redis客户端连接
+        Di::getInstance()->set('REDIS',\App\Vendor\Db\Redis::class);
     }
 
     public function onRequest(Request $request,Response $response): void

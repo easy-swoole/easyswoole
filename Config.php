@@ -36,12 +36,13 @@ return [
         'serviceTTL'=>10
     ],
     "MASTER_MYSQL" => [
-        'host' => '192.168.1.121',
+        'host' => '192.168.1.122',
         'username' => 'yang',
         'password' => 'yang_123',
-        'db'=> 'yang_db',
+        'db'=> 'test',
         'port' => 3306,
-        'charset' => 'utf8'
+        'charset' => 'utf8',
+        'timeout' => 3
     ],
     "SLAVE_MYSQL" => [
         'host' => '192.168.1.122',
@@ -49,13 +50,15 @@ return [
         'password' => 'yang_123',
         'db'=> 'yang_db2',
         'port' => 3306,
-        'charset' => 'utf8'
+        'charset' => 'utf8',
+        'timeout' => 3
     ],
     "REDIS" => [
         "host"=>'127.0.0.1',
         "port"=>6379,
         "auth"=>'yang_123',
         "db" => 1,
+        "timeout" => 2.0
     ],
     "MONGODB" => [
         "host" =>'127.0.0.1',

@@ -30,7 +30,9 @@ class Test extends BaseController
 //                echo "hello";
 //            });
 //        }
-        $res = $this->testModel->test();
+        $res = $this->testModel->test2();
+//        $res = "hello world";
+//        $this->setCache($res);
         $this->writeJson(200, $res);
     }
 

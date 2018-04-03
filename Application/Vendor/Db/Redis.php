@@ -28,7 +28,7 @@ class Redis
 
     static function getInstance(){
         if(!isset(self::$instance)){
-            self::$instance = new \Redis();
+            self::$instance = new Redis();
         }
         return self::$instance;
     }
@@ -40,7 +40,7 @@ class Redis
     function connect(){
         $conf = Config::getInstance()->getConf("REDIS");
         $this->con = new \Redis();
-        $this->con->connect($conf['host'], $conf['port'], 3);
+        $this->con->connect($conf['host'], $conf['port'], $conf['timeout']);
         $this->con->auth($conf['auth']);
         $this->con->select($conf['db']);
         if(!$this->con->ping()){
