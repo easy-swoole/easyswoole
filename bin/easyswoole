@@ -399,13 +399,10 @@ function serverReload($options)
 
 function serverRestart($options)
 {
-
-
     if(serverStop($options)){
         $options['d'] = '';
         serverStart($options);
     }
-
 }
 
 function serverInstall($options)
