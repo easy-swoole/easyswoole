@@ -87,7 +87,7 @@ class Core
     private function eventHook():Event
     {
         $event = Event::getInstance();
-        require EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
+        require_once EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
         $sysEvent = new EasySwooleEvent();
         $event->set('frameInitialize',[$sysEvent,'frameInitialize']);
         $event->set('mainServerCreate',[$sysEvent,'mainServerCreate']);

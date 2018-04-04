@@ -32,6 +32,9 @@ function commandHandler()
         case 'install':
             serverInstall($options);
             break;
+        case 'restart':
+            serverRestart($options);
+            break;
         case 'help':
         default:
             showHelp($options);
@@ -154,7 +157,7 @@ HELP_STOP;
 \e[33m操作:\e[0m
 \e[31m  easyswoole reload\e[0m
 \e[33m简介:\e[0m
-\e[36m  执行本命令可以重启框架 可选的操作参数如下\e[0m
+\e[36m  执行本命令可以重启所有Worker 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
 \e[32m  --all \e[0m           重启所有进程
 \e[32m  --pid\e[34m-pidFile \e[0m   指定服务PID存储文件\n
@@ -170,6 +173,17 @@ HELP_STOP;
 \e[32m  本操作没有相关的参数\e[0m\n
 HELP_INSTALL;
             break;
+        case 'restart':
+            echo <<<HELP_INSTALL
+\e[33m操作:\e[0m
+\e[31m  easyswoole restart\e[0m
+\e[33m简介:\e[0m
+\e[36m  停止并重新启动服务\e[0m
+\e[33m参数:\e[0m
+\e[32m  本操作没有相关的参数\e[0m\n
+HELP_INSTALL;
+            break;
+
         default:
             showLogo();
             echo <<<DEFAULTHELP
@@ -179,10 +193,12 @@ HELP_INSTALL;
   easyswoole [操作] [选项]
 
 \e[33m操作:\e[0m
-\e[32m  install \e[0m      安装easySwoole
-\e[32m  start \e[0m        启动easySwoole
-\e[32m  stop \e[0m         停止easySwoole
-\e[32m  reload \e[0m       重启easySwoole
+\e[32m  install \e[0m      初始化easySwoole
+\e[32m  start \e[0m        启动服务
+\e[32m  stop \e[0m         停止服务
+\e[32m  reload \e[0m       重载服务
+\e[32m  restart \e[0m      重启服务
+
 \e[32m  help \e[0m         查看命令的帮助信息\n
 \e[31m有关某个操作的详细信息 请使用\e[0m help \e[31m命令查看 \e[0m
 \e[31m如查看\e[0m start \e[31m操作的详细信息 请输入\e[0m easyswoole help --start\n\n
@@ -317,7 +333,7 @@ function serverStop($options)
 
         if (!swoole_process::kill($pid, 0)) {
             echo "PID :{$pid} not exist \n";
-            return;
+            return false;
         }
 
         if (in_array('-f', $options)) {
@@ -328,14 +344,15 @@ function serverStop($options)
 
         //等待5秒
         $time = time();
+        $flag = false;
         while (true) {
             usleep(1000);
             if (!swoole_process::kill($pid, 0)) {
                 echo "server stop at " . date("y-m-d h:i:s") . "\n";
                 if (is_file($pidFile)) {
                     unlink($pidFile);
-
                 }
+                $flag = true;
                 break;
             } else {
                 if (time() - $time > 5) {
@@ -344,8 +361,10 @@ function serverStop($options)
                 }
             }
         }
+        return $flag;
     } else {
         echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+        return false;
     }
 }
 
@@ -375,6 +394,14 @@ function serverReload($options)
 
     } else {
         echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+    }
+}
+
+function serverRestart($options)
+{
+    if(serverStop($options)){
+        $options['d'] = '';
+        serverStart($options);
     }
 }
 
