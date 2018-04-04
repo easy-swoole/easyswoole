@@ -172,6 +172,36 @@ class Validator
     }
 
     /**
+     * 是否为json字符串
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function json(array &$data, string &$field) :bool{
+        if(isset($data[$field])){
+            if(empty(json_decode($data[$field], true))){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 邮箱校验
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function email(array &$data, string &$field) :bool
+    {
+        if (isset($data[$field])) {
+            return preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/", $data[$field]);
+        }
+        return true;
+    }
+
+
+    /**
      * 正则校验
      * @param array $data
      * @param string $field

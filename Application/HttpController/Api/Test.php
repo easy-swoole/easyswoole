@@ -34,9 +34,10 @@ class Test extends BaseController
         $posts = $this->request()->getRequestParam();
         $validator = new Validator();
         $validator->validate($posts, array(
-            "input" => "min:3|max:5",
+            "input" => "min:3|max:5|required",
             "input2" => "numeric",
-            "input3" => "mobile"
+            "input3" => "mobile",
+            "input4" => "json"
         ), array(
             "input" => "input必须3-5之间",
             "input2" => "必须是数值型",
