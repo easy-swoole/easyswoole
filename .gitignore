@@ -13,4 +13,5 @@ composer.lock
 easyswoole.install
 src/swoole_log.txt
 
-
+# web
+/web

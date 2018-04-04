@@ -2,6 +2,7 @@
 namespace App\HttpController\Api;
 
 use App\Model\TestModel;
+use App\Utility\Validator;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 
@@ -30,9 +31,18 @@ class Test extends BaseController
 //                echo "hello";
 //            });
 //        }
-//        $res = $this->testModel->test2();
-        $res = "hello world";
-        $this->writeJson(200, $res);
+        $posts = $this->request()->getRequestParam();
+        $validator = new Validator();
+        $validator->validate($posts, array(
+            "input" => "min:3|max:5",
+            "input2" => "numeric",
+            "input3" => "mobile"
+        ), array(
+            "input" => "input必须3-5之间",
+            "input2" => "必须是数值型",
+            "input3" => "手机号码格式不对"
+        ));
+        $this->writeJson(200, $validator->errorList());
     }
 
 }
