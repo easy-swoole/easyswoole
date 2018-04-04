@@ -53,7 +53,7 @@ class BaseModel
         $this->db = Di::getInstance()->get("MYSQL_MASTER");
         $this->readDb = Di::getInstance()->get("MYSQL_SLAVE");
         //异步mysql连接
-        $this->asyncMysql = Di::getInstance()->get("ASYNC_MYSQL_MASTER");
+//        $this->asyncMysql = Di::getInstance()->get("ASYNC_MYSQL_MASTER");
 //        $this->elastic = Di::getInstance()->get("master_elastic")->getClient();
     }
 }
