@@ -5,10 +5,8 @@
  * Date: 2018/3/12
  * Time: 下午12:53
  */
-
 namespace EasySwoole\Core\Swoole\Coroutine\Client;
 use \Swoole\Coroutine\Http\Client;
-
 
 class Http
 {
@@ -20,44 +18,43 @@ class Http
     protected $post = [];
     protected $file = [];
     protected $header = [];
-
+    protected $setting = [];
     function __construct(?string $url = null)
     {
         if(!empty($url)){
             $this->parserUrl($url);
         }
     }
-
     function setUrl(string $url)
     {
         $this->parserUrl($url);
         return $this;
     }
-
+    function set(array $set)
+    {
+        $this->setting = $set;
+        return $this;
+    }
     function setHeader(array $data)
     {
         $this->header = $data;
         return $this;
     }
-
     function setGet(array $data)
     {
         $this->get = $data;
         return $this;
     }
-
     function setPost(array $data)
     {
         $this->post = $data;
         return $this;
     }
-
     function addFile($filePath,$fileName)
     {
         $this->file[$fileName] = $filePath;
         return $this;
     }
-
     protected function parserUrl(string $url)
     {
         $data = parse_url($url);
@@ -78,7 +75,6 @@ class Http
             parse_str($data['query'], $this->get);
         }
     }
-
     protected function reset()
     {
         $this->port = 80;
@@ -90,13 +86,15 @@ class Http
         $this->file = [];
         $this->header = [];
     }
-
     /*
      * 延迟收包请注意close
      */
     function exec($setDefer = false,$autoRest = true)
     {
         $client = new Client($this->host, $this->port,$this->ssl);
+        if(!empty($this->setting)){
+            $client->set($this->setting);
+        }
         if(!empty($this->header)){
             $client->setHeaders($this->header);
         }
@@ -126,5 +124,4 @@ class Http
             return $client;
         }
     }
-
 }
