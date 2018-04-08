@@ -14,6 +14,8 @@ use EasySwoole\Core\Component\Cluster\Communicate\SysCommand;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Cluster\Communicate\CommandBean;
 use EasySwoole\Core\Component\Cluster\Server\ServerManager;
+use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
+use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 
 class CommandRegister extends Event
 {
@@ -23,13 +25,22 @@ class CommandRegister extends Event
     {
         parent::__construct($allowKeys);
         $this->set(SysCommand::NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            ServerManager::addNode($commandBean);
+            //广播自身节点
+
         });
+
         $this->set(SysCommand::RPC_NODE_BROADCAST,function (CommandBean $commandBean,$udpAddress){
-            ServerManager::addNodeServices($commandBean);
+           $list = $commandBean->getArgs();
+           if(is_array($list)){
+               foreach ($list as $item){
+                    $node = new ServiceNode($item);
+                    ServiceManager::getInstance()->addServiceNode($node);
+               }
+           }
         });
+
         $this->set(SysCommand::NODE_SHUTDOWN, function (CommandBean $commandBean,$udpAddress) {
-            ServerManager::delNode($commandBean);
+
         });
     }
 

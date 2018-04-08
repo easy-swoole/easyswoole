@@ -12,9 +12,9 @@ namespace EasySwoole\Core\Component\Rpc\AbstractInterface;
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Spl\SplStream;
+use EasySwoole\Core\Socket\AbstractInterface\TcpController;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Common\CommandBean;
-use EasySwoole\Core\Socket\TcpController;
 
 abstract class AbstractRpcService extends TcpController
 {

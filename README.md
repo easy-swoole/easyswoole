@@ -42,6 +42,7 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP�
 - 异步进程、自定义进程、定时器
 - 集群分布式支持，例如集群节点通讯，服务发现，RPC
 - 全开放系统事件注册器与EventHook
+- Redis队列消费与订阅
 
 ## 基准测试
 
@@ -137,9 +138,8 @@ Percentage of the requests served within a certain time (ms)
 ## 其他
 
 - [项目官网主页](https://www.easyswoole.com)
-
+- [码云](https://gitee.com/easyswoole/easyswoole)
 - [项目文档仓库](https://github.com/easy-swoole/doc)
-
 - [HTTP基础DEMO](https://github.com/easy-swoole/demo)
 
 - 官方QQ交流群 : **633921431**

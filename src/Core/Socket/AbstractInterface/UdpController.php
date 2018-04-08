@@ -2,15 +2,13 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2017/12/20
- * Time: 下午3:49
+ * Date: 2018/4/3
+ * Time: 下午1:49
  */
 
-namespace EasySwoole\Core\Socket;
-
+namespace EasySwoole\Core\Socket\AbstractInterface;
 
 use EasySwoole\Core\Component\Spl\SplStream;
-use EasySwoole\Core\Socket\AbstractInterface\Controller;
 use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Common\CommandBean;
 

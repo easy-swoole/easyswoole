@@ -9,15 +9,32 @@
 namespace EasySwoole\Core\Swoole\Time;
 
 
+use EasySwoole\Core\Component\Invoker;
+use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\ServerManager;
 
 class Timer
 {
     public static function loop($microSeconds,\Closure $func,$args = null){
-        return ServerManager::getInstance()->getServer()->tick($microSeconds,$func,$args);
+        $new = function (...$args)use($func){
+            try{
+                Invoker::callUserFunc($func,...$args);
+            }catch (\Throwable $throwable){
+                Trigger::throwable($throwable);
+            }
+        };
+        return ServerManager::getInstance()->getServer()->tick($microSeconds,$new,$args);
     }
+
     public static function delay($microSeconds,\Closure $func,$args = null){
-       return  ServerManager::getInstance()->getServer()->after($microSeconds,$func,$args);
+        $new = function (...$args)use($func){
+            try{
+                Invoker::callUserFunc($func,...$args);
+            }catch (\Throwable $throwable){
+                Trigger::throwable($throwable);
+            }
+        };
+        return ServerManager::getInstance()->getServer()->after($microSeconds,$new,$args);
     }
     /*
      * @param $timerId

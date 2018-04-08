@@ -55,6 +55,7 @@ class ServiceManager
 
     public function addServiceNode(ServiceNode $bean):void
     {
+        $bean->setLastHeartBeat(time());
         $this->getTable()->set($this->generateKey($bean),$bean->toArray());
     }
 

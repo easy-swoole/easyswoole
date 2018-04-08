@@ -19,7 +19,7 @@ class Trigger
         if($func instanceof TriggerInterface){
             $func::error($msg,$file,$line,$errorCode);
         }else{
-            $debug = "file[{$file}] line[{$line}] message:[{$msg}]";
+            $debug = "Error at file[{$file}] line[{$line}] message:[{$msg}]";
             Logger::getInstance()->log($debug,'debug');
             Logger::getInstance()->console($debug,false);
         }
@@ -31,7 +31,7 @@ class Trigger
         if($func instanceof TriggerInterface){
             $func::throwable($throwable);
         }else{
-            $debug = "file[{$throwable->getFile()}] line[{$throwable->getLine()}] message:[{$throwable->getMessage()}]";
+            $debug = "Exception at file[{$throwable->getFile()}] line[{$throwable->getLine()}] message:[{$throwable->getMessage()}]";
             Logger::getInstance()->log($debug,'debug');
             Logger::getInstance()->console($debug,false);
         }
