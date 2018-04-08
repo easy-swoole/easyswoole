@@ -20,7 +20,6 @@ class Http
     protected $post = [];
     protected $file = [];
     protected $header = [];
-    protected $setting = [];
 
     function __construct(?string $url = null)
     {
@@ -32,12 +31,6 @@ class Http
     function setUrl(string $url)
     {
         $this->parserUrl($url);
-        return $this;
-    }
-
-    function set(array $set)
-    {
-        $this->setting = $set;
         return $this;
     }
 
@@ -82,12 +75,7 @@ class Http
             $this->queryPath = $data['path'];
         }
         if(isset($data['query'])){
-            $list = explode('=',$data['query']);
-            while (!empty($list)){
-                $key = array_shift($list);
-                $val = array_shift($list);
-                $this->get[$key] = $val;
-            }
+            parse_str($data['query'], $this->get);
         }
     }
 
@@ -109,15 +97,11 @@ class Http
     function exec($setDefer = false,$autoRest = true)
     {
         $client = new Client($this->host, $this->port,$this->ssl);
-
-        if(!empty($this->setting)){
-            $client->set($this->setting);
-        }
         if(!empty($this->header)){
             $client->setHeaders($this->header);
         }
         if(!empty($this->get)){
-            $this->queryPath = $this->queryPath.'?&'.http_build_query($this->get);
+            $this->queryPath = $this->queryPath.'?'.http_build_query($this->get);
         }
         if(!empty($this->file)){
             foreach ($this->file as $name => $path){
