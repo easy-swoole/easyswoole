@@ -7,6 +7,7 @@
  */
 
 namespace EasySwoole\Core\Swoole\Coroutine;
+use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\Coroutine\AbstractInterface\CoroutinePool;
@@ -20,6 +21,9 @@ class PoolManager
     protected $poolList = [];
     protected $processPool = [];
     const TABLE_NAME = 'coroutinePool';
+    const TYPE_ONLY_WORKER = 1;
+    const TYPE_ONLY_TASK_WORKER = 2;
+    const TYPE_ALL_WORKER = 3;
     use Singleton;
     /*
      * 协程仅能在worker中使用
@@ -35,7 +39,7 @@ class PoolManager
         );
     }
 
-    function addPool(string $class,int $minNum = 3,int $maxNum = 10)
+    function addPool(string $class,int $minNum = 3,int $maxNum = 10,$type = self::TYPE_ONLY_WORKER)
     {
         try{
             $ref = new \ReflectionClass($class);
@@ -43,6 +47,7 @@ class PoolManager
                 $this->poolList[$class] = [
                     'min'=>$minNum,
                     'max'=>$maxNum,
+                    'type'=>$type
                 ];
                 return true;
             }else{
@@ -88,7 +93,17 @@ class PoolManager
 
     public function workerStartClean($workerId)
     {
+        $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
         foreach ($this->poolList as $class => $item){
+            if($item['type'] === self::TYPE_ONLY_WORKER){
+                if($workerId > ($workerNum -1)){
+                    continue;
+                }
+            }else if($item['type'] === self::TYPE_ONLY_TASK_WORKER){
+                if($workerId <= ($workerNum -1)){
+                    continue;
+                }
+            }
             $key = self::generateTableKey($class, $workerId);
             $table = TableManager::getInstance()->get(self::TABLE_NAME);
             $table->del($key);
