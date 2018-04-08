@@ -20,6 +20,7 @@ class Memory
         $this->table = new \swoole_table(1024);
         $this->table->column('value', swoole_table::TYPE_STRING, 65536); //暂定65536. 目前只定义一个字段value, 可以多加入
         $this->table->create();
+        self::$instance = $this;
     }
 
     static function getInstance(){

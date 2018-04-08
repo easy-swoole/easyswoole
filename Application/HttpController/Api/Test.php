@@ -31,19 +31,20 @@ class Test extends BaseController
 //                echo "hello";
 //            });
 //        }
-        $posts = $this->request()->getRequestParam();
-        $validator = new Validator();
-        $validator->validate($posts, array(
-            "input" => "min:3|max:5|required",
-            "input2" => "numeric",
-            "input3" => "mobile",
-            "input4" => "json"
-        ), array(
-            "input" => "input必须3-5之间",
-            "input2" => "必须是数值型",
-            "input3" => "手机号码格式不对"
-        ));
-        $this->writeJson(200, $validator->errorList());
+//        $posts = $this->request()->getRequestParam();
+//        $validator = new Validator();
+//        $validator->validate($posts, array(
+//            "input" => "min:3|max:5|required",
+//            "input2" => "numeric",
+//            "input3" => "mobile",
+//            "input4" => "json"
+//        ), array(
+//            "input" => "input必须3-5之间",
+//            "input2" => "必须是数值型",
+//            "input3" => "手机号码格式不对"
+//        ));
+        $res = $this->redis->get("test");
+        $this->writeJson(200, $res);
     }
 
 }

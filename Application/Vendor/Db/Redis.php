@@ -26,7 +26,7 @@ class Redis
      */
     private $con;
 
-    static function getInstance(){
+    public static function getInstance(){
         if(!isset(self::$instance)){
             self::$instance = new Redis();
         }
@@ -51,6 +51,7 @@ class Redis
                 return null;
             }
         }
+        self::$instance = $this;
 //        $this->con->setOption(\Redis::OPT_SERIALIZER,\Redis::SERIALIZER_PHP); 暂时不开启php序列化
     }
 
