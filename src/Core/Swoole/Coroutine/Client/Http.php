@@ -20,6 +20,7 @@ class Http
     protected $post = [];
     protected $file = [];
     protected $header = [];
+    protected $setting = [];
 
     function __construct(?string $url = null)
     {
@@ -31,6 +32,12 @@ class Http
     function setUrl(string $url)
     {
         $this->parserUrl($url);
+        return $this;
+    }
+
+    function set(array $set)
+    {
+        $this->setting = $set;
         return $this;
     }
 
@@ -102,6 +109,10 @@ class Http
     function exec($setDefer = false,$autoRest = true)
     {
         $client = new Client($this->host, $this->port,$this->ssl);
+
+        if(!empty($this->setting)){
+            $client->set($this->setting);
+        }
         if(!empty($this->header)){
             $client->setHeaders($this->header);
         }
