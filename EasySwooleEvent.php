@@ -22,6 +22,7 @@ Class EasySwooleEvent implements EventInterface {
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
+        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
 //        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
     }
 
