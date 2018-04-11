@@ -82,8 +82,8 @@ class TaskManager
             $ret = ServerManager::getInstance()->getServer()->taskWaitMulti($temp,$timeout);
             if(!empty($ret)){
                 //极端情况下  所有任务都超时
-                foreach ($ret as $index => $result){
-                    $result[$map[$index]] = $result;
+                foreach ($ret as $index => $subRet){
+                    $result[$map[$index]] = $subRet;
                 }
             }
         }
