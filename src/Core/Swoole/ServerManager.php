@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Swoole;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Cache\Cache;
 use EasySwoole\Core\Component\Cluster\Cluster;
+use EasySwoole\Core\Component\Crontab\CronTab;
 use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
@@ -61,6 +62,7 @@ class ServerManager
         $this->attachListener();
         Cache::getInstance();
         Cluster::getInstance()->run();
+        CronTab::getInstance()->run();
         $this->isStart = true;
         $this->getServer()->start();
     }
