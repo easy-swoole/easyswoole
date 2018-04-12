@@ -24,7 +24,7 @@ Class EasySwooleEvent implements EventInterface {
         date_default_timezone_set('Asia/Shanghai');
 
         //异常拦截, 生产环境开启此配置, TODO 调试环境关闭有助于调试
-        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
+//        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
 //        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
     }
 
