@@ -35,7 +35,7 @@ class Validator
 
     /**
      * 密码校验
-     * 密码8-16位数字和字母的组合(不能是纯数字或者纯字母)
+     * 密码8-16位数字和字母的组合加上!?这两个符号(不能是纯数字或者纯字母)
      * @param array $data 数组数据
      * @param string $field 需要校验的字段
      * @return bool
