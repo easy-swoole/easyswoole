@@ -16,11 +16,11 @@ use EasySwoole\Core\Swoole\ServerManager;
 
 interface EventInterface
 {
-    public function frameInitialize():void;
+    public static function frameInitialize():void;
 
-    public function mainServerCreate(ServerManager $server,EventRegister $register):void;
+    public static function mainServerCreate(ServerManager $server,EventRegister $register):void;
 
-    public  function onRequest(Request $request,Response $response):void;
+    public static function onRequest(Request $request,Response $response):void;
 
-    public  function afterAction(Request $request,Response $response):void;
+    public static function afterAction(Request $request,Response $response):void;
 }
