@@ -200,6 +200,27 @@ class Validator
         return true;
     }
 
+    /**
+     * 值范围校验, 比如有个需求, 客户端传入的某个字段参数必须在foo,good,park这三个值内, 如果不是则校验不过
+     * @param array $data
+     * @param string $field
+     * @param string $args
+     * @return bool
+     */
+    public function in(array &$data, string &$field, string $args) :bool{
+        $argsArr = @explode(",", $args);
+        $res = false;
+        if (isset($data[$field])) {
+            foreach ($argsArr as $v){
+                if($v === $data[$field]){
+                    $res = true;
+                    break;
+                }
+            }
+            return $res;
+        }
+        return true;
+    }
 
     /**
      * 正则校验
