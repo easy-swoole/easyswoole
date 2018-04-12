@@ -254,7 +254,7 @@ class Validator
                 $this->validateRes[$field] = isset($msg[$field]) ? $msg[$field] : "校验失败";
             }
         }
-        return $this->hasError();
+        return !$this->hasError();
     }
 
     /**
@@ -263,9 +263,9 @@ class Validator
      */
     public function hasError(){
        if(!empty($this->validateRes)){
-           return false;
+           return true;
        }
-       return true;
+       return false;
     }
 
     /**
