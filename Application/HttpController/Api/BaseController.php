@@ -166,22 +166,51 @@ class BaseController extends Controller
 
     /**
      * json输出
-     * @param int $statusCode
      * @param null $data
      * @param null $msg
+     * @param int $code 业务自行定义的返回码
+     * @param int $status http code
      * @return bool|string
      */
-    protected function writeJson($statusCode = 200, $data = null, $msg = null){
+    protected function writeJson($data = null, $msg = null, $code = 200,  $status = 200){
         if(!$this->response()->isEndResponse()){
             $data = Array(
-                "code"=>$statusCode,
+                "code"=> $code,
                 "data"=> $data,
                 "msg"=>$msg
             );
             $output = json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
             $this->response()->write($output);
             $this->response()->withHeader('Content-type','application/json;charset=utf-8');
-            $this->response()->withStatus($statusCode);
+            $this->response()->withStatus($status);
+            return $output;
+        }else{
+            trigger_error("response has end");
+            return false;
+        }
+    }
+
+    /**
+     * jsonp输出
+     * @param string $callback
+     * @param null $data
+     * @param int $code
+     * @param null $msg
+     * @param int $status
+     * @return bool|string
+     */
+    protected function writeJsonp($callback, $data = null, $msg = null, $code = 200,  $status = 200){
+        if(!$this->response()->isEndResponse()){
+            $data = Array(
+                "code"=> $code,
+                "data"=> $data,
+                "msg"=> $msg
+            );
+            $output = json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+            $output = $callback . "({$output})";
+            $this->response()->write($output);
+            $this->response()->withHeader('Content-type','text/javascript; charset=utf-8');
+            $this->response()->withStatus($status);
             return $output;
         }else{
             trigger_error("response has end");
