@@ -19,11 +19,12 @@ class CronTab
 
     private $task = [];
 
-    public function addRule($rule,$task):CronTab
+    public function addRule(string $taskName,$rule,$task):CronTab
     {
-        $this->task[] = [
+        $this->task[$taskName] = [
             'rule'=>$rule,
-            'task'=>$task
+            'task'=>$task,
+            'isStart'=>true
         ];
         return $this;
     }

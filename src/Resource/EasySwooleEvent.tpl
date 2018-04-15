@@ -16,23 +16,23 @@ use \EasySwoole\Core\Http\Response;
 
 Class EasySwooleEvent implements EventInterface {
 
-    public function frameInitialize(): void
+    public static function frameInitialize(): void
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
     }
 
-    public function mainServerCreate(ServerManager $server,EventRegister $register): void
+    public static function mainServerCreate(ServerManager $server,EventRegister $register): void
     {
         // TODO: Implement mainServerCreate() method.
     }
 
-    public function onRequest(Request $request,Response $response): void
+    public static function onRequest(Request $request,Response $response): void
     {
         // TODO: Implement onRequest() method.
     }
 
-    public function afterAction(Request $request,Response $response): void
+    public static function afterAction(Request $request,Response $response): void
     {
         // TODO: Implement afterAction() method.
     }
