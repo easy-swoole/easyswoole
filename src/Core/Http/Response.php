@@ -53,12 +53,16 @@ class Response extends MessageResponse
             foreach ($cookies as $cookie){
                 $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
             }
-            $write = $this->getBody()->__toString();
-            if(!empty($write)){
-                $this->response->write($write);
+            if (empty($this->getFile())) {
+                $write = $this->getBody()->__toString();
+                if (!empty($write)) {
+                    $this->response->write($write);
+                }
+                $this->getBody()->close();
+                $this->end();
+            } else {
+                $this->response->sendfile($this->getFile());
             }
-            $this->getBody()->close();
-            $this->end();
             return true;
         }else{
             return false;

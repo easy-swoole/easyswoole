@@ -14,6 +14,7 @@ class Message
     private $protocolVersion = '1.1';
     private $headers = [];
     private $body;
+    private $file;
 
     function __construct(array $headers = null,Stream $body = null,$protocolVersion = '1.1')
     {
@@ -125,6 +126,17 @@ class Message
     {
         // TODO: Implement withBody() method.
         $this->body = $body;
+        return $this;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function withFile(string $file)
+    {
+        $this->file = $file;
         return $this;
     }
 }
