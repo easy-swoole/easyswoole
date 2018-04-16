@@ -57,7 +57,7 @@ class Response extends MessageResponse
                 $this->response->cookie($cookie->getName(),$cookie->getValue(),$cookie->getExpire(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
             }
             $write = $this->getBody()->__toString();
-            if(!empty($write)){
+            if($write !== ''){
                 $this->response->write($write);
             }
 
