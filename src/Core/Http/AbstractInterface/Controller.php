@@ -76,12 +76,17 @@ abstract class Controller
             if($ref->hasMethod($actionName) && $ref->getMethod( $actionName)->isPublic()){
                 try{
                     $this->$actionName();
-                    $this->afterAction($actionName);
                 }catch (\Throwable $exception){
                     $this->onException($exception,$actionName);
                 }
             }else{
                 $this->actionNotFound($actionName);
+            }
+            //afterAction 始终都会被执行
+            try{
+                $this->afterAction($actionName);
+            }catch (\Throwable $throwable){
+                $this->onException($exception,$actionName);
             }
         }
     }
