@@ -30,7 +30,7 @@ abstract class Controller
         $this->request = $request;
         $this->response = $response;
         $this->actionName = $actionName;
-        if(in_array($actionName,['__hook','__construct'])){
+        if($actionName == '__construct'){
             $this->response()->withStatus(Status::CODE_BAD_REQUEST);
         }else{
             $this->__hook( $actionName);
