@@ -72,21 +72,21 @@ abstract class Controller
         if($this->onRequest($actionName) !== false){
             $actionName = $this->actionName ;
             //支持在子类控制器中以private，protected来修饰某个方法不可见
-            $ref = new \ReflectionClass(static::class);
-            if($ref->hasMethod($actionName) && $ref->getMethod( $actionName)->isPublic()){
-                try{
+            try{
+                $ref = new \ReflectionClass(static::class);
+                if($ref->hasMethod($actionName) && $ref->getMethod( $actionName)->isPublic()){
                     $this->$actionName();
-                }catch (\Throwable $exception){
-                    $this->onException($exception,$actionName);
+                }else{
+                    $this->actionNotFound($actionName);
                 }
-            }else{
-                $this->actionNotFound($actionName);
+            }catch (\Throwable $throwable){
+                $this->onException($throwable,$actionName);
             }
             //afterAction 始终都会被执行
             try{
                 $this->afterAction($actionName);
             }catch (\Throwable $throwable){
-                $this->onException($exception,$actionName);
+                $this->onException($throwable,$actionName);
             }
         }
     }

@@ -39,7 +39,7 @@ abstract class Controller
 
     }
 
-    protected function onException(\Throwable $throwable):void
+    protected function onException(\Throwable $throwable,$actionName):void
     {
         throw $throwable;
     }
@@ -67,25 +67,25 @@ abstract class Controller
 
     protected function __hook(?string $actionName)
     {
-        //这里面的class一定存在
         if($this->onRequest($actionName) === false){
             return;
         }
+        //支持在子类控制器中以private，protected来修饰某个方法不可见
         $actionName = $this->request->getAction();
-        $ref = new \ReflectionClass(static::class);
-        if($ref->hasMethod($actionName)){
-            if($ref->getMethod($actionName)->isPublic()){
-                try{
-                    $this->$actionName();
-                    $this->afterAction($actionName);
-                }catch (\Throwable $throwable){
-                    $this->onException($throwable);
-                }
+        try{
+            $ref = new \ReflectionClass(static::class);
+            if($ref->hasMethod($actionName)  && $ref->getMethod( $actionName)->isPublic()){
+                $this->$actionName();
             }else{
                 $this->actionNotFound($actionName);
             }
-        }else{
-            $this->actionNotFound($actionName);
+        }catch (\Throwable $throwable){
+            $this->onException($throwable,$actionName);
+        }
+        try{
+            $this->afterAction($actionName);
+        }catch (\Throwable $throwable){
+            $this->onException($throwable,$actionName);
         }
     }
 }
