@@ -22,7 +22,7 @@ abstract class Controller
     {
         $this->request = $request;
         $this->response = $response;
-        if($request->getAction() != '__construct'){
+        if(!in_array($request->getAction(),['__hook','__construct'])){
             $this->__hook($request->getAction());
         }else{
             $response->write('do not try to call __construct');
