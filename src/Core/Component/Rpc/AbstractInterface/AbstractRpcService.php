@@ -31,7 +31,7 @@ abstract class AbstractRpcService extends TcpController
         $this->response()->setStatus(Status::ACTION_NOT_FOUND);
     }
 
-    protected function onException(\Throwable $throwable): void
+    protected function onException(\Throwable $throwable,$actionName): void
     {
         $this->response()->setError($throwable->getMessage());
         $this->response()->setStatus(Status::SERVER_ERROR);
