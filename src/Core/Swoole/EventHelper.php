@@ -26,6 +26,17 @@ use \EasySwoole\Core\Swoole\PipeMessage\EventRegister as PipeMessageEventRegiste
 
 class EventHelper
 {
+
+    public static function register(EventRegister $register,string $event,callable $callback):void
+    {
+        $register->set($event,$callback);
+    }
+
+    public static function registerWithAdd(EventRegister $register,string $event,callable $callback):void
+    {
+        $register->add($event,$callback);
+    }
+
     public static function registerDefaultOnRequest(EventRegister $register,$controllerNameSpace = 'App\\HttpController\\'):void
     {
         $dispatcher = new Dispatcher($controllerNameSpace);
