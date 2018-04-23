@@ -58,7 +58,6 @@ class EventHelper
                 }
             }
             $response_psr->response();
-            $response_psr->end(true);
         });
     }
 

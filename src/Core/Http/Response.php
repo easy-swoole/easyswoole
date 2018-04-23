@@ -7,7 +7,8 @@
  */
 
 namespace EasySwoole\Core\Http;
-use  EasySwoole\Core\Http\Message\Response as MessageResponse;
+use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Http\Message\Response as MessageResponse;
 use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Message\Utility;
 use EasySwoole\Core\Utility\Curl\Cookie;
@@ -19,10 +20,11 @@ class Response extends MessageResponse
     const STATUS_NOT_END = 0;
     const STATUS_LOGICAL_END = 1;
     const STATUS_REAL_END = 2;
+    const STATUS_RESPONSE_DETACH = 3;
 
     private $sendFile = null;
 
-    private $isEndResponse = self::STATUS_NOT_END;//1 逻辑end  2真实end
+    private $isEndResponse = self::STATUS_NOT_END;//1 逻辑end  2真实end 3分离响应
 
     final public function __construct(\swoole_http_response $response)
     {
@@ -30,19 +32,16 @@ class Response extends MessageResponse
         parent::__construct();
     }
 
-    function end($realEnd = false){
-        if($this->isEndResponse == self::STATUS_NOT_END){
-            $this->isEndResponse = self::STATUS_LOGICAL_END;
-        }
-        if($realEnd === true && $this->isEndResponse !== self::STATUS_REAL_END){
-            $this->isEndResponse = self::STATUS_REAL_END;
+    function end($status = self::STATUS_LOGICAL_END){
+        $this->isEndResponse = self::STATUS_LOGICAL_END;
+        if($status == self::STATUS_REAL_END){
             $this->response->end();
         }
     }
 
     function response():bool
     {
-        if($this->isEndResponse !== self::STATUS_REAL_END){
+        if($this->isEndResponse <= self::STATUS_REAL_END){
             //结束处理
             $status = $this->getStatusCode();
             $this->response->status($status);
@@ -66,7 +65,7 @@ class Response extends MessageResponse
             }
 
             $this->getBody()->close();
-            $this->end();
+            $this->end(self::STATUS_REAL_END);
             return true;
         }else{
             return false;
@@ -83,7 +82,11 @@ class Response extends MessageResponse
             $this->getBody()->write($str);
             return true;
         }else{
-            trigger_error("response has end");
+            $bt = debug_backtrace();
+            $caller = array_shift($bt);
+            $file = $caller['file'];
+            $line = $caller['line'];
+            Trigger::error("response has end at status {$this->isEndResponse}",$file,$line);
             return false;
         }
     }
@@ -94,7 +97,11 @@ class Response extends MessageResponse
             $this->withStatus($status);
             $this->withHeader('Location',$url);
         }else{
-            trigger_error("response has end");
+            $bt = debug_backtrace();
+            $caller = array_shift($bt);
+            $file = $caller['file'];
+            $line = $caller['line'];
+            Trigger::error("response has end at status {$this->isEndResponse}",$file,$line);
         }
     }
 
@@ -114,7 +121,11 @@ class Response extends MessageResponse
             $this->withAddedCookie($cookie);
             return true;
         }else{
-            trigger_error("response has end");
+            $bt = debug_backtrace();
+            $caller = array_shift($bt);
+            $file = $caller['file'];
+            $line = $caller['line'];
+            Trigger::error("response has end at status {$this->isEndResponse}",$file,$line);
             return false;
         }
 
@@ -129,6 +140,20 @@ class Response extends MessageResponse
     function sendFile(string $sendFilePath)
     {
         $this->sendFile = $sendFilePath;
+    }
+
+    public function detach():?int
+    {
+        $fd = $this->response->fd;
+        $this->isEndResponse = self::STATUS_RESPONSE_DETACH;
+        $this->response->detach();
+        return $fd;
+    }
+
+    static function createFromFd(int $fd):Response
+    {
+        $resp = \Swoole\Http\Response::create($fd);
+        return new Response($resp);
     }
 
     final public function __toString():string
