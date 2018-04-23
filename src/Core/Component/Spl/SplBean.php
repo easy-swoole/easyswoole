@@ -24,7 +24,11 @@ class SplBean implements \JsonSerializable
 
     final public function allProperty():array
     {
-        return array_keys($this->jsonSerialize());
+        $data = [];
+        foreach ($this as $key => $item){
+            array_push($data,$key);
+        }
+        return $data;
     }
 
     function toArray(array $columns = null,$filter = null):array
