@@ -20,7 +20,7 @@ class ChannelManager
     function add($name,$size = 1024 * 256):void
     {
         if(!isset($this->list[$name])){
-            $chan = new Channel(1024 * 256);
+            $chan = new Channel($size);
             $this->list[$name] = $chan;
         }
     }
