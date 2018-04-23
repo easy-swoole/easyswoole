@@ -15,6 +15,12 @@ class Trigger
 {
     public static function error($msg,$file = null,$line = null,$errorCode = E_USER_ERROR)
     {
+        if($file == null){
+            $bt = debug_backtrace();
+            $caller = array_shift($bt);
+            $file = $caller['file'];
+            $line = $caller['line'];
+        }
         $func = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
         if($func instanceof TriggerInterface){
             $func::error($msg,$file,$line,$errorCode);
@@ -36,5 +42,6 @@ class Trigger
             Logger::getInstance()->console($debug,false);
         }
     }
+
 
 }
