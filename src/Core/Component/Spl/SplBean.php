@@ -104,4 +104,11 @@ class SplBean implements \JsonSerializable
         return json_encode($this->jsonSerialize(),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     }
 
+    public function restore(array $data = [])
+    {
+        $this->arrayToBean($data+get_class_vars(static::class));
+        $this->initialize();
+        return $this;
+    }
+
 }
