@@ -8,12 +8,13 @@
 
 namespace EasySwoole\Core\Component\Spl;
 
-
+/*
+ * 仅能获取protected 和public熟悉
+ */
 class SplBean implements \JsonSerializable
 {
     const FILTER_NOT_NULL = 1;
     const FILTER_NOT_EMPTY = 2;//0 不算empty
-
     public function __construct(array $data = null,$autoCreateProperty = false)
     {
         if($data){
