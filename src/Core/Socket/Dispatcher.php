@@ -29,9 +29,19 @@ class Dispatcher
     private $exceptionHandler;
     private $errorHandler = null;
 
-    function __construct(ParserInterface $parser)
+    function __construct(string $parserInterface)
     {
-        $this->parser = $parser;
+        try{
+            $ref = new \ReflectionClass($parserInterface);
+            if($ref->implementsInterface(ParserInterface::class)){
+                $this->parser = $parserInterface;
+            }else{
+                throw new \Exception("class {$parserInterface} not a implement ".'EasySwoole\Core\Socket\AbstractInterface\ParserInterface');
+            }
+        }catch (\Throwable $throwable){
+            Trigger::throwable($throwable);
+            throw $throwable;
+        }
     }
 
     public function setExceptionHandler(ExceptionHandler $handler = null):Dispatcher
@@ -71,7 +81,7 @@ class Dispatcher
                 return;
             }
         }
-        $command = $this->parser->decode($data,$client);
+        $command = $this->parser::decode($data,$client);
         if(is_object($command)){
             $commandCopy = clone $command;
         }else{
@@ -82,7 +92,7 @@ class Dispatcher
                 try{
                     $ret = Invoker::callUserFunc($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
                     if($ret !== null){
-                        $res = $this->parser->encode($ret,$client,$commandCopy);
+                        $res = $this->parser::encode($ret,$client,$commandCopy);
                         if($res !== null){
                             Response::response($client,$res);
                         }
@@ -110,7 +120,7 @@ class Dispatcher
                         $response->write($throwable->getMessage().$throwable->getTraceAsString());
                     }
                 }
-                $res = $this->parser->encode($response,$client,$commandCopy);
+                $res = $this->parser::encode($response,$client,$commandCopy);
                 if($res !== null){
                     Response::response($client,$res);
                 }
@@ -119,7 +129,7 @@ class Dispatcher
                     try{
                         $ret = Invoker::callUserFunc($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
                         if($ret !== null){
-                            $res = $this->parser->encode($ret,$client,$commandCopy);
+                            $res = $this->parser::encode($ret,$client,$commandCopy);
                             if($res !== null){
                                 Response::response($client,$res);
                             }
@@ -131,7 +141,7 @@ class Dispatcher
                 }
             }
         }else{
-            $res = $this->parser->encode($command,$client,$commandCopy);
+            $res = $this->parser::encode($command,$client,$commandCopy);
             if($res !== null){
                 Response::response($client,$res);
             }
