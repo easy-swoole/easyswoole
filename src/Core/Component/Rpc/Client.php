@@ -26,6 +26,19 @@ class Client
     private $taskList = [];
 
     private $clientConnectTimeOut = 0.1;
+    private $protocolSetting = [
+        'open_length_check' => true,
+        'package_length_type' => 'N',
+        'package_length_offset' => 0,
+        'package_body_offset' => 4,
+        'package_max_length' => 1024 * 64
+    ];
+
+    function setProtocolSetting(array $data)
+    {
+        $this->protocolSetting = $data;
+        return $this;
+    }
 
     function setClientConnectTimeout(float $timeout):Client
     {
@@ -121,13 +134,7 @@ class Client
     private function connect(ServiceNode $node): ?\swoole_client
     {
         $client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_SYNC);
-        $client->set([
-            'open_length_check' => true,
-            'package_length_type' => 'N',
-            'package_length_offset' => 0,
-            'package_body_offset' => 4,
-            'package_max_length' => 1024 * 64
-        ]);
+        $client->set($this->protocolSetting);
         if ($client->connect($node->getAddress(), $node->getPort(),$this->clientConnectTimeOut)) {
             return $client;
         } else {
@@ -151,14 +158,21 @@ class Client
         $raw = Parser::unPack($raw);
         if(!empty($node->getEncryptToken())){
             $openssl = new Openssl($node->getEncryptToken());
-            $raw = $openssl->encrypt($raw);
+            $raw = $openssl->decrypt($raw);
         }
-        $raw = json_decode($raw,true);
-        if(!is_array($raw)){
-            $raw = [
-                'status'=>Status::CLIENT_WAIT_RESPONSE_TIMEOUT
-            ];
+        $json = json_decode($raw,true);
+        if(!is_array($json)){
+            if(!empty($raw) && ($raw !== false)){
+                $json = [
+                    'status'=>Status::PACKAGE_ENCRYPT_DECODED_ERROR
+                ];
+            }else{
+                $json = [
+                    'status'=>Status::CLIENT_WAIT_RESPONSE_TIMEOUT
+                ];
+            }
+
         }
-        return new ServiceResponse($raw + ['responseNode'=>$node]);
+        return new ServiceResponse( $json + ['responseNode'=>$node]);
     }
 }

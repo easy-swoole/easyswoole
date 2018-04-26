@@ -11,8 +11,6 @@ namespace EasySwoole\Core\Component\Rpc;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Openssl;
-use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
-use EasySwoole\Core\Component\Rpc\Common\Encrypt;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\ServiceResponse;
 use EasySwoole\Core\Component\Rpc\Common\Status;
@@ -30,6 +28,21 @@ class Server
 
     private $list = [];
     private $controllerNameSpace = 'App\\RpcController\\';
+    private $protocolSetting = [
+        'open_length_check' => true,
+        'package_length_type'   => 'N',
+        'package_length_offset' => 0,
+        'package_body_offset'   => 4,
+        'package_max_length'    => 1024*64,
+        'heartbeat_idle_time' => 5,
+        'heartbeat_check_interval' => 30,
+    ];
+
+    function setProtocolSetting(array $data)
+    {
+        $this->protocolSetting = $data;
+        return $this;
+    }
 
     function setControllerNameSpace(string $nameSpace):Server
     {
@@ -49,7 +62,7 @@ class Server
         return $this;
     }
 
-    public function attach($heartbeat_idle_time = 3,$heartbeat_check_interval = 30)
+    public function attach()
     {
         foreach ($this->list as $name => $item){
             $node = new ServiceNode();
@@ -58,15 +71,7 @@ class Server
             $node->setEncryptToken($item['encryptToken']);
             ServiceManager::getInstance()->addServiceNode($node);
 
-            $sub = ServerManager::getInstance()->addServer("RPC_SERVER_{$name}",$item['port'],SWOOLE_TCP,$item['address'],[
-                'open_length_check' => true,
-                'package_length_type'   => 'N',
-                'package_length_offset' => 0,
-                'package_body_offset'   => 4,
-                'package_max_length'    => 1024*64,
-                'heartbeat_idle_time' => $heartbeat_idle_time,
-                'heartbeat_check_interval' => $heartbeat_check_interval,
-            ]);
+            $sub = ServerManager::getInstance()->addServer("RPC_SERVER_{$name}",$item['port'],SWOOLE_TCP,$item['address'],$this->protocolSetting);
 
             $nameSpace = $this->controllerNameSpace.ucfirst($item['serviceName']);
             EventHelper::register($sub,$sub::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($item,$nameSpace){
