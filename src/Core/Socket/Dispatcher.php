@@ -116,11 +116,11 @@ class Dispatcher
                             $response->write($data);
                         }
                     }else{
-                        trigger_error($throwable->getTraceAsString());
-                        $response->write($throwable->getMessage().$throwable->getTraceAsString());
+                        Trigger::throwable($throwable);
+                        $response->write($throwable->getMessage());
                     }
                 }
-                $res = $this->parser::encode($response,$client,$commandCopy);
+                $res = $this->parser::encode($response->__toString(),$client,$commandCopy);
                 if($res !== null){
                     Response::response($client,$res);
                 }
@@ -128,19 +128,19 @@ class Dispatcher
                 if(is_callable($this->errorHandler)){
                     try{
                         $ret = Invoker::callUserFunc($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
-                        if($ret !== null){
+                        if(is_string($ret)){
                             $res = $this->parser::encode($ret,$client,$commandCopy);
                             if($res !== null){
                                 Response::response($client,$res);
                             }
                         }
                     }catch (\Throwable $exception){
-                        trigger_error($exception->getTraceAsString());
-                        Response::response($client,$exception->getTraceAsString());
+                        Trigger::throwable($exception);
+                        Response::response($client,$exception->getMessage());
                     }
                 }
             }
-        }else{
+        }else if(is_string($command)){
             $res = $this->parser::encode($command,$client,$commandCopy);
             if($res !== null){
                 Response::response($client,$res);
