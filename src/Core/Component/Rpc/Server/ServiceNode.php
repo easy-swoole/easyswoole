@@ -19,8 +19,7 @@ class ServiceNode extends SplBean
     protected $address = '127.0.0.1';
     protected $port;
     protected $lastHeartBeat;
-    protected $encrypt = false;
-    protected $token = null;
+    protected $encryptToken = null;
 
     /**
      * @return mixed
@@ -103,45 +102,26 @@ class ServiceNode extends SplBean
     }
 
     /**
-     * @return string
-     */
-    public function getEncrypt(): string
-    {
-        return $this->encrypt;
-    }
-
-    /**
-     * @param string $encrypt
-     */
-    public function setEncrypt(string $encrypt): void
-    {
-        $this->encrypt = $encrypt;
-    }
-
-    /**
      * @return null
      */
-    public function getToken()
+    public function getEncryptToken()
     {
-        return $this->token;
+        return $this->encryptToken;
     }
 
     /**
-     * @param null $token
+     * @param null $encryptToken
      */
-    public function setToken($token): void
+    public function setEncryptToken($encryptToken): void
     {
-        $this->token = $token;
+        $this->encryptToken = $encryptToken;
     }
+
 
     protected function initialize(): void
     {
         if(empty($this->serverId)){
             $this->serverId = Config::getInstance()->getServerId();
-            //在swoole table 中以string存储
-            if($this->encrypt == 'false'){
-                $this->encrypt = false;
-            }
         }
     }
 }

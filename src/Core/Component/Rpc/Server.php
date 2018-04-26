@@ -10,12 +10,17 @@ namespace EasySwoole\Core\Component\Rpc;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Rpc\Client\ResponseObj;
+use EasySwoole\Core\Component\Rpc\Common\Encrypt;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
+use EasySwoole\Core\Component\Rpc\Common\ServiceResponse;
 use EasySwoole\Core\Component\Rpc\Common\Status;
 use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
 use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Socket\Client\Tcp;
+use EasySwoole\Core\Socket\Response;
 use EasySwoole\Core\Swoole\EventHelper;
 use EasySwoole\Core\Swoole\ServerManager;
 
@@ -23,65 +28,96 @@ class Server
 {
     use Singleton;
 
-    private $encrypt;
-    private $token;
     private $list = [];
+    private $controllerNameSpace = 'App\\RpcController\\';
 
-    /**
-     * @param string $name
-     * @param string $serviceClass
-     * @return $this|bool
-     */
-    function addService(string $name, string $serviceClass)
+    function setControllerNameSpace(string $nameSpace):Server
     {
-        //一个EasySwoole服务上不允许同名服务
-        $this->list[$name] = $serviceClass;
+        $this->controllerNameSpace = $nameSpace;
         return $this;
     }
 
-    /*
-     * * @param mixed $encrypt false,or openssl method ,like DES-EDE3
-     */
-    public function attach(int $port,$encrypt = false,$token = null,string $address = '0.0.0.0')
+    function addService(string $serviceName,int $port,$encryptToken = null,string $address = '0.0.0.0')
     {
-        if(!empty($encrypt) && empty($token)){
-            Trigger::error("Rpc Server auto disable because encrypt token is empty");
-            $encrypt = false;
-        }
-        $this->encrypt = $encrypt;
-        $this->token = $token;
+        //一个EasySwoole服务上不允许同名服务
+        $this->list[$serviceName] = [
+            'serviceName'=>$serviceName,
+            'port'=>$port,
+            'encryptToken'=>$encryptToken,
+            'address'=>$address
+        ];
+        return $this;
+    }
+
+    public function attach($heartbeat_idle_time = 3,$heartbeat_check_interval = 30)
+    {
         foreach ($this->list as $name => $item){
             $node = new ServiceNode();
-            $node->setPort($port);
+            $node->setPort($item['port']);
             $node->setServiceName($name);
+            $node->setEncryptToken($item['encryptToken']);
             ServiceManager::getInstance()->addServiceNode($node);
+
+            $sub = ServerManager::getInstance()->addServer("RPC_SERVER_{$name}",$item['port'],SWOOLE_TCP,$item['address'],[
+                'open_length_check' => true,
+                'package_length_type'   => 'N',
+                'package_length_offset' => 0,
+                'package_body_offset'   => 4,
+                'package_max_length'    => 1024*64,
+                'heartbeat_idle_time' => $heartbeat_idle_time,
+                'heartbeat_check_interval' => $heartbeat_check_interval,
+            ]);
+
+            $nameSpace = $this->controllerNameSpace.ucfirst($item['serviceName']);
+            EventHelper::register($sub,$sub::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($item,$nameSpace){
+                $response = new ServiceResponse();
+                $client = new Tcp($fd,$reactor_id);
+                $data = Parser::unPack($data);
+                $openssl = null;
+                if(!empty($item['encryptToken'])){
+                    $openssl = new Openssl($item['encryptToken']);
+                }
+                if($openssl){
+                    $data = $openssl->decrypt($data);
+                }
+                if($data !== false){
+                    $caller = Parser::decode($data,$client);
+                    if($caller){
+                        $response->arrayToBean($caller->toArray());
+                        $response->setArgs(null);
+                        $group = ucfirst($caller->getServiceGroup());
+                        $controller = "{$nameSpace}\\{$group}";
+                        if(!class_exists($controller)){
+                            $response->setStatus(Status::SERVICE_GROUP_NOT_FOUND);
+                            $controller = "{$nameSpace}\\Index";
+                            if(!class_exists($controller)){
+                                $controller = null;
+                            }else{
+                                $response->setStatus(Status::OK);
+                            }
+                        }
+                        if($controller){
+                            try{
+                                (new $controller($client,$caller,$response));
+                            }catch (\Throwable $throwable){
+                                Trigger::throwable($throwable);
+                                $response->setStatus(Status::SERVICE_ERROR);
+                            }
+                        }else{
+                            $response->setStatus(Status::SERVICE_NOT_FOUND);
+                        }
+                    }else{
+                        $response->setStatus(Status::PACKAGE_DECODE_ERROR);
+                    }
+                }else{
+                    $response->setStatus(Status::PACKAGE_ENCRYPT_DECODED_ERROR);
+                }
+                $response = json_encode($response->toArray(),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+                if($openssl){
+                    $response =  $openssl->encrypt($response);
+                }
+                Response::response($client,Parser::pack($response));
+            });
         }
-
-        $sub = ServerManager::getInstance()->addServer('RPC',$port,SWOOLE_TCP,$address,[
-            'open_length_check' => true,
-            'package_length_type'   => 'N',
-            'package_length_offset' => 0,
-            'package_body_offset'   => 4,
-            'package_max_length'    => 1024*64,
-            'heartbeat_idle_time' => 15,
-            'heartbeat_check_interval' => 2,
-        ]);
-
-        EventHelper::registerDefaultOnReceive($sub,new Parser($this->list),function ($err){
-            $bean = new ResponseObj();
-            $bean->setError($err);
-            $bean->setStatus(Status::ACTION_NOT_FOUND);
-            return $bean->__toString();
-        });
-    }
-
-    function encrypt()
-    {
-        return $this->encrypt;
-    }
-
-    function token()
-    {
-        return $this->token;
     }
 }

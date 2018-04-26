@@ -42,11 +42,7 @@ class ServiceManager
                 'size'=>10,
                 'type'=>Table::TYPE_INT
             ],
-            'encrypt'=>[
-                'size'=>15,
-                'type'=>Table::TYPE_STRING
-            ],
-            'token'=>[
+            'encryptToken'=>[
                 'size'=>32,
                 'type'=>Table::TYPE_STRING
             ]
