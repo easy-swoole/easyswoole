@@ -10,7 +10,7 @@ namespace EasySwoole;
 
 use \EasySwoole\Core\AbstractInterface\EventInterface;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Swoole\EventHelper;
 use \EasySwoole\Core\Swoole\ServerManager;
 use \EasySwoole\Core\Swoole\EventRegister;
 use \EasySwoole\Core\Http\Request;
@@ -18,7 +18,7 @@ use \EasySwoole\Core\Http\Response;
 
 Class EasySwooleEvent implements EventInterface {
 
-    public function frameInitialize(): void
+    public static function frameInitialize(): void
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
@@ -28,9 +28,12 @@ Class EasySwooleEvent implements EventInterface {
 //        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
     }
 
-    public function mainServerCreate(ServerManager $server,EventRegister $register): void
+    public static function mainServerCreate(ServerManager $server,EventRegister $register): void
     {
         // TODO: Implement mainServerCreate() method.
+        //针对websocket 注册ws onmessage事件
+        EventHelper::registerDefaultOnMessage($register,\App\Parser::class);
+
         $instance = Config::getInstance();
         //mysql主服务器
         $masterMysqlConf = $instance->getConf("MASTER_MYSQL");
@@ -46,12 +49,12 @@ Class EasySwooleEvent implements EventInterface {
         Di::getInstance()->set('ASYNC_REDIS',\App\Vendor\Db\AsyncRedis::class);
     }
 
-    public function onRequest(Request $request,Response $response): void
+    public static function onRequest(Request $request,Response $response): void
     {
         // TODO: Implement onRequest() method.
     }
 
-    public function afterAction(Request $request,Response $response): void
+    public static function afterAction(Request $request,Response $response): void
     {
         // TODO: Implement afterAction() method.
     }

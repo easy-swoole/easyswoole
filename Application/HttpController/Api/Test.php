@@ -44,7 +44,7 @@ class Test extends BaseController
 //            "input3" => "手机号码格式不对"
 //        ));
 //        $res = $this->redis->get("test");
-//        $this->writeJson(200, $res);
+        $this->writeJson(200);
     }
 
 }
