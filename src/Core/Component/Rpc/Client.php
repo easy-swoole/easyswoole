@@ -26,13 +26,6 @@ class Client
     private $taskList = [];
 
     private $clientConnectTimeOut = 0.1;
-    private $protocolSetting = [
-        'open_length_check' => true,
-        'package_length_type' => 'N',
-        'package_length_offset' => 0,
-        'package_body_offset' => 4,
-        'package_max_length' => 1024 * 64
-    ];
 
     function setProtocolSetting(array $data)
     {
@@ -134,7 +127,13 @@ class Client
     private function connect(ServiceNode $node): ?\swoole_client
     {
         $client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_SYNC);
-        $client->set($this->protocolSetting);
+        $client->set([
+            'open_length_check' => true,
+            'package_length_type' => 'N',
+            'package_length_offset' => 0,
+            'package_body_offset' => 4,
+            'package_max_length' => 1024 * 64
+        ]);
         if ($client->connect($node->getAddress(), $node->getPort(),$this->clientConnectTimeOut)) {
             return $client;
         } else {
