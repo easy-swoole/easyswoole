@@ -70,7 +70,6 @@ abstract class Controller
     protected function __hook(?string $actionName):void
     {
         if($this->onRequest($actionName) !== false){
-            $actionName = $this->actionName ;
             //支持在子类控制器中以private，protected来修饰某个方法不可见
             try{
                 $ref = new \ReflectionClass(static::class);
