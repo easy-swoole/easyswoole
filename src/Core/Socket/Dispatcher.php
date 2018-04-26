@@ -98,8 +98,8 @@ class Dispatcher
                         }
                     }
                 }catch (\Throwable $exception){
-                    trigger_error($exception->getTraceAsString());
-                    Response::response($client,$exception->getTraceAsString());
+                    Trigger::throwable($exception);
+                    Response::response($client,$exception->getMessage());
                 }
             }
             return;
