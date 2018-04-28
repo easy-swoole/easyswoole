@@ -30,7 +30,7 @@ class Core
 
     public function initialize():Core
     {
-        Di::getInstance()->set(SysConst::VERSION,'2.0.1');
+        Di::getInstance()->set(SysConst::VERSION,'2.0.2');
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
         //创建全局事件容器
         $event = $this->eventHook();
