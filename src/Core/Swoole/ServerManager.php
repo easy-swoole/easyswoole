@@ -193,7 +193,7 @@ class ServerManager
         $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
             PoolManager::getInstance()->workerStartClean($workerId);
             $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
-            $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
+            $name = Config::getInstance()->getConf('SERVER_NAME');
             if(PHP_OS != 'Darwin'){
                 if($workerId <= ($workerNum -1)){
                     $name = "{$name}_Worker_".$workerId;

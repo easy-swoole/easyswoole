@@ -244,7 +244,7 @@ class Cache
 
     private function generateProcessName(int $processId):string
     {
-        $name = \EasySwoole\Core\Component\Cluster\Config::getInstance()->getServerName();
+        $name = Config::getInstance()->getConf('SERVER_NAME');
         return "{$name}_Cache_Process_{$processId}";
     }
 }

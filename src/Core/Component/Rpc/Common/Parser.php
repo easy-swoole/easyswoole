@@ -7,9 +7,8 @@
  */
 
 namespace EasySwoole\Core\Component\Rpc\Common;
-use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
 
-class Parser implements ParserInterface
+class Parser
 {
     public static function decode($raw, $client):?ServiceCaller
     {
@@ -20,12 +19,6 @@ class Parser implements ParserInterface
         }else{
             return null;
         }
-    }
-
-    public static function encode(string $raw, $client, $commandBean): ?string
-    {
-        // TODO: Implement encode() method.
-
     }
 
     public static function unPack($raw)

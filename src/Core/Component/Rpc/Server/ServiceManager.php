@@ -9,7 +9,7 @@
 namespace EasySwoole\Core\Component\Rpc\Server;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Cluster\Config;
+use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Swoole\Memory\TableManager;
 use Swoole\Table;
 
@@ -182,7 +182,7 @@ class ServiceManager
     private function generateKey(ServiceNode $serviceNode, $local = false):string
     {
         if ($local) {
-            return substr(md5(Config::getInstance()->getServerId().$serviceNode->getServiceName()), 8, 16);
+        return substr(md5(Cluster::getInstance()->currentNode()->getNodeId().$serviceNode->getServiceName()), 8, 16);
         } else {
             return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
         }

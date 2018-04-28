@@ -7,9 +7,7 @@
  */
 
 namespace EasySwoole\Core\Component\Rpc\Server;
-
-
-use EasySwoole\Core\Component\Cluster\Config;
+use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Spl\SplBean;
 
 class ServiceNode extends SplBean
@@ -121,7 +119,7 @@ class ServiceNode extends SplBean
     protected function initialize(): void
     {
         if(empty($this->serverId)){
-            $this->serverId = Config::getInstance()->getServerId();
+            $this->serverId = Cluster::getInstance()->currentNode()->getNodeId();
         }
     }
 }
