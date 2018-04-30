@@ -3,16 +3,15 @@
  * Created by PhpStorm.
  * User: yf
  * Date: 2018/4/30
- * Time: 上午11:28
+ * Time: 上午11:06
  */
 
-namespace EasySwoole\Core\Component\Cluster\Event;
-
-
+namespace EasySwoole\Core\Component\Cluster\Callback;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Container;
 
-class MessageCallbackContainer extends Container
+
+class ShutdownCallBackContainer extends Container
 {
     use Singleton;
 }

@@ -9,8 +9,8 @@
 namespace EasySwoole\Core\Component\Cluster\Common;
 
 
-use EasySwoole\Core\Component\Cluster\Event\BroadcastCallbackContainer;
-use EasySwoole\Core\Component\Cluster\Event\ShutdownCallbackContainer;
+use EasySwoole\Core\Component\Cluster\Callback\BroadcastCallbackContainer;
+use EasySwoole\Core\Component\Cluster\Callback\ShutdownCallbackContainer;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
 use Swoole\Process;

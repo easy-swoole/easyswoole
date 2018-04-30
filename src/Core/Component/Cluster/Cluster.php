@@ -13,7 +13,7 @@ use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Common\BaseServiceProcess;
 use EasySwoole\Core\Component\Cluster\Common\NodeBean;
-use EasySwoole\Core\Component\Cluster\Event\MessageCallbackContainer;
+use EasySwoole\Core\Component\Cluster\Callback\MessageCallbackContainer;
 use EasySwoole\Core\Component\Cluster\NetWork\PacketParser;
 use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Trigger;
