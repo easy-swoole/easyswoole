@@ -11,7 +11,6 @@ namespace EasySwoole\Core\Component\Cluster\NetWork;
 
 use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Cluster\Common\MessageBean;
-use EasySwoole\Core\Component\Cluster\Common\NodeBean;
 use EasySwoole\Core\Component\Openssl;
 use \EasySwoole\Core\Socket\Client\Udp;
 
@@ -23,7 +22,6 @@ class PacketParser
         $node = clone Cluster::getInstance()->currentNode();
         //去除敏感信息再发送
         $node->setBroadcastAddress([]);
-        $node->setListenAddress([]);
         $node->setToken(null);
         $bean->setFromNode($node);
         return $aes->encrypt($bean->__toString());

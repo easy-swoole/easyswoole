@@ -59,6 +59,9 @@ class Cluster
             'udpPort'=>[
                 'type'=>Table::TYPE_INT,'size'=>10
             ],
+            'listenPort'=>[
+                'type'=>Table::TYPE_STRING,'size'=>16
+            ],
             'lastBeatBeatTime'=>[
                 'type'=>Table::TYPE_INT,'size'=>10
             ]
@@ -71,21 +74,16 @@ class Cluster
             self::registerDefaultCallback();
             $name = Config::getInstance()->getConf('SERVER_NAME');
             ProcessManager::getInstance()->addProcess("{$name}_Cluster_BaseService",BaseServiceProcess::class,['currentNode'=>$this->currentNode]);
-            foreach ($this->currentNode->getListenAddress() as $address){
-                $address = explode(':',$address);
-                $listen = array_shift($address);
-                $port =  array_shift($address);
-                $sub = ServerManager::getInstance()->addServer("{$name}_Cluster",$port,SWOOLE_SOCK_UDP,$listen);
-                $openssl = new Openssl($this->currentNode->getToken());
-                EventHelper::register($sub,$sub::onPacket,function (\swoole_server $server, string $data, array $client_info)use($openssl){
-                    $data = $openssl->decrypt($data);
-                    $udpClient = new Udp($client_info);
-                    $message = PacketParser::unpack((string)$data,$udpClient);
-                    if($message){
-                        MessageCallbackContainer::getInstance()->hook($message->getCommand(),$message);
-                    }
-                });
-            }
+            $sub = ServerManager::getInstance()->addServer("{$name}_Cluster",$this->currentNode->getListenPort(),SWOOLE_SOCK_UDP,$this->currentNode->getListenAddress());
+            $openssl = new Openssl($this->currentNode->getToken());
+            EventHelper::register($sub,$sub::onPacket,function (\swoole_server $server, string $data, array $client_info)use($openssl){
+                $data = $openssl->decrypt($data);
+                $udpClient = new Udp($client_info);
+                $message = PacketParser::unpack((string)$data,$udpClient);
+                if($message){
+                    MessageCallbackContainer::getInstance()->hook($message->getCommand(),$message);
+                }
+            });
         }
     }
 
@@ -111,7 +109,8 @@ class Cluster
                     'udpInfo'=>[
                         'address'=>$item['udpAddress'],
                         'port'=>$item['udpPort']
-                    ]
+                    ],
+                    'listenPort'=>$item['listenPort']
                 ]);
                 $ret[] = $node;
             }
@@ -134,7 +133,8 @@ class Cluster
                     'udpInfo'=>[
                         'address'=>$item['udpAddress'],
                         'port'=>$item['udpPort']
-                    ]
+                    ],
+                    'listenPort'=>$item['listenPort']
                 ]);
                 return $node;
             }
@@ -154,7 +154,8 @@ class Cluster
                 'nodeName'=>$node->getNodeName(),
                 'udpAddress'=>$node->getUdpInfo()->getAddress(),
                 'udpPort'=>$node->getUdpInfo()->getPort(),
-                'lastBeatBeatTime'=>time()
+                'lastBeatBeatTime'=>time(),
+                'listenPort'=>$node->getListenPort()
             ]);
         });
         //集群节点广播关机回调
@@ -170,7 +171,7 @@ class Cluster
             $list = $messageBean->getArgs();
             foreach ($list as $item){
                 $serviceNode = new ServiceNode($item);
-                //可达主机地址即为udp地址
+                //可达主机地址即为udp地址（真实地址）
                 $serviceNode->setAddress($node->getUdpInfo()->getAddress());
                 Server::getInstance()->updateServiceNode($serviceNode);
             }

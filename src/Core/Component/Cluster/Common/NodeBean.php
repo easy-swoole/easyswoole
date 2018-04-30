@@ -19,7 +19,8 @@ class NodeBean extends SplBean
     protected $enable;
     protected $token;
     protected $broadcastAddress = [];
-    protected $listenAddress = [];
+    protected $listenAddress = '0.0.0.0';
+    protected $listenPort;
     protected $broadcastTTL;
     protected $nodeTimeout;
     protected $nodeName;
@@ -75,21 +76,32 @@ class NodeBean extends SplBean
         $this->broadcastAddress = $broadcastAddress;
     }
 
+    public function getListenPort()
+    {
+        return $this->listenPort;
+    }
+
+    public function setListenPort( $listenPort): void
+    {
+        $this->listenPort = $listenPort;
+    }
+
     /**
-     * @return array
+     * @return string
      */
-    public function getListenAddress(): array
+    public function getListenAddress(): string
     {
         return $this->listenAddress;
     }
 
     /**
-     * @param array $listenAddress
+     * @param string $listenAddress
      */
-    public function setListenAddress(array $listenAddress): void
+    public function setListenAddress(string $listenAddress): void
     {
         $this->listenAddress = $listenAddress;
     }
+
 
     /**
      * @return mixed

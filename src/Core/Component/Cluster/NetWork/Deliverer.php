@@ -21,7 +21,8 @@ class Deliverer
     public static function toNode(MessageBean $message,NodeBean $node)
     {
         $message = PacketParser::pack($message);
-        Udp::sendTo($message,$node->getUdpInfo()->getPort(),$node->getUdpInfo()->getAddress());
+        //端口以监听地址为准，ip地址以udp地址为准
+        Udp::sendTo($message,$node->getListenPort(),$node->getUdpInfo()->getAddress());
     }
 
 
@@ -30,7 +31,7 @@ class Deliverer
         $message = PacketParser::pack($message);
         $nodes = Cluster::getInstance()->allNodes();
         foreach ($nodes as $node){
-            Udp::sendTo($message,$node->getUdpInfo()->getPort(),$node->getUdpInfo()->getAddress());
+            Udp::sendTo($message,$node->getListenPort(),$node->getUdpInfo()->getAddress());
         }
     }
 
