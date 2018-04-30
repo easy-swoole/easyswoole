@@ -11,6 +11,7 @@ namespace EasySwoole\Core\Component\Cluster\Common;
 
 use EasySwoole\Core\Component\Spl\SplBean;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Utility\Random;
 
 class NodeBean extends SplBean
@@ -23,6 +24,7 @@ class NodeBean extends SplBean
     protected $nodeTimeout;
     protected $nodeName;
     protected $nodeId;
+    protected $udpInfo;
 
     /**
      * @return mixed
@@ -91,16 +93,19 @@ class NodeBean extends SplBean
     /**
      * @return mixed
      */
-    public function getBroadcastTTL()
+    public function getBroadcastTTL():int
     {
-        return $this->broadcastTTL;
+        return intval($this->broadcastTTL);
     }
 
     /**
      * @param mixed $broadcastTTL
      */
-    public function setBroadcastTTL($broadcastTTL): void
+    public function setBroadcastTTL(int $broadcastTTL): void
     {
+        if($broadcastTTL < 1){
+            $broadcastTTL = 5;
+        }
         $this->broadcastTTL = $broadcastTTL;
     }
 
@@ -145,6 +150,22 @@ class NodeBean extends SplBean
     }
 
     /**
+     * @return mixed
+     */
+    public function getUdpInfo():?Udp
+    {
+        return $this->udpInfo;
+    }
+
+    /**
+     * @param mixed $udpInfo
+     */
+    public function setUdpInfo($udpInfo): void
+    {
+        $this->udpInfo = $udpInfo;
+    }
+
+    /**
      * @param mixed $nodeId
      */
     public function setNodeId($nodeId): void
@@ -157,6 +178,9 @@ class NodeBean extends SplBean
         if(empty($this->nodeIdId)){
             $this->nodeId = Random::randStr(8);
         }
+        if($this->getBroadcastTTL() < 1){
+            $this->setBroadcastTTL(5);
+        }
         if($this->enable && empty($this->token)){
             Trigger::throwable(new \Exception('cluster token could not be empty and set cluster mode disable automatic'));
             $this->enable = false;
@@ -164,6 +188,11 @@ class NodeBean extends SplBean
         if($this->enable && empty($this->listenAddress)){
             Trigger::throwable(new \Exception('cluster listenAddress could not be empty and set cluster mode disable automatic'));
             $this->enable = false;
+        }
+        if(is_array($this->udpInfo)){
+            $this->udpInfo = new Udp($this->udpInfo);
+        }else{
+            $this->udpInfo = null;
         }
     }
 }

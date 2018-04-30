@@ -9,8 +9,8 @@
 namespace EasySwoole\Core\Component\Crontab;
 
 
+use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Cluster\Config;
 use EasySwoole\Core\Swoole\Process\ProcessManager;
 
 class CronTab
@@ -32,9 +32,9 @@ class CronTab
     function run()
     {
         if(!empty($this->task)){
-            $name = Config::getInstance()->getServerName();
+            $name = Config::getInstance()->getConf('SERVER_NAME');
             $name = "{$name}_CronTab_Process";
-            ProcessManager::getInstance()->addProcess($name,Runner::class,true,$this->task);
+            ProcessManager::getInstance()->addProcess($name,Runner::class,$this->task);
         }
     }
 }

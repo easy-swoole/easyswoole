@@ -47,7 +47,7 @@ class Cache
             ],2048);
             $this->processNum = $num;
             for ($i=0;$i < $num;$i++){
-                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class,true);
+                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class);
             }
         }
     }

@@ -20,7 +20,7 @@ abstract class AbstractProcess
     private $processName;
     private $async = null;
     private $args = [];
-    function __construct(string $processName,$async = true,array $args)
+    function __construct(string $processName,array $args,$async = true)
     {
         $this->async = $async;
         $this->args = $args;
@@ -105,6 +105,15 @@ abstract class AbstractProcess
     public function getArgs():array
     {
         return $this->args;
+    }
+
+    public function getArg($key)
+    {
+        if(isset($this->args[$key])){
+            return $this->args[$key];
+        }else{
+            return null;
+        }
     }
 
     public function getProcessName()
