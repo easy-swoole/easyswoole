@@ -15,14 +15,23 @@ use EasySwoole\Core\Component\Cluster\Common\NodeBean;
 
 class Deliverer
 {
+    /*
+     * 调用此方法，请确保知晓节点的udp信息
+     */
     public static function toNode(MessageBean $message,NodeBean $node)
     {
-
+        $message = PacketParser::pack($message);
+        Udp::sendTo($message,$node->getUdpInfo()->getPort(),$node->getUdpInfo()->getAddress());
     }
+
 
     public static function toAllNode(MessageBean $message)
     {
-
+        $message = PacketParser::pack($message);
+        $nodes = Cluster::getInstance()->allNodes();
+        foreach ($nodes as $node){
+            Udp::sendTo($message,$node->getUdpInfo()->getPort(),$node->getUdpInfo()->getAddress());
+        }
     }
 
     public static function broadcast(MessageBean $message)
