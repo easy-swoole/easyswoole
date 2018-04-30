@@ -60,7 +60,7 @@ class Cluster
                 'type'=>Table::TYPE_INT,'size'=>10
             ],
             'listenPort'=>[
-                'type'=>Table::TYPE_STRING,'size'=>16
+                'type'=>Table::TYPE_STRING,'size'=>10
             ],
             'lastBeatBeatTime'=>[
                 'type'=>Table::TYPE_INT,'size'=>10
