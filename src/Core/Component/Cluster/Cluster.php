@@ -13,6 +13,7 @@ use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Callback\BroadcastCallbackContainer;
 use EasySwoole\Core\Component\Cluster\Callback\DefaultCallbackName;
+use EasySwoole\Core\Component\Cluster\Callback\NodeOffLienCallbackContainer;
 use EasySwoole\Core\Component\Cluster\Callback\ShutdownCallBackContainer;
 use EasySwoole\Core\Component\Cluster\Common\BaseServiceProcess;
 use EasySwoole\Core\Component\Cluster\Common\MessageBean;
@@ -110,7 +111,7 @@ class Cluster
                 'listenPort'=>$item['listenPort']
             ]);
             if($time - $item['lastBeatBeatTime'] > $ttl){
-                ShutdownCallBackContainer::getInstance()->call($node,false);
+                NodeOffLienCallbackContainer::getInstance()->call($node,false);
                 TableManager::getInstance()->get('ClusterNodeList')->del($key);
             }else{
                 $ret[] = $node;
@@ -135,7 +136,7 @@ class Cluster
                 'listenPort'=>$item['listenPort']
             ]);
             if(time() - $item['lastBeatBeatTime'] > $ttl){
-                ShutdownCallBackContainer::getInstance()->call($node,false);
+                NodeOffLienCallbackContainer::getInstance()->call($node,false);
                 return null;
             }else{
                 return $node;
@@ -166,7 +167,7 @@ class Cluster
             TableManager::getInstance()->get('ClusterNodeList')->del($node->getNodeId());
             //下线该服务的全部rpc服务
             Server::getInstance()->serverNodeOffLine($node);
-            ShutdownCallBackContainer::getInstance()->call($node,true);
+            NodeOffLienCallbackContainer::getInstance()->call($node,true);
         });
         //RPC服务节点广播回调
         MessageCallbackContainer::getInstance()->add(DefaultCallbackName::RPC_SERVICE_BROADCAST,function (MessageBean $messageBean){
