@@ -2,13 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2018/1/21
- * Time: 下午3:22
+ * Date: 2018/4/30
+ * Time: 下午1:47
  */
 
-namespace EasySwoole\Core\Component\Rpc\Server;
+namespace EasySwoole\Core\Component\Rpc\Common;
 use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Spl\SplBean;
+
 
 class ServiceNode extends SplBean
 {

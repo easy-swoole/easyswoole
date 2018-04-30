@@ -10,21 +10,53 @@ namespace EasySwoole\Core\Component\Rpc;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\ServiceResponse;
 use EasySwoole\Core\Component\Rpc\Common\Status;
-use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
-use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Component\Rpc\Common\ServiceNode;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Socket\Client\Tcp;
 use EasySwoole\Core\Socket\Response;
 use EasySwoole\Core\Swoole\EventHelper;
+use EasySwoole\Core\Swoole\Memory\TableManager;
 use EasySwoole\Core\Swoole\ServerManager;
+use Swoole\Table;
 
 class Server
 {
     use Singleton;
+
+    function __construct()
+    {
+        TableManager::getInstance()->add('__RpcService',[
+            'serviceName'=>[
+                'size'=>35,
+                'type'=>Table::TYPE_STRING
+            ],
+            'serverId'=>[
+                'size'=>16,
+                'type'=>Table::TYPE_STRING
+            ],
+            'address'=>[
+                'size'=>15,
+                'type'=>Table::TYPE_STRING
+            ],
+            'port'=>[
+                'size'=>10,
+                'type'=>Table::TYPE_INT
+            ],
+            'lastHeartBeat'=>[
+                'size'=>10,
+                'type'=>Table::TYPE_INT
+            ],
+            'encryptToken'=>[
+                'size'=>32,
+                'type'=>Table::TYPE_STRING
+            ]
+        ],2048);
+    }
 
     private $list = [];
     private $controllerNameSpace = 'App\\RpcController\\';
@@ -38,25 +70,81 @@ class Server
     function addService(string $serviceName,int $port,$encryptToken = null,string $address = '0.0.0.0')
     {
         //一个EasySwoole服务上不允许同名服务
-        $this->list[$serviceName] = [
+        $this->list[$serviceName] = new ServiceNode([
             'serviceName'=>$serviceName,
             'port'=>$port,
             'encryptToken'=>$encryptToken,
             'address'=>$address
-        ];
+        ]);
         return $this;
     }
 
+    /*
+     * 获取全部在线的服务节点
+     */
+    function allOnlineServiceNodes():array
+    {
+        $ret = [];
+        $table =  TableManager::getInstance()->get('__RpcService');
+        $ttl = Cluster::getInstance()->currentNode()->getNodeTimeout();
+        $time = time();
+        foreach ($table as $key => $item){
+            if($time - $item['lastHeartBeat'] > $ttl){
+                $table->del($key);
+            }else{
+                $ret[] = new ServiceNode($item);
+            }
+        }
+        return $ret;
+    }
+
+    /*
+     * 获取某个服务的全部在线节点
+     */
+    function getServiceOnlineNodes($serviceName):array
+    {
+        $ret = [];
+        $table =  TableManager::getInstance()->get('__RpcService');
+        $ttl = Cluster::getInstance()->currentNode()->getNodeTimeout();
+        $time = time();
+        foreach ($table as $key => $item){
+            if($time - $item['lastHeartBeat'] > $ttl){
+                $table->del($key);
+            }else if($item['serviceName'] == $serviceName){
+                $ret[] = new ServiceNode($item);
+            }
+        }
+        return $ret;
+    }
+
+    function getServiceOnlineNode($serviceName):?ServiceNode
+    {
+        $list = $this->getServiceOnlineNodes($serviceName);
+        if(!empty($list)){
+            return $list[array_rand($list)];
+        }else{
+            return null;
+        }
+    }
+
+
+    function allLocalServiceNodes():array
+    {
+        return $this->list;
+    }
+
+    function updateService(ServiceNode $serviceNode)
+    {
+        $serviceNode->setLastHeartBeat(time());
+        TableManager::getInstance()->get('__RpcService')->set($this->generateKey($serviceNode),$serviceNode->toArray());
+    }
+
+
     public function attach($heartbeat_idle_time = 5,$heartbeat_check_interval = 30)
     {
-        foreach ($this->list as $name => $item){
-            $node = new ServiceNode();
-            $node->setPort($item['port']);
-            $node->setServiceName($name);
-            $node->setEncryptToken($item['encryptToken']);
-            ServiceManager::getInstance()->addServiceNode($node);
+        foreach ($this->list as $name => $node){
 
-            $sub = ServerManager::getInstance()->addServer("RPC_SERVER_{$name}",$item['port'],SWOOLE_TCP,$item['address'],[
+            $sub = ServerManager::getInstance()->addServer("RPC_SERVER_{$name}",$node->getPort(),SWOOLE_TCP,$node->getAddress(),[
                 'open_length_check' => true,
                 'package_length_type'   => 'N',
                 'package_length_offset' => 0,
@@ -66,14 +154,14 @@ class Server
                 'heartbeat_check_interval' => $heartbeat_check_interval,
             ]);
 
-            $nameSpace = $this->controllerNameSpace.ucfirst($item['serviceName']);
-            EventHelper::register($sub,$sub::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($item,$nameSpace){
+            $nameSpace = $this->controllerNameSpace.ucfirst($name);
+            EventHelper::register($sub,$sub::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data)use($node,$nameSpace){
                 $response = new ServiceResponse();
                 $client = new Tcp($fd,$reactor_id);
                 $data = Parser::unPack($data);
                 $openssl = null;
-                if(!empty($item['encryptToken'])){
-                    $openssl = new Openssl($item['encryptToken']);
+                if(!empty($node->getEncryptToken())){
+                    $openssl = new Openssl($node->getEncryptToken());
                 }
                 if($openssl){
                     $data = $openssl->decrypt($data);
@@ -117,5 +205,10 @@ class Server
                 Response::response($client,Parser::pack($response));
             });
         }
+    }
+
+    private function generateKey(ServiceNode $serviceNode):string
+    {
+        return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
     }
 }

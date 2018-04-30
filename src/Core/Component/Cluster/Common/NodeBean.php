@@ -25,6 +25,7 @@ class NodeBean extends SplBean
     protected $nodeName;
     protected $nodeId;
     protected $udpInfo;
+    protected $lastBeatBeatTime;
 
     /**
      * @return mixed
@@ -173,21 +174,30 @@ class NodeBean extends SplBean
         $this->nodeId = $nodeId;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getLastBeatBeatTime()
+    {
+        return $this->lastBeatBeatTime;
+    }
+
+    /**
+     * @param mixed $lastBeatBeatTime
+     */
+    public function setLastBeatBeatTime($lastBeatBeatTime): void
+    {
+        $this->lastBeatBeatTime = $lastBeatBeatTime;
+    }
+
+
     protected function initialize(): void
     {
-        if(empty($this->nodeIdId)){
+        if(empty($this->nodeId)){
             $this->nodeId = Random::randStr(8);
         }
         if($this->getBroadcastTTL() < 1){
             $this->setBroadcastTTL(5);
-        }
-        if($this->enable && empty($this->token)){
-            Trigger::throwable(new \Exception('cluster token could not be empty and set cluster mode disable automatic'));
-            $this->enable = false;
-        }
-        if($this->enable && empty($this->listenAddress)){
-            Trigger::throwable(new \Exception('cluster listenAddress could not be empty and set cluster mode disable automatic'));
-            $this->enable = false;
         }
         if(is_array($this->udpInfo)){
             $this->udpInfo = new Udp($this->udpInfo);

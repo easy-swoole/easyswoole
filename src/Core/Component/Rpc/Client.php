@@ -16,8 +16,7 @@ use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\ServiceCaller;
 use EasySwoole\Core\Component\Rpc\Client\ServiceResponse;
 use EasySwoole\Core\Component\Rpc\Common\Status;
-use EasySwoole\Core\Component\Rpc\Server\ServiceManager;
-use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Component\Rpc\Common\ServiceNode;
 use EasySwoole\Core\Component\Trigger;
 
 
@@ -26,18 +25,6 @@ class Client
     private $taskList = [];
 
     private $clientConnectTimeOut = 0.1;
-
-    function setProtocolSetting(array $data)
-    {
-        $this->protocolSetting = $data;
-        return $this;
-    }
-
-    function setClientConnectTimeout(float $timeout):Client
-    {
-        $this->clientConnectTimeOut = $timeout;
-        return $this;
-    }
 
     function addCall(string $serviceName,string $serviceGroup,string $action,...$args)
     {
@@ -58,7 +45,7 @@ class Client
         $nodeMap = [];
         foreach ($this->taskList as $task){
             //获取节点
-            $serviceNode = ServiceManager::getInstance()->getServiceNode($task->getServiceName());
+            $serviceNode = Server::getInstance()->getServiceOnlineNode($task->getServiceName());
             if($serviceNode instanceof ServiceNode){
                 $client = $this->connect($serviceNode);
                 if($client){

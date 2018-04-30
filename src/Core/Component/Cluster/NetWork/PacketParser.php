@@ -12,19 +12,21 @@ namespace EasySwoole\Core\Component\Cluster\NetWork;
 use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Cluster\Common\MessageBean;
 use EasySwoole\Core\Component\Cluster\Common\NodeBean;
+use EasySwoole\Core\Component\Openssl;
 use \EasySwoole\Core\Socket\Client\Udp;
 
 class PacketParser
 {
     static function pack(MessageBean $bean):string
     {
+        $aes = new Openssl(Cluster::getInstance()->currentNode()->getToken());
         $node = clone Cluster::getInstance()->currentNode();
         //去除敏感信息再发送
         $node->setBroadcastAddress([]);
         $node->setListenAddress([]);
         $node->setToken(null);
         $bean->setFromNode($node);
-        return $bean->__toString();
+        return $aes->encrypt($bean->__toString());
     }
 
     static function unpack(string $jsonStr,Udp $udpClient):?MessageBean

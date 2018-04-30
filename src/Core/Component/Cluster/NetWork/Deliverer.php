@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Component\Cluster\NetWork;
 
 
+use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Cluster\Common\MessageBean;
 use EasySwoole\Core\Component\Cluster\Common\NodeBean;
 
@@ -26,6 +27,11 @@ class Deliverer
 
     public static function broadcast(MessageBean $message)
     {
-
+        $message = PacketParser::pack($message);
+        $addresses = Cluster::getInstance()->currentNode()->getBroadcastAddress();
+        foreach ($addresses as $item){
+            $item = explode(':',$item);
+            Udp::broadcast($message,$item[1],$item[0]);
+        }
     }
 }

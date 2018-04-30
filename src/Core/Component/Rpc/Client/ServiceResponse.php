@@ -9,7 +9,7 @@
 namespace EasySwoole\Core\Component\Rpc\Client;
 
 
-use EasySwoole\Core\Component\Rpc\Server\ServiceNode;
+use EasySwoole\Core\Component\Rpc\Common\ServiceNode;
 
 class ServiceResponse extends \EasySwoole\Core\Component\Rpc\Common\ServiceResponse
 {
