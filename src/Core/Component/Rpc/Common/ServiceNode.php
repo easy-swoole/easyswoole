@@ -13,7 +13,7 @@ use EasySwoole\Core\Component\Spl\SplBean;
 
 class ServiceNode extends SplBean
 {
-    protected $serverId;
+    protected $serverNodeId;//服务（器）节点id
     protected $serviceName;
     protected $address = '127.0.0.1';
     protected $port;
@@ -23,17 +23,17 @@ class ServiceNode extends SplBean
     /**
      * @return mixed
      */
-    public function getServerId()
+    public function getServerNodeId()
     {
-        return $this->serverId;
+        return $this->serverNodeId;
     }
 
     /**
-     * @param mixed $serverId
+     * @param mixed $serverNodeId
      */
-    public function setServerId($serverId)
+    public function setServerNodeId($serverNodeId)
     {
-        $this->serverId = $serverId;
+        $this->serverNodeId = $serverNodeId;
     }
 
     /**
@@ -119,8 +119,8 @@ class ServiceNode extends SplBean
 
     protected function initialize(): void
     {
-        if(empty($this->serverId)){
-            $this->serverId = Cluster::getInstance()->currentNode()->getNodeId();
+        if(empty($this->serverNodeId)){
+            $this->serverNodeId = Cluster::getInstance()->currentNode()->getNodeId();
         }
     }
 }

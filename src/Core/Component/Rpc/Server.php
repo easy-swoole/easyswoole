@@ -11,6 +11,7 @@ namespace EasySwoole\Core\Component\Rpc;
 
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Cluster;
+use EasySwoole\Core\Component\Cluster\Common\NodeBean;
 use EasySwoole\Core\Component\Openssl;
 use EasySwoole\Core\Component\Rpc\Common\Parser;
 use EasySwoole\Core\Component\Rpc\Common\ServiceResponse;
@@ -35,7 +36,7 @@ class Server
                 'size'=>35,
                 'type'=>Table::TYPE_STRING
             ],
-            'serverId'=>[
+            'serverNodeId'=>[
                 'size'=>16,
                 'type'=>Table::TYPE_STRING
             ],
@@ -116,7 +117,9 @@ class Server
         }
         return $ret;
     }
-
+    /*
+     * 随机获取某个服务节点
+     */
     function getServiceOnlineNode($serviceName):?ServiceNode
     {
         $list = $this->getServiceOnlineNodes($serviceName);
@@ -133,10 +136,23 @@ class Server
         return $this->list;
     }
 
-    function updateService(ServiceNode $serviceNode)
+    function updateServiceNode(ServiceNode $serviceNode)
     {
         $serviceNode->setLastHeartBeat(time());
         TableManager::getInstance()->get('__RpcService')->set($this->generateKey($serviceNode),$serviceNode->toArray());
+    }
+
+    /*
+     * 某个服务（器）节点完全下线
+     */
+    function serverNodeOffLine(NodeBean $nodeBean)
+    {
+        $table =  TableManager::getInstance()->get('__RpcService');
+        foreach ($table as $key => $item){
+            if($item['serverNodeId'] == $nodeBean->getNodeId()){
+                $table->del($key);
+            }
+        }
     }
 
 
@@ -209,6 +225,6 @@ class Server
 
     private function generateKey(ServiceNode $serviceNode):string
     {
-        return substr(md5($serviceNode->getServerId().$serviceNode->getServiceName()), 8, 16);
+        return substr(md5($serviceNode->getServerNodeId().$serviceNode->getServiceName()), 8, 16);
     }
 }

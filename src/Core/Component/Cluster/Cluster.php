@@ -13,6 +13,7 @@ use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Cluster\Callback\BroadcastCallbackContainer;
 use EasySwoole\Core\Component\Cluster\Callback\DefaultCallbackName;
+use EasySwoole\Core\Component\Cluster\Callback\ShutdownCallBackContainer;
 use EasySwoole\Core\Component\Cluster\Common\BaseServiceProcess;
 use EasySwoole\Core\Component\Cluster\Common\MessageBean;
 use EasySwoole\Core\Component\Cluster\Common\NodeBean;
@@ -156,6 +157,13 @@ class Cluster
                 'lastBeatBeatTime'=>time()
             ]);
         });
+        //集群节点广播关机回调
+        MessageCallbackContainer::getInstance()->add(DefaultCallbackName::CLUSTER_NODE_SHUTDOWN,function (MessageBean $messageBean){
+            $node = $messageBean->getFromNode();
+            TableManager::getInstance()->get('ClusterNodeList')->del($node->getNodeId());
+            //下线该服务的全部rpc服务
+            Server::getInstance()->serverNodeOffLine($node);
+        });
         //RPC服务节点广播回调
         MessageCallbackContainer::getInstance()->add(DefaultCallbackName::RPC_SERVICE_BROADCAST,function (MessageBean $messageBean){
             $node = $messageBean->getFromNode();
@@ -164,7 +172,7 @@ class Cluster
                 $serviceNode = new ServiceNode($item);
                 //可达主机地址即为udp地址
                 $serviceNode->setAddress($node->getUdpInfo()->getAddress());
-                Server::getInstance()->updateService($serviceNode);
+                Server::getInstance()->updateServiceNode($serviceNode);
             }
         });
 
@@ -184,6 +192,12 @@ class Cluster
             $message = new MessageBean();
             $message->setArgs($data);
             $message->setCommand(DefaultCallbackName::RPC_SERVICE_BROADCAST);
+            Deliverer::broadcast($message);
+        });
+        //注册默认集群关机回调
+        ShutdownCallBackContainer::getInstance()->set(DefaultCallbackName::CLUSTER_NODE_SHUTDOWN,function (){
+            $message = new MessageBean();
+            $message->setCommand(DefaultCallbackName::CLUSTER_NODE_SHUTDOWN);
             Deliverer::broadcast($message);
         });
     }
