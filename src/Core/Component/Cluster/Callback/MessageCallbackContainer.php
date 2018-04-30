@@ -10,9 +10,10 @@ namespace EasySwoole\Core\Component\Cluster\Callback;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Container;
+use EasySwoole\Core\Component\Event;
 
-class MessageCallbackContainer extends Container
+
+class MessageCallbackContainer extends Event
 {
     use Singleton;
 }

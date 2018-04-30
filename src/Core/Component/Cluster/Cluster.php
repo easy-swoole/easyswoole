@@ -50,14 +50,7 @@ class Cluster
                     $udpClient = new Udp($client_info);
                     $message = PacketParser::unpack((string)$data,$udpClient);
                     if($message){
-                        $calls = MessageCallbackContainer::getInstance()->all();
-                        foreach ($calls as $call){
-                            try{
-                                call_user_func($call,$message);
-                            }catch (\Throwable $throwable){
-                                Trigger::throwable($throwable);
-                            }
-                        }
+                        MessageCallbackContainer::getInstance()->hook($message->getCommand(),$message);
                     }
                 });
             }
