@@ -99,19 +99,20 @@ class Cluster
         $time = time();
         $ttl = $this->currentNode->getNodeTimeout();
         foreach ($list as $key => $item){
+            $node = new NodeBean([
+                'nodeId'=>$key,
+                'nodeName'=>$item['nodeName'],
+                'lastBeatBeatTime'=>$item['lastBeatBeatTime'],
+                'udpInfo'=>[
+                    'address'=>$item['udpAddress'],
+                    'port'=>$item['udpPort']
+                ],
+                'listenPort'=>$item['listenPort']
+            ]);
             if($time - $item['lastBeatBeatTime'] > $ttl){
+                ShutdownCallBackContainer::getInstance()->call($node,false);
                 TableManager::getInstance()->get('ClusterNodeList')->del($key);
             }else{
-                $node = new NodeBean([
-                    'nodeId'=>$key,
-                    'nodeName'=>$item['nodeName'],
-                    'lastBeatBeatTime'=>$item['lastBeatBeatTime'],
-                    'udpInfo'=>[
-                        'address'=>$item['udpAddress'],
-                        'port'=>$item['udpPort']
-                    ],
-                    'listenPort'=>$item['listenPort']
-                ]);
                 $ret[] = $node;
             }
         }
@@ -123,19 +124,20 @@ class Cluster
         $item = TableManager::getInstance()->get('ClusterNodeList')->get($nodeId);
         if(is_array($item)){
             $ttl = $this->currentNode->getNodeTimeout();
+            $node = new NodeBean([
+                'nodeId'=>$nodeId,
+                'nodeName'=>$item['nodeName'],
+                'lastBeatBeatTime'=>$item['lastBeatBeatTime'],
+                'udpInfo'=>[
+                    'address'=>$item['udpAddress'],
+                    'port'=>$item['udpPort']
+                ],
+                'listenPort'=>$item['listenPort']
+            ]);
             if(time() - $item['lastBeatBeatTime'] > $ttl){
+                ShutdownCallBackContainer::getInstance()->call($node,false);
                 return null;
             }else{
-                $node = new NodeBean([
-                    'nodeId'=>$nodeId,
-                    'nodeName'=>$item['nodeName'],
-                    'lastBeatBeatTime'=>$item['lastBeatBeatTime'],
-                    'udpInfo'=>[
-                        'address'=>$item['udpAddress'],
-                        'port'=>$item['udpPort']
-                    ],
-                    'listenPort'=>$item['listenPort']
-                ]);
                 return $node;
             }
         }else{
@@ -164,6 +166,7 @@ class Cluster
             TableManager::getInstance()->get('ClusterNodeList')->del($node->getNodeId());
             //下线该服务的全部rpc服务
             Server::getInstance()->serverNodeOffLine($node);
+            ShutdownCallBackContainer::getInstance()->call($node,true);
         });
         //RPC服务节点广播回调
         MessageCallbackContainer::getInstance()->add(DefaultCallbackName::RPC_SERVICE_BROADCAST,function (MessageBean $messageBean){

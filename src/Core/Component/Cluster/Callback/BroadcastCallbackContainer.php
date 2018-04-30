@@ -10,9 +10,8 @@ namespace EasySwoole\Core\Component\Cluster\Callback;
 
 
 use EasySwoole\Core\AbstractInterface\Singleton;
-use EasySwoole\Core\Component\Container;
 
-class BroadcastCallbackContainer extends Container
+class BroadcastCallbackContainer extends BaseContainer
 {
     use Singleton;
 }
