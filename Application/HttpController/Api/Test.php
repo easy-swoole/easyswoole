@@ -8,14 +8,9 @@ use EasySwoole\Core\Http\Response;
 
 class Test extends BaseController
 {
-    /**
-     * @var TestModel
-     */
-    private $testModel;
 
     function __construct(string $actionName, Request $request, Response $response)
     {
-        $this->testModel = new TestModel();
         parent::__construct($actionName, $request, $response);
     }
 
@@ -44,7 +39,8 @@ class Test extends BaseController
 //            "input3" => "手机号码格式不对"
 //        ));
 //        $res = $this->redis->get("test");
-        $this->writeJson(200);
+        $res = TestModel::getInstance()->test();
+        $this->writeJson($res);
     }
 
 }
