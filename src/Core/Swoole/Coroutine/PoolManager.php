@@ -37,6 +37,12 @@ class PoolManager
             ],
             4096
         );
+        $conf = Config::getInstance()->getConf('COROUTINE_POOL');
+        if(is_array($conf)){
+            foreach ($conf as $class => $item){
+                $this->addPool($class,$item['min'],$item['max'],$item['type']);
+            }
+        }
     }
 
     function addPool(string $class,int $minNum = 3,int $maxNum = 10,$type = self::TYPE_ONLY_WORKER)
