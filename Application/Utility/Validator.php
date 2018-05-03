@@ -239,7 +239,7 @@ class Validator
     /**
      * @param array $data, 需要进行校验的数组
      * @param array $fieldsRules 校验规则数组,参数用点和|区分 如 array(
-     *  "input1" => "numeric|min:10|",
+     *  "input1" => "numeric|min:10|in:x,y,z|",
      *  "input2" => "numeric|min:10|",
      * )
      * @param array $msg, 传对应字段校验出错后返回的错误信息, 如果没有, 则默认返回校验失败
