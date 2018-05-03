@@ -85,6 +85,7 @@ class BaseController extends Controller
 //        $this->memory = Di::getInstance()->get("memory")->getTable();
         /*初始化session超级全局变量*/
         $cookie = $this->request()->getCookieParams();
+        /*初始化session超级全局变量, GLOBALS['userInfo'], 此全局变量在单个进程内是全局变量, 所以当每个请求到来时, 需要进行初始化， 否则会是上一个请求的userInfo信息*/
         if(isset($cookie[$this->cookiePrefix]) && !empty($cookie[$this->cookiePrefix])){
             $userInfo = $this->redis->get($this->tokenPrefix.$cookie[$this->cookiePrefix]);
             $GLOBALS["userInfo"] = @json_decode($userInfo, true);
