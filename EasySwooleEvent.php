@@ -8,7 +8,9 @@
 
 namespace EasySwoole;
 
+use App\Crontab\Cron;
 use \EasySwoole\Core\AbstractInterface\EventInterface;
+use EasySwoole\Core\Component\Crontab\CronTab;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Swoole\EventHelper;
 use \EasySwoole\Core\Swoole\ServerManager;
@@ -47,6 +49,13 @@ Class EasySwooleEvent implements EventInterface {
         Di::getInstance()->set('REDIS',\App\Vendor\Db\Redis::class);
         //异步redis客户端
         Di::getInstance()->set('ASYNC_REDIS',\App\Vendor\Db\AsyncRedis::class);
+
+        /**
+         * crontab 定时任务
+         */
+//        CronTab::getInstance()->addRule('redisKeysRefresh','*/1 * * * *',function (){
+//            Cron::refreshRedisKeys();
+//        });
     }
 
     public static function onRequest(Request $request,Response $response): void
