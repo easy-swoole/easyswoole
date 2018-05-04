@@ -60,6 +60,11 @@ class BaseController extends Controller
     protected $tokenExpire = 604800; //生成token的过期时间为86400s 一天, 设置的一周
 
     /**
+     * 未认证过的token默认过期时间
+     * @var int
+     */
+    protected $notVerifyTokenExpire = 86400; //生成token的过期时间为86400s 一天
+    /**
      * @var \Redis
      */
     protected $redis;
@@ -91,7 +96,11 @@ class BaseController extends Controller
             $GLOBALS["userInfo"] = @json_decode($userInfo, true); //无法解析, 则结果为null
         }
         else{
-            $GLOBALS["userInfo"] = null;
+            //如果用户没有认证过, 初始化基础会话token
+            $memberInfo = array();
+            $token = $this->tokenStart($memberInfo, $this->notVerifyTokenExpire);
+            $this->response()->setcookie($this->cookiePrefix, $token, time() + $this->notVerifyTokenExpire, "/", "", false, true);
+            $GLOBALS["userInfo"] = array();
         }
         /*校验请求数据是否安全，不安全则退出*/
         if($this->checkSafe() === false){
@@ -99,7 +108,7 @@ class BaseController extends Controller
         }
         /*校验请求的Uri, uri请求拦截器, 这里可以对需要登录或者不需要登录的接口做处理*/
         if($this->checkUri() === false){
-            $this->writeJson(Status::CODE_FORBIDDEN, null, Status::getReasonPhrase(Status::CODE_FORBIDDEN));
+            $this->writeJson( null, Status::getReasonPhrase(Status::CODE_FORBIDDEN),Status::CODE_FORBIDDEN);
             $this->response()->end();
             return false;  //这里返回false, 如果子类没有重写onRequest此方法, 则直接返回客户端数据, 如果重写了, 根据具体重写规则而定.
         }
@@ -243,7 +252,7 @@ class BaseController extends Controller
      */
     protected function checkSafe(){
         if(!(Security::check($this->request()->getRequestParam()) && Security::check($this->request()->getCookieParams()))){
-            $this->writeJson(Status::CHECK_SAFE_FAIL, null, Status::getReasonPhrase(Status::CHECK_SAFE_FAIL));
+            $this->writeJson(null, Status::getReasonPhrase(Status::CHECK_SAFE_FAIL), Status::CHECK_SAFE_FAIL);
             $this->response()->end();
             return false;
         }

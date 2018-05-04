@@ -11,11 +11,11 @@ class Utils
 {
     /*生成任何位数的随机字符串*/
     static function randomStr($length){
-        $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789";
+        $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789!@#$%^&*";
         /*当需要生成字符串长度小于等于字符串基础库时, 直接截取需要的长度*/
         $strlen = strlen($str);
         if($length <= $strlen){
-            return substr(str_shuffle("abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789"), 0, $length);
+            return substr(str_shuffle($str), 0, $length);
         }
         $coefficient = ceil($length/$strlen); //算出生成随机码长度是字符串库长度的倍数
         $randStr = "";
