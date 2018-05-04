@@ -145,19 +145,21 @@ class Client
         if(!empty($node->getEncryptToken())){
             $openssl = new Openssl($node->getEncryptToken());
             $raw = $openssl->decrypt($raw);
-        }
-        $json = json_decode($raw,true);
-        if(!is_array($json)){
-            if(!empty($raw) && ($raw !== false)){
+            if($raw === false){
                 $json = [
                     'status'=>Status::PACKAGE_ENCRYPT_DECODED_ERROR
                 ];
-            }else{
-                $json = [
-                    'status'=>Status::CLIENT_WAIT_RESPONSE_TIMEOUT
-                ];
             }
-
+        }
+        //如果已经解密失败,则不再做包解析
+        if(!isset($json)){
+            $json = json_decode($raw,true);
+        }
+        //若包解析失败
+        if(!is_array($json)){
+            $json = [
+                'status'=>Status::CLIENT_WAIT_RESPONSE_TIMEOUT
+            ];
         }
         return new ServiceResponse( $json + ['responseNode'=>$node]);
     }
