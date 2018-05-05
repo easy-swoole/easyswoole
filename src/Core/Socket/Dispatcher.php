@@ -116,7 +116,7 @@ class Dispatcher
                         Response::response($client,$res);
                     }
                 }catch (\Throwable $throwable){
-                    $this->hookException($throwable);
+                    $this->hookException($throwable,$data,$client);
                 }
             }else{
                 $this->hookError(self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
@@ -136,7 +136,7 @@ class Dispatcher
                     }
                 }
             }catch (\Throwable $exception){
-                $this->hookException($exception);
+                $this->hookException($exception,$raw,$client);
             }
         }else{
             //默认没有错误处理的时候，关闭连接
