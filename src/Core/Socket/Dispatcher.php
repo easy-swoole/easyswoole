@@ -155,7 +155,13 @@ class Dispatcher
     {
         if(class_exists($this->exceptionHandler)){
             Try{
-                $this->exceptionHandler::handler($throwable,$raw,$client);
+                $ret = $this->exceptionHandler::handler($throwable,$raw,$client);
+                if(is_string($ret)){
+                    $res = $this->parser::encode($ret,$client);
+                    if($res !== null){
+                        Response::response($client,$res);
+                    }
+                }
             }catch (\Throwable $throwable){
                 Trigger::throwable($throwable);
                 $this->closeClient($client);
