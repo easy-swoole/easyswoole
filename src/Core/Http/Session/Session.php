@@ -104,7 +104,7 @@ class Session
                 TaskManager::async(function ()use ($handler,$savePath,$name){
                     $handler = new Handler();
                     $handler->open($savePath,$name);
-                    $set = Di::getInstance()->get(SysConst::HTT_SESSION_GC_MAX_LIFE_TIME);
+                    $set = Di::getInstance()->get(SysConst::HTTP_SESSION_GC_MAX_LIFE_TIME);
                     if(!empty($set)){
                         $maxLifeTime = $set;
                     }else{
