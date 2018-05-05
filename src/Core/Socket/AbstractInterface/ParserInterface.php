@@ -20,5 +20,5 @@ interface ParserInterface
     /*
      * $commandBean为请求decode后的结果，解决需要客户端主动动态密钥的加密传输场景，
      */
-    public static function encode(string $raw,$client,$commandBean):?string ;
+    public static function encode(string $raw,$client):?string ;
 }

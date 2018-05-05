@@ -17,6 +17,7 @@ use EasySwoole\Core\Socket\Client\Udp;
 use EasySwoole\Core\Socket\Client\WebSocket;
 use EasySwoole\Core\Socket\AbstractInterface\ParserInterface;
 use EasySwoole\Core\Socket\Common\CommandBean;
+use EasySwoole\Core\Swoole\ServerManager;
 
 class Dispatcher
 {
@@ -44,13 +45,26 @@ class Dispatcher
         }
     }
 
-    public function setExceptionHandler(ExceptionHandler $handler = null):Dispatcher
+    public function setExceptionHandler(string $handler = null):Dispatcher
     {
-        $this->exceptionHandler = $handler;
+        if($handler == null){
+            return $this;
+        }
+        try{
+            $ref = new \ReflectionClass($handler);
+            if($ref->implementsInterface(ExceptionHandler::class)){
+                $this->exceptionHandler = $handler;
+            }else{
+                throw new \Exception("class {$handler} not a implement ".'EasySwoole\Core\Socket\AbstractInterface\ExceptionHandler');
+            }
+        }catch (\Throwable $throwable){
+            Trigger::throwable($throwable);
+            throw $throwable;
+        }
         return $this;
     }
 
-    public function onError(callable $callable = null)
+    public function setErrorHandler(callable $callable = null)
     {
         $this->errorHandler = $callable;
     }
@@ -81,70 +95,73 @@ class Dispatcher
                 return;
             }
         }
-        $command = $this->parser::decode($data,$client);
-        if(is_object($command)){
-            $commandCopy = clone $command;
-        }else{
-            $commandCopy = $command;
+        try{
+            $command = $this->parser::decode($data,$client);
+        }catch (\Throwable $throwable){
+            Trigger::throwable($throwable);
         }
+        //若解析器返回null，则调用errorHandler，且状态为包解析错误
         if($command === null){
-            if(is_callable($this->errorHandler)){
-                try{
-                    $ret = Invoker::callUserFunc($this->errorHandler,self::PACKAGE_PARSER_ERROR,$data,$client);
-                    if($ret !== null){
-                        $res = $this->parser::encode($ret,$client,$commandCopy);
-                        if($res !== null){
-                            Response::response($client,$res);
-                        }
-                    }
-                }catch (\Throwable $exception){
-                    Trigger::throwable($exception);
-                    Response::response($client,$exception->getMessage());
-                }
-            }
+            $this->hookError(self::PACKAGE_PARSER_ERROR,$data,$client);
             return;
         }else if($command instanceof CommandBean){
+            //解包正确
             $controller = $command->getControllerClass();
             if(class_exists($controller)){
-                $response = new SplStream();
                 try{
+                    $response = new SplStream();
                     (new $controller($client,$command,$response));
-                }catch (\Throwable $throwable){
-                    if($this->exceptionHandler instanceof ExceptionHandler){
-                        $data = $this->exceptionHandler->handler($throwable,$client,$command);
-                        if($data !== null){
-                            $response->write($data);
-                        }
-                    }else{
-                        Trigger::throwable($throwable);
-                        $response->write($throwable->getMessage());
+                    $res = $this->parser::encode($response->__toString(),$client);
+                    if($res !== null){
+                        Response::response($client,$res);
                     }
-                }
-                $res = $this->parser::encode($response->__toString(),$client,$commandCopy);
-                if($res !== null){
-                    Response::response($client,$res);
+                }catch (\Throwable $throwable){
+                    $this->hookException($throwable);
                 }
             }else{
-                if(is_callable($this->errorHandler)){
-                    try{
-                        $ret = Invoker::callUserFunc($this->errorHandler,self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
-                        if(is_string($ret)){
-                            $res = $this->parser::encode($ret,$client,$commandCopy);
-                            if($res !== null){
-                                Response::response($client,$res);
-                            }
-                        }
-                    }catch (\Throwable $exception){
-                        Trigger::throwable($exception);
-                        Response::response($client,$exception->getMessage());
+                $this->hookError(self::TARGET_CONTROLLER_NOT_FOUND,$data,$client);
+            }
+        }
+    }
+
+    private function hookError($status,string $raw,$client)
+    {
+        if(is_callable($this->errorHandler)){
+            try{
+                $ret = Invoker::callUserFunc($this->errorHandler,$status,$raw,$client);
+                if(is_string($ret)){
+                    $res = $this->parser::encode($ret,$client);
+                    if($res !== null){
+                        Response::response($client,$res);
                     }
                 }
+            }catch (\Throwable $exception){
+                $this->hookException($exception);
             }
-        }else if(is_string($command)){
-            $res = $this->parser::encode($command,$client,$commandCopy);
-            if($res !== null){
-                Response::response($client,$res);
+        }else{
+            //默认没有错误处理的时候，关闭连接
+            $this->closeClient($client);
+        }
+    }
+
+    private function closeClient($client)
+    {
+        if(!$client instanceof Udp){
+            ServerManager::getInstance()->getServer()->close($client->getFd());
+        }
+    }
+
+    private function hookException(\Throwable $throwable,string $raw,$client)
+    {
+        if(class_exists($this->exceptionHandler)){
+            Try{
+                $this->exceptionHandler::handler($throwable,$raw,$client);
+            }catch (\Throwable $throwable){
+                Trigger::throwable($throwable);
+                $this->closeClient($client);
             }
+        }else{
+            $this->closeClient($client);
         }
     }
 }

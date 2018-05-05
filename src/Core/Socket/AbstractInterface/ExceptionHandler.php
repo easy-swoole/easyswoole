@@ -9,9 +9,7 @@
 namespace EasySwoole\Core\Socket\AbstractInterface;
 
 
-use EasySwoole\Core\Socket\Common\CommandBean;
-
 interface ExceptionHandler
 {
-    public function handler(\Throwable $throwable,$client,CommandBean $bean):?string ;
+    public static function handler(\Throwable $throwable,string $data,$client) ;
 }
