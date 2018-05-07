@@ -195,7 +195,12 @@ class Validator
     public function email(array &$data, string &$field) :bool
     {
         if (isset($data[$field])) {
-            return preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/", $data[$field]);
+            $res = filter_var($data[$field], FILTER_VALIDATE_EMAIL);
+            if($res != false){
+                return true;
+            }
+            return false;
+//            return preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/", $data[$field]);
         }
         return true;
     }
