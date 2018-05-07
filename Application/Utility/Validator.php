@@ -122,7 +122,7 @@ class Validator
      */
     public function maxLength(array &$data, string &$field, int $maxLength) :bool{
         if(isset($data[$field])){
-            return strlen($data[$field]) <= $maxLength;
+            return mb_strlen($data[$field], 'utf-8') <= $maxLength;
         }
         return true;
     }
@@ -136,7 +136,7 @@ class Validator
      */
     public function minLength(array &$data, string &$field, int $minLength) :bool{
         if(isset($data[$field])){
-            return strlen($data[$field]) >= $minLength;
+            return mb_strlen($data[$field], 'utf-8') >= $minLength;
         }
         return true;
     }
