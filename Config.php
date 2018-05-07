@@ -76,4 +76,7 @@ return [
             'pass' => 'yangHv4y'
         ],         // IP + Port ,可以配置多个cluster
     ],
+    "TOKEN" => [
+        "length" => 128 //token字符串长度
+    ],
 ];
