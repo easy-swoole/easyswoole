@@ -155,15 +155,15 @@ class Validator
     }
 
     /**
-     * 是否为整数判断, 这里注意, 包含0, 0被认为是false
+     * 是否为整数判断, 0也是整数
      * @param array $data
      * @param string $field
      * @return bool
      */
     public function int(array &$data, string &$field) :bool{
         if(isset($data[$field])){
-            $number = intval($data[$field]);
-            if($number !== 0){
+            $res = filter_var($data[$field], FILTER_VALIDATE_INT);
+            if($res !== false){
                 return true;
             }
             return false;
