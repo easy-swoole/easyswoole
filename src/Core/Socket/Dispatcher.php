@@ -95,6 +95,7 @@ class Dispatcher
                 return;
             }
         }
+        $command = null;
         try{
             $command = $this->parser::decode($data,$client);
         }catch (\Throwable $throwable){
