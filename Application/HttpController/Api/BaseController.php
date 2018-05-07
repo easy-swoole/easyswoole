@@ -313,4 +313,13 @@ class BaseController extends Controller
         return $this->redis->set($this->tokenPrefix.$token, json_encode($userInfo), $this->tokenExpire);
     }
 
+    /**
+     * 删除token
+     * @param $token
+     * @return int
+     */
+    protected function delToken(&$token){
+        return $this->redis->del($this->tokenPrefix.$token);
+    }
+
 }
