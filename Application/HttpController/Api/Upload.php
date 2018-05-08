@@ -60,7 +60,7 @@ class Upload extends BaseController
                     /*文件大小小于等于最大值*/
                     if($file->getSize() <= self::MAX_SIZE){
                         $tmpDir = date('Y-m-d');
-                        $tmpFile = Utils::randomStr(64) . "." . $this->allowTypes[$file->getClientMediaType()];
+                        $tmpFile = Utils::randomStr(64, "words") . "." . $this->allowTypes[$file->getClientMediaType()];
                         $dir = self::ABSOLUTE_DIR . $tmpDir;
 //                      /*如果没有此目录，则生成目录*/
                         if(!is_dir($dir)){
