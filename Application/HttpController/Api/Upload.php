@@ -5,7 +5,7 @@
  * Date: 2017/9/20
  * Time: 9:36
  */
-namespace App\Controller\Api;
+namespace App\HttpController\Api;
 
 use App\HttpController\Api\BaseController;
 use App\Utility\Utils;
