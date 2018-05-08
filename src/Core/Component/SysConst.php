@@ -11,11 +11,6 @@ namespace EasySwoole\Core\Component;
 
 class SysConst
 {
-
-
-    const DIR_TEMP = 'DIR_TEMP';
-    const DIR_LOG = 'DIR_LOG';
-
     const VERSION = 'VERSION';
 
     const LOGGER_WRITER = 'LOGGER_WRITER';

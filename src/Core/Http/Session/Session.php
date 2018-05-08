@@ -9,6 +9,7 @@
 namespace EasySwoole\Core\Http\Session;
 
 
+use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\Component\SysConst;
@@ -43,7 +44,7 @@ class Session
         }
         $path = Di::getInstance()->get(SysConst::HTTP_SESSION_SAVE_PATH);
         if(empty($path)){
-            $this->sessionSavePath = Di::getInstance()->get(SysConst::DIR_TEMP).'/Session';
+            $this->sessionSavePath = Config::getInstance()->getConf('TEMP_DIR').'/Session';
             if(!is_dir($this->sessionSavePath)){
                 mkdir( $this->sessionSavePath );
             }

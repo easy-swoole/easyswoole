@@ -141,14 +141,14 @@ class CacheProcess extends AbstractProcess
     private function saveData()
     {
         $processName = $this->getProcessName();
-        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
+        $file = Config::getInstance()->getConf('TEMP_DIR')."/{$processName}.data";
         file_put_contents($file,\swoole_serialize::pack($this->cacheData->getArrayCopy()),LOCK_EX);
     }
 
     private function loadData()
     {
         $processName = $this->getProcessName();
-        $file = Di::getInstance()->get(SysConst::DIR_TEMP)."/{$processName}.data";
+        $file = Config::getInstance()->getConf('TEMP_DIR')."/{$processName}.data";
         if(file_exists($file)){
             $data = \swoole_serialize::unpack(file_get_contents($file));
             if(!is_array($data)){

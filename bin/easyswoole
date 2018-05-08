@@ -13,6 +13,8 @@ foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php
     }
 }
 
+Core::getInstance();
+
 function commandHandler()
 {
     list($command, $options) = commandParser();

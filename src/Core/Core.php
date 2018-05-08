@@ -26,6 +26,7 @@ class Core
     public function __construct()
     {
         defined('EASYSWOOLE_ROOT') or define("EASYSWOOLE_ROOT",realpath(getcwd()));
+        $this->sysDirectoryInit();
     }
 
     public function initialize():Core
@@ -34,7 +35,6 @@ class Core
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
         //创建全局事件容器
         $event = $this->eventHook();
-        $this->sysDirectoryInit();
         $event->hook('frameInitialize');
         $this->errorHandle();
         return $this;
@@ -49,9 +49,17 @@ class Core
     {
         //创建临时目录    请以绝对路径，不然守护模式运行会有问题
         $tempDir = Config::getInstance()->getConf('TEMP_DIR');
+        if(empty($tempDir)){
+            Config::getInstance()->setConf('TEMP_DIR',EASYSWOOLE_ROOT.'/Temp');
+            $tempDir = EASYSWOOLE_ROOT.'/Temp';
+        }
+
         $logDir = Config::getInstance()->getConf('LOG_DIR');
-        Di::getInstance()->set(SysConst::DIR_TEMP,$tempDir);
-        Di::getInstance()->set(SysConst::DIR_LOG,$logDir);
+        if(empty($logDir)){
+            Config::getInstance()->setConf('LOG_DIR',EASYSWOOLE_ROOT.'/Log');
+            $logDir = EASYSWOOLE_ROOT.'/Temp';
+        }
+
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
     }

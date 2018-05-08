@@ -9,9 +9,7 @@
 namespace EasySwoole\Core\Component\Cache;
 
 
-use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\Spl\SplArray;
-use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Config;
 use EasySwoole\Core\Utility\Random;
 
 class Utility
@@ -22,7 +20,7 @@ class Utility
     static function writeFile(string $data):string
     {
         $name = 'cache_'.Random::randStr(12);
-        $file = Di::getInstance()->get(SysConst::DIR_TEMP).'/'.$name;
+        $file = Config::getInstance()->getConf('TEMP_DIR').'/'.$name;
         file_put_contents($file,$data);
         return $file;
     }
