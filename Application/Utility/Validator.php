@@ -228,6 +228,23 @@ class Validator
     }
 
     /**
+     * 验证url
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function url(array &$data, string &$field) :bool {
+        if(isset($data[$field])){
+            $res = filter_var($data[$field], FILTER_VALIDATE_URL);
+            if($res != false){
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 正则校验
      * @param array $data
      * @param string $field

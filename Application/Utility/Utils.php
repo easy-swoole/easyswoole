@@ -9,9 +9,24 @@ namespace App\Utility;
 
 class Utils
 {
-    /*生成任何位数的随机字符串*/
-    static function randomStr($length){
-        $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789!@#$%^&*";
+    /**
+     * 生成任何位数的随机字符串, type=normal 所有, words 字母和数字
+     * @param $length
+     * @param string $type
+     * @return bool|string
+     */
+    static function randomStr($length, $type="normal"){
+        switch ($type){
+            case "normal":
+                $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789!@#$%^&*";
+                break;
+            case "words":
+                $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789";
+                break;
+            default:
+                $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789";
+                break;
+        }
         /*当需要生成字符串长度小于等于字符串基础库时, 直接截取需要的长度*/
         $strlen = strlen($str);
         if($length <= $strlen){
