@@ -74,7 +74,7 @@ class Upload extends BaseController
                 }
             }
         }
-        $this->writeJson(200, $uploadArr);
+        $this->writeJson($uploadArr);
     }
 
 }
