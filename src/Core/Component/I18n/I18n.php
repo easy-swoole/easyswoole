@@ -47,7 +47,8 @@ class I18n
                 continue;
             }
             $path = str_replace([$this->languageDir, '.' . $extension], '', $file);
-            [$language, $category] = explode('/', $path);
+            [$language, $category] = explode('/', $path, 2);
+            $category = str_replace('/', '.', $category);
             $parser = __NAMESPACE__ . '\Parser\\' . ucfirst($extension) . 'Parser';
             $call = [$parser, 'parse'];
             if (is_callable($call)) {
