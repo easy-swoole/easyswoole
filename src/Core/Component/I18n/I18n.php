@@ -9,7 +9,6 @@
 namespace EasySwoole\Core\Component\I18n;
 
 use EasySwoole\Config;
-use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Trigger;
 
@@ -19,15 +18,14 @@ class I18n
     private $languageDir,
         $defaultCategory,
         $defaultLanguage,
-        $dict;
+        $dict = [];
 
     public function __construct()
     {
         $config = Config::getInstance()->getConf('I18N');
-        $this->languageDir = $config['languageDir'];
-        $this->defaultCategory = $config['defaultCategory'];
-        $this->defaultLanguage = $config['defaultLanguage'];
-        $this->dict = new SplArray();
+        $this->languageDir = $config['language_dir'];
+        $this->defaultCategory = $config['default_category'];
+        $this->defaultLanguage = $config['default_language'];
     }
 
     public function loadLanguage(string $language, string $category, string $key)
@@ -38,7 +36,7 @@ class I18n
             return null;
         }
         $pack = require $file;
-        $this->dict->set($language . '.' . $category, $pack);
+        $this->dict[$language][$category] = $pack;
         $text = $pack[$key] ?? null;
         return $text;
     }
@@ -62,8 +60,7 @@ class I18n
                 Trigger::throwable(new \Exception('The format of path is incorrect'));
                 return null;
         }
-        $path = $language . '.' . $category . '.' . $key;
-        $text = $this->dict->get($path) ?? $this->loadLanguage($language, $category, $key);
+        $text = $this->dict[$language][$category][$key] ?? $this->loadLanguage($language, $category, $key);
         if (is_null($text)) {
             Trigger::throwable(new \Exception($path . ' not found'));
             return null;
