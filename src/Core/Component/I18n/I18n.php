@@ -9,66 +9,96 @@
 namespace EasySwoole\Core\Component\I18n;
 
 use EasySwoole\Config;
-use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Component\Invoker;
+use EasySwoole\Core\Component\Spl\SplArray;
 use EasySwoole\Core\Component\Trigger;
 
 class I18n
 {
-    use Singleton;
     private $languageDir,
         $defaultCategory,
         $defaultLanguage,
-        $dict = [];
+        $loaded = false,
+        $lang;
+    private static $instance;
 
     public function __construct()
     {
         $config = Config::getInstance()->getConf('I18N');
         $this->languageDir = $config['language_dir'];
+        if (substr($this->languageDir, -1) != '/') {
+            $this->languageDir .= '/';
+        }
         $this->defaultCategory = $config['default_category'];
         $this->defaultLanguage = $config['default_language'];
+        $this->lang = new SplArray();
     }
 
-    public function loadLanguage(string $language, string $category, string $key)
+    public function load() : bool
     {
-        $file = $this->languageDir . '/' . $language . '/' . $category . '.php';
-        if (!is_readable($file)) {
-            Trigger::throwable(new \Exception('The Language file: ' . $file . ' is not readable'));
-            return null;
+        if ($this->loaded) {
+            return true;
         }
-        $pack = require $file;
-        $this->dict[$language][$category] = $pack;
-        $text = $pack[$key] ?? null;
-        return $text;
+        $iterator = new \RecursiveDirectoryIterator($this->languageDir);
+        $files = new \RecursiveIteratorIterator($iterator);
+        foreach ($files as $file) {
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            if ($extension == '') {
+                continue;
+            }
+            $path = str_replace([$this->languageDir, '.' . $extension], '', $file);
+            [$language, $category] = explode('/', $path);
+            $parser = __NAMESPACE__ . '\Parser\\' . ucfirst($extension) . 'Parser';
+            $call = [$parser, 'parse'];
+            if (is_callable($call)) {
+                $lang = Invoker::callUserFunc($call, $file);
+            } else {
+                Trigger::error($parser . ' not found');
+                continue;
+            }
+            if ($lang === null) {
+                Trigger::error($file . ' parse error');
+            } else {
+                $this->lang->set($language . '.' . $category, $lang);
+            }
+        }
+        $this->loaded = true;
+        return true;
     }
 
-    public function translate(string $path, ?array $replace = null, ?string $language = null)
+    public function getRealKey(string $key, ?string $locale) : string
     {
-        if (is_null($language)) {
-            $language = $this->defaultLanguage;
+        if ($locale === null) {
+            $locale = $this->defaultLanguage;
         }
-        $tPath = explode('.', $path);
-        switch (count($tPath) <=> 2) {
-            case -1:
-                $category = $this->defaultCategory;
-                $key = $tPath[0];
-                break;
-            case 0:
-                $category = $tPath[0];
-                $key = $tPath[1];
-                break;
-            default:
-                Trigger::throwable(new \Exception('The format of path is incorrect'));
-                return null;
+        if (strpos($key, '.') === false) {
+            $key = implode([$this->defaultCategory, $key], '.');
         }
-        $text = $this->dict[$language][$category][$key] ?? $this->loadLanguage($language, $category, $key);
-        if (is_null($text)) {
-            Trigger::throwable(new \Exception($path . ' not found'));
+        return implode('.', [$locale, $key]);
+    }
+
+    public function format(string $text, array $params) : string
+    {
+        $params = array_values($params);
+        return sprintf($text, ...$params);
+    }
+
+    public static function translate(string $key, ?array $params = null, ?string $locale = null) : ?string
+    {
+        if(!isset(self::$instance)){
+            self::$instance = new static();
+        }
+        $instance = self::$instance;
+        if (!$instance->loaded) {
+            $instance->load();
+        }
+        $realKey = $instance->getRealKey($key, $locale);
+        $text = $instance->lang->get($realKey);
+        if ($text === null) {
+            Trigger::error($realKey . ' not found');
             return null;
-        }
-        if (empty($replace)) {
-            return $text;
         } else {
-            return sprintf($text, ...$replace);
+            return empty($params) ? $text : $instance->format($text, $params);
         }
     }
 }
