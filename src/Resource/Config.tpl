@@ -38,5 +38,10 @@ return [
         'nodeTimeout'=>10,
         'nodeName'=>'easySwoole',
         'nodeId'=>null
+    ],
+    'I18N'=>[
+        'languageDir'=>EASYSWOOLE_ROOT.'/language',
+        'defaultCategory'=>'default',
+        'defaultLanguage'=>'en'
     ]
 ];
