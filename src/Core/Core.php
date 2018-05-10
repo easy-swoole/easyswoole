@@ -25,7 +25,9 @@ class Core
     {
         defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
         defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
-        require_once EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
+        if(file_exists(EASYSWOOLE_ROOT.'/EasySwooleEvent.php')){
+            require_once EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
+        }
         $this->sysDirectoryInit();
     }
 
