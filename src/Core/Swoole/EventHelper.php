@@ -8,7 +8,6 @@
 
 namespace EasySwoole\Core\Swoole;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\SuperClosure;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Component\Trigger;
@@ -21,6 +20,7 @@ use EasySwoole\Core\Socket\Dispatcher as SocketDispatcher;
 use EasySwoole\Core\Swoole\PipeMessage\Message;
 use EasySwoole\Core\Swoole\Task\AbstractAsyncTask;
 use \EasySwoole\Core\Swoole\PipeMessage\EventRegister as PipeMessageEventRegister;
+use EasySwoole\EasySwooleEvent;
 
 class EventHelper
 {
@@ -42,10 +42,9 @@ class EventHelper
             $request_psr = new Request($request);
             $response_psr = new Response($response);
             try{
-                $event = Event::getInstance();
-                $event->hook('onRequest',$request_psr,$response_psr);
+                EasySwooleEvent::onRequest($request_psr,$response_psr);
                 $dispatcher->dispatch($request_psr,$response_psr);
-                $event->hook('afterAction',$request_psr,$response_psr);
+                EasySwooleEvent::afterAction($request_psr,$response_psr);
             }catch (\Throwable $throwable){
                 $handler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
                 if($handler instanceof ExceptionHandlerInterface){

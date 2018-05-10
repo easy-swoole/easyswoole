@@ -8,13 +8,8 @@
 
 namespace EasySwoole\Core\Component;
 
-
-use EasySwoole\Core\AbstractInterface\Singleton;
-
 class Event extends MultiContainer
 {
-    use Singleton;
-
     function add($key, $item)
     {
         if(is_callable($item)){
