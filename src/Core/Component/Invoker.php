@@ -44,21 +44,7 @@ class Invoker
     public static function callUserFunc(callable $callable,...$params)
     {
         if(SWOOLE_VERSION >1){
-            if($callable instanceof \Closure){
-                return $callable(...$params);
-            }else if(is_array($callable) && is_object($callable[0])){
-                $class = $callable[0];
-                $method = $callable[1];
-                return $class->$method(...$params);
-            }else if(is_array($callable) && is_string($callable[0])){
-                $class = $callable[0];
-                $method = $callable[1];
-                return $class::$method(...$params);
-            }else if(is_string($callable)){
-                return $callable(...$params);
-            }else{
-                return null;
-            }
+            self::call($callable, $params);
         }else{
             return call_user_func($callable,...$params);
         }
@@ -67,23 +53,53 @@ class Invoker
     public static function callUserFuncArray(callable $callable,array $params)
     {
         if(SWOOLE_VERSION > 1){
-            if($callable instanceof \Closure){
-                return $callable(...$params);
-            }else if(is_array($callable) && is_object($callable[0])){
-                $class = $callable[0];
-                $method = $callable[1];
-                return $class->$method(...$params);
-            }else if(is_array($callable) && is_string($callable[0])){
-                $class = $callable[0];
-                $method = $callable[1];
-                return $class::$method(...$params);
-            }else if(is_string($callable)){
-                return $callable(...$params);
-            }else{
-                return null;
-            }
+            self::call($callable, $params);
         }else{
             return call_user_func_array($callable,$params);
+        }
+    }
+
+    private static function call(callable $callable, array $params)
+    {
+        if($callable instanceof \Closure) {
+            return $callable(...$params);
+        } else if (is_array($callable)) {
+            if (is_object($callable[0])) {
+                $class = $callable[0];
+                $method = $callable[1];
+                // can't use parent::method ...
+                return $class->$method(...$params);
+            } else if (is_string($callable[0])) {
+                $class = $callable[0];
+                $method = $callable[1];
+                if (strpos($method, '::') !== false) {
+                    [$c, $method] = explode('::', $method, 2);
+                    if ($c == 'parent') {
+                        $class = get_parent_class($class);
+                        if ($class === false) {
+                            return null;
+                        }
+                    } else if ($c == 'self') {
+
+                    } else {
+                        return null;
+                    }
+                }
+                return $class::$method(...$params);
+            } else {
+                return null;
+            }
+        } else if (is_string($callable)) {
+            if (strpos($callable, '::') === false) {
+                return $callable(...$params);
+            } else {
+                [$class, $method] = explode('::', $callable, 2);
+                return $class::$method(...$params);
+            }
+        } else if (is_object($callable)) {
+            return $callable->__invoke(...$params);
+        } else {
+            return null;
         }
     }
 }
