@@ -50,6 +50,10 @@ class Invoker
                 $class = $callable[0];
                 $method = $callable[1];
                 return $class->$method(...$params);
+            }else if(is_array($callable) && is_string($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class::$method(...$params);
             }else{
                 return null;
             }
@@ -67,6 +71,10 @@ class Invoker
                 $class = $callable[0];
                 $method = $callable[1];
                 return $class->$method(...$params);
+            }else if(is_array($callable) && is_string($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class::$method(...$params);
             }else{
                 return null;
             }
