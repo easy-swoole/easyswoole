@@ -12,8 +12,6 @@ namespace EasySwoole\Core;
 use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Component\Event;
-use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Component\Trigger;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -25,17 +23,17 @@ class Core
 
     public function __construct()
     {
-        defined('EASYSWOOLE_ROOT') or define("EASYSWOOLE_ROOT",realpath(getcwd()));
+        defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
+        defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
+        require_once EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
         $this->sysDirectoryInit();
     }
 
     public function initialize():Core
     {
-        Di::getInstance()->set(SysConst::VERSION,'2.1.1');
+        Di::getInstance()->set(SysConst::VERSION,'2.1.2');
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
-        //创建全局事件容器
-        $event = $this->eventHook();
-        $event->hook('frameInitialize');
+        EasySwooleEvent::frameInitialize();
         $this->errorHandle();
         return $this;
     }
@@ -90,16 +88,5 @@ class Core
             };
         }
         register_shutdown_function($func);
-    }
-
-    private function eventHook():Event
-    {
-        $event = Event::getInstance();
-        require_once EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
-        $event->set('frameInitialize',[EasySwooleEvent::class,'frameInitialize']);
-        $event->set('mainServerCreate',[EasySwooleEvent::class,'mainServerCreate']);
-        $event->set('onRequest',[EasySwooleEvent::class,'onRequest']);
-        $event->set('afterAction',[EasySwooleEvent::class,'afterAction']);
-        return $event;
     }
 }

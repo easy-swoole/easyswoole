@@ -15,7 +15,6 @@ use \Swoole\Coroutine;
 
 class Invoker
 {
-    private static $swooleVersion = null;
     /*
      *  Async::set([
           'enable_signalfd' => false,
@@ -44,9 +43,20 @@ class Invoker
 
     public static function callUserFunc(callable $callable,...$params)
     {
-        //只有swoole 2.x需要特殊处理
-        if(self::getSwooleMainVersion() == 2){
-            return Coroutine::call_user_func($callable,...$params);
+        if(SWOOLE_VERSION >1){
+            if($callable instanceof \Closure){
+                return $callable(...$params);
+            }else if(is_array($callable) && is_object($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class->$method(...$params);
+            }else if(is_array($callable) && is_string($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class::$method(...$params);
+            }else{
+                return null;
+            }
         }else{
             return call_user_func($callable,...$params);
         }
@@ -54,19 +64,22 @@ class Invoker
 
     public static function callUserFuncArray(callable $callable,array $params)
     {
-        //只有swoole 2.x需要特殊处理
-        if(self::getSwooleMainVersion() == 2){
-            return Coroutine::call_user_func_array($callable,$params);
+        if(SWOOLE_VERSION > 1){
+            if($callable instanceof \Closure){
+                return $callable(...$params);
+            }else if(is_array($callable) && is_object($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class->$method(...$params);
+            }else if(is_array($callable) && is_string($callable[0])){
+                $class = $callable[0];
+                $method = $callable[1];
+                return $class::$method(...$params);
+            }else{
+                return null;
+            }
         }else{
             return call_user_func_array($callable,$params);
         }
-    }
-
-    private static function getSwooleMainVersion():int
-    {
-        if(self::$swooleVersion === null){
-            self::$swooleVersion = intval(phpversion('swoole'));
-        }
-        return self::$swooleVersion;
     }
 }

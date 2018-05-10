@@ -10,6 +10,7 @@ namespace EasySwoole\Core\Component\Cluster\Callback;
 
 
 use EasySwoole\Core\Component\Container;
+use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Trigger;
 
 class BaseContainer extends Container
@@ -18,7 +19,7 @@ class BaseContainer extends Container
         $calls = $this->all();
         foreach ($calls as $call){
             try{
-                call_user_func($call,...$arg);
+                Invoker::callUserFunc($call,...$arg);
             }catch (\Throwable $throwable){
                 Trigger::throwable($throwable);
             }

@@ -11,10 +11,10 @@ use EasySwoole\Config;
 use EasySwoole\Core\Component\Cache\Cache;
 use EasySwoole\Core\Component\Cluster\Cluster;
 use EasySwoole\Core\Component\Crontab\CronTab;
-use EasySwoole\Core\Component\Event;
 use EasySwoole\Core\Component\Invoker;
 use EasySwoole\Core\Component\Pool\PoolManager;
 use EasySwoole\Core\Component\Trigger;
+use EasySwoole\EasySwooleEvent;
 use Swoole\Coroutine;
 
 class ServerManager
@@ -127,7 +127,7 @@ class ServerManager
         //创建默认的事件注册器
         $register = new EventRegister();
         $this->finalHook($register);
-        Event::getInstance()->hook('mainServerCreate', $this, $register);
+        EasySwooleEvent::mainServerCreate($this,$register);
         $events = $register->all();
         foreach ($events as $event => $callback){
             $this->mainServer->on($event, function () use ($callback) {
