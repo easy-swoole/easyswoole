@@ -26,6 +26,8 @@ class Client
 
     private $clientConnectTimeOut = 0.1;
 
+    private $failNodes = [];
+
     function addCall(string $serviceName,string $serviceGroup,string $action,...$args)
     {
         $obj = new TaskObj();
@@ -43,6 +45,7 @@ class Client
         $clients = [];
         $taskMap = [];
         $nodeMap = [];
+        $this->failNodes = [];
         foreach ($this->taskList as $task){
             //获取节点
             $serviceNode = Server::getInstance()->getServiceOnlineNode($task->getServiceName());
@@ -57,6 +60,7 @@ class Client
                 }else{
                     $response = new ServiceResponse($task->toArray()+['status'=>Status::CLIENT_CONNECT_FAIL]);
                     $this->callFunc($response,$task);
+                    $this->failNodes[] = $serviceNode;
                 }
             }else{
                 $response = new ServiceResponse($task->toArray()+['status'=>Status::CLIENT_SERVER_NOT_FOUND]);
@@ -86,6 +90,7 @@ class Client
             if($spend > $timeOut){
                 foreach ($clients as $index => $client){
                     $node = $nodeMap[$index];
+                    $this->failNodes[] = $node;
                     $response = $this->decodeData($node,'');
                     $this->callFunc($response,$taskMap[$index]);
                     $client->close();
@@ -93,6 +98,11 @@ class Client
                 }
             }
         }
+    }
+
+    function getFailNodes():array
+    {
+        return $this->failNodes;
     }
 
     private function callFunc(ServiceResponse $obj,TaskObj $taskObj)
