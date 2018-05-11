@@ -3,6 +3,8 @@ namespace App\HttpController\Api;
 
 use App\Model\TestModel;
 use App\Utility\Validator;
+use App\Vendor\Db\CoMysqlPool;
+use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 
@@ -41,6 +43,14 @@ class Test extends BaseController
 //        $res = $this->redis->get("test");
         $res = TestModel::getInstance()->test();
         $this->writeJson($res);
+    }
+
+    function testCoMysql(){
+        $mysql1 = CoMysqlPool::getInstance()->getConnect();
+        $mysql1->setDefer();
+        $res = $mysql1->query("select * from test as total");
+        $mysql_res = $mysql1->recv();
+        var_dump($mysql_res);
     }
 
 }

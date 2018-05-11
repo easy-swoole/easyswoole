@@ -53,6 +53,15 @@ return [
         'charset' => 'utf8',
         'timeout' => 3
     ],
+    "CO_MYSQL" => [
+        'host' => '127.0.0.1',
+        'user' => 'yang_db2',
+        'password' => 'yang_db2',
+        'database'=> 'innovation_platform',
+        'port' => 3306,
+        'charset' => 'utf8',
+        'timeout' => 3
+    ],
     "REDIS" => [
         "host"=>'127.0.0.1',
         "port"=>6379,
