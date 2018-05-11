@@ -18,7 +18,7 @@ use Swoole\Coroutine\Mysql;
 class CoMysqlPool
 {
     /**
-     * @var int 连接池大小
+     * @var int 连接池大小, 这里注意, 这里是每一个进程都会启动默认20个mysql连接, 也就是说如果启动8个进程则会有160个链接。所以根据具体情况调整连接池大小
      */
     private $poolSize = 20;
 
