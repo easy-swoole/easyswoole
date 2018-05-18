@@ -51,6 +51,7 @@ class Test extends BaseController
         $res = $mysql1->query("select * from test as total");
         $mysql_res = $mysql1->recv();
         var_dump($mysql_res);
+        CoMysqlPool::getInstance()->freeConnect($mysql1);
     }
 
 }
