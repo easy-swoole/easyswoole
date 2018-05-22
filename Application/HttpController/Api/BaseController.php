@@ -63,7 +63,7 @@ class BaseController extends Controller
      * 未认证过的token默认过期时间
      * @var int
      */
-    protected $notVerifyTokenExpire = 86400; //生成token的过期时间为86400s 一天
+    protected $notVerifyTokenExpire = 3600; //生成token的过期时间为3600s 一小时
     /**
      * @var \Redis
      */
