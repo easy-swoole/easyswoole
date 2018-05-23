@@ -53,9 +53,9 @@ function commandParser()
     }
     foreach ($argv as $item) {
         if (substr($item, 0, 2) === '--') {
-            $temp          = trim($item, "--");
-            $temp          = explode("-", $temp);
-            $key           = array_shift($temp);
+            $temp = trim($item, "--");
+            $temp = explode("-", $temp);
+            $key = array_shift($temp);
             $options[$key] = array_shift($temp) ?: '';
         }
     }
@@ -121,7 +121,7 @@ function releaseResource($source, $destination)
 function showHelp($options)
 {
     $opName = '';
-    $args   = array_keys($options);
+    $args = array_keys($options);
     if ($args) $opName = $args[0];
 
     switch ($opName) {
@@ -230,10 +230,10 @@ function showTag($name, $value)
 
 function getRelativelyPath($a, $b)
 {
-    $arr1         = explode('/', $a);
-    $arr2         = explode('/', $b);
+    $arr1 = explode('/', $a);
+    $arr2 = explode('/', $b);
     $intersection = array_intersect_assoc($arr1, $arr2);
-    $depth        = 0;
+    $depth = 0;
     for ($i = 0, $len = count($intersection); $i < $len; $i++) {
         $depth = $i;
         if (!isset($intersection[$i])) {
@@ -251,7 +251,7 @@ function getRelativelyPath($a, $b)
         $prefix = array('.');
     }
 
-    $tmp          = array_merge($prefix, array_slice($arr1, $depth));
+    $tmp = array_merge($prefix, array_slice($arr1, $depth));
     $relativePath = implode('/', $tmp);
     return $relativePath;
 }
@@ -259,8 +259,8 @@ function getRelativelyPath($a, $b)
 function serverStart($options)
 {
     showLogo();
-    $conf    = Conf::getInstance();
-    $inst    = Core::getInstance()->initialize();
+    $conf = Conf::getInstance();
+    $inst = Core::getInstance()->initialize();
     $version = \EasySwoole\Core\Component\Di::getInstance()->get(\EasySwoole\Core\Component\SysConst::VERSION);
     echo "\n\e[31mEasySwoole\e[0m framework \e[34mVersion {$version}\e[0m\n\n";
 
@@ -317,15 +317,14 @@ function serverStart($options)
 
     showTag('debug enable', $conf->getConf('DEBUG') ? 'true' : 'false');
     showTag('swoole version', phpversion('swoole'));
-    showTag('swoole pid', getmypid());
-
+    showTag('php version', phpversion());
     $inst->run();
 }
 
 function serverStop($options)
 {
     Core::getInstance()->initialize();
-    $Conf    = Conf::getInstance();
+    $Conf = Conf::getInstance();
     $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
     if (!empty($options['pid'])) {
         $pidFile = $options['pid'];
@@ -373,7 +372,7 @@ function serverStop($options)
 function serverReload($options)
 {
     Core::getInstance()->initialize();
-    $Conf    = Conf::getInstance();
+    $Conf = Conf::getInstance();
     $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
     if (!empty($options['pid'])) {
         $pidFile = $options['pid'];
@@ -401,7 +400,7 @@ function serverReload($options)
 
 function serverRestart($options)
 {
-    if(serverStop($options)){
+    if (serverStop($options)) {
         $options['d'] = '';
         serverStart($options);
     }
@@ -412,7 +411,7 @@ function serverInstall($options)
     $lockFile = EASYSWOOLE_ROOT . '/easyswoole.install';
     if (!is_file($lockFile)) {
         initConf();
-        $Conf    = Conf::getInstance();
+        $Conf = Conf::getInstance();
         $temPath = $Conf->getConf('TEMP_DIR');
         $logPath = $Conf->getConf('LOG_DIR');
 
