@@ -24,7 +24,7 @@ class Validate
             $errorMsg = $item['errorMsg'];
             $filedRules = $item['rule'];
             $filedRules = $filedRules->getRules();
-            if(!isset($data[$filed]) && in_array(Rule::OPTIONAL,$filedRules)){
+            if(!isset($data[$filed]) && array_key_exists(Rule::OPTIONAL,$filedRules)){
                 continue;
             }else{
                 foreach ($filedRules as $rule => $args){
