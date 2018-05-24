@@ -32,6 +32,6 @@ abstract class REST extends Controller
 
     function index()
     {
-        $this->actionNotFound();
+        $this->actionNotFound('index');
     }
 }
