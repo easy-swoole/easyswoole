@@ -28,12 +28,15 @@ return [
         'PERSISTENT_TIME'=>0//如果需要定时数据落地，请设置对应的时间周期，单位为秒
     ],
     'CLUSTER'=>[
-        'enable'=>false,
-        'token'=>null,
-        'broadcastAddress'=>['255.255.255.255:9556'],
-        'listenPort'=>9556,
-        'broadcastTTL'=>5,
-        'serviceTTL'=>10
+        'enable'           => false,
+        'token'            => null,
+        'broadcastAddress' => ['255.255.255.255:9556'],
+        'listenAddress'    => '0.0.0.0',
+        'listenPort'       => '9556',
+        'broadcastTTL'     => 5,
+        'nodeTimeout'      => 10,               // 2.1.1 新增
+        'nodeName'         => 'easySwoole',     // 2.1.1 新增
+        'nodeId'           => null,             // 2.1.1 新增
     ],
     "MASTER_MYSQL" => [
         'host' => '192.168.1.122',
