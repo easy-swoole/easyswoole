@@ -13,6 +13,7 @@ use App\Utility\HoldUp;
 use App\Utility\Security;
 use App\Utility\Status;
 use App\Utility\Utils;
+use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\Controller;
 
@@ -270,7 +271,7 @@ class BaseController extends Controller
     protected function tokenStart(&$userInfoArr, int &$expire = 0) {
         $token = "";
         while (1){
-            $token = Utils::randomStr(256);
+            $token = Utils::randomStr(Config::getInstance()->getConf("TOKEN")["length"]);
             /*如果token存在, 则重新生成一个新的token, 不存在则跳出循环*/
             if(!$this->redis->exists($this->tokenPrefix.$token)){
                 break;

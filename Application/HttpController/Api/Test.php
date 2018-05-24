@@ -41,8 +41,8 @@ class Test extends BaseController
 //            "input3" => "手机号码格式不对"
 //        ));
 //        $res = $this->redis->get("test");
-        $res = TestModel::getInstance()->test();
-        $this->writeJson($res);
+//        $res = TestModel::getInstance()->test();
+        $this->writeJson("hello world");
     }
 
     function testCoMysql(){

@@ -10,7 +10,7 @@ namespace App\Utility;
 class Utils
 {
     /**
-     * 生成任何位数的随机字符串, type=normal 所有, words 字母和数字
+     * 生成任何位数的随机字符串, type=normal 字母数字, runes 字母和数字和特殊符号
      * @param $length
      * @param string $type
      * @return bool|string
@@ -18,10 +18,10 @@ class Utils
     static function randomStr($length, $type="normal"){
         switch ($type){
             case "normal":
-                $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789!@#$%^&*";
-                break;
-            case "words":
                 $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789";
+                break;
+            case "runes":
+                $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789!@#$%^&*";
                 break;
             default:
                 $str = "abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ0123456789";
