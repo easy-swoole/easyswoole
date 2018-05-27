@@ -6,8 +6,7 @@
     },
     "require": {
         "easyswoole/easyswoole": "2.x-dev",
-        "joshcam/mysqli-database-class": "dev-master",
-        "elasticsearch/elasticsearch": "^6.0"
+        "joshcam/mysqli-database-class": "dev-master"
     },
     "require-dev": {
         "eaglewu/swoole-ide-helper": "dev-master"
