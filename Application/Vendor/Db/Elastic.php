@@ -6,7 +6,6 @@
  * Time: 23:25
  */
 namespace App\Vendor\Db;
-use Conf\Config;
 use Elasticsearch\ClientBuilder;
 
 class Elastic
