@@ -262,7 +262,7 @@ class Func
     }
 
     static function REQUIRED($data,array $rawData,$args):bool {
-        return $data === null ? false : true;
+        return empty($data) ? false : true;
     }
 
     static function SAME($data,array $rawData,$args):bool
