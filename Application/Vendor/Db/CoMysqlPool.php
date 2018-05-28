@@ -76,7 +76,7 @@ class CoMysqlPool
      * @return null|Mysql
      */
     function getConnect() :?Mysql {
-        Logger::getInstance()->log("协程池空闲数:" . count($this->pool) . "; 协程池总大小:" . $this->poolSize);
+//        Logger::getInstance()->log("协程池空闲数:" . count($this->pool) . "; 协程池总大小:" . $this->poolSize);
         /**
          * @var $mysql \Swoole\Coroutine\Mysql
          */
@@ -87,6 +87,7 @@ class CoMysqlPool
             $this->tryTimes = 0; //每次重连前先清空尝试次数
             $newMysql = $this->connect();
             if(!empty($newMysql)){
+                unset($mysql);
                 Logger::getInstance()->log("mysqlCo: 重连成功");
                 return $newMysql;
             }
