@@ -2,6 +2,8 @@
 namespace App\HttpController\Api;
 
 use App\Model\TestModel;
+use App\Utility\Security;
+use App\Utility\Utils;
 use App\Utility\Validator;
 use App\Vendor\Db\CoMysqlPool;
 use EasySwoole\Core\Component\Di;
@@ -42,7 +44,8 @@ class Test extends BaseController
 //        ));
 //        $res = $this->redis->get("test");
 //        $res = TestModel::getInstance()->test();
-        $this->writeJson("hello world");
+        $requests = $this->request()->getRequestParam();
+        $this->writeJson($requests);
     }
 
     function testCoMysql(){

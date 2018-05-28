@@ -6,7 +6,8 @@
     },
     "require": {
         "easyswoole/easyswoole": "2.x-dev",
-        "joshcam/mysqli-database-class": "dev-master"
+        "joshcam/mysqli-database-class": "dev-master",
+        "voku/anti-xss": "^4.1"
     },
     "require-dev": {
         "eaglewu/swoole-ide-helper": "dev-master"
