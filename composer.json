@@ -16,10 +16,18 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "easyswoole/spl": "dev-master"
+        "easyswoole/spl": "dev-master",
+        "easyswoole/component": "dev-master",
+        "easyswoole/core": "dev-master",
+        "easyswoole/http": "dev-master"
     },
     "require-dev": {
-        "easyswoole/swoole-ide-helper": "dev-master",
-        "phpunit/phpunit" : "^5.6"
-    }
+        "easyswoole/swoole-ide-helper": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "EasySwoole\\Frame\\": "src/"
+        }
+    },
+    "minimum-stability":"dev"
 }
