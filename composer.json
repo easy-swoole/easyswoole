@@ -16,15 +16,7 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "nikic/fast-route": "^1.2",
-        "nikic/php-parser": "^3.1",
-        "jeremeamia/SuperClosure": "^2.3",
-        "dragonmantank/cron-expression": "^2.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "EasySwoole\\": "src/"
-        }
+        "easyswoole/spl": "dev-master"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master",
