@@ -340,4 +340,44 @@ class Utils
             $data['pageSize'] = 10;
         }
     }
+
+    /**
+     * TODO 暂时只处理get
+     * curl地址(第三方回调)
+     * @param $host
+     * @param $data
+     * @param $method
+     * @return mixed
+     */
+    static function curlUrl($host, array $data, $method){
+        $headers = array();
+        //去除末尾的/
+        $last = substr($host, -1);
+        if($last === "/"){
+            $host = substr($host,0,-1);
+        }
+        $url = $host;
+        if(is_array($data)){
+            $url .= "?";
+            foreach ($data as $key => $value){
+                $url .= $key . "=" . urlencode($value) . "&";
+            }
+        }
+        $url = substr($url, 0, -1);
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_FAILONERROR, false);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, FALSE);
+        curl_setopt($curl, CURLOPT_NOBODY, FALSE);
+        if (1 == strpos("$".$url, "https://"))
+        {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        }
+        $res = curl_exec($curl);
+        return $res;
+    }
 }
