@@ -19,7 +19,8 @@
         "easyswoole/spl": "dev-master",
         "easyswoole/component": "dev-master",
         "easyswoole/core": "dev-master",
-        "easyswoole/http": "dev-master"
+        "easyswoole/http": "dev-master",
+        "easyswoole/utility": "dev-master"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master"
