@@ -380,4 +380,13 @@ class Utils
         $res = curl_exec($curl);
         return $res;
     }
+
+    /**
+     * 隐藏手机号中间四位
+     * @param $mobile
+     */
+    static function hindMobile(&$mobile){
+        $mobile = substr($mobile, 0, 3)."****".substr($mobile, 7);
+    }
+    
 }
