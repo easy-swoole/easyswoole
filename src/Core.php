@@ -32,14 +32,6 @@ class Core
 
     function initialize()
     {
-        //配置文件检查
-        $file = EASYSWOOLE_ROOT . '/Config.php';
-        if(file_exists($file)){
-            $data = require_once EASYSWOOLE_ROOT . '/Config.php';
-        }else{
-            die('global config file missing');
-        }
-        Config::getInstance()->load($data);
         //检查全局文件是否存在.
         $file = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
         if(file_exists($file)){
