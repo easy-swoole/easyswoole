@@ -20,7 +20,13 @@ class Config extends SplArray
 
     public function __construct()
     {
-        $this->conf = new SplArray();
+        $file = EASYSWOOLE_ROOT . '/Config.php';
+        if(file_exists($file)){
+            $data = require_once EASYSWOOLE_ROOT . '/Config.php';
+        }else{
+            die('global config file missing');
+        }
+        $this->conf = new SplArray($data);
     }
 
     /**

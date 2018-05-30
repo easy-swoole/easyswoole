@@ -11,6 +11,7 @@ namespace EasySwoole\Frame;
 
 class SysConst
 {
+    const VERSION = '3.0.0';
     const ERROR_HANDLER = 'ERROR_HANDLER';
     const SHUTDOWN_FUNCTION = 'SHUTDOWN_FUNCTION';
 
