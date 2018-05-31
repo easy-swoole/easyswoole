@@ -55,7 +55,7 @@ class Upload extends BaseController
         if(Utils::isExist($files)){
             /* @var $file \EasySwoole\Core\Http\Message\UploadFile */
             foreach ($files as $k => $file){
-                /*如果上传文件类型在运行文件类型中*/
+                /*如果上传文件类型是允许的类型*/
                 if(isset($this->allowTypes[$file->getClientMediaType()])){
                     /*文件大小小于等于最大值*/
                     if($file->getSize() <= self::MAX_SIZE){

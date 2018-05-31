@@ -323,22 +323,27 @@ class Utils
     }
 
     /**
-     * 初始化page和pageSize参数, page从0开始pageSize默认为10
+     * 初始化page和pageSize参数, page从0开始pageSize默认为10, 并且返回偏移offset和pageSize
      * @param $data
+     * @return array 返回偏移offset和pageSize
      */
-    static function initPageAndPageSize(&$data){
-        if(isset($data['page']) && $data['page'] >= 0){
-            $data['page'] = (int)$data['page'];
+    static function initPageAndPageSize(&$data) :array {
+        if(isset($data['page']) && filter_var($data['page'], FILTER_VALIDATE_INT) && $data['page'] >= 0){
+            $page = (int)$data['page'];
         }
         else{
-            $data['page'] = 0;
+            $page = 0;
         }
-        if(isset($data['pageSize']) && $data['pageSize'] >= 0){
-            $data['pageSize'] = (int)$data['pageSize'];
+        if(isset($data['pageSize']) && filter_var($data['pageSize'], FILTER_VALIDATE_INT) && $data['pageSize'] > 0){
+            $pageSize = (int)$data['pageSize'];
         }
         else{
-            $data['pageSize'] = 10;
+            $pageSize = 10;
         }
+        return [
+            'offset' => $page*$pageSize,
+            'pageSize' => $pageSize
+        ];
     }
 
     /**
