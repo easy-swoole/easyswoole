@@ -7,9 +7,6 @@
  */
 
 namespace EasySwoole\Frame;
-
-
-use EasySwoole\Component\ConstDefine;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Core\EventHelper;
@@ -28,7 +25,8 @@ class Core
 
     function __construct()
     {
-        ConstDefine::define();
+        defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
+        defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
     }
 
     function initialize()
