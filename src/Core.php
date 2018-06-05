@@ -12,6 +12,8 @@ namespace EasySwoole\Frame;
 use EasySwoole\Component\ConstDefine;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
+use EasySwoole\Core\EventHelper;
+use EasySwoole\Core\EventRegister;
 use EasySwoole\Core\ServerManager;
 use EasySwoole\Frame\AbstractInterface\Event;
 use EasySwoole\Http\Dispatcher;
@@ -134,7 +136,8 @@ class Core
             $depth = $depth > 5 ? $depth : 5;
             $service = new WebService($namespace,$depth);
             $service->setExceptionHandler(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER));
-            ServerManager::getInstance()->getSwooleServer()->on('request',function (\swoole_http_request $request,\swoole_http_response $response)use($service){
+            $server = ServerManager::getInstance()->getSwooleServer();
+            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($service){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 EasySwooleEvent::onRequest($request_psr,$response_psr);
