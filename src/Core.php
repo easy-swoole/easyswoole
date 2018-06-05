@@ -16,7 +16,6 @@ use EasySwoole\Core\EventHelper;
 use EasySwoole\Core\EventRegister;
 use EasySwoole\Core\ServerManager;
 use EasySwoole\Frame\AbstractInterface\Event;
-use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
@@ -50,10 +49,10 @@ class Core
         }else{
             die('global event file missing');
         }
-        //临时文件和Log目录初始化
-        $this->sysDirectoryInit();
         //执行框架初始化事件
         EasySwooleEvent::initialize();
+        //临时文件和Log目录初始化
+        $this->sysDirectoryInit();
         //注册错误回调
         $this->registerErrorHandler();
         return $this;
