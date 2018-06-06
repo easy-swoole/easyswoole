@@ -45,7 +45,7 @@ class TaskManager
         $taskNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.task_worker_num');
         $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
         $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
-        ServerManager::getInstance()->getServer()->sendMessage(\swoole_serialize::pack($message),$workerId);
+        ServerManager::getInstance()->getServer()->sendMessage(serialize($message),$workerId);
     }
 
     public static  function sync($task,$timeout = 0.5,$taskWorkerId = -1)

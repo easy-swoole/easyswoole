@@ -138,7 +138,7 @@ class EventHelper
     public static function registerDefaultOnPipeMessage(EventRegister $register):void
     {
         $register->set($register::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
-            $message = \swoole_serialize::unpack($data);
+            $message = unserialize($data);
             if($message instanceof Message){
                 PipeMessageEventRegister::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
             }else{
