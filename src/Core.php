@@ -77,8 +77,8 @@ class Core
         //创建临时目录    请以绝对路径，不然守护模式运行会有问题
         $tempDir = Config::getInstance()->getConf('TEMP_DIR');
         if(empty($tempDir)){
-            Config::getInstance()->setConf('TEMP_DIR',EASYSWOOLE_ROOT.'/Temp');
             $tempDir = EASYSWOOLE_ROOT.'/Temp';
+            Config::getInstance()->setConf('TEMP_DIR',$tempDir);
         }
         if(!is_dir($tempDir)){
             mkdir($tempDir);
@@ -86,8 +86,8 @@ class Core
 
         $logDir = Config::getInstance()->getConf('LOG_DIR');
         if(empty($logDir)){
-            Config::getInstance()->setConf('LOG_DIR',EASYSWOOLE_ROOT.'/Log');
-            $logDir = EASYSWOOLE_ROOT.'/Temp';
+            $logDir = EASYSWOOLE_ROOT.'/Log';
+            Config::getInstance()->setConf('LOG_DIR',$logDir);
         }
         if(!is_dir($logDir)){
             mkdir($logDir);
