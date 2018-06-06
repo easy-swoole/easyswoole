@@ -14,7 +14,7 @@ namespace EasySwoole\Core\Component\Spl;
  * @alter   : evalor <master@evalor.cn>
  * @package EasySwoole\Core\Component\Spl
  */
-class SplBean implements \JsonSerializable, \ArrayAccess
+class SplBean implements \JsonSerializable
 {
     const FILTER_NOT_NULL  = 1;
     const FILTER_NOT_EMPTY = 2; // 0 不算empty
@@ -153,26 +153,6 @@ class SplBean implements \JsonSerializable, \ArrayAccess
         $this->arrayToBean($data + get_class_vars(static::class));
         $this->initialize();
         return $this;
-    }
-
-    public function offsetExists($offset)
-    {
-        return isset($this->$offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->getProperty($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->addProperty($offset, $value);
-    }
-
-    public function offsetUnset($offset)
-    {
-        unset($this->$offset);
     }
 
 }
