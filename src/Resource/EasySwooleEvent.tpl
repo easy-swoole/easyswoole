@@ -27,9 +27,10 @@ class EasySwooleEvent implements Event
         // TODO: Implement mainServerCreate() method.
     }
 
-    public static function onRequest(Request $request, Response $response): void
+    public static function onRequest(Request $request, Response $response): bool
     {
         // TODO: Implement onRequest() method.
+        return true;
     }
 
     public static function afterAction(Request $request, Response $response): void

@@ -137,9 +137,11 @@ class Core
             EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($service){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                EasySwooleEvent::onRequest($request_psr,$response_psr);
-                $service->onRequest($request_psr,$response_psr);
-                EasySwooleEvent::afterAction($request_psr,$response_psr);
+                //如果全局事件返回false  则拦截请求
+                if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
+                    $service->onRequest($request_psr,$response_psr);
+                    EasySwooleEvent::afterAction($request_psr,$response_psr);
+                };
             });
         }
     }

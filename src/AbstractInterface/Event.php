@@ -19,7 +19,7 @@ interface Event
 
     public static function mainServerCreate(EventRegister $register);
 
-    public static function onRequest(Request $request,Response $response):void;
+    public static function onRequest(Request $request,Response $response):bool ;
 
     public static function afterAction(Request $request,Response $response):void;
 }
