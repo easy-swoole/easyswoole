@@ -8,11 +8,14 @@
 
 namespace EasySwoole\Frame;
 use EasySwoole\Component\Di;
+use EasySwoole\Component\Invoker;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Core\EventHelper;
 use EasySwoole\Core\EventRegister;
 use EasySwoole\Core\ServerManager;
 use EasySwoole\Frame\AbstractInterface\Event;
+use EasySwoole\Http\Dispatcher;
+use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
@@ -131,17 +134,27 @@ class Core
             }
             $depth = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_MAX_DEPTH));
             $depth = $depth > 5 ? $depth : 5;
-            $service = new WebService($namespace,$depth);
-            $service->setExceptionHandler(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER));
+            $dispatcher = new Dispatcher($namespace,$depth);
+            $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             $server = ServerManager::getInstance()->getSwooleServer();
-            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($service){
+            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher,$httpExceptionHandler){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 //如果全局事件返回false  则拦截请求
                 if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
-                    $service->onRequest($request_psr,$response_psr);
-                    EasySwooleEvent::afterAction($request_psr,$response_psr);
-                };
+                    try{
+                        $dispatcher->dispatch($request_psr,$response_psr);
+                    }catch (\Throwable $throwable){
+                        if(is_callable($httpExceptionHandler)){
+                            Invoker::callUserFunc($httpExceptionHandler,$throwable,$request_psr,$response_psr);
+                        }else{
+                            $response_psr->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                            $response_psr->write(nl2br($throwable->getMessage() ."\n". $throwable->getTraceAsString()));
+                        }
+                    }
+                }
+                EasySwooleEvent::afterRequest($request_psr,$response_psr);
+                $response_psr->response();
             });
         }
     }

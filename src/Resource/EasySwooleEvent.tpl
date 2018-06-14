@@ -33,7 +33,7 @@ class EasySwooleEvent implements Event
         return true;
     }
 
-    public static function afterAction(Request $request, Response $response): void
+    public static function afterRequest(Request $request, Response $response): void
     {
         // TODO: Implement afterAction() method.
     }
