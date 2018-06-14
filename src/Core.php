@@ -62,7 +62,7 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['HOST'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
-        $this->hookHttpRequest($conf['SERVER_TYPE']);
+        $this->mainServerHook($conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         return $this;
     }
@@ -122,7 +122,7 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function hookHttpRequest($type)
+    private function mainServerHook($type)
     {
         if($type != ServerManager::TYPE_SERVER){
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
