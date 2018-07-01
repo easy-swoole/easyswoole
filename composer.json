@@ -1,5 +1,5 @@
 {
-    "name": "easyswoole/frame",
+    "name": "easyswoole/easyswoole",
     "type": "library",
     "description": "An efficient swoole framework",
     "keywords" : ["swoole", "framework", "async","easyswoole"],
