@@ -5,9 +5,6 @@
     "keywords" : ["swoole", "framework", "async","easyswoole"],
     "homepage" : "https://www.easyswoole.com/",
     "license" : "Apache-2.0",
-    "bin": [
-        "bin/easyswoole"
-    ],
     "authors": [
         {
             "name": "YF",
@@ -31,7 +28,6 @@
             "EasySwoole\\Frame\\": "src/"
         }
     },
-    "minimum-stability":"dev",
     "scripts":{
         "post-install-cmd":"EasySwoole\\Frame\\Install::extraFile"
     }
