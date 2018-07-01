@@ -5,12 +5,11 @@ define('EASYSWOOLE_ROOT', realpath(getcwd()));
 use EasySwoole\Frame\Config as Conf;
 use EasySwoole\Frame\Core;
 use EasySwoole\Frame\SysConst;
-
-foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php' ] as $file) {
-    if (file_exists($file)) {
-        require $file;
-        break;
-    }
+$file = 'vendor/autoload.php';
+if (file_exists($file)) {
+    require $file;
+}else{
+    die('include composer autoload.php fail');
 }
 
 /**
