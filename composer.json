@@ -16,7 +16,8 @@
         "ext-swoole": ">=4.0",
         "easyswoole/spl": "^1.0",
         "easyswoole/http": "^1.0",
-        "easyswoole/core": "^1.0"
+        "easyswoole/core": "^1.0",
+        "easyswoole/utility": "^1.0"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master"
@@ -25,8 +26,5 @@
         "psr-4": {
             "EasySwoole\\Frame\\": "src/"
         }
-    },
-    "scripts":{
-        "post-install-cmd":"EasySwoole\\Frame\\Install::extraFile"
     }
 }
