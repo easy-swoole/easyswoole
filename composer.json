@@ -1,5 +1,5 @@
 {
-    "name": "easyswoole/easyswoole",
+    "name": "easyswoole/frame",
     "type": "library",
     "description": "An efficient swoole framework",
     "keywords" : ["swoole", "framework", "async","easyswoole"],
@@ -16,11 +16,12 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "easyswoole/spl": "dev-master",
-        "easyswoole/component": "dev-master",
-        "easyswoole/core": "dev-master",
-        "easyswoole/http": "dev-master",
-        "easyswoole/utility": "dev-master"
+        "ext-swoole": ">=4.0",
+        "easyswoole/spl": ">=1.0",
+        "easyswoole/component": ">=1.0",
+        "easyswoole/core": ">=1.0",
+        "easyswoole/http": ">=1.0",
+        "easyswoole/utility": ">=1.0"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master"
@@ -30,5 +31,8 @@
             "EasySwoole\\Frame\\": "src/"
         }
     },
-    "minimum-stability":"dev"
+    "minimum-stability":"dev",
+    "scripts":{
+        "post-install-cmd":"EasySwoole\\Frame\\Install::extraFile"
+    }
 }
