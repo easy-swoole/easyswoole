@@ -25,6 +25,11 @@ class Install
         self::releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
     }
 
+    static function showTag($name, $value)
+    {
+        echo "\e[32m" . str_pad($name, 20, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m\n";
+    }
+
     public static function releaseResource($source, $destination)
     {
         clearstatcache();
@@ -41,6 +46,17 @@ class Install
             copy($source, $destination);
         }
     }
+
+    public static function opCacheClear()
+    {
+        if (function_exists('apc_clear_cache')) {
+            apc_clear_cache();
+        }
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
+    }
+
 
     public static function showLogo()
     {
@@ -101,7 +117,7 @@ HELP_RESTART;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以重启所有Worker 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  -all \e[0m           重启所有worker和task_worker进程
+\e[32m  -a \e[0m           重启所有worker和task_worker进程
 HELP_RELOAD;
     }
 
@@ -130,13 +146,6 @@ Install::showLogo();
 
 
 $com = new \EasySwoole\Utility\CommandLine();
-$config = \EasySwoole\Frame\Config::getInstance();
-
-//设置参数回调
-//$com->setOptionCallback('d',function ()use($config){
-//    $config->set('MAIN_SERVER.SETTING.daemonize',true);
-//    var_dump('set d',func_get_args());
-//});
 
 //设置命令回调
 $com->setArgCallback($com::ARG_DEFAULT_CALLBACK,function ()use($com){
@@ -153,29 +162,104 @@ $com->setArgCallback($com::ARG_DEFAULT_CALLBACK,function ()use($com){
     }
 });
 
-$com->setArgCallback('install',function ()use($config){
+$com->setArgCallback('install',function (){
     Install::init();
     echo "install success\n";
 });
 
 $com->setArgCallback('start',function ()use($com){
-    var_dump($com->getOptVal());
+    \EasySwoole\Frame\Core::getInstance()->initialize();
+    $conf = \EasySwoole\Frame\Config::getInstance();
+    if($com->getOptVal('d')){
+        $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
+    }
+    Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
+    Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
+    Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
+    Install::showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
+    $user = $conf->getConf('MAIN_SERVER.SETTING.user');
+    if(empty($user)){
+        $user = get_current_user();
+    }
+    Install::showTag('run at user', $user);
+    Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
+    Install::showTag('swoole version', phpversion('swoole'));
+    Install::showTag('php version', phpversion());
+    \EasySwoole\Frame\Core::getInstance()->createServer()->start();
 });
 
 $com->setArgCallback('stop',function ()use($com){
-    //可以 -f
-    var_dump('stop',$com->getOptVal('f'));
+    $force = $com->getOptVal('f');
+    \EasySwoole\Frame\Core::getInstance()->initialize();
+    $Conf = \EasySwoole\Frame\Config::getInstance();
+    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+    if (file_exists($pidFile)) {
+        $pid = file_get_contents($pidFile);
+        if (!swoole_process::kill($pid, 0)) {
+            echo "PID :{$pid} not exist \n";
+            return false;
+        }
+        if ($force) {
+            swoole_process::kill($pid, SIGKILL);
+        } else {
+            swoole_process::kill($pid);
+        }
+        //等待5秒
+        $time = time();
+        $flag = false;
+        while (true) {
+            usleep(1000);
+            if (!swoole_process::kill($pid, 0)) {
+                echo "server stop at " . date("y-m-d h:i:s") . "\n";
+                if (is_file($pidFile)) {
+                    unlink($pidFile);
+                }
+                $flag = true;
+                break;
+            } else {
+                if (time() - $time > 5) {
+                    echo "stop server fail.try -f again \n";
+                    break;
+                }
+            }
+        }
+        return $flag;
+    } else {
+        echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+        return false;
+    }
 });
 
-$com->setArgCallback('reload',function (){
-    var_dump('reload');
+$com->setArgCallback('reload',function ()use($com){
+    $all = $com->getOptVal('a');
+    \EasySwoole\Frame\Core::getInstance()->initialize();
+    $Conf = \EasySwoole\Frame\Config::getInstance();
+    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+    if (file_exists($pidFile)) {
+        if (!$all) {
+            $sig = SIGUSR2;
+            Install::showTag('reloadType',"only-task");
+        } else {
+            $sig = SIGUSR1;
+            Install::showTag('reloadType',"all-worker");
+        }
+
+        Install::opCacheClear();
+        $pid = file_get_contents($pidFile);
+        if (!swoole_process::kill($pid, 0)) {
+            echo "pid :{$pid} not exist \n";
+            return;
+        }
+        swoole_process::kill($pid, $sig);
+        echo "send server reload command at " . date("y-m-d h:i:s") . "\n";
+    } else {
+        echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+    }
 });
 
 
 
 $com->parseArgs($argv);
 
-
-//var_dump(preg_match('/^\-/', '--d'));
 
 

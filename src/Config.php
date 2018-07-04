@@ -12,7 +12,7 @@ namespace EasySwoole\Frame;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Spl\SplArray;
 
-class Config extends SplArray
+class Config
 {
     protected $conf;
 
