@@ -11,7 +11,7 @@ namespace App\Vendor\Db;
 
 use EasySwoole\Config;
 
-class Redis
+class Memcached
 {
     private static $instance;
 
@@ -22,7 +22,7 @@ class Redis
     protected $maxTryConnectTimes = 3;
 
     /**
-     * @var \Redis
+     * @var \Memcached
      */
     private $con;
 
@@ -38,30 +38,32 @@ class Redis
     }
 
     function connect(){
-        $conf = Config::getInstance()->getConf("REDIS");
-        $this->con = new \Redis();
-        $this->con->connect($conf['host'], $conf['port'], $conf['timeout']);
-        $this->con->auth($conf['auth']);
-        $this->con->select($conf['db']);
-        if(!$this->con->ping()){
+        $conf = Config::getInstance()->getConf("MEMCACHED");
+        $this->con = new \Memcached();
+        //添加memcache池
+        $this->con->addServers(array(
+            array($conf['host'], $conf['port'], 100)
+        ));
+        //如果获取memcache状态失败则尝试重连
+        if(!$this->con->getVersion()){
             if($this->tryConnectTimes <= $this->maxTryConnectTimes){
                 $this->tryConnectTimes++;
                 return $this->connect();
             }else{
-                trigger_error("redis connect fail");
+                trigger_error("memcached connect fail");
                 return null;
             }
         }
         self::$instance = $this;
-//        $this->con->setOption(\Redis::OPT_SERIALIZER,\Redis::SERIALIZER_PHP); 暂时不开启php序列化
     }
 
     /**
-     * @return \Redis
+     * 获取memcached连接
+     * @return \Memcached
      */
     function getConnect(){
         //ping 如果能ping通直接连接，ping不通则尝试重连
-        if($this->con->ping()){
+        if($this->con->getVersion()){
             return $this->con;
         }
         $this->tryConnectTimes = 0; //当前重连次数归零, 如果没有归零则会导致redis恢复后不会重连了

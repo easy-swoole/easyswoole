@@ -42,10 +42,9 @@ class Test extends BaseController
 //            "input2" => "必须是数值型",
 //            "input3" => "手机号码格式不对"
 //        ));
-//        $res = $this->redis->get("test");
+//        $res = $this->redis->get("test")
 //        $res = TestModel::getInstance()->test();
-        $requests = $this->request()->getRequestParam();
-        $this->writeJson($requests);
+        $this->writeJson("hello");
     }
 
     function testCoMysql(){

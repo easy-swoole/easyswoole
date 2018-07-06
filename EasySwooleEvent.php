@@ -49,6 +49,8 @@ Class EasySwooleEvent implements EventInterface {
         Di::getInstance()->set('REDIS',\App\Vendor\Db\Redis::class);
         //异步redis客户端
         Di::getInstance()->set('ASYNC_REDIS',\App\Vendor\Db\AsyncRedis::class);
+        //memcached链接
+        Di::getInstance()->set('MEMCACHED',\App\Vendor\Db\Memcached::class);
 
         /**
          * crontab 定时任务

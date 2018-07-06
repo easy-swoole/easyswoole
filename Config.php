@@ -72,6 +72,10 @@ return [
         "db" => 1,
         "timeout" => 5.0
     ],
+    "MEMCACHED" => [             //如果需要开启memcached, 则可以在EasyswooleEvent里打开memcache
+        "host"=>'127.0.0.1',
+        "port"=>11211,
+    ],
     "MONGODB" => [
         "host" =>'127.0.0.1',
         "port" => 27088,
