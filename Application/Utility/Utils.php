@@ -393,5 +393,5 @@ class Utils
     static function hindMobile(&$mobile){
         $mobile = substr($mobile, 0, 3)."****".substr($mobile, 7);
     }
-    
+
 }
