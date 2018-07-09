@@ -1,0 +1,3 @@
+[2018-07-06 14:24:15 *14468.2]	ERROR	zm_deactivate_swoole (ERROR 503): Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 262144 bytes) in /mnt/easyswoole2/vendor/easyswoole/easyswoole/src/Core/Core.php on line 85.
+[2018-07-06 14:24:15 $14456.0]	WARNING	swManager_check_exit_status: worker#2 abnormal exit, status=255, signal=0
+[2018-07-09 17:01:41 $16963.0]	WARNING	swManager_check_exit_status: worker#4 abnormal exit, status=0, signal=11

@@ -9,6 +9,8 @@ use App\Vendor\Db\CoMysqlPool;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use Kjcx\HelloReply;
+use Kjcx\HelloRequest;
 
 class Test extends BaseController
 {
@@ -44,7 +46,15 @@ class Test extends BaseController
 //        ));
 //        $res = $this->redis->get("test")
 //        $res = TestModel::getInstance()->test();
-        $this->writeJson("hello");
+        $raw = $this->request()->getBody()->__toString();
+        $req = new HelloRequest();
+        $req->mergeFromString($raw);
+        $name = $req->getName();
+        $desc = $req->getDesc();
+        $res = new HelloReply();
+        $res->setMessage("ddads");
+        $res->setData("dasdas");
+        $this->response()->write($res->serializeToString());
     }
 
     function testCoMysql(){
@@ -54,6 +64,22 @@ class Test extends BaseController
         $mysql_res = $mysql1->recv();
         var_dump($mysql_res);
         CoMysqlPool::getInstance()->freeConnect($mysql1);
+    }
+
+    function sendProtobuf(){
+        $req = new HelloRequest();
+        $req->setName("hello proto");
+        $req->setDesc("good desc");
+        $str = $req->serializeToString();
+        $client = new \GuzzleHttp\Client();
+        $res = $client->request("POST", "http://localhost:9501/", [
+            "body" => $str
+        ]);
+        $contents = $res->getBody()->getContents();
+        $res = new HelloReply();
+        $res->mergeFromString($contents);
+        var_dump($res->getData());
+        var_dump($res->getMessage());
     }
 
 }
