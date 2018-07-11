@@ -13,6 +13,7 @@ class Random
 {
     static function randStr($length)
     {
+        mt_srand();
         return substr(str_shuffle("abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ23456789"), 0, $length);
     }
 
