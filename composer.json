@@ -10,7 +10,6 @@
         "easyswoole/easyswoole": "2.x-dev",
         "joshcam/mysqli-database-class": "dev-master",
         "voku/anti-xss": "^4.1",
-        "google/protobuf": "v3.6.0.1",
         "guzzlehttp/guzzle": "^6.3"
     },
     "require-dev": {
