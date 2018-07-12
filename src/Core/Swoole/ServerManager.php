@@ -145,7 +145,11 @@ class ServerManager
         return $this->mainServer;
     }
 
-    public function getServer($serverName = null):?\swoole_server
+    /**
+     * @param string $serverName
+     * @return null|\swoole_server|\swoole_server_port
+     */
+    public function getServer($serverName = null)
     {
          if($this->mainServer){
              if($serverName === null){
