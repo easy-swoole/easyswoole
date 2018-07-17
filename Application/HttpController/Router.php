@@ -28,8 +28,7 @@ class Router extends \EasySwoole\Core\Http\AbstractInterface\Router
 //            $response->end();
 //        });
 //        $routeCollector->get( '/user2/{id:\d+}','/Api/test2');
-        $routeCollector->post( '/','/api/test/test');
-        $routeCollector->get( '/send','/api/test/sendProtobuf');
+        $routeCollector->get( '/','/api/test/test');
     }
 
 }

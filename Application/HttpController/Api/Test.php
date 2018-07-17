@@ -46,15 +46,7 @@ class Test extends BaseController
 //        ));
 //        $res = $this->redis->get("test")
 //        $res = TestModel::getInstance()->test();
-        $raw = $this->request()->getBody()->__toString();
-        $req = new HelloRequest();
-        $req->mergeFromString($raw);
-        $name = $req->getName();
-        $desc = $req->getDesc();
-        $res = new HelloReply();
-        $res->setMessage("ddads");
-        $res->setData("dasdas");
-        $this->response()->write($res->serializeToString());
+        $this->response()->write("hello world");
     }
 
     function testCoMysql(){
