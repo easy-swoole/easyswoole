@@ -58,20 +58,5 @@ class Test extends BaseController
         CoMysqlPool::getInstance()->freeConnect($mysql1);
     }
 
-    function sendProtobuf(){
-        $req = new HelloRequest();
-        $req->setName("hello proto");
-        $req->setDesc("good desc");
-        $str = $req->serializeToString();
-        $client = new \GuzzleHttp\Client();
-        $res = $client->request("POST", "http://localhost:9501/", [
-            "body" => $str
-        ]);
-        $contents = $res->getBody()->getContents();
-        $res = new HelloReply();
-        $res->mergeFromString($contents);
-        var_dump($res->getData());
-        var_dump($res->getMessage());
-    }
 
 }
