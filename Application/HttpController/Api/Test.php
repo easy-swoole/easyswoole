@@ -1,16 +1,9 @@
 <?php
 namespace App\HttpController\Api;
 
-use App\Model\TestModel;
-use App\Utility\Security;
-use App\Utility\Utils;
-use App\Utility\Validator;
 use App\Vendor\Db\CoMysqlPool;
-use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
-use Kjcx\HelloReply;
-use Kjcx\HelloRequest;
 
 class Test extends BaseController
 {
