@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+
+  redis:
+    image: redis
+    volumes:
+      - my-redis:/data
+    ports:
+      - 6379:6379
+    networks:
+      - my-bridge
+
+  mysql:
+    image: mysql:5.7.22
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - my-mysql5.7:/var/lib/mysql
+    networks:
+      - my-bridge
+
+  easyswoole:
+    image: registry.cn-shenzhen.aliyuncs.com/php-docker/php-swoole
+    environment:
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    ports:
+      - 80:9501
+    volumes:
+      - ./:/mnt/
+    networks:
+      - my-bridge
+
+volumes:
+  my-mysql5.7:
+  my-redis:
+
+networks:
+  my-bridge:
+    driver:
+      bridge

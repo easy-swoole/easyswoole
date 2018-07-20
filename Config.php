@@ -39,45 +39,45 @@ return [
         'nodeId'           => null,             // 2.1.1 新增
     ],
     "MASTER_MYSQL" => [
-        'host' => '192.168.1.122',
-        'username' => 'yang',
-        'password' => 'yang_123',
-        'db'=> 'test',
+        'host' => getenv()['MYSQL_HOST'],
+        'username' => 'root',
+        'password' => 'root',
+        'db'=> 'dev',
         'port' => 3306,
         'charset' => 'utf8',
         'timeout' => 3
     ],
     "SLAVE_MYSQL" => [
-        'host' => '192.168.1.122',
-        'username' => 'yang',
-        'password' => 'yang_123',
-        'db'=> 'yang_db2',
+        'host' => getenv()['MYSQL_HOST'],
+        'username' => 'root',
+        'password' => 'root',
+        'db'=> 'dev',
         'port' => 3306,
         'charset' => 'utf8',
         'timeout' => 3
     ],
     "CO_MYSQL" => [
-        'host' => '127.0.0.1',
-        'user' => 'yang_db2',
-        'password' => 'yang_db2',
-        'database'=> 'innovation_platform',
+        'host' => getenv()['MYSQL_HOST'],
+        'user' => 'root',
+        'password' => 'root',
+        'database'=> 'dev',
         'port' => 3306,
         'charset' => 'utf8',
         'timeout' => 3
     ],
     "REDIS" => [
-        "host"=>'127.0.0.1',
+        "host"=>getenv()['REDIS_HOST'],
         "port"=>6379,
         "auth"=>'',
         "db" => 1,
         "timeout" => 5.0
     ],
     "MEMCACHED" => [             //如果需要开启memcached, 则可以在EasyswooleEvent里打开memcache
-        "host"=>'127.0.0.1',
+        "host"=>'192.168.1.189',
         "port"=>11211,
     ],
     "MONGODB" => [
-        "host" =>'127.0.0.1',
+        "host" =>'192.168.1.189',
         "port" => 27088,
         "username" => "yang",
         "password" => "yang_123",
