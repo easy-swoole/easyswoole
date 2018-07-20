@@ -27,10 +27,22 @@ services:
     environment:
       MYSQL_HOST: mysql
       REDIS_HOST: redis
-    ports:
-      - 80:9501
+#    ports:
+#      - 80: 80
     volumes:
       - ./:/mnt/
+    networks:
+      - my-bridge
+
+  ## load-balance
+  lb:
+    image: dockercloud/haproxy
+    links:
+      - easyswoole
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - my-bridge
 
