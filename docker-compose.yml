@@ -22,7 +22,7 @@ services:
     networks:
       - my-bridge
 
-  easyswoole:
+  swoole:
     image: registry.cn-shenzhen.aliyuncs.com/php-docker/php-swoole
     environment:
       MYSQL_HOST: mysql
@@ -38,7 +38,7 @@ services:
   lb:
     image: dockercloud/haproxy
     links:
-      - easyswoole
+      - swoole
     ports:
       - 80:80
     volumes:

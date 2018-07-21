@@ -39,7 +39,7 @@ class Test extends BaseController
 //        ));
 //        $res = $this->redis->get("test")
 //        $res = TestModel::getInstance()->test();
-        $this->response()->write("hello world");
+        $this->response()->write("hello man");
     }
 
     function testCoMysql(){
