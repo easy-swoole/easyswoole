@@ -37,4 +37,10 @@ class EasySwooleEvent implements Event
     {
         // TODO: Implement afterAction() method.
     }
+
+    public static function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data):void
+    {
+
+    }
+
 }

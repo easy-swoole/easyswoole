@@ -127,7 +127,9 @@ class Core
     private function mainServerHook($type)
     {
         if($type === ServerManager::TYPE_SERVER){
-
+            ServerManager::getInstance()->getSwooleServer()->on(EventRegister::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data){
+                EasySwooleEvent::onReceive($server,$fd,$reactor_id,$data);
+            });
         }else{
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
             if(empty($namespace)){
