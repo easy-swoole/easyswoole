@@ -6,7 +6,7 @@
  * Time: 下午5:46
  */
 
-namespace EasySwoole\Frame;
+namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;

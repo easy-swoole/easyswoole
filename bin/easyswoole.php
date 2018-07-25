@@ -14,7 +14,7 @@ class Install
 {
     public static function init()
     {
-        \EasySwoole\Frame\Core::getInstance();
+        \EasySwoole\EasySwoole\Core::getInstance();
         //强制更新easyswoole bin管理文件
         if(is_file(EASYSWOOLE_ROOT . '/easyswoole')){
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
@@ -123,7 +123,7 @@ HELP_RELOAD;
 
     public static function showHelp()
     {
-        $version = \EasySwoole\Frame\SysConst::VERSION;
+        $version = \EasySwoole\EasySwoole\SysConst::VERSION;
         echo <<<DEFAULTHELP
 \n欢迎使用为API而生的\e[32m easySwoole\e[0m 框架 当前版本: \e[34m{$version}\e[0m
 
@@ -168,8 +168,8 @@ $com->setArgCallback('install',function (){
 });
 
 $com->setArgCallback('start',function ()use($com){
-    \EasySwoole\Frame\Core::getInstance()->initialize();
-    $conf = \EasySwoole\Frame\Config::getInstance();
+
+    $conf = \EasySwoole\EasySwoole\Config::getInstance();
     if($com->getOptVal('d')){
         $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
     }
@@ -185,13 +185,14 @@ $com->setArgCallback('start',function ()use($com){
     Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
     Install::showTag('swoole version', phpversion('swoole'));
     Install::showTag('php version', phpversion());
-    \EasySwoole\Frame\Core::getInstance()->createServer()->start();
+    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+    \EasySwoole\EasySwoole\Core::getInstance()->createServer()->start();
 });
 
 $com->setArgCallback('stop',function ()use($com){
     $force = $com->getOptVal('f');
-    \EasySwoole\Frame\Core::getInstance()->initialize();
-    $Conf = \EasySwoole\Frame\Config::getInstance();
+    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+    $Conf = \EasySwoole\EasySwoole\Config::getInstance();
     $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
     if (file_exists($pidFile)) {
         $pid = file_get_contents($pidFile);
@@ -232,8 +233,8 @@ $com->setArgCallback('stop',function ()use($com){
 
 $com->setArgCallback('reload',function ()use($com){
     $all = $com->getOptVal('a');
-    \EasySwoole\Frame\Core::getInstance()->initialize();
-    $Conf = \EasySwoole\Frame\Config::getInstance();
+    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+    $Conf = \EasySwoole\EasySwoole\Config::getInstance();
     $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
     if (file_exists($pidFile)) {
         if (!$all) {

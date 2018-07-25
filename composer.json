@@ -13,10 +13,11 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "ext-swoole": ">=4.0",
+        "ext-swoole": ">=4.0.3",
+        "easyswoole/component": "^1.0",
         "easyswoole/spl": "^1.0",
-        "easyswoole/http": "^1.0",
         "easyswoole/core": "^1.0",
+        "easyswoole/http": "^1.0",
         "easyswoole/utility": "^1.0"
     },
     "require-dev": {
@@ -24,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "EasySwoole\\Frame\\": "src/"
+            "EasySwoole\\EasySwoole\\": "src/"
         }
     }
 }

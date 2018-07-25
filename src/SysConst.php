@@ -6,7 +6,7 @@
  * Time: 下午6:24
  */
 
-namespace EasySwoole\Frame;
+namespace EasySwoole\EasySwoole;
 
 
 class SysConst
@@ -18,5 +18,6 @@ class SysConst
     const HTTP_CONTROLLER_NAMESPACE = 'HTTP_CONTROLLER_NAMESPACE';
     const HTTP_CONTROLLER_MAX_DEPTH = 'CONTROLLER_MAX_DEPTH';
     const HTTP_EXCEPTION_HANDLER = 'HTTP_EXCEPTION_HANDLER';
+    const HTTP_CONTROLLER_POOL_MAX_NUM = 'HTTP_CONTROLLER_POOL_MAX_NUM';
 
 }

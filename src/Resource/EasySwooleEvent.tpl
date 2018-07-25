@@ -6,11 +6,11 @@
  * Time: 下午6:33
  */
 
-namespace EasySwoole\Frame;
+namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Core\EventRegister;
-use EasySwoole\Frame\AbstractInterface\Event;
+use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 

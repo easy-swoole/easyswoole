@@ -6,13 +6,15 @@
  * Time: 下午6:07
  */
 
-namespace EasySwoole\Frame;
+namespace EasySwoole\EasySwoole;
+
+
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Core\EventHelper;
 use EasySwoole\Core\EventRegister;
 use EasySwoole\Core\ServerManager;
-use EasySwoole\Frame\AbstractInterface\Event;
+use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
@@ -36,9 +38,9 @@ class Core
         if(file_exists($file)){
             require_once $file;
             try{
-                $ref = new \ReflectionClass('EasySwoole\Frame\EasySwooleEvent');
+                $ref = new \ReflectionClass('EasySwoole\EasySwoole\EasySwooleEvent');
                 if(!$ref->implementsInterface(Event::class)){
-                    die('global file for EasySwooleEvent is not compatible for EasySwoole\Frame\EasySwooleEvent');
+                    die('global file for EasySwooleEvent is not compatible for EasySwoole\EasySwoole\EasySwooleEvent');
                 }
                 unset($ref);
             }catch (\Throwable $throwable){
@@ -124,14 +126,20 @@ class Core
 
     private function mainServerHook($type)
     {
-        if($type != ServerManager::TYPE_SERVER){
+        if($type === ServerManager::TYPE_SERVER){
+
+        }else{
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
             if(empty($namespace)){
                 $namespace = 'App\\HttpController\\';
             }
             $depth = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_MAX_DEPTH));
             $depth = $depth > 5 ? $depth : 5;
-            $webService = new WebService($namespace,$depth);
+            $max = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM));
+            if($max == 0){
+                $max = 20;
+            }
+            $webService = new WebService($namespace,$depth,$max);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             if($httpExceptionHandler){
                 $webService->setExceptionHandler($httpExceptionHandler);
@@ -140,7 +148,10 @@ class Core
             EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($webService){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                $webService->onRequest($request_psr,$response_psr);
+                if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
+                    $webService->onRequest($request_psr,$response_psr);
+                }
+                EasySwooleEvent::afterRequest($request_psr,$response_psr);
             });
         }
     }

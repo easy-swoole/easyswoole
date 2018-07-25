@@ -6,7 +6,7 @@
  * Time: 下午6:32
  */
 
-namespace EasySwoole\Frame\AbstractInterface;
+namespace EasySwoole\EasySwoole\AbstractInterface;
 
 
 use EasySwoole\Core\EventRegister;
