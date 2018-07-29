@@ -9,7 +9,6 @@
 namespace EasySwoole\EasySwoole\Swoole\Process;
 
 
-use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\Time\Time;
 use Swoole\Process;
 
@@ -20,13 +19,12 @@ abstract class AbstractProcess
     private $async = null;
     private $args = [];
 
-    function __construct(string $processName,array $args,$async = true)
+    final function __construct(string $processName,array $args = [],$async = true)
     {
         $this->async = $async;
         $this->args = $args;
         $this->processName = $processName;
         $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
-        ServerManager::getInstance()->getSwooleServer()->addProcess($this->swooleProcess);
     }
 
     public function getProcess():Process
