@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole\Swoole\Task;
 
 
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\Trigger\Trigger;
 
 class TaskManager
@@ -27,6 +28,29 @@ class TaskManager
         return ServerManager::getInstance()->getSwooleServer()->task($task,$taskWorkerId,$finishCallback);
     }
 
+    public static function processAsync($task)
+    {
+        $conf = ServerManager::getInstance()->getSwooleServer()->setting;
+        if(!isset($conf['task_worker_num'])){
+            return false;
+        }
+        $taskNum = $conf['task_worker_num'];
+        $workerNum = $conf['worker_num'];
+        if($task instanceof \Closure){
+            try{
+                $task = new SuperClosure($task);
+            }catch (\Throwable $throwable){
+                Trigger::throwable($throwable);
+                return false;
+            }
+        }
+        $message = new Message();
+        $message->setCommand('TASK');
+        $message->setData($task);
+        $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
+        ServerManager::getInstance()->getSwooleServer()->sendMessage(\swoole_serialize::pack($message),$workerId);
+        return true;
+    }
 
     public static  function sync($task,$timeout = 0.5,$taskWorkerId = -1)
     {
