@@ -4,7 +4,7 @@ return [
     'MAIN_SERVER'=>[
         'HOST'=>'0.0.0.0',
         'PORT'=>9501,
-        'SERVER_TYPE'=>\EasySwoole\Core\ServerManager::TYPE_WEB_SERVER,
+        'SERVER_TYPE'=>\EasySwoole\EasySwoole\ServerManager::TYPE_WEB_SERVER,
         'SOCK_TYPE'=>SWOOLE_TCP,//该配置项当为SERVER_TYPE值为TYPE_SERVER时有效
         'RUN_MODEL'=>SWOOLE_PROCESS,
         'SETTING'=>[

@@ -9,7 +9,7 @@
 namespace EasySwoole\EasySwoole\AbstractInterface;
 
 
-use EasySwoole\Core\EventRegister;
+use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 

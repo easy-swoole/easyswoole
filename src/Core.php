@@ -11,10 +11,9 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
-use EasySwoole\Core\EventHelper;
-use EasySwoole\Core\EventRegister;
-use EasySwoole\Core\ServerManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\Swoole\EventHelper;
+use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
