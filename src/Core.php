@@ -149,10 +149,19 @@ class Core
             EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($webService){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
-                    $webService->onRequest($request_psr,$response_psr);
+                try{
+                    if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
+                        $webService->onRequest($request_psr,$response_psr);
+                    }
+                }catch (\Throwable $throwable){
+                    Trigger::throwable($throwable);
+                }finally{
+                    try{
+                        EasySwooleEvent::afterRequest($request_psr,$response_psr);
+                    }catch (\Throwable $throwable){
+                        Trigger::throwable($throwable);
+                    }
                 }
-                EasySwooleEvent::afterRequest($request_psr,$response_psr);
             });
         }
     }
