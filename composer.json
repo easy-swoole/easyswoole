@@ -27,5 +27,8 @@
         "psr-4": {
             "EasySwoole\\EasySwoole\\": "src/"
         }
-    }
+    },
+    "bin": [
+        "bin/easyswoole.php"
+    ]
 }
