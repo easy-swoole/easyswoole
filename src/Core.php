@@ -138,7 +138,7 @@ class Core
             $depth = $depth > 5 ? $depth : 5;
             $max = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM));
             if($max == 0){
-                $max = 20;
+                $max = 100;
             }
             $webService = new WebService($namespace,$depth,$max);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
