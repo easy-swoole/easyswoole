@@ -185,6 +185,7 @@ $com->setArgCallback('start',function ()use($com){
     Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
     Install::showTag('swoole version', phpversion('swoole'));
     Install::showTag('php version', phpversion());
+    Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
     \EasySwoole\EasySwoole\Core::getInstance()->initialize();
     \EasySwoole\EasySwoole\Core::getInstance()->createServer()->start();
 });
