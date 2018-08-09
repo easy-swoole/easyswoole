@@ -105,7 +105,7 @@ class Request  extends ServerRequest
                     $file['name'],
                     $file['type']
                 );
-            }
+            };
             
             foreach($this->request->files as $key => $value){
                 if(is_array($value) && !isset($value['tmp_name'])){
