@@ -95,14 +95,28 @@ class Request  extends ServerRequest
     {
         if(isset($this->request->files)){
             $normalized = array();
-            foreach ($this->request->files as $key => $value) {
-                $normalized[$key] = new UploadFile(
-                    $value['tmp_name'],
-                    (int) $value['size'],
-                    (int) $value['error'],
-                    $value['name'],
-                    $value['type']
+            
+            $parseFile = function ($file)
+            {
+                return new UploadFile(
+                    $file['tmp_name'],
+                    (int) $file['size'],
+                    (int) $file['error'],
+                    $file['name'],
+                    $file['type']
                 );
+            }
+            
+            foreach($this->request->files as $key => $value){
+                if(is_array($value) && !isset($value['tmp_name'])){
+                    $normalized[$key] = [];
+                    foreach($value as $file){
+                        $normalized[$key][] = $parseFile($file);
+                    }
+                    continue;
+                }
+
+                $normalized[$key] = $parseFile($value);
             }
             return $normalized;
         }else{
