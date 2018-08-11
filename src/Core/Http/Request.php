@@ -95,33 +95,33 @@ class Request  extends ServerRequest
     {
         if(isset($this->request->files)){
             $normalized = array();
-            
-            $parseFile = function ($file)
-            {
-                return new UploadFile(
-                    $file['tmp_name'],
-                    (int) $file['size'],
-                    (int) $file['error'],
-                    $file['name'],
-                    $file['type']
-                );
-            };
-            
             foreach($this->request->files as $key => $value){
                 if(is_array($value) && !isset($value['tmp_name'])){
                     $normalized[$key] = [];
                     foreach($value as $file){
-                        $normalized[$key][] = $parseFile($file);
+                        $normalized[$key][] = $this->initFile($file);
                     }
                     continue;
                 }
 
-                $normalized[$key] = $parseFile($value);
+                $normalized[$key] =  $this->initFile($value);
             }
             return $normalized;
         }else{
             return array();
         }
+    }
+
+
+    private function initFile($file)
+    {
+        return new UploadFile(
+            $file['tmp_name'],
+            (int) $file['size'],
+            (int) $file['error'],
+            $file['name'],
+            $file['type']
+        );
     }
 
     private function initCookie()
