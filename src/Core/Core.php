@@ -33,7 +33,7 @@ class Core
 
     public function initialize():Core
     {
-        Di::getInstance()->set(SysConst::VERSION,'2.1.2');
+        Di::getInstance()->set(SysConst::VERSION,'2.1.4');
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
         EasySwooleEvent::frameInitialize();
         $this->errorHandle();
