@@ -17,6 +17,7 @@ use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
+use EasySwoole\Trigger\Bean\Location;
 use EasySwoole\Trigger\Logger;
 use EasySwoole\Trigger\Trigger;
 
@@ -106,7 +107,10 @@ class Core
         $userHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
         if(!is_callable($userHandler)){
             $userHandler = function($errorCode, $description, $file = null, $line = null){
-                Trigger::error($description,$file,$line,$errorCode);
+                $l = new Location();
+                $l->setFile($file);
+                $l->setLine($line);
+                Trigger::error($description,$l);
             };
         }
         set_error_handler($userHandler);
@@ -116,7 +120,10 @@ class Core
             $func = function (){
                 $error = error_get_last();
                 if(!empty($error)){
-                    Trigger::error($error['message'],$error['file'],$error['line']);
+                    $l = new Location();
+                    $l->setFile($error['file']);
+                    $l->setLine($error['line']);
+                    Trigger::error($error['message'],$l);
                 }
             };
         }
