@@ -17,9 +17,7 @@ use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
-use EasySwoole\Trigger\Bean\Location;
-use EasySwoole\Trigger\Logger;
-use EasySwoole\Trigger\Trigger;
+use EasySwoole\Trace\Bean\Location;
 
 class Core
 {
@@ -97,7 +95,8 @@ class Core
         //设置默认文件目录值
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
-        Logger::getInstance()->setLogDir($logDir);
+        //设置目录
+        Logger::getInstance($logDir);
     }
 
     private function registerErrorHandler()
@@ -110,7 +109,7 @@ class Core
                 $l = new Location();
                 $l->setFile($file);
                 $l->setLine($line);
-                Trigger::error($description,$l);
+                Trigger::getInstance()->error($description,$l);
             };
         }
         set_error_handler($userHandler);
@@ -123,7 +122,7 @@ class Core
                     $l = new Location();
                     $l->setFile($error['file']);
                     $l->setLine($error['line']);
-                    Trigger::error($error['message'],$l);
+                    Trigger::getInstance()->error($error['message'],$l);
                 }
             };
         }
@@ -161,12 +160,12 @@ class Core
                         $webService->onRequest($request_psr,$response_psr);
                     }
                 }catch (\Throwable $throwable){
-                    Trigger::throwable($throwable);
+                    Trigger::getInstance()->throwable($throwable);
                 }finally{
                     try{
                         EasySwooleEvent::afterRequest($request_psr,$response_psr);
                     }catch (\Throwable $throwable){
-                        Trigger::throwable($throwable);
+                        Trigger::getInstance()->throwable($throwable);
                     }
                 }
             });

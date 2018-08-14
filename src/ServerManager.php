@@ -16,7 +16,6 @@ use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
 use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
 use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
-use EasySwoole\Trigger\Trigger;
 
 class ServerManager
 {
@@ -69,7 +68,7 @@ class ServerManager
                 break;
             }
             default:{
-                Trigger::error('"unknown server type :{$type}"');
+                Trigger::getInstance()->error('"unknown server type :{$type}"');
                 return false;
             }
         }
@@ -133,7 +132,7 @@ class ServerManager
                     });
                 }
             }else{
-                Trigger::throwable(new \Exception("addListener with server name:{$serverName} at host:{$server['host']} port:{$server['port']} fail"));
+                Trigger::getInstance()->throwable(new \Exception("addListener with server name:{$serverName} at host:{$server['host']} port:{$server['port']} fail"));
             }
         }
     }
@@ -162,7 +161,7 @@ class ServerManager
                 try{
                     return $taskObj( $server, $taskId, $fromWorkerId);
                 }catch (\Throwable $throwable){
-                    Trigger::throwable($throwable);
+                    Trigger::getInstance()->throwable($throwable);
                 }
             }
             return null;
@@ -193,7 +192,7 @@ class ServerManager
                 try{
                     $taskObj();
                 }catch (\Throwable $throwable){
-                    Trigger::throwable($throwable);
+                    Trigger::getInstance()->throwable($throwable);
                 }
             }
         });
@@ -203,7 +202,7 @@ class ServerManager
             if($message instanceof Message){
                 OnCommand::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
             }else{
-                Trigger::error("data :{$data} not packet by swoole_serialize or not a Message Instance");
+                Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
             }
         });
     }

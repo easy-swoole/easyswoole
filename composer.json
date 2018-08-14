@@ -18,14 +18,16 @@
         "easyswoole/spl": "^1.0",
         "easyswoole/http": "^1.0",
         "easyswoole/utility": "^1.0",
-        "jeremeamia/SuperClosure": "^2.4"
+        "jeremeamia/SuperClosure": "^2.4",
+        "easyswoole/trace": "^1.0"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master"
     },
     "autoload": {
         "psr-4": {
-            "EasySwoole\\EasySwoole\\": "src/"
+            "EasySwoole\\EasySwoole\\": "src/",
+            "App\\": "App/"
         }
     },
     "bin": [

@@ -11,7 +11,7 @@ namespace EasySwoole\EasySwoole\Swoole\Task;
 
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
-use EasySwoole\Trigger\Trigger;
+use EasySwoole\EasySwoole\Trigger;
 
 class TaskManager
 {
@@ -21,7 +21,7 @@ class TaskManager
             try{
                 $task = new SuperClosure($task);
             }catch (\Throwable $throwable){
-                Trigger::throwable($throwable);
+                Trigger::getInstance()->throwable($throwable);
                 return false;
             }
         }
@@ -40,7 +40,7 @@ class TaskManager
             try{
                 $task = new SuperClosure($task);
             }catch (\Throwable $throwable){
-                Trigger::throwable($throwable);
+                Trigger::getInstance()->throwable($throwable);
                 return false;
             }
         }
@@ -58,7 +58,7 @@ class TaskManager
             try{
                 $task = new SuperClosure($task);
             }catch (\Throwable $throwable){
-                Trigger::throwable($throwable);
+                Trigger::getInstance()->throwable($throwable);
                 return false;
             }
         }
@@ -75,7 +75,7 @@ class TaskManager
                 try{
                     $task = new SuperClosure($task);
                 }catch (\Throwable $throwable){
-                    Trigger::throwable($throwable);
+                    Trigger::getInstance()->throwable($throwable);
                     return false;
                 }
             }

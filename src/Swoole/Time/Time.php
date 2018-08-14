@@ -10,7 +10,7 @@ namespace EasySwoole\EasySwoole\Swoole\Time;
 
 
 use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\Trigger\Trigger;
+use EasySwoole\EasySwoole\Trigger;
 
 class Time
 {
@@ -19,7 +19,7 @@ class Time
             try{
                 call_user_func($func,...$args);
             }catch (\Throwable $throwable){
-                Trigger::throwable($throwable);
+                Trigger::getInstance()->throwable($throwable);
             }
         };
         return ServerManager::getInstance()->getSwooleServer()->tick($microSeconds,$new,$args);
@@ -30,7 +30,7 @@ class Time
             try{
                 call_user_func($func,...$args);
             }catch (\Throwable $throwable){
-                Trigger::throwable($throwable);
+                Trigger::getInstance()->throwable($throwable);
             }
         };
         return ServerManager::getInstance()->getSwooleServer()->after($microSeconds,$new,$args);
