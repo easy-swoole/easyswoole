@@ -102,10 +102,15 @@ class Config
             $file = file($file);
             foreach ($file as $line){
                 $line = trim($line);
-                if(strpos($line,"#") !== 0){
-                    $arr = explode('=',$line);
-                    $this->setConf(trim($arr[0]),trim($arr[1]));
+                if(!empty($line)){
+                    if(strpos($line,"#") !== 0){
+                        $arr = explode('=',$line);
+                        if(!empty($arr)){
+                            $this->setConf(trim($arr[0]),trim($arr[1]));
+                        }
+                    }
                 }
+
             }
         }
     }
