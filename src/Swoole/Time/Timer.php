@@ -12,7 +12,7 @@ namespace EasySwoole\EasySwoole\Swoole\Time;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Trigger;
 
-class Time
+class Timer
 {
     public static function loop($microSeconds,callable $func,$args = null){
         $new = function (...$args)use($func){

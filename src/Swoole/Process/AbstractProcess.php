@@ -9,7 +9,7 @@
 namespace EasySwoole\EasySwoole\Swoole\Process;
 
 
-use EasySwoole\EasySwoole\Swoole\Time\Time;
+use EasySwoole\EasySwoole\Swoole\Time\Timer;
 use Swoole\Process;
 
 abstract class AbstractProcess
@@ -37,19 +37,19 @@ abstract class AbstractProcess
      */
     public function addTick($ms,callable $call):?int
     {
-        return Time::loop(
+        return Timer::loop(
             $ms,$call
         );
     }
 
     public function clearTick(int $timerId)
     {
-        Time::clear($timerId);
+        Timer::clear($timerId);
     }
 
     public function delay($ms,callable $call):?int
     {
-        return Time::delay(
+        return Timer::delay(
             $ms,$call
         );
     }
