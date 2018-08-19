@@ -16,4 +16,5 @@ return [
     ],
     'TEMP_DIR'=>null,//若不配置，则默认框架初始化
     'LOG_DIR'=>null,//若不配置，则默认框架初始化
+    'IS_DEV'=>true,//若为生产环境，则解析dev.env文件，否则加载produce.evn
 ];

@@ -23,6 +23,8 @@ class Install
         file_put_contents(EASYSWOOLE_ROOT . '/easyswoole',"<?php require '{$path}';");
         self::releaseResource(__DIR__ . '/../src/Resource/Config.tpl', EASYSWOOLE_ROOT . '/Config.php');
         self::releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
+        self::releaseResource(__DIR__ . '/../src/Resource/dev.env', EASYSWOOLE_ROOT . '/dev.env');
+        self::releaseResource(__DIR__ . '/../src/Resource/produce.env', EASYSWOOLE_ROOT . '/produce.env');
     }
 
     static function showTag($name, $value)

@@ -26,6 +26,11 @@ class Config
             $data = require_once EASYSWOOLE_ROOT . '/Config.php';
         }
         $this->conf = new SplArray($data);
+        $file  = EASYSWOOLE_ROOT.'/dev.env';
+        if(!$this->getConf('IS_DEV')){
+            $file  = EASYSWOOLE_ROOT.'/produce.env';
+        }
+        $this->loadEnv($file);
     }
 
     /**
@@ -86,6 +91,20 @@ class Config
                     $this->conf[$basename] = $confData;
                 } else {
                     $this->conf = new SplArray(array_merge($this->toArray(), $confData));
+                }
+            }
+        }
+    }
+
+    public function loadEnv(string $file)
+    {
+        if(file_exists($file)){
+            $file = file($file);
+            foreach ($file as $line){
+                $line = trim($line);
+                if(strpos($line,"#") !== 0){
+                    $arr = explode('=',$line);
+                    $this->setConf(trim($arr[0]),trim($arr[1]));
                 }
             }
         }
