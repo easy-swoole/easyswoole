@@ -7,7 +7,7 @@ use EasySwoole\Core\Utility\File;
 
 define('EASYSWOOLE_ROOT', realpath(getcwd()));
 
-foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php' ] as $file) {
     if (file_exists($file)) {
         require $file;
         break;
@@ -60,7 +60,7 @@ function commandParser()
             $options[$key] = array_shift($temp) ?: '';
         }
     }
-    return array($command, $options);
+    return array( $command, $options );
 }
 
 function opCacheClear()
@@ -109,7 +109,7 @@ function releaseResource($source, $destination)
         $filename = basename($destination);
         echo "{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ";
         $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-        if (!in_array($answer, ['y', 'yes'])) {
+        if (!in_array($answer, [ 'y', 'yes' ])) {
             $replace = false;
         }
     }
@@ -249,7 +249,7 @@ function getRelativelyPath($a, $b)
     if (count($arr2) - $depth - 1 > 0) {
         $prefix = array_fill(0, count($arr2) - $depth - 1, '..');
     } else {
-        $prefix = array('.');
+        $prefix = array( '.' );
     }
 
     $tmp = array_merge($prefix, array_slice($arr1, $depth));
@@ -261,6 +261,10 @@ function serverStart($options)
 {
     showLogo();
     $conf = Conf::getInstance();
+    if ($options['e']) {
+        $confPath = file_exists($options['e']) ? $options['e'] : EASYSWOOLE_ROOT . '/' . ucfirst($options['e']) . '.php';
+        $conf->loadFile($confPath, true);
+    }
     $inst = Core::getInstance()->initialize();
     $version = \EasySwoole\Core\Component\Di::getInstance()->get(\EasySwoole\Core\Component\SysConst::VERSION);
     echo "\n\e[31mEasySwoole\e[0m framework \e[34mVersion {$version}\e[0m\n\n";
@@ -419,7 +423,7 @@ function serverInstall($options)
         if (is_dir($temPath)) {
             echo 'Temp Directory has already existed, do you want to replace it? [ Y / N (default) ] : ';
             $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-            if (in_array($answer, ['y', 'yes'])) {
+            if (in_array($answer, [ 'y', 'yes' ])) {
                 if (!File::createDir($temPath)) {
                     die("create Temp Directory:{$temPath} fail");
                 }
@@ -433,7 +437,7 @@ function serverInstall($options)
         if (is_dir($logPath)) {
             echo 'Log Directory has already existed, do you want to replace it? [ Y / N (default) ] : ';
             $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-            if (in_array($answer, ['y', 'yes'])) {
+            if (in_array($answer, [ 'y', 'yes' ])) {
                 if (!File::createDir($logPath)) {
                     die("create Temp Directory:{$logPath} fail");
                 }
