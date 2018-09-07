@@ -261,7 +261,7 @@ function serverStart($options)
 {
     showLogo();
     $conf = Conf::getInstance();
-    if ($options['e']) {
+    if (isset($options['e'])) {
         $confPath = file_exists($options['e']) ? $options['e'] : EASYSWOOLE_ROOT . '/' . ucfirst($options['e']) . '.php';
         $conf->loadFile($confPath, true);
     }
