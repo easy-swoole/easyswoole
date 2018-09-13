@@ -45,8 +45,8 @@ class ServerManager
         if($serverName === null){
             return $this->swooleServer;
         }else{
-            if(isset($this->swooleServer[$serverName])){
-                return $this->swooleServer[$serverName];
+            if(isset($this->subServer[$serverName])){
+                return $this->subServer[$serverName];
             }
             return null;
         }
