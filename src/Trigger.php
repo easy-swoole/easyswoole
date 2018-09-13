@@ -19,7 +19,9 @@ class Trigger extends \EasySwoole\Trace\Trigger
 
     function __construct(TriggerInterface $trigger = null)
     {
-        $trigger = new TriggerHandler(Logger::getInstance());
+        if($trigger == null){
+            $trigger = new TriggerHandler(Logger::getInstance());
+        }
         parent::__construct($trigger);
     }
 }
