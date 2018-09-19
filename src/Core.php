@@ -23,10 +23,18 @@ class Core
 {
     use Singleton;
 
+    private $isDev = true;
+
     function __construct()
     {
         defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
         defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
+    }
+
+    function setIsDev(bool $isDev)
+    {
+        $this->isDev = $isDev;
+        return $this;
     }
 
     function initialize()
@@ -49,6 +57,8 @@ class Core
         }
         //执行框架初始化事件
         EasySwooleEvent::initialize();
+        //加载配置文件
+        $this->loadEnv();
         //临时文件和Log目录初始化
         $this->sysDirectoryInit();
         //注册错误回调
@@ -170,5 +180,15 @@ class Core
                 }
             });
         }
+    }
+
+    private function loadEnv()
+    {
+        if($this->isDev){
+            $file  = EASYSWOOLE_ROOT.'/dev.env';
+        }else{
+            $file  = EASYSWOOLE_ROOT.'/produce.env';
+        }
+        Config::getInstance()->loadEnv($file);
     }
 }

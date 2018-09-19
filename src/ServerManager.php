@@ -27,9 +27,9 @@ class ServerManager
     private $subServer = [];
     private $subServerRegister = [];
 
-    const TYPE_SERVER = 'server';
-    const TYPE_WEB_SERVER = 'web_server';
-    const TYPE_WEB_SOCKET_SERVER = 'ws_server';
+    const TYPE_SERVER = 'SERVER';
+    const TYPE_WEB_SERVER = 'WEB_SERVER';
+    const TYPE_WEB_SOCKET_SERVER = 'WEB_SOCKET_SERVER';
 
 
     function __construct()

@@ -21,7 +21,6 @@ class Install
         }
         $path = '.'.str_replace(EASYSWOOLE_ROOT,'',__FILE__);
         file_put_contents(EASYSWOOLE_ROOT . '/easyswoole',"<?php require '{$path}';");
-        self::releaseResource(__DIR__ . '/../src/Resource/Config.tpl', EASYSWOOLE_ROOT . '/Config.php');
         self::releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
         self::releaseResource(__DIR__ . '/../src/Resource/dev.env', EASYSWOOLE_ROOT . '/dev.env');
         self::releaseResource(__DIR__ . '/../src/Resource/produce.env', EASYSWOOLE_ROOT . '/produce.env');
@@ -83,7 +82,9 @@ LOGO;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以启动框架 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  -d \e[0m                   以守护模式启动框架
+\e[32m  daemonize \e[0m                   以守护模式启动框架
+\e[32m  produce \e[0m                     生产模式(加载produce.env)
+
 HELP_START;
     }
 
@@ -95,7 +96,8 @@ HELP_START;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以停止框架 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  -f \e[0m             强制停止服务
+\e[32m  force \e[0m             强制停止服务
+
 HELP_STOP;
     }
 
@@ -119,7 +121,8 @@ HELP_RESTART;
 \e[33m简介:\e[0m
 \e[36m  执行本命令可以重启所有Worker 可选的操作参数如下\e[0m
 \e[33m参数:\e[0m
-\e[32m  -a \e[0m           重启所有worker和task_worker进程
+\e[32m  all \e[0m           重启所有worker和task_worker进程
+
 HELP_RELOAD;
     }
 
@@ -136,10 +139,9 @@ HELP_RELOAD;
 \e[32m  start \e[0m        启动服务
 \e[32m  stop \e[0m         停止服务
 \e[32m  reload \e[0m       重载服务
-\e[32m  restart \e[0m      重启服务
 \e[32m  help \e[0m         查看命令的帮助信息\n
 \e[31m有关某个操作的详细信息 请使用\e[0m help \e[31m命令查看 \e[0m
-\e[31m如查看\e[0m start \e[31m操作的详细信息 请输入\e[0m easyswoole help --start\n\n
+\e[31m如查看\e[0m start \e[31m操作的详细信息 请输入\e[0m easyswoole help start\n\n
 DEFAULTHELP;
     }
 }
@@ -147,123 +149,138 @@ DEFAULTHELP;
 Install::showLogo();
 
 
-$com = new \EasySwoole\Utility\CommandLine();
+$commandList = $argv;
+array_shift($commandList);
 
-//设置命令回调
-$com->setArgCallback($com::ARG_DEFAULT_CALLBACK,function ()use($com){
-    if($com->getOptVal('start')){
-        Install::showHelpForStart();
-    }else if($com->getOptVal('stop')){
-        Install::showHelpForStop();
-    }else if($com->getOptVal('reload')){
-        Install::showHelpForReload();
-    }else if($com->getOptVal('restart')){
-        Install::showHelpForRestart();
-    }else{
-        Install::showHelp();
+$mainCommand = array_shift($commandList);
+
+switch ($mainCommand){
+
+    case 'install':{
+        Install::init();
+        echo "install success\n";
+        break;
     }
-});
 
-$com->setArgCallback('install',function (){
-    Install::init();
-    echo "install success\n";
-});
-
-$com->setArgCallback('start',function ()use($com){
-
-    $conf = \EasySwoole\EasySwoole\Config::getInstance();
-    if($com->getOptVal('d')){
-        $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
-    }
-    Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
-    Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
-    Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
-    Install::showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
-    $user = $conf->getConf('MAIN_SERVER.SETTING.user');
-    if(empty($user)){
-        $user = get_current_user();
-    }
-    Install::showTag('run at user', $user);
-    Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
-    Install::showTag('swoole version', phpversion('swoole'));
-    Install::showTag('php version', phpversion());
-    Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
-    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-    \EasySwoole\EasySwoole\Core::getInstance()->createServer()->start();
-});
-
-$com->setArgCallback('stop',function ()use($com){
-    $force = $com->getOptVal('f');
-    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-    $Conf = \EasySwoole\EasySwoole\Config::getInstance();
-    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
-    if (file_exists($pidFile)) {
-        $pid = file_get_contents($pidFile);
-        if (!swoole_process::kill($pid, 0)) {
-            echo "PID :{$pid} not exist \n";
-            return false;
+    case 'start':{
+        if(in_array('produce',$commandList)){
+            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
-        if ($force) {
-            swoole_process::kill($pid, SIGKILL);
-        } else {
-            swoole_process::kill($pid);
+
+        $conf = \EasySwoole\EasySwoole\Config::getInstance();
+        if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
+            $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
-        //等待5秒
-        $time = time();
-        $flag = false;
-        while (true) {
-            usleep(1000);
+
+        Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
+        Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
+        Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
+        Install::showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
+        $user = $conf->getConf('MAIN_SERVER.SETTING.user');
+        if(empty($user)){
+            $user = get_current_user();
+        }
+        Install::showTag('run at user', $user);
+        Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
+        Install::showTag('swoole version', phpversion('swoole'));
+        Install::showTag('php version', phpversion());
+        Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        \EasySwoole\EasySwoole\Core::getInstance()->createServer()->start();
+        break;
+    }
+
+    case 'stop':{
+        $force = false;
+        if(in_array('force',$commandList)){
+            $force = true;
+        }
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        $Conf = \EasySwoole\EasySwoole\Config::getInstance();
+        $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+        if (file_exists($pidFile)) {
+            $pid = file_get_contents($pidFile);
             if (!swoole_process::kill($pid, 0)) {
-                echo "server stop at " . date("y-m-d h:i:s") . "\n";
-                if (is_file($pidFile)) {
-                    unlink($pidFile);
-                }
-                $flag = true;
-                break;
+                echo "PID :{$pid} not exist \n";
+                return false;
+            }
+            if ($force) {
+                swoole_process::kill($pid, SIGKILL);
             } else {
-                if (time() - $time > 5) {
-                    echo "stop server fail.try -f again \n";
+                swoole_process::kill($pid);
+            }
+            //等待5秒
+            $time = time();
+            $flag = false;
+            while (true) {
+                usleep(1000);
+                if (!swoole_process::kill($pid, 0)) {
+                    echo "server stop at " . date("y-m-d h:i:s") . "\n";
+                    if (is_file($pidFile)) {
+                        unlink($pidFile);
+                    }
+                    $flag = true;
                     break;
+                } else {
+                    if (time() - $time > 5) {
+                        echo "stop server fail.try -f again \n";
+                        break;
+                    }
                 }
             }
-        }
-        return $flag;
-    } else {
-        echo "PID file does not exist, please check whether to run in the daemon mode!\n";
-        return false;
-    }
-});
-
-$com->setArgCallback('reload',function ()use($com){
-    $all = $com->getOptVal('a');
-    \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-    $Conf = \EasySwoole\EasySwoole\Config::getInstance();
-    $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
-    if (file_exists($pidFile)) {
-        if (!$all) {
-            $sig = SIGUSR2;
-            Install::showTag('reloadType',"only-task");
+            return $flag;
         } else {
-            $sig = SIGUSR1;
-            Install::showTag('reloadType',"all-worker");
+            echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+            return false;
         }
-
-        Install::opCacheClear();
-        $pid = file_get_contents($pidFile);
-        if (!swoole_process::kill($pid, 0)) {
-            echo "pid :{$pid} not exist \n";
-            return;
-        }
-        swoole_process::kill($pid, $sig);
-        echo "send server reload command at " . date("y-m-d h:i:s") . "\n";
-    } else {
-        echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+        break;
     }
-});
 
+    case 'reload':{
+        $all = false;
+        if(in_array('all',$commandList)){
+            $all = true;
+        }
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        $Conf = \EasySwoole\EasySwoole\Config::getInstance();
+        $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
+        if (file_exists($pidFile)) {
+            if (!$all) {
+                $sig = SIGUSR2;
+                Install::showTag('reloadType',"only-task");
+            } else {
+                $sig = SIGUSR1;
+                Install::showTag('reloadType',"all-worker");
+            }
 
+            Install::opCacheClear();
+            $pid = file_get_contents($pidFile);
+            if (!swoole_process::kill($pid, 0)) {
+                echo "pid :{$pid} not exist \n";
+                return;
+            }
+            swoole_process::kill($pid, $sig);
+            echo "send server reload command at " . date("y-m-d h:i:s") . "\n";
+        } else {
+            echo "PID file does not exist, please check whether to run in the daemon mode!\n";
+        }
+        break;
+    }
 
-$com->parseArgs($argv);
-
+    case 'help':
+    default:{
+        $com = array_shift($commandList);
+        if($com == 'start'){
+            Install::showHelpForStart();
+        }else if($com == 'stop'){
+            Install::showHelpForStop();
+        }else if($com == 'reload'){
+            Install::showHelpForReload();
+        }else{
+            Install::showHelp();
+        }
+        break;
+    }
+}
 
 

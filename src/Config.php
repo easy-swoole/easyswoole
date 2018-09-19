@@ -20,17 +20,7 @@ class Config
 
     public function __construct()
     {
-        $data = [];
-        $file = EASYSWOOLE_ROOT . '/Config.php';
-        if(file_exists($file)){
-            $data = require_once EASYSWOOLE_ROOT . '/Config.php';
-        }
-        $this->conf = new SplArray($data);
-        $file  = EASYSWOOLE_ROOT.'/dev.env';
-        if(!$this->getConf('IS_DEV')){
-            $file  = EASYSWOOLE_ROOT.'/produce.env';
-        }
-        $this->loadEnv($file);
+        $this->conf = new SplArray();
     }
 
     /**
@@ -98,20 +88,32 @@ class Config
 
     public function loadEnv(string $file)
     {
+        $defines = get_defined_constants();
         if(file_exists($file)){
             $file = file($file);
             foreach ($file as $line){
                 $line = trim($line);
                 if(!empty($line)){
+                    //若以 # 开头的则为注释，不解析
                     if(strpos($line,"#") !== 0){
                         $arr = explode('=',$line);
                         if(!empty($arr)){
-                            $this->setConf(trim($arr[0]),trim($arr[1]));
+                            $val = trim(explode("#",$arr[1])[0]);
+                            foreach ($defines as $key => $define){
+                                $val = str_replace($key,$define,$val);
+                            }
+                            if(is_numeric($val) && is_int($val + 0)){
+                                $val = (int)$val;
+                            }else if($val == 'null' || empty($val)){
+                                $val = null;
+                            }
+                            $this->setConf(trim($arr[0]),$val);
                         }
                     }
                 }
-
             }
+        }else{
+            throw new \Exception("config file : {$file} is miss");
         }
     }
 }
