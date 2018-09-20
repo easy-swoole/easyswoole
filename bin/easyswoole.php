@@ -166,12 +166,11 @@ switch ($mainCommand){
         if(in_array('produce',$commandList)){
             \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
-
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $conf = \EasySwoole\EasySwoole\Config::getInstance();
         if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
-
         Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
         Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
@@ -181,7 +180,13 @@ switch ($mainCommand){
             $user = get_current_user();
         }
         Install::showTag('run at user', $user);
-        Install::showTag('daemonize', $conf->getConf("MAIN_SERVER.SETTING.daemonize"));
+        $daemonize = $conf->getConf("MAIN_SERVER.SETTING.daemonize");
+        if($daemonize){
+            $daemonize = 'true';
+        }else{
+            $daemonize = 'false';
+        }
+        Install::showTag('daemonize', $daemonize);
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
         Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
