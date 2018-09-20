@@ -106,6 +106,8 @@ class Config
                                 $val = (int)$val;
                             }else if($val == 'null' || empty($val)){
                                 $val = null;
+                            }else if($val == 'true' || $val == 'false'){
+                                $val = (bool)($val);
                             }
                             $this->setConf(trim($arr[0]),$val);
                         }
