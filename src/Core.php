@@ -156,7 +156,7 @@ class Core
             if($max == 0){
                 $max = 100;
             }
-            $webService = new WebService($namespace,Trigger::getInstance(),$depth,$max);
+            $webService = new WebService($namespace,$depth,$max);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             if($httpExceptionHandler){
                 $webService->setExceptionHandler($httpExceptionHandler);
