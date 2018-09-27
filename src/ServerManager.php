@@ -10,12 +10,7 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
-use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
-use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
-use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
-use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
 
 class ServerManager
 {
@@ -75,7 +70,6 @@ class ServerManager
         if($this->swooleServer){
             $this->swooleServer->set($setting);
         }
-        $this->registerDefault($this->swooleServer);
         return true;
     }
 
@@ -135,75 +129,5 @@ class ServerManager
                 Trigger::getInstance()->throwable(new \Exception("addListener with server name:{$serverName} at host:{$server['host']} port:{$server['port']} fail"));
             }
         }
-    }
-
-
-    private function registerDefault(\swoole_server $server)
-    {
-        //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
-        EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $taskObj = new $taskObj;
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
-                    }
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    return $taskObj( $server, $taskId, $fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }
-            return null;
-        });
-        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $server, $taskId, $taskObj){
-            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $taskObj->finish($taskObj->getResult(),$taskId);
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }
-        });
-
-        //注册默认的pipe通讯
-        OnCommand::getInstance()->set('TASK',function ($fromId,$taskObj){
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $taskObj = new $taskObj;
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $taskObj->run($taskObj->getData(),ServerManager::getInstance()->getSwooleServer()->worker_id,$fromId);
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    $taskObj();
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }
-        });
-
-        EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
-            $message = \swoole_serialize::unpack($data);
-            if($message instanceof Message){
-                OnCommand::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
-            }else{
-                Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
-            }
-        });
     }
 }

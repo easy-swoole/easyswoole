@@ -18,6 +18,10 @@ use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
 use EasySwoole\Trace\Bean\Location;
+use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
+use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
+use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
+use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
 
 class Core
 {
@@ -72,7 +76,7 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['HOST'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
-        $this->mainServerHook($conf['SERVER_TYPE']);
+        $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         return $this;
     }
@@ -139,10 +143,11 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function mainServerHook($type)
+    private function registerDefaultCallBack(\swoole_server $server,string $serverType)
     {
-        if($type === ServerManager::TYPE_SERVER){
-            ServerManager::getInstance()->getSwooleServer()->on(EventRegister::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data){
+        //如果主服务仅仅是swoole server，那么设置默认onReceive为全局的onReceive
+        if($serverType === ServerManager::TYPE_SERVER){
+            $server->on(EventRegister::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data){
                 EasySwooleEvent::onReceive($server,$fd,$reactor_id,$data);
             });
         }else{
@@ -161,7 +166,6 @@ class Core
             if($httpExceptionHandler){
                 $webService->setExceptionHandler($httpExceptionHandler);
             }
-            $server = ServerManager::getInstance()->getSwooleServer();
             EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($webService){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
@@ -180,6 +184,71 @@ class Core
                 }
             });
         }
+        //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
+        EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
+            if(is_string($taskObj) && class_exists($taskObj)){
+                $taskObj = new $taskObj;
+            }
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
+                    //在有return或者设置了结果的时候  说明需要执行结束回调
+                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                    if(!is_null($ret)){
+                        $taskObj->setResult($ret);
+                        return $taskObj;
+                    }
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
+                }
+            }else if($taskObj instanceof SuperClosure){
+                try{
+                    return $taskObj( $server, $taskId, $fromWorkerId);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
+            }
+            return null;
+        });
+        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $server, $taskId, $taskObj){
+            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $taskObj->finish($taskObj->getResult(),$taskId);
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
+                }
+            }
+        });
+
+        //注册默认的pipe通讯
+        OnCommand::getInstance()->set('TASK',function ($fromId,$taskObj){
+            if(is_string($taskObj) && class_exists($taskObj)){
+                $taskObj = new $taskObj;
+            }
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $taskObj->run($taskObj->getData(),ServerManager::getInstance()->getSwooleServer()->worker_id,$fromId);
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
+                }
+            }else if($taskObj instanceof SuperClosure){
+                try{
+                    $taskObj();
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
+            }
+        });
+
+        EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
+            $message = \swoole_serialize::unpack($data);
+            if($message instanceof Message){
+                OnCommand::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
+            }else{
+                Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
+            }
+        });
     }
 
     private function loadEnv()
