@@ -176,6 +176,7 @@ class Model
      * @return bool
      */
     function update(&$data, $conds) {
+        $data = Utils::onlyCols($this->fields, $data);
         $rdb = $this->db;
         foreach ($conds as &$cond) {
             if(is_array($cond[1])) {
