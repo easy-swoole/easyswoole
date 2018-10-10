@@ -1,14 +1,14 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: 111
- * Date: 2018/4/4
- * Time: 12:21
+ * User: azerothyangg
+ * Date: 2018/10/10
+ * Time: 17:33
  */
 
-namespace App\Utility;
-
-//校验类
+/**
+ * Class Validator
+ */
 class Validator
 {
     /**
@@ -81,8 +81,11 @@ class Validator
      * @return bool
      */
     public function notEmpty(array &$data, string &$field) :bool{
-        if (isset($data[$field]) && !empty($data[$field])){
-            return true;
+        if (isset($data[$field])){
+            $content = trim($data[$field]);
+            if (!empty($content)) {
+                return true;
+            }
         }
         return false;
     }
@@ -259,10 +262,83 @@ class Validator
     }
 
     /**
+     * 校验是否为json数组
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function jsonArray(array &$data, string &$field) :bool {
+        if(isset($data[$field])){
+            $content = @json_decode($data[$field], true);
+            if (!empty($content) && is_array($content)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * json 数组参数校验, 目前支持到二维数组,一般伴随jsonArray一起使用
+     * @param array $data
+     * @param string $field
+     * @param string $rules
+     * @return bool
+     */
+    public function jsonArrayParams(array &$data, string &$field, string $rules) :bool {
+        //如果不包含*表示规则格式错误,开发人员问题
+        if (strpos($field, "*") === false) {
+            return false;
+        }
+        $fields = explode(".", $field);
+        $field = $fields[0];
+        $subField = $fields[2];
+        if(isset($data[$field])){
+            $contents = @json_decode($data[$field], true);
+            if (!empty($contents) && is_array($contents)) {
+                $res = true; //校验结果, 默认是通过true
+                $rules = explode("@", $rules);
+                foreach ($rules as $rule) {
+                    //如果规则为空, 则直接跳过
+                    if(empty($rule)){
+                        continue;
+                    }
+                    $ruleContent = explode('=', $rule);
+                    $method = $ruleContent[0];
+                    $ruleContentLength = count($ruleContent);
+                    //根据参数长度, 使用校验, TODO 单个校验目前最多只有1个外界参数, 不包含固定的data和field
+                    switch ($ruleContentLength) {
+                        case 1 :
+                            foreach ($contents as $content) {
+                                $res = $this->$method($content, $subField) && $res;
+                                if ($res === false) {
+                                    return $res;
+                                }
+                            }
+                            break;
+                        case 2 :
+                            foreach ($contents as $content) {
+                                $res = $this->$method($content, $subField, $ruleContent[1]) && $res;
+                                if ($res === false) {
+                                    return $res;
+                                }
+                            }
+                            break;
+                        default :
+                            break;
+                    }
+                }
+                return $res;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param array $data, 需要进行校验的数组
      * @param array $fieldsRules 校验规则数组,参数用点和|区分 如 array(
-     *  "input1" => "numeric|min:10|in:x,y,z|",
-     *  "input2" => "numeric|min:10|",
+     *  "input1" => "numeric|min:10|in:x,y,z|jsonArray",
+     *  "input2" => "numeric|max:10|",
+     *  "input3.*.name" => "numeric|min:10|in:x,y,z|jsonArrayParams:numeric@notEmpty@maxLength=3", 这里是处理json数组对象校验
      * )
      * @param array $msg, 传对应字段校验出错后返回的错误信息, 如果没有, 则默认返回校验失败
      * @return bool
@@ -305,10 +381,10 @@ class Validator
      * @return bool
      */
     public function hasError(){
-       if(!empty($this->validateRes)){
-           return true;
-       }
-       return false;
+        if(!empty($this->validateRes)){
+            return true;
+        }
+        return false;
     }
 
     /**
