@@ -1,10 +1,12 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: azerothyangg
+ * User: azerothyang
  * Date: 2018/10/10
  * Time: 17:33
  */
+
+namespace App\Utility;
 
 /**
  * Class Validator
