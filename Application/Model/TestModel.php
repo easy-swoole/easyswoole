@@ -13,7 +13,6 @@ use EasySwoole\Core\AbstractInterface\Singleton;
 
 class TestModel extends BaseModel
 {
-    use Singleton; //单例模式
 
     function test(){
         return $this->readDb->get("test");

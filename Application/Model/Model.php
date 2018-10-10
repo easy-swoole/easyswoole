@@ -17,6 +17,16 @@ use App\Utility\Utils;
  */
 class Model
 {
+    protected static $instance;
+
+    static function getInstance(...$args)
+    {
+        if(!isset(self::$instance)){
+            self::$instance = new static(...$args);
+        }
+        return self::$instance;
+    }
+
     //模型字段
     protected $fields = array();
 
