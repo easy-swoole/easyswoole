@@ -104,10 +104,12 @@ class Config
                             }
                             if(is_numeric($val) && is_int($val + 0)){
                                 $val = (int)$val;
-                            }else if($val == 'null' || empty($val)){
-                                $val = null;
-                            }else if($val == 'true' || $val == 'false'){
-                                $val = (bool)($val);
+                            }else if(is_string($val)){
+                                if($val== 'null' || empty($val)){
+                                    $val = null;
+                                }else if($val == 'true' || $val == 'false'){
+                                    $val = (bool)($val);
+                                }
                             }
                             $this->setConf(trim($arr[0]),$val);
                         }
