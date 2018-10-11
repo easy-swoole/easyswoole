@@ -107,8 +107,10 @@ class Config
                             }else if(is_string($val)){
                                 if($val== 'null' || empty($val)){
                                     $val = null;
-                                }else if($val == 'true' || $val == 'false'){
-                                    $val = (bool)($val);
+                                }else if($val == 'true'){
+                                    $val = true;
+                                }else if($val == 'false'){
+                                    $val = false;
                                 }
                             }
                             $this->setConf(trim($arr[0]),$val);
