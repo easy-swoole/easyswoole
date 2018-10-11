@@ -166,7 +166,7 @@ class Model
             }
         }
         //单条数据
-        return $rdb->getValue($this->table, $cols);
+        return $rdb->getOne($this->table, $cols);
     }
 
     /**
