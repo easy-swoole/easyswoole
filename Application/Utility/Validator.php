@@ -2,15 +2,12 @@
 /**
  * Created by PhpStorm.
  * User: azerothyang
- * Date: 2018/10/10
- * Time: 17:33
+ * Date: 2018/10/11
+ * Time: 12:21
  */
-
 namespace App\Utility;
 
-/**
- * Class Validator
- */
+//校验类
 class Validator
 {
     /**
@@ -336,16 +333,87 @@ class Validator
     }
 
     /**
+     * 校验是否为数组
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function array(array &$data, string &$field) :bool {
+        if(isset($data[$field])){
+            $res = is_array($data[$field]);
+            return $res;
+        }
+        return true;
+    }
+
+    /**
+     * 二维数组校验，内层数组所含的参数
+     * @param array $data
+     * @param string $field
+     * @param string $rules
+     * @return bool
+     */
+    public function arrayParams(array &$data, string &$field, string $rules) :bool {
+        //如果不包含*表示规则格式错误,开发人员问题
+        if (strpos($field, "*") === false) {
+            return false;
+        }
+        $fields = explode(".", $field);
+        $field = $fields[0];
+        $subField = $fields[2];
+        if(isset($data[$field])){
+            $contents = $data[$field];
+            if (!empty($contents) && is_array($contents)) {
+                $res = true; //校验结果, 默认是通过true
+                $rules = explode("@", $rules);
+                foreach ($rules as $rule) {
+                    //如果规则为空, 则直接跳过
+                    if(empty($rule)){
+                        continue;
+                    }
+                    $ruleContent = explode('=', $rule);
+                    $method = $ruleContent[0];
+                    $ruleContentLength = count($ruleContent);
+                    //根据参数长度, 使用校验, TODO 单个校验目前最多只有1个外界参数, 不包含固定的data和field
+                    switch ($ruleContentLength) {
+                        case 1 :
+                            foreach ($contents as $content) {
+                                $res = $this->$method($content, $subField) && $res;
+                                if ($res === false) {
+                                    return $res;
+                                }
+                            }
+                            break;
+                        case 2 :
+                            foreach ($contents as $content) {
+                                $res = $this->$method($content, $subField, $ruleContent[1]) && $res;
+                                if ($res === false) {
+                                    return $res;
+                                }
+                            }
+                            break;
+                        default :
+                            break;
+                    }
+                }
+                return $res;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param array $data, 需要进行校验的数组
      * @param array $fieldsRules 校验规则数组,参数用点和|区分 如 array(
-     *  "input1" => "numeric|min:10|in:x,y,z|jsonArray",
-     *  "input2" => "numeric|max:10|",
-     *  "input3.*.name" => "numeric|min:10|in:x,y,z|jsonArrayParams:numeric@notEmpty@maxLength=3", 这里是处理json数组对象校验
+     *  "input3" => "numeric|min:10|in:x,y,z|jsonArray",
+     *  "input4" => "numeric|max:10|array",
+     *  "input3.*.name" => "numeric|min:10|in:x,y,z|jsonArrayParams:numeric@notEmpty@maxLength=3",
+     *  "input4.*.test" => "arrayParams:numeric@notEmpty@maxLength=3",
      * )
      * @param array $msg, 传对应字段校验出错后返回的错误信息, 如果没有, 则默认返回校验失败
      * @return bool
      */
-    public function validate(array &$data, array $fieldsRules=array(), array $msg=array()) :bool {
+    public function validate(&$data, array $fieldsRules=array(), array $msg=array()) :bool {
         //遍历所有字段的校验规则, 针对每个字段的校验规则进行校验
         foreach ($fieldsRules as $field => $singleRules){
             $ruleArr = explode('|', $singleRules);
