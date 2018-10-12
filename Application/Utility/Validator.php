@@ -283,7 +283,7 @@ class Validator
      * @param string $rules
      * @return bool
      */
-    public function jsonArrayParams(array &$data, string &$field, string $rules) :bool {
+    public function jsonArrayParams(array &$data, string $field, string $rules) :bool {
         //如果不包含*表示规则格式错误,开发人员问题
         if (strpos($field, "*") === false) {
             return false;
@@ -353,7 +353,7 @@ class Validator
      * @param string $rules
      * @return bool
      */
-    public function arrayParams(array &$data, string &$field, string $rules) :bool {
+    public function arrayParams(array &$data, string $field, string $rules) :bool {
         //如果不包含*表示规则格式错误,开发人员问题
         if (strpos($field, "*") === false) {
             return false;
@@ -390,6 +390,54 @@ class Validator
                                 if ($res === false) {
                                     return $res;
                                 }
+                            }
+                            break;
+                        default :
+                            break;
+                    }
+                }
+                return $res;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 一维数组校验, 内部参数
+     * @param array $data
+     * @param string $field
+     * @param string $rules
+     * @return bool
+     */
+    public function arrayParam(array &$data, string $field, string $rules) :bool {
+        $fields = explode(".", $field);
+        $field = $fields[0];
+        $subField = $fields[1];
+        if(isset($data[$field])){
+            $content = $data[$field];
+            if (!empty($content) && is_array($content)) {
+                $res = true; //校验结果, 默认是通过true
+                $rules = explode("@", $rules);
+                foreach ($rules as $rule) {
+                    //如果规则为空, 则直接跳过
+                    if(empty($rule)){
+                        continue;
+                    }
+                    $ruleContent = explode('=', $rule);
+                    $method = $ruleContent[0];
+                    $ruleContentLength = count($ruleContent);
+                    //根据参数长度, 使用校验, TODO 单个校验目前最多只有1个外界参数, 不包含固定的data和field
+                    switch ($ruleContentLength) {
+                        case 1 :
+                            $res = $this->$method($content, $subField) && $res;
+                            if ($res === false) {
+                                return $res;
+                            }
+                            break;
+                        case 2 :
+                            $res = $this->$method($content, $subField, $ruleContent[1]) && $res;
+                            if ($res === false) {
+                                return $res;
                             }
                             break;
                         default :
