@@ -17,15 +17,6 @@ use App\Utility\Utils;
  */
 class Model
 {
-    protected static $instance;
-
-    static function getInstance(...$args)
-    {
-        if(!isset(self::$instance)){
-            self::$instance = new static(...$args);
-        }
-        return self::$instance;
-    }
 
     //模型字段
     protected $fields = array();
@@ -158,6 +149,11 @@ class Model
      */
     function get($cols, $conds) {
         $rdb = $this->readDb;
+        if (empty($cols)) {
+            $cols = "*";
+        }else {
+            $cols = array_intersect($cols, $this->fields);
+        }
         foreach ($conds as &$cond) {
             if(is_array($cond[1])) {
                 $rdb = $rdb->where($cond[0], $cond[1], "IN");
