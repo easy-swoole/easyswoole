@@ -81,8 +81,7 @@ class Validator
      */
     public function notEmpty(array &$data, string &$field) :bool{
         if (isset($data[$field])){
-            $content = trim($data[$field]);
-            if (!empty($content)) {
+            if (!empty($data[$field])) {
                 return true;
             }
         }

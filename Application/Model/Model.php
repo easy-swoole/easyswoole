@@ -143,11 +143,11 @@ class Model
 
     /**
      * 简单获取单条数据
-     * @param $cols
+     * @param array $cols
      * @param $conds
      * @return mixed
      */
-    function get($cols, $conds) {
+    function get(?array $cols, $conds) {
         $rdb = $this->readDb;
         if (empty($cols)) {
             $cols = "*";

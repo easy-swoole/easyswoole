@@ -5,6 +5,11 @@ use App\Vendor\Db\CoMysqlPool;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 
+/**
+ * 注意: 控制器命名遵循psr规范 首字母大写，同时与文件名一致。router里的路由处理器,也要对应文件名大小写
+ * Class Test
+ * @package App\HttpController\Api
+ */
 class Test extends BaseController
 {
 
