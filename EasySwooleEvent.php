@@ -9,9 +9,11 @@
 namespace EasySwoole;
 
 use App\Crontab\Cron;
+use App\Vendor\Logger\LoggerHandler;
 use \EasySwoole\Core\AbstractInterface\EventInterface;
 use EasySwoole\Core\Component\Crontab\CronTab;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Swoole\EventHelper;
 use \EasySwoole\Core\Swoole\ServerManager;
 use \EasySwoole\Core\Swoole\EventRegister;
@@ -24,6 +26,7 @@ Class EasySwooleEvent implements EventInterface {
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
+        Di::getInstance()->set(SysConst::LOGGER_WRITER,LoggerHandler::class);
 
         //异常拦截, 生产环境开启此配置, TODO 调试环境关闭有助于调试
 //        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );

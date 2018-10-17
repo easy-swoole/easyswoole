@@ -13,8 +13,10 @@ use App\Utility\HoldUp;
 use App\Utility\Security;
 use App\Utility\Status;
 use App\Utility\Utils;
+use App\Vendor\Logger\LoggerHandler;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\SysConst;
 use EasySwoole\Core\Http\AbstractInterface\Controller;
 
 class BaseController extends Controller
@@ -82,6 +84,11 @@ class BaseController extends Controller
     protected $memcached;
 
     /**
+     * @var LoggerHandler 日志处理
+     */
+    protected $logger;
+
+    /**
      * 返回false 则终止后续调用控制器方法, 直接返回
      * @param $action
      * @return bool|null
@@ -90,6 +97,7 @@ class BaseController extends Controller
     {
         //redis 初始化
         $this->redis = Di::getInstance()->get("REDIS")->getConnect();
+        $this->logger = Di::getInstance()->get(SysConst::LOGGER_WRITER);
 
         //初始化memcached
 //        $this->memcached = Di::getInstance()->get("MEMCACHED")->getConnect();

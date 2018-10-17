@@ -47,13 +47,14 @@ class Test extends BaseController
         $this->response()->write("hello man");
     }
 
-    function testCoMysql(){
-        $mysql1 = CoMysqlPool::getInstance()->getConnect();
-        $mysql1->setDefer();
-        $res = $mysql1->query("select * from test as total");
-        $mysql_res = $mysql1->recv();
-        var_dump($mysql_res);
-        CoMysqlPool::getInstance()->freeConnect($mysql1);
+    function log(){
+        $data = array(1,2,3,4,5);
+        $this->logger->debug($params, array(
+            "file" => __DIR__ . "/" . __FILE__,
+            "line" => __LINE__,
+            "class" => __CLASS__,
+            "method" => __METHOD__
+        ));
     }
 
 
