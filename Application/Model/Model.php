@@ -71,7 +71,9 @@ class Model
      * @return int
      */
     function add(array &$data) {
-        $data = Utils::onlyCols($this->fields, $data);
+        if (!empty($this->fields)) {
+            $data = Utils::onlyCols($this->fields, $data);
+        }
         $res = $this->db->insert($this->table, $data);
         if ($res === false) {
             return 0;

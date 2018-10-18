@@ -19,14 +19,28 @@ use \EasySwoole\Core\Swoole\ServerManager;
 use \EasySwoole\Core\Swoole\EventRegister;
 use \EasySwoole\Core\Http\Request;
 use \EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Utility\File;
 
 Class EasySwooleEvent implements EventInterface {
+
+    public static function loadConf($ConfPath)
+    {
+        $Conf  = Config::getInstance();
+        $files = File::scanDir($ConfPath);
+        foreach ($files as $file) {
+            $data = require_once $file;
+            $Conf->setConf(strtolower(basename($file, '.php')), (array)$data);
+        }
+    }
 
     public static function frameInitialize(): void
     {
         // TODO: Implement frameInitialize() method.
         date_default_timezone_set('Asia/Shanghai');
         Di::getInstance()->set(SysConst::LOGGER_WRITER,LoggerHandler::class);
+
+        // 载入项目 Conf 文件夹中所有的配置文件
+        self::loadConf(EASYSWOOLE_ROOT . '/Conf');
 
         //异常拦截, 生产环境开启此配置, TODO 调试环境关闭有助于调试
 //        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
