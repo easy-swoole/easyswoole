@@ -20,6 +20,19 @@ class Validator
     }
 
     /**
+     * 校验日期型
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function date(array &$data, string &$field) :bool{
+        if(isset($data[$field])) {
+            return (bool)strtotime($data[$field]);
+        }
+        return true;
+    }
+
+    /**
      * 手机号校验
      * @param array $data 数组数据
      * @param string $field 需要校验的字段
