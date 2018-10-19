@@ -17,7 +17,10 @@ return [
             'task_worker_num' => 8, //异步任务进程
             'task_max_request'=>10,
             'max_request'=>5000,//强烈建议设置此配置项
-            'worker_num'=>8
+            'worker_num'=>8,
+            'request_slowlog_file' => EASYSWOOLE_ROOT.'/Log/slow.log', //开启请求慢日志。
+            'trace_event_worker' => true, //跟踪 Task 和 Worker 进程
+            'request_slowlog_timeout' => 2, //2秒
         ],
     ],
     'DEBUG'=>true,
