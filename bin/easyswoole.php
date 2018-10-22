@@ -22,8 +22,8 @@ class Install
         $path = '.'.str_replace(EASYSWOOLE_ROOT,'',__FILE__);
         file_put_contents(EASYSWOOLE_ROOT . '/easyswoole',"<?php require '{$path}';");
         self::releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
-        self::releaseResource(__DIR__ . '/../src/Resource/dev.env', EASYSWOOLE_ROOT . '/dev.env');
-        self::releaseResource(__DIR__ . '/../src/Resource/produce.env', EASYSWOOLE_ROOT . '/produce.env');
+        self::releaseResource(__DIR__ . '/../src/Resource/config.env', EASYSWOOLE_ROOT . '/dev.env');
+        self::releaseResource(__DIR__ . '/../src/Resource/config.env', EASYSWOOLE_ROOT . '/produce.env');
     }
 
     static function showTag($name, $value)
@@ -173,6 +173,10 @@ switch ($mainCommand){
         }
         Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
+        $ips = swoole_get_local_ip();
+        foreach ($ips as $eth => $val){
+            Install::showTag('ip@'.$eth, $val);
+        }
         Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
         Install::showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
         $user = $conf->getConf('MAIN_SERVER.SETTING.user');
