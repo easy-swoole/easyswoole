@@ -20,12 +20,6 @@ class DefaultController extends Controller
         $this->response()->addResult('msg',"action {$actionName}@class ".static::class." miss");
     }
 
-    protected function afterAction(?string $actionName)
-    {
-        //都是以短链接的形式去做管理
-        $this->response()->setStatus(Response::STATUS_RESPONSE_AND_CLOSE);
-    }
-
     function hostIp()
     {
         $this->response()->addResult('ipList',swoole_get_local_ip());
