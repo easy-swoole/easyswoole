@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\Console\TcpService;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\Http\Request;
@@ -83,6 +84,12 @@ class Core
 
     function start()
     {
+        //给主进程也命名
+        if(PHP_OS != 'Darwin'){
+            $name = Config::getInstance()->getConf('SERVER_NAME');
+            cli_set_process_title($name);
+        }
+        (new TcpService(Config::getInstance()->getConf('console')));
         ServerManager::getInstance()->start();
     }
 
@@ -247,6 +254,19 @@ class Core
                 OnCommand::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
             }else{
                 Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
+            }
+        });
+
+        //注册默认的worker start
+        EventHelper::registerWithAdd(ServerManager::getInstance()->getMainEventRegister(),EventRegister::onWorkerStart,function (\swoole_server $server,$workerId){
+            if(PHP_OS != 'Darwin'){
+                $name = Config::getInstance()->getConf('SERVER_NAME');
+                if( ($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
+                    $type = 'Worker';
+                }else{
+                    $type = 'TaskWorker';
+                }
+                cli_set_process_title("{$name}.{$type}.{$workerId}");
             }
         });
     }
