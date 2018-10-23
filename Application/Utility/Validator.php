@@ -525,4 +525,18 @@ class Validator
         return $this->validateRes;
     }
 
+    /**
+     * 获取校验错误信息
+     * @return string
+     */
+    public function errorMsg() {
+        $msg = "";
+        if (is_array($this->validateRes) && !empty($this->validateRes)) {
+            foreach ($this->validateRes as $k => $v) {
+                $msg .= $k . " " . $v . "\n";
+            }
+        }
+        return $msg;
+    }
+
 }
