@@ -18,18 +18,19 @@ class TcpParser implements ParserInterface
     public function decode($raw, $client): ?Caller
     {
         // TODO: Implement decode() method.
-        $data = substr($raw,'4');
+        $caller =  new Caller();
+        $data = self::unpack($raw);
         $arr = json_decode($data,true);
         if(!is_array($arr)){
             $arr = [
-                'action'=>'decodeError',
-                'controller'=>DefaultController::class,
+                'action'=>'help',
+                'controller'=>TcpController::class,
                 'args'=>[
-                    'raw'=>$raw
                 ]
             ];
+        }else{
+            $arr['controller'] = TcpController::class;
         }
-        $caller =  new Caller();
         $caller->setAction($arr['action']);
         $caller->setControllerClass($arr['controller']);
         $caller->setArgs($arr['args']);
@@ -39,7 +40,20 @@ class TcpParser implements ParserInterface
     public function encode(Response $response, $client): ?string
     {
         // TODO: Implement encode() method.
-        $sendStr = json_encode($response->getResult(),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-        return pack('N', strlen($sendStr)).$sendStr;
+        $str = $response->getMessage();
+        if(empty($str)){
+            $str = 'empty response';
+        }
+        return self::pack($str);
+    }
+
+    public static function pack(string $data):string
+    {
+        return pack('N', strlen($data)).$data;
+    }
+
+    public static function unpack(string $data):string
+    {
+        return substr($data,'4');
     }
 }

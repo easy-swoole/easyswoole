@@ -89,7 +89,7 @@ class Core
             $name = Config::getInstance()->getConf('SERVER_NAME');
             cli_set_process_title($name);
         }
-        (new TcpService(Config::getInstance()->getConf('console')));
+        (new TcpService(Config::getInstance()->getConf('CONSOLE')));
         ServerManager::getInstance()->start();
     }
 

@@ -17,6 +17,9 @@ class Trigger extends \EasySwoole\Trace\Trigger
 {
     use Singleton;
 
+    /*
+     * 自带的trigger用的是自带的Logger,里面开启了控制台socket 推送。如果你重写了TriggerHandler，请自己复制Logger里面的推送逻辑
+     */
     function __construct(TriggerInterface $trigger = null)
     {
         if($trigger == null){

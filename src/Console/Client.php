@@ -8,43 +8,103 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
-
-use EasySwoole\Socket\Bean\Response;
+/*
+ * 注意，该客户端仅供cli或者独立process使用
+ */
 
 class Client
 {
     private $host;
     private $port;
+    private $client = null;
+
     function __construct($host,$port)
     {
         $this->host = $host;
         $this->port = $port;
     }
 
-    function call(string $controller,string $action,$args):?array
+    function close():bool
     {
-        $arr = [
-            'controller'=>$controller,
-            'action'=>$action,
-            'args'=>$args
-        ];
-
-        $fp = stream_socket_client("tcp://{$this->host}:{$this->port}");
-        if($fp){
-            $sendStr = json_encode($arr,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-            $data = pack('N', strlen($sendStr)).$sendStr;
-            fwrite($fp,$data);
-            $data = fread($fp,65533);
-            fclose($fp);
-            $len = unpack('N',$data);
-            $data = substr($data,'4');
-            if(strlen($data) != $len[1]){
-                throw new \Exception("tcp://{$this->host}:{$this->port} response error data");
-            }else{
-                return json_decode($data,true);
-            }
+        if($this->client instanceof \swoole_client && $this->client->isConnected()){
+            $this->client->close();
+            $this->client = null;
+            return true;
+        }else if($this->client instanceof \swoole_client){
+            //若服务端主动断开的时候
+            $this->client = null;
+            return true;
         }else{
-            throw new \Exception("connect to tcp://{$this->host}:{$this->port} fail");
+            return false;
         }
+    }
+
+    function getClient():?\swoole_client
+    {
+        return $this->client;
+    }
+
+    function connect():bool
+    {
+        $this->close();
+
+        $this->client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
+        $this->client->set(
+            [
+                'open_length_check' => true,
+                'package_length_type'   => 'N',
+                'package_length_offset' => 0,
+                'package_body_offset'   => 4,
+                'package_max_length'    => 1024*1024
+            ]
+        );
+        $this->client->on("connect", function(\swoole_client $cli) {
+            fwrite(STDOUT, "connect to tcp://{$this->host}:{$this->port} succeed \n");
+        });
+
+        $this->client->on("close", function($cli){
+            $this->close();
+            fwrite(STDOUT,"tcp://{$this->host}:{$this->port} disconnect \n");
+            swoole_event_del(STDIN);
+        });
+
+        $this->client->on("error", function($cli){
+            $this->close();
+            fwrite(STDOUT,"connection tcp://{$this->host}:{$this->port} error \n");
+            swoole_event_del(STDIN);
+        });
+
+        $this->client->on("receive", function($cli, $data) {
+            $str = TcpParser::unpack($data);
+            fwrite(STDOUT,$str."\n");
+        });
+        return $this->client->connect($this->host, $this->port, 0.5);
+    }
+
+    public function sendCommand(string $commandLine):bool
+    {
+        if($this->client instanceof \swoole_client && $this->client->isConnected()){
+            $commandList = $this->commandParser($commandLine);
+            $sendArr = [
+                'action'=>array_shift($commandList),
+                'args'=>$commandList
+            ];
+            $this->client->send(TcpParser::pack(json_encode($sendArr,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)));
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private function commandParser(string $data):array
+    {
+        $list = explode(' ',$data);
+        $ret = [];
+        foreach ($list as $item){
+            if(!empty($item)){
+                array_push($ret,$item);
+            }
+        }
+        return $ret;
     }
 }

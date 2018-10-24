@@ -275,6 +275,24 @@ switch ($mainCommand){
         break;
     }
 
+    case 'console':{
+        if(in_array('produce',$commandList)){
+            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+        }
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        $conf = \EasySwoole\EasySwoole\Config::getInstance()->getConf('CONSOLE');
+        $client = new \EasySwoole\EasySwoole\Console\Client($conf['HOST'],$conf['PORT']);
+        if($client->connect()){
+            swoole_event_add(STDIN,function()use($client){
+                $ret = trim(fgets(STDIN));
+                $client->sendCommand($ret);
+            });
+        }else{
+            fwrite(STDOUT, "connect to  tcp://{$this->host}:{$this->port} fail \n");
+        }
+        break;
+    }
+
     case 'help':
     default:{
         $com = array_shift($commandList);
