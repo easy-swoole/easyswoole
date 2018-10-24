@@ -300,7 +300,7 @@ switch ($mainCommand){
                 $client->sendCommand($ret);
             });
         }else{
-            fwrite(STDOUT, "connect to  tcp://".$conf['HOST'].$conf['PORT']." fail \n");
+            fwrite(STDOUT, "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." fail \n");
         }
         break;
     }
