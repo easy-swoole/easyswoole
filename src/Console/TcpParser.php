@@ -44,7 +44,7 @@ class TcpParser implements ParserInterface
         if(empty($str)){
             $str = 'empty response';
         }
-        return self::pack($str);
+        return self::pack(trim($str));
     }
 
     public static function pack(string $data):string

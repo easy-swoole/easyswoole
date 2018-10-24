@@ -171,8 +171,20 @@ switch ($mainCommand){
         if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
+        //创建主服务
+        \EasySwoole\EasySwoole\Core::getInstance()->createServer();
+        Install::showTag('main server', $conf->getConf('MAIN_SERVER.SERVER_TYPE'));
         Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
+
+        $list  = \EasySwoole\EasySwoole\ServerManager::getInstance()->getSubServerRegister();
+        $index = 1;
+        foreach ($list as $serverName => $item){
+            $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
+            Install::showTag('sub-Server'.$index, "{$serverName} => {$type}@{$item['host']}:{$item['port']}");
+            $index++;
+        }
+
         $ips = swoole_get_local_ip();
         foreach ($ips as $eth => $val){
             Install::showTag('ip@'.$eth, $val);
@@ -194,7 +206,7 @@ switch ($mainCommand){
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
         Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
-        \EasySwoole\EasySwoole\Core::getInstance()->createServer()->start();
+        \EasySwoole\EasySwoole\Core::getInstance()->start();
         break;
     }
 

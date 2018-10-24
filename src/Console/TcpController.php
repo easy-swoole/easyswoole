@@ -130,8 +130,16 @@ class TcpController extends Controller
         $this->response()->setStatus(Response::STATUS_RESPONSE_AND_CLOSE);
     }
 
-    function test(){
-        new AAA();
+    function serverList(){
+        $conf = Config::getInstance()->getConf('MAIN_SERVER');
+        $str = "serverName\t\tserverType\t\thost\t\tport\n";
+        $str .= sprintf("%-16s\t%-16s\t%-16s%s",'mainServer',$conf['SERVER_TYPE'],$conf['HOST'],$conf['PORT'])."\n";
+        $list  = ServerManager::getInstance()->getSubServerRegister();
+        foreach ($list as $serverName => $item){
+            $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
+            $str .= sprintf("%-16s\t%-16s\t%-16s%s",$serverName,$type,$item['host'],$item['port'])."\n";
+        }
+        $this->response()->setMessage($str);
     }
 
     private function arrayToString(array $array):string

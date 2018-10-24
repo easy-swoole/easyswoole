@@ -22,13 +22,12 @@ class TcpService
 {
     function __construct(?array $config)
     {
-        //创建swoole table 用于记录客户端连接
-        TableManager::getInstance()->add('Console.Auth',[
-            'isAuth'=>['type'=>Table::TYPE_INT,'size'=>1],
-            'tryTimes'=>['type'=>Table::TYPE_INT,'size'=>1]
-        ]);
-
         if($config['ENABLE']){
+            //创建swoole table 用于记录客户端连接
+            TableManager::getInstance()->add('Console.Auth',[
+                'isAuth'=>['type'=>Table::TYPE_INT,'size'=>1],
+                'tryTimes'=>['type'=>Table::TYPE_INT,'size'=>1]
+            ]);
             $conf = new Config();
             $conf->setParser(new TcpParser());
             $conf->setType($conf::TCP);
@@ -75,13 +74,15 @@ class TcpService
 
     static function push(string $string)
     {
-        $string = TcpParser::pack($string);
         $table = TableManager::getInstance()->get('Console.Auth');
-        foreach ($table as $fd => $value){
-            if(GlobalConfig::getInstance()->getConf('CONSOLE.AUTH') && $value['isAuth'] == 0){
-                continue;
+        if($table instanceof Table){
+            $string = TcpParser::pack($string);
+            foreach ($table as $fd => $value){
+                if(GlobalConfig::getInstance()->getConf('CONSOLE.AUTH') && $value['isAuth'] == 0){
+                    continue;
+                }
+                ServerManager::getInstance()->getSwooleServer()->send($fd,$string);
             }
-            ServerManager::getInstance()->getSwooleServer()->send($fd,$string);
         }
     }
 }

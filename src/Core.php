@@ -79,6 +79,8 @@ class Core
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        //创建主服务后，创建Tcp子服务
+        (new TcpService(Config::getInstance()->getConf('CONSOLE')));
         return $this;
     }
 
@@ -89,7 +91,6 @@ class Core
             $name = Config::getInstance()->getConf('SERVER_NAME');
             cli_set_process_title($name);
         }
-        (new TcpService(Config::getInstance()->getConf('CONSOLE')));
         ServerManager::getInstance()->start();
     }
 

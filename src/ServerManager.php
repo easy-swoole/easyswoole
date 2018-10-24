@@ -130,4 +130,9 @@ class ServerManager
             }
         }
     }
+
+    function getSubServerRegister():array
+    {
+        return $this->subServerRegister;
+    }
 }
