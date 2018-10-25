@@ -19,10 +19,10 @@ class TcpController extends Controller
 {
     function onRequest(?string $actionName): bool
     {
+        $fd = $this->caller()->getClient()->getFd();
         $authKey = Config::getInstance()->getConf('CONSOLE.AUTH');
         //如果开启了权限验证
         if(!empty($authKey)){
-            $fd = $this->caller()->getClient()->getFd();
             $info = TableManager::getInstance()->get('Console.Auth')->get($fd);
             //如果是执行鉴权命令
             if($actionName == 'auth'){
@@ -41,14 +41,36 @@ class TcpController extends Controller
                     return false;
                 }
             }
-
-
         }else{
             return true;
         }
     }
 
+    /*
+     * pushLog
+     * pushLog enable
+     * pushLog disable
+     */
+    function pushLog()
+    {
+        $args = $this->caller()->getArgs();
+        $command = array_shift($args);
+        if($command == 'enable'){
+            Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG',true);
+            $str = 'enable console push log';
+        }else if($command == 'disable'){
+            Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG',false);
+            $str = 'disable console push log';
+        }else{
+            $status = Config::getInstance()->getDynamicConf('CONSOLE.PUSH_LOG');
+            $str = 'console push log is '.($status ? 'enable' : 'disable');
+        }
+        $this->response()->setMessage($str);
+    }
 
+    /*
+     * auth password
+     */
     function auth()
     {
         $fd = $this->caller()->getClient()->getFd();
@@ -90,29 +112,43 @@ class TcpController extends Controller
         }
     }
 
+    /*
+     * hostIp
+     */
     function hostIp()
     {
         $list = swoole_get_local_ip();
         $this->response()->setMessage($this->arrayToString($list));
     }
 
+    /*
+     * status
+     */
     function status()
     {
         $this->response()->setMessage($this->arrayToString(ServerManager::getInstance()->getSwooleServer()->stats()));
     }
 
+    /*
+     * reload
+     */
     function reload()
     {
         ServerManager::getInstance()->getSwooleServer()->reload();
         $this->response()->setMessage('reload at'.time());
     }
 
+    /*
+     * shutdown
+     */
     function shutdown()
     {
         ServerManager::getInstance()->getSwooleServer()->shutdown();
         $this->response()->setMessage('shutdown at'.time());
     }
-
+    /*
+     * clientInfo fd
+     */
     function clientInfo()
     {
         $args = $this->caller()->getArgs();
@@ -125,11 +161,17 @@ class TcpController extends Controller
         $this->response()->setMessage($this->arrayToString($info));
     }
 
+    /*
+     * close
+     */
     function close(){
         $this->response()->setMessage("Bye Bye !");
         $this->response()->setStatus(Response::STATUS_RESPONSE_AND_CLOSE);
     }
 
+    /*
+     * serverList
+     */
     function serverList(){
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
         $str = "serverName\t\tserverType\t\thost\t\tport\n";

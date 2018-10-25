@@ -64,12 +64,19 @@ class TcpService
                 $server->send($fd,TcpParser::pack($hello),$reactorId);
                 if(GlobalConfig::getInstance()->getConf('CONSOLE.AUTH')){
                     $server->send($fd,TcpParser::pack('please enter your auth key; auth $authKey'),$reactorId);
+                }else{
+                    //在不需要鉴权的时候，全部用户都是允许的
+                    TableManager::getInstance()->get('Console.Auth')->set($fd,[
+                        'isAuth'=>1,
+                        'tryTimes'=>0
+                    ]);
                 }
             });
             $sub->set($sub::onClose,function (\swoole_server $server, int $fd, int $reactorId){
                 TableManager::getInstance()->get('Console.Auth')->del($fd);
             });
         }
+        GlobalConfig::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG',GlobalConfig::getInstance()->getConf('CONSOLE.PUSH_LOG'));
     }
 
     static function push(string $string)

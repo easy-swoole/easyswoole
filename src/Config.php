@@ -11,16 +11,45 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Spl\SplArray;
+use Swoole\Table;
 
 class Config
 {
-    protected $conf;
-
+    private $conf;
+    private $swooleTable;
     use Singleton;
 
     public function __construct()
     {
         $this->conf = new SplArray();
+        /*
+         * 用于存储动态配置,不适合存储大量\大长度的的配置下，仅仅建议用于开关存储
+         */
+        $this->swooleTable = new \swoole_table(1024);
+        $this->swooleTable->column('value',Table::TYPE_STRING,512);
+        $this->swooleTable->create();
+    }
+
+    function setDynamicConf($key,$val)
+    {
+        $this->swooleTable->set($key,[
+            'value'=>\swoole_serialize::pack($val,0)
+        ]);
+    }
+
+    function getDynamicConf($key)
+    {
+        $data = $this->swooleTable->get($key);
+        if(!empty($data)){
+            return \swoole_serialize::unpack($data['value']);
+        }else{
+            return null;
+        }
+    }
+
+    function delDynamicConf($key)
+    {
+        $this->swooleTable->del($key);
     }
 
     /**
