@@ -20,7 +20,6 @@
         "easyswoole/utility": "^1.0",
         "jeremeamia/SuperClosure": "^2.4",
         "easyswoole/trace": "^1.0",
-        "vlucas/phpdotenv": "^2.5",
         "easyswoole/socket": "^1.0"
     },
     "require-dev": {
