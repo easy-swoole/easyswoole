@@ -47,7 +47,7 @@ class TcpService
             });
 
             $dispatcher = new Dispatcher($conf);
-            $sub = ServerManager::getInstance()->addServer('ConsoleTcp',$config['PORT'],SWOOLE_TCP,$config['HOST'],[
+            $sub = ServerManager::getInstance()->addServer('ConsoleTcp',$config['PORT'],SWOOLE_TCP,$config['LISTEN_HOST'],[
                 'heartbeat_check_interval'=>$config['EXPIRE'],
                 'heartbeat_idle_time'=>$config['EXPIRE'],
                 'open_length_check' => true,
