@@ -38,7 +38,7 @@ class Redis
     }
 
     function connect(){
-        $conf = Config::getInstance()->getConf("REDIS");
+        $conf = Config::getInstance()->getConf("testconf.REDIS");
         $this->con = new \Redis();
         $this->con->connect($conf['host'], $conf['port'], $conf['timeout']);
         $this->con->auth($conf['auth']);

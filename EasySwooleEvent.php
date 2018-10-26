@@ -25,6 +25,13 @@ Class EasySwooleEvent implements EventInterface {
 
     public static function loadConf($ConfPath)
     {
+        $mainConf = require  __DIR__ . "/Config.php";
+        //根据环境判断加载的配置文件
+        if ($mainConf["env"] === "debug") {
+            $ConfPath = $ConfPath . "/dev";
+        } else {
+            $ConfPath = $ConfPath . "/prod";
+        }
         $Conf  = Config::getInstance();
         $files = File::scanDir($ConfPath);
         foreach ($files as $file) {
@@ -53,48 +60,53 @@ Class EasySwooleEvent implements EventInterface {
         //针对websocket 注册ws onmessage事件
         EventHelper::registerDefaultOnMessage($register,\App\Parser::class);
 
-        //hot reload start TODO 线上环境可以去掉
-        $register->add($register::onWorkerStart, function(\swoole_server $server, int $workerId){
-            if ($workerId == 0) {
-                // 递归获取所有目录和文件
-                $a = function ($dir) use (&$a) {
-                    $data = array();
-                    if (is_dir($dir)) {
-                        //是目录的话，先增当前目录进去
-                        $data[] = $dir;
-                        $files = array_diff(scandir($dir), array('.', '..'));
-                        foreach ($files as $file) {
-                            $data = array_merge($data, $a($dir . "/" . $file));
-                        }
-                    } else {
-                        $data[] = $dir;
-                    }
-                    return $data;
-                };
-                $list = $a(EASYSWOOLE_ROOT);
-                $notify = inotify_init();
-                // 为所有目录和文件添加inotify监视
-                foreach ($list as $item) {
-                    inotify_add_watch($notify, $item, IN_CREATE | IN_DELETE | IN_MODIFY);
-                }
-                // 加入EventLoop
-                swoole_event_add($notify, function () use ($notify) {
-                    $events = inotify_read($notify);
-                    if (!empty($events)) {
-                        //注意更新多个文件的间隔时间处理,防止一次更新了10个文件，重启了10次，懒得做了，反正原理在这里
-                        ServerManager::getInstance()->getServer()->reload();
-                    }
-                });
-            }
-        });
+        $instance = Config::getInstance(); //获取配置实例
 
+        //hot reload start TODO 线上环境可以去掉
+        if($instance->getConf("env") && $instance->getConf("env") === "debug") {
+            //hot reload start TODO 线上环境可以去掉
+            $register->add($register::onWorkerStart, function(\swoole_server $server, int $workerId){
+                if ($workerId == 0) {
+                    // 递归获取所有目录和文件
+                    $a = function ($dir) use (&$a) {
+                        $data = array();
+                        if (is_dir($dir)) {
+                            //是目录的话，先增当前目录进去
+                            $data[] = $dir;
+                            $files = array_diff(scandir($dir), array('.', '..'));
+                            foreach ($files as $file) {
+                                $data = array_merge($data, $a($dir . "/" . $file));
+                            }
+                        } else {
+                            $data[] = $dir;
+                        }
+                        return $data;
+                    };
+                    $list = $a(EASYSWOOLE_ROOT);
+                    $notify = inotify_init();
+                    // 为所有目录和文件添加inotify监视
+                    foreach ($list as $item) {
+                        inotify_add_watch($notify, $item, IN_CREATE | IN_DELETE | IN_MODIFY);
+                    }
+                    // 加入EventLoop
+                    swoole_event_add($notify, function () use ($notify) {
+                        $events = inotify_read($notify);
+                        if (!empty($events)) {
+                            //注意更新多个文件的间隔时间处理,防止一次更新了10个文件，重启了10次，懒得做了，反正原理在这里
+                            ServerManager::getInstance()->getServer()->reload();
+                        }
+                    });
+                }
+            });
+            //hot reload end
+        }
         //hot reload end
-        $instance = Config::getInstance();
+
         //mysql主服务器
-        $masterMysqlConf = $instance->getConf("MASTER_MYSQL");
+        $masterMysqlConf = $instance->getConf("testconf.MASTER_MYSQL");
         Di::getInstance()->set('MYSQL_MASTER',\MysqliDb::class, $masterMysqlConf);
         //mysql从服务器
-        $slaveMysqlConf = $instance->getConf("SLAVE_MYSQL");
+        $slaveMysqlConf = $instance->getConf("testconf.SLAVE_MYSQL");
         Di::getInstance()->set('MYSQL_SLAVE',\MysqliDb::class, $slaveMysqlConf);
         //异步mysql主服务器
         Di::getInstance()->set('ASYNC_MYSQL_MASTER',\App\Vendor\Db\AsyncMysql::class);

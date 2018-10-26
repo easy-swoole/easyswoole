@@ -38,7 +38,7 @@ class Memcached
     }
 
     function connect(){
-        $conf = Config::getInstance()->getConf("MEMCACHED");
+        $conf = Config::getInstance()->getConf("testconf.MEMCACHED");
         $this->con = new \Memcached();
         //添加memcache池
         $this->con->addServers(array(

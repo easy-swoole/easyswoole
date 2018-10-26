@@ -29,7 +29,7 @@ class Mongodb
     }
 
     function connect(){
-        $conf = Config::getInstance()->getConf("MONGODB");
+        $conf = Config::getInstance()->getConf("testconf.MONGODB");
         $specialConf = [];
         if(isset($conf['password']) && !empty($conf['password'])){
             $specialConf['password'] = $conf['password'];

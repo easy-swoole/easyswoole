@@ -29,7 +29,7 @@ class AsyncRedis
     }
 
     function __construct(){
-        $conf = Config::getInstance()->getConf("REDIS");
+        $conf = Config::getInstance()->getConf("testconf.REDIS");
         $conf = $this->formatConf($conf);
         $this->redis = new \swoole_redis($conf);
     }
@@ -42,7 +42,7 @@ class AsyncRedis
      * @throws
      */
     function set(string $key, string $value) :bool {
-        $conf = Config::getInstance()->getConf("REDIS");
+        $conf = Config::getInstance()->getConf("testconf.REDIS");
         $this->redis->connect($conf['host'], $conf['port'] , function (\swoole_redis $redis, bool $result) use ($key, $value){
             if($result === false){
                 //执行失败处理 TODO

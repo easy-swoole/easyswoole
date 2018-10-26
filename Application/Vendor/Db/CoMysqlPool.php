@@ -41,7 +41,7 @@ class CoMysqlPool
         //初始化连接池
         for ($i=0; $i < $this->poolSize; $i++) {
             $mysql = new Mysql();
-            $Conf = Config::getInstance()->getConf("CO_MYSQL");
+            $Conf = Config::getInstance()->getConf("testconf.CO_MYSQL");
             $ret = $mysql->connect($Conf);
             if($ret){
                 array_push($this->pool, $mysql);
@@ -60,7 +60,7 @@ class CoMysqlPool
         }
         //如果尝试次数还没达最大值,  继续尝试
         $mysql = new Mysql();
-        $Conf = Config::getInstance()->getConf("CO_MYSQL");
+        $Conf = Config::getInstance()->getConf("testconf.CO_MYSQL");
         $ret = $mysql->connect($Conf);
         if($ret){
             return $mysql;

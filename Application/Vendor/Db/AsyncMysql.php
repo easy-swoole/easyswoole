@@ -46,7 +46,7 @@ class AsyncMysql
      * @throws
      */
     function query($sql){
-        $conf = Config::getInstance()->getConf("MASTER_MYSQL");
+        $conf = Config::getInstance()->getConf("testconf.MASTER_MYSQL");
         //格式化mysql配置
         $this->formatConf($conf);
         $this->db->connect($conf, function (\swoole_mysql $db, bool $result) use ($sql){
