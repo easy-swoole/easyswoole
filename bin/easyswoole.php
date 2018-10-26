@@ -163,10 +163,10 @@ switch ($mainCommand){
     }
 
     case 'start':{
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         if(in_array('produce',$commandList)){
             \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $conf = \EasySwoole\EasySwoole\Config::getInstance();
         if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
@@ -288,10 +288,10 @@ switch ($mainCommand){
     }
 
     case 'console':{
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         if(in_array('produce',$commandList)){
             \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $conf = \EasySwoole\EasySwoole\Config::getInstance()->getConf('CONSOLE');
         $client = new \EasySwoole\EasySwoole\Console\Client($conf['HOST'],$conf['PORT']);
         if($client->connect()){

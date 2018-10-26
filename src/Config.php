@@ -151,4 +151,9 @@ class Config
             throw new \Exception("config file : {$file} is miss");
         }
     }
+
+    function clear()
+    {
+        $this->conf = new SplArray();
+    }
 }

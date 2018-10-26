@@ -39,6 +39,8 @@ class Core
     function setIsDev(bool $isDev)
     {
         $this->isDev = $isDev;
+        //变更这里的时候，例如在全局的事件里面修改的，，重新加载配置项
+        $this->loadEnv();
         return $this;
     }
 
@@ -60,10 +62,10 @@ class Core
         }else{
             die('global event file missing');
         }
+        //先加载配置文件
+        $this->loadEnv();
         //执行框架初始化事件
         EasySwooleEvent::initialize();
-        //加载配置文件
-        $this->loadEnv();
         //临时文件和Log目录初始化
         $this->sysDirectoryInit();
         //注册错误回调
@@ -274,6 +276,7 @@ class Core
 
     private function loadEnv()
     {
+        //加载之前，先清空原来的
         if($this->isDev){
             $file  = EASYSWOOLE_ROOT.'/dev.env';
         }else{
