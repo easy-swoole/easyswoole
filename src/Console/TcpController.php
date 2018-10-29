@@ -104,6 +104,9 @@ class TcpController extends Controller
 
     protected function actionNotFound(?string $actionName)
     {
+        /*
+         * 请在这里处理命令，Tcp控制器中不再实现实体action
+         */
         $call = CommandContainer::getInstance()->get($actionName);
         if(is_callable($call)){
             CommandContainer::getInstance()->hook($actionName,$this->caller(),$this->response());

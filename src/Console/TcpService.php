@@ -9,6 +9,8 @@
 namespace EasySwoole\EasySwoole\Console;
 
 
+use EasySwoole\EasySwoole\Console\DefaultCommand\Auth;
+use EasySwoole\EasySwoole\Console\DefaultCommand\Help;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
 use EasySwoole\EasySwoole\Trigger;
@@ -28,6 +30,7 @@ class TcpService
                 'isAuth'=>['type'=>Table::TYPE_INT,'size'=>1],
                 'tryTimes'=>['type'=>Table::TYPE_INT,'size'=>1]
             ]);
+            $this->registerDefault();
             $conf = new Config();
             $conf->setParser(new TcpParser());
             $conf->setType($conf::TCP);
@@ -91,5 +94,14 @@ class TcpService
                 ServerManager::getInstance()->getSwooleServer()->send($fd,$string);
             }
         }
+    }
+
+    /*
+     * 注册默认的命令
+     */
+    private function registerDefault()
+    {
+        CommandContainer::getInstance()->set('help',new Help());
+        CommandContainer::getInstance()->set('auth',new Auth());
     }
 }
