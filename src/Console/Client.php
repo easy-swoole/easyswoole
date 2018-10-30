@@ -76,7 +76,7 @@ class Client
 
         $this->client->on("receive", function($cli, $data) {
             $str = TcpParser::unpack($data);
-            fwrite(STDOUT,$str."\n");
+            echo $str . PHP_EOL;
         });
         return $this->client->connect($this->host, $this->port, 0.5);
     }
