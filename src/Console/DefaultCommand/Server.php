@@ -43,6 +43,7 @@ class Server implements CommandInterface
                 case 'close': $this->close($caller, $response); break;
                 case 'clientInfo': $this->clientInfo($caller, $response); break;
                 case 'serverList': $this->serverList($caller, $response); break;
+                case 'pushLog' : $this->pushLog($caller,$response); break;
                 default :
                     $response->setMessage("action {$actionName} not supported!");
             }
