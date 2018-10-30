@@ -8,26 +8,45 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
-
 use EasySwoole\Component\Singleton;
+use EasySwoole\Socket\Bean\Caller;
+use EasySwoole\Socket\Bean\Response;
 
 class CommandContainer
 {
     use Singleton;
-    
+
     private $container = [];
 
-    public function set($key,CommandInterface $command)
+    public function set($key, CommandInterface $command)
     {
         $this->container[$key] = $command;
     }
 
-    function get($key):?CommandInterface
+    function get($key): ?CommandInterface
     {
-        if(isset($this->container[$key])){
+        if (isset($this->container[$key])) {
             return $this->container[$key];
-        }else{
+        } else {
             return null;
+        }
+    }
+
+
+    /**
+     * 调度到某控制器方法执行操作
+     * @param $actionName
+     * @param Caller $caller
+     * @param Response $response
+     * @author: eValor < master@evalor.cn >
+     */
+    function hook($actionName, Caller $caller, Response $response)
+    {
+        $call = CommandContainer::getInstance()->get($actionName);
+        if ($call instanceof CommandInterface) {
+            $call->exec($caller, $response);
+        } else {
+            $response->setMessage("action {$actionName} miss");
         }
     }
 }
