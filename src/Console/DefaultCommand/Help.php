@@ -45,6 +45,13 @@ class Help implements CommandInterface
 
     public function help(Caller $caller, Response $response)
     {
-        // TODO: Implement help() method.
+        $help = <<<HELP
+        
+查看某个命令的帮助信息
+
+用法: help 命令名称
+
+HELP;
+        $response->setMessage($help);
     }
 }

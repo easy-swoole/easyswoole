@@ -53,7 +53,25 @@ class Server implements CommandInterface
 
     public function help(Caller $caller, Response $response)
     {
+        $help = <<<HELP
+        
+进行服务端的管理
 
+命令: 
+
+status     | 查看服务当前的状态
+hostIp     | 显示服务当前的IP地址
+reload     | 重载服务端
+shutdown   | 关闭服务端
+close      | 断开远程连接
+clientInfo | 查看某个链接的信息
+serverList | 查看服务端启动的服务列表
+pushLog    | 打开或关闭远程日志推送
+
+用法 : auth password
+
+HELP;
+        $response->setMessage($help);
     }
 
     /**

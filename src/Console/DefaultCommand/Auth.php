@@ -68,6 +68,12 @@ class Auth implements CommandInterface
      */
     public function help(Caller $caller, Response $response)
     {
-        // TODO: Implement help() method.
+        $help = <<<HELP
+        
+在服务端设置需要授权才能连接时，可以使用本命令进行授权
+用法 : auth password
+
+HELP;
+        $response->setMessage($help);
     }
 }
