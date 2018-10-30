@@ -10,9 +10,11 @@ namespace EasySwoole\EasySwoole\Console\DefaultCommand;
 
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Console\CommandInterface;
+use EasySwoole\EasySwoole\Console\Helper\ConsoleTable;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
+use EasySwoole\Utility\ArrayToTextTable;
 
 /**
  * 服务管理
