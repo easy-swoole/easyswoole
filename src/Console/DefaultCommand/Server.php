@@ -10,7 +10,6 @@ namespace EasySwoole\EasySwoole\Console\DefaultCommand;
 
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Console\CommandInterface;
-use EasySwoole\EasySwoole\Console\Helper\ConsoleTable;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
@@ -67,7 +66,9 @@ class Server implements CommandInterface
      */
     private function status(Caller $caller, Response $response)
     {
-        $response->setMessage($this->arrayToString(ServerManager::getInstance()->getSwooleServer()->stats()));
+        $stats = ServerManager::getInstance()->getSwooleServer()->stats();
+        $message = new ArrayToTextTable([ $stats ]);
+        $response->setMessage($message);
     }
 
     /**
@@ -80,7 +81,8 @@ class Server implements CommandInterface
     private function hostIp(Caller $caller, Response $response)
     {
         $list = swoole_get_local_ip();
-        $response->setMessage($this->arrayToString($list));
+        $message = new ArrayToTextTable([ $list ]);
+        $response->setMessage($message);
     }
 
     /**
@@ -135,10 +137,11 @@ class Server implements CommandInterface
         $fd = array_shift($args);
         if (!empty($fd)) {
             $info = ServerManager::getInstance()->getSwooleServer()->getClientInfo($fd);
+            $info = new ArrayToTextTable([ $info ]);
         } else {
-            $info = [];
+            $info = 'missing parameter usage: server clientInfo fd';
         }
-        $response->setMessage($this->arrayToString($info));
+        $response->setMessage($info);
     }
 
     /**
@@ -150,15 +153,16 @@ class Server implements CommandInterface
      */
     private function serverList(Caller $caller, Response $response)
     {
+        $serverInfo = [];
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
-        $str = "serverName\t\tserverType\t\thost\t\tport\n";
-        $str .= sprintf("%-16s\t%-16s\t%-16s%s", 'mainServer', $conf['SERVER_TYPE'], $conf['HOST'], $conf['PORT']) . "\n";
+        $serverInfo[] = [ 'serverName' => 'mainServer', 'serverType' => $conf['SERVER_TYPE'], 'serverHost' => $conf['HOST'], 'listenPort' => $conf['PORT'] ];
         $list = ServerManager::getInstance()->getSubServerRegister();
         foreach ($list as $serverName => $item) {
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            $str .= sprintf("%-16s\t%-16s\t%-16s%s", $serverName, $type, $item['host'], $item['port']) . "\n";
+            $serverInfo[] = [ 'serverName' => $serverName, 'serverType' => $type, 'serverHost' => $item['host'], 'listenPort' => $item['port'] ];
         }
-        $response->setMessage($str);
+        $info = new ArrayToTextTable($serverInfo);
+        $response->setMessage($info);
     }
 
     private function pushLog(Caller $caller, Response $response)
@@ -176,20 +180,5 @@ class Server implements CommandInterface
             $str = 'console push log is ' . ($status ? 'enable' : 'disable');
         }
         $response->setMessage($str);
-    }
-
-    /**
-     * 将数组转为字符串
-     * @param array $array
-     * @return string
-     * @author: eValor < master@evalor.cn >
-     */
-    private function arrayToString(array $array): string
-    {
-        $str = '';
-        foreach ($array as $key => $value) {
-            $str .= "{$key} : {$value} \n";
-        }
-        return trim($str);
     }
 }
