@@ -36,7 +36,7 @@ class Help implements CommandInterface
             $actionName = $args[0];
             $call = CommandContainer::getInstance()->get($actionName);
             if ($call instanceof CommandInterface) {
-                $call->exec($caller, $response);
+                $call->help($caller, $response);
             } else {
                 $response->setMessage("no help message for command {$actionName} was found.");
             }
