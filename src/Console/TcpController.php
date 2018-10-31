@@ -46,16 +46,6 @@ class TcpController extends Controller
         }
     }
 
-    /*
-     * pushLog
-     * pushLog enable
-     * pushLog disable
-     */
-    function pushLog()
-    {
-
-    }
-
     /**
      * 控制器本身不再处理任何实体action
      * 全部转发给对应注册的命令处理器进行处理

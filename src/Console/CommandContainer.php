@@ -32,6 +32,15 @@ class CommandContainer
         }
     }
 
+    /**
+     * 获取当前已注册的全部命令
+     * @return array
+     * @author: eValor < master@evalor.cn >
+     */
+    function getCommandList()
+    {
+        return array_keys($this->container);
+    }
 
     /**
      * 调度到某控制器方法执行操作
