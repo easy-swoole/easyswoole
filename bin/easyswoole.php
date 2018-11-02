@@ -128,7 +128,7 @@ HELP_RELOAD;
 
     public static function showHelp()
     {
-        $version = \EasySwoole\EasySwoole\SysConst::VERSION;
+        $version = \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION;
         echo <<<DEFAULTHELP
 \n欢迎使用为API而生的\e[32m easySwoole\e[0m 框架 当前版本: \e[34m{$version}\e[0m
 
@@ -207,7 +207,7 @@ switch ($mainCommand){
         Install::showTag('daemonize', $daemonize);
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
-        Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
+        Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION);
         Install::showTag('run mode', $mode);
         \EasySwoole\EasySwoole\Core::getInstance()->start();
         break;
