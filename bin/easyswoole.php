@@ -164,7 +164,9 @@ switch ($mainCommand){
 
     case 'start':{
         \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        $mode = 'develop';
         if(in_array('produce',$commandList)){
+            $mode = 'produce';
             \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
         $conf = \EasySwoole\EasySwoole\Config::getInstance();
@@ -206,6 +208,7 @@ switch ($mainCommand){
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
         Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::VERSION);
+        Install::showTag('run mode', $mode);
         \EasySwoole\EasySwoole\Core::getInstance()->start();
         break;
     }
