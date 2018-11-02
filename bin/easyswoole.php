@@ -163,12 +163,12 @@ switch ($mainCommand){
     }
 
     case 'start':{
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $mode = 'develop';
         if(in_array('produce',$commandList)){
             $mode = 'produce';
             \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
+        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $conf = \EasySwoole\EasySwoole\Config::getInstance();
         if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
