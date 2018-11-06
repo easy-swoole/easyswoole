@@ -207,19 +207,22 @@ class Core
                     }catch (\Throwable $throwable){
                         Trigger::getInstance()->throwable($throwable);
                     }
+                    return;
                 }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    try{
-                        $taskObj = new $taskObj;
-                        $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
-                        //在有return或者设置了结果的时候  说明需要执行结束回调
-                        $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                        if(!is_null($ret)){
-                            $taskObj->setResult($ret);
-                            return $taskObj;
-                        }
-                    }catch (\Throwable $throwable){
-                        $taskObj->onException($throwable);
+                    $taskObj = new $taskObj;
+                }
+            }
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
+                    //在有return或者设置了结果的时候  说明需要执行结束回调
+                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                    if(!is_null($ret)){
+                        $taskObj->setResult($ret);
+                        return $taskObj;
                     }
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
@@ -258,19 +261,22 @@ class Core
                     }catch (\Throwable $throwable){
                         Trigger::getInstance()->throwable($throwable);
                     }
+                    return;
                 }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    try{
-                        $taskObj = new $taskObj;
-                        $ret =  $taskObj->run($taskObj->getData(),-1,$fromWorkerId);
-                        //在有return或者设置了结果的时候  说明需要执行结束回调
-                        $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                        if(!is_null($ret)){
-                            $taskObj->setResult($ret);
-                            return $taskObj;
-                        }
-                    }catch (\Throwable $throwable){
-                        $taskObj->onException($throwable);
+                    $taskObj = new $taskObj;
+                }
+            }
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $ret =  $taskObj->run($taskObj->getData(),-1,$fromWorkerId);
+                    //在有return或者设置了结果的时候  说明需要执行结束回调
+                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                    if(!is_null($ret)){
+                        $taskObj->setResult($ret);
+                        return $taskObj;
                     }
+                }catch (\Throwable $throwable){
+                    $taskObj->onException($throwable);
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
