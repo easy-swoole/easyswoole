@@ -238,26 +238,26 @@ class Core
         });
 
         //注册默认的pipe通讯
-
+        //通过pipe通讯，也就是processAsync投递的闭包任务，是没有taskId信息的，因此参数传递默认-1
         OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromId){
             if(is_string($taskObj) && class_exists($taskObj)){
                 $taskObj = new $taskObj;
             }
             if($taskObj instanceof AbstractAsyncTask){
                 try{
-                    $taskObj->run($taskObj->getData(),$server->worker_id,$fromId);
+                    $taskObj->run($taskObj->getData(),-1,$fromId);
                 }catch (\Throwable $throwable){
                     $taskObj->onException($throwable);
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
-                    $taskObj();
+                    $taskObj($server, -1, $fromId);
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
             }else if(is_callable($taskObj)){
                 try{
-                    call_user_func($taskObj,$server,$server->worker_id,$fromId);
+                    call_user_func($taskObj,$server,-1,$fromId);
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
