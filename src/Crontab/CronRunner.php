@@ -20,7 +20,7 @@ class CronRunner extends AbstractProcess
 
     public function run(Process $process)
     {
-        $this->tasks = $this->getArg('tasks');
+        $this->tasks = $this->getArgs();
         $this->cronProcess();
         Timer::loop(29 * 1000, function () {
             $this->cronProcess();
@@ -39,15 +39,13 @@ class CronRunner extends AbstractProcess
 
     private function cronProcess()
     {
-        foreach ($this->tasks as $taskName => $taskConst) {
-            $cronRule = $taskConst['rule'];
-            $cronClosure = $taskConst['task'];
-
+        foreach ($this->tasks as $task) {
+            $cronRule = $task::getRule();
             $nextRunTime = CronExpression::factory($cronRule)->getNextRunDate();
             $distanceTime = $nextRunTime->getTimestamp() - time();
             if ($distanceTime < 30) {
-                Timer::delay($distanceTime * 1000, function () use ($cronClosure) {
-                    TaskManager::processAsync($cronClosure);
+                Timer::delay($distanceTime * 1000, function () use ($task) {
+                    TaskManager::processAsync($task);
                 });
             }
         }

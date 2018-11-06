@@ -13,8 +13,10 @@ use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Console\TcpService;
+use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
+use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\WebService;
@@ -93,6 +95,7 @@ class Core
             $name = Config::getInstance()->getConf('SERVER_NAME');
             cli_set_process_title($name);
         }
+        Crontab::getInstance()->__run();
         ServerManager::getInstance()->start();
     }
 
@@ -197,19 +200,26 @@ class Core
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
         EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
             if(is_string($taskObj) && class_exists($taskObj)){
-                $taskObj = new $taskObj;
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
+                $ref = new \ReflectionClass($taskObj);
+                if($ref->implementsInterface(QuickTaskInterface::class)){
+                    try{
+                        $taskObj::run($server,$taskId,$fromWorkerId);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
                     }
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
+                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
+                    try{
+                        $taskObj = new $taskObj;
+                        $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
+                        //在有return或者设置了结果的时候  说明需要执行结束回调
+                        $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                        if(!is_null($ret)){
+                            $taskObj->setResult($ret);
+                            return $taskObj;
+                        }
+                    }catch (\Throwable $throwable){
+                        $taskObj->onException($throwable);
+                    }
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
@@ -239,25 +249,38 @@ class Core
 
         //注册默认的pipe通讯
         //通过pipe通讯，也就是processAsync投递的闭包任务，是没有taskId信息的，因此参数传递默认-1
-        OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromId){
+        OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromWorkerId){
             if(is_string($taskObj) && class_exists($taskObj)){
-                $taskObj = new $taskObj;
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $taskObj->run($taskObj->getData(),-1,$fromId);
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
+                $ref = new \ReflectionClass($taskObj);
+                if($ref->implementsInterface(QuickTaskInterface::class)){
+                    try{
+                        $taskObj::run($server,-1,$fromWorkerId);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
+                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
+                    try{
+                        $taskObj = new $taskObj;
+                        $ret =  $taskObj->run($taskObj->getData(),-1,$fromWorkerId);
+                        //在有return或者设置了结果的时候  说明需要执行结束回调
+                        $ret = is_null($ret) ? $taskObj->getResult() : $ret;
+                        if(!is_null($ret)){
+                            $taskObj->setResult($ret);
+                            return $taskObj;
+                        }
+                    }catch (\Throwable $throwable){
+                        $taskObj->onException($throwable);
+                    }
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
-                    $taskObj($server, -1, $fromId);
+                    return $taskObj( $server, -1, $fromWorkerId);
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
             }else if(is_callable($taskObj)){
                 try{
-                    call_user_func($taskObj,$server,-1,$fromId);
+                    call_user_func($taskObj,$server,-1,$fromWorkerId);
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
