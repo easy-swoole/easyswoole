@@ -217,6 +217,12 @@ class Core
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
+            }else if(is_callable($taskObj)){
+                try{
+                    call_user_func($taskObj,$server,$taskId,$fromWorkerId);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
             }
             return null;
         });
@@ -232,13 +238,14 @@ class Core
         });
 
         //注册默认的pipe通讯
-        OnCommand::getInstance()->set('TASK',function ($fromId,$taskObj){
+
+        OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromId){
             if(is_string($taskObj) && class_exists($taskObj)){
                 $taskObj = new $taskObj;
             }
             if($taskObj instanceof AbstractAsyncTask){
                 try{
-                    $taskObj->run($taskObj->getData(),ServerManager::getInstance()->getSwooleServer()->worker_id,$fromId);
+                    $taskObj->run($taskObj->getData(),$server->worker_id,$fromId);
                 }catch (\Throwable $throwable){
                     $taskObj->onException($throwable);
                 }
@@ -248,13 +255,19 @@ class Core
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
+            }else if(is_callable($taskObj)){
+                try{
+                    call_user_func($taskObj,$server,$server->worker_id,$fromId);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
             }
         });
 
         EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
             $message = \swoole_serialize::unpack($data);
             if($message instanceof Message){
-                OnCommand::getInstance()->hook($message->getCommand(),$fromWorkerId,$message->getData());
+                OnCommand::getInstance()->hook($message->getCommand(),$server,$message->getData(),$fromWorkerId);
             }else{
                 Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
             }
