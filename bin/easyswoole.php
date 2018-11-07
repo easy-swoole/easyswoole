@@ -300,7 +300,9 @@ switch ($mainCommand){
         if($client->connect()){
             swoole_event_add(STDIN,function()use($client){
                 $ret = trim(fgets(STDIN));
-                $client->sendCommand($ret);
+                if(!empty($ret)){
+                    $client->sendCommand($ret);
+                }
             });
         }else{
             fwrite(STDOUT, "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." fail \n");
