@@ -6,9 +6,14 @@ $file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
 if (file_exists($file)) {
     require $file;
 }else{
-    die('include composer autoload.php fail');
+    die("include composer autoload.php fail\n");
 }
 
+// require swoole version greater then 4.2.6
+$version = phpversion('swoole');
+if (version_compare(phpversion('swoole'),'4.2.6','<')){
+    die("the swoole extension version must be >= 4.2.6 (current: {$version})\n");
+}
 
 class Install
 {
