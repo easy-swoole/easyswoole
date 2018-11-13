@@ -24,7 +24,7 @@ abstract class AbstractProcess
         $this->async = $async;
         $this->args = $args;
         $this->processName = $processName;
-        $this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
+        $this->swooleProcess = new \swoole_process([$this,'__start']);
     }
 
     public function getProcess():Process
