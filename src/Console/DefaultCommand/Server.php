@@ -171,11 +171,11 @@ HELP;
     {
         $serverInfo = [];
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
-        $serverInfo[] = [ 'serverName' => 'mainServer', 'serverType' => $conf['SERVER_TYPE'], 'serverHost' => $conf['HOST'], 'listenPort' => $conf['PORT'] ];
+        $serverInfo[] = [ 'serverName' => 'mainServer', 'serverType' => $conf['SERVER_TYPE'], 'serverHost' => $conf['LISTEN_ADDRESS'], 'listenPort' => $conf['PORT'] ];
         $list = ServerManager::getInstance()->getSubServerRegister();
         foreach ($list as $serverName => $item) {
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            $serverInfo[] = [ 'serverName' => $serverName, 'serverType' => $type, 'serverHost' => $item['host'], 'listenPort' => $item['port'] ];
+            $serverInfo[] = [ 'serverName' => $serverName, 'serverType' => $type, 'listenAddress' => $item['listenAddress'], 'listenPort' => $item['port'] ];
         }
         $info = new ArrayToTextTable($serverInfo);
         $response->setMessage($info);

@@ -74,14 +74,14 @@ class ServerManager
     }
 
 
-    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $host = '0.0.0.0',array $setting = [
+    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $listenAddress = '0.0.0.0',array $setting = [
         "open_eof_check"=>false,
     ]):EventRegister
     {
         $eventRegister = new EventRegister();
         $this->subServerRegister[$serverName] = [
             'port'=>$port,
-            'host'=>$host,
+            'listenAddress'=>$listenAddress,
             'type'=>$type,
             'setting'=>$setting,
             'eventRegister'=>$eventRegister
@@ -111,7 +111,7 @@ class ServerManager
     private function attachListener():void
     {
         foreach ($this->subServerRegister as $serverName => $server){
-            $subPort = $this->getSwooleServer()->addlistener($server['host'],$server['port'],$server['type']);
+            $subPort = $this->getSwooleServer()->addlistener($server['listenAddress'],$server['port'],$server['type']);
             if($subPort){
                 $this->subServer[$serverName] = $subPort;
                 if(is_array($server['setting'])){

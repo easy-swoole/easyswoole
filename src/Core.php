@@ -79,7 +79,7 @@ class Core
     {
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
         ServerManager::getInstance()->createSwooleServer(
-            $conf['PORT'],$conf['SERVER_TYPE'],$conf['HOST'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
+            $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());

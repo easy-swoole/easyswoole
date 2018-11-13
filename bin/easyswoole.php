@@ -181,14 +181,14 @@ switch ($mainCommand){
         //创建主服务
         \EasySwoole\EasySwoole\Core::getInstance()->createServer();
         Install::showTag('main server', $conf->getConf('MAIN_SERVER.SERVER_TYPE'));
-        Install::showTag('listen address', $conf->getConf('MAIN_SERVER.HOST'));
+        Install::showTag('listen address', $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
 
         $list  = \EasySwoole\EasySwoole\ServerManager::getInstance()->getSubServerRegister();
         $index = 1;
         foreach ($list as $serverName => $item){
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            Install::showTag('sub-Server'.$index, "{$serverName} => {$type}@{$item['host']}:{$item['port']}");
+            Install::showTag('sub-Server'.$index, "{$serverName} => {$type}@{$item['listenAddress']}:{$item['port']}");
             $index++;
         }
 
