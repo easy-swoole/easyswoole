@@ -294,11 +294,11 @@ class Core
         });
 
         EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){
-            $message = \swoole_serialize::unpack($data);
+            $message = unserialize($data);
             if($message instanceof Message){
                 OnCommand::getInstance()->hook($message->getCommand(),$server,$message->getData(),$fromWorkerId);
             }else{
-                Trigger::getInstance()->error("data :{$data} not packet by swoole_serialize or not a Message Instance");
+                Trigger::getInstance()->error("data :{$data} not packet as an Message Instance");
             }
         });
 

@@ -33,7 +33,7 @@ class Config
     function setDynamicConf($key,$val)
     {
         $this->swooleTable->set($key,[
-            'value'=>\swoole_serialize::pack($val,0)
+            'value'=> serialize($val)
         ]);
     }
 
@@ -41,7 +41,7 @@ class Config
     {
         $data = $this->swooleTable->get($key);
         if(!empty($data)){
-            return \swoole_serialize::unpack($data['value']);
+            return unserialize($data['value']);
         }else{
             return null;
         }

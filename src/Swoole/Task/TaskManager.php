@@ -49,7 +49,7 @@ class TaskManager
         $message->setData($task);
         mt_srand();
         $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
-        ServerManager::getInstance()->getSwooleServer()->sendMessage(\swoole_serialize::pack($message),$workerId);
+        ServerManager::getInstance()->getSwooleServer()->sendMessage(serialize($message),$workerId);
         return true;
     }
 
