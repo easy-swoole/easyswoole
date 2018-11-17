@@ -17,9 +17,10 @@ use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
+use EasySwoole\Http\Dispatcher;
+use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
-use EasySwoole\Http\WebService;
 use EasySwoole\Trace\Bean\Location;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
@@ -174,27 +175,36 @@ class Core
             if($max == 0){
                 $max = 15;
             }
-            $webService = new WebService($namespace,$depth,$max);
+
+            $dispatcher = new Dispatcher($namespace,$depth,$max);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
-            if($httpExceptionHandler){
-                $webService->setExceptionHandler($httpExceptionHandler);
+            if(!is_callable($httpExceptionHandler)){
+                $httpExceptionHandler = function ($throwable,$request,$response){
+                    $response->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
+                    $response->write(nl2br($throwable->getMessage()."\n".$throwable->getTraceAsString()));
+                    Trigger::getInstance()->throwable($throwable);
+                };
+                Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER,$httpExceptionHandler);
             }
-            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($webService){
+            $dispatcher->setHttpExceptionHandler($httpExceptionHandler);
+
+            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 try{
                     if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
-                        $webService->onRequest($request_psr,$response_psr);
+                        $dispatcher->dispatch($request_psr,$response_psr);
                     }
                 }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
+                    call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER,$throwable,$request_psr,$response_psr));
                 }finally{
                     try{
                         EasySwooleEvent::afterRequest($request_psr,$response_psr);
                     }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
+                        call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER,$throwable,$request_psr,$response_psr));
                     }
                 }
+                $response_psr->__response();
             });
         }
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
