@@ -175,8 +175,12 @@ class Core
             if($max == 0){
                 $max = 15;
             }
-
+            $waitTime = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_WAIT_TIME));
+            if($waitTime == 0){
+                $waitTime = 5;
+            }
             $dispatcher = new Dispatcher($namespace,$depth,$max);
+            $dispatcher->setControllerPoolWaitTime($waitTime);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             if(!is_callable($httpExceptionHandler)){
                 $httpExceptionHandler = function ($throwable,$request,$response){
