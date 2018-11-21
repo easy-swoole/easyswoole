@@ -51,6 +51,7 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP�
 ## 基准测试
 
 配置1: 阿里云 1H1G 无任何优化的实例 安装CentOS-7.5/64位 PHP-7.2.11 Swoole-4.2.8 EasySwoole-3.0.7
+
 配置2: 阿里云 8H16G 无任何优化的实例 安装CentOS-7.5/64位 PHP-7.2.11 Swoole-4.2.8 EasySwoole-3.0.7
 
 另一台机器运行ab工具对以上两台实例进行压测，三台机器均在同一个内网下
