@@ -10,7 +10,7 @@
                          |___/                                                
 ```
 
-#### Doc [For English](https://www.easyswoole.com/Manual/2.x/En/_book/) Click Here
+#### Doc [For English](https://www.easyswoole.com/Manual/3.x/En/_book/) Click Here
 
 ## EasySwoole
 
@@ -50,25 +50,23 @@ EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP�
 
 ## 基准测试
 
-使用阿里云 **1核1G** 未做任何内核优化的实例作为运行 **easySwoole** 的测试机器，同时内网环境下部署另一台未经任何优化的施压机，详细配置如下
+配置1: 阿里云 1H1G 无任何优化的实例 安装CentOS-7.5/64位 PHP-7.2.11 Swoole-4.2.8 EasySwoole-3.0.7
+配置2: 阿里云 8H16G 无任何优化的实例 安装CentOS-7.5/64位 PHP-7.2.11 Swoole-4.2.8 EasySwoole-3.0.7
 
-|   配置   |    测试机     |    施压机     |
-| :----: | :--------: | :--------: |
-|  操作系统  | CentOS 7.4 | CentOS 7.4 |
-|  vCPU  |     1      |     2      |
-|   内存   |    1 GB    |    4 GB    |
-|  PHP   |    7.2     |    ----    |
-| Swoole |   1.9.21   |    ----    |
-
-基准测试在默认的 **Index** 控制器输出 'Hello World' 
+另一台机器运行ab工具对以上两台实例进行压测，三台机器均在同一个内网下
 
 ```php
 <?php
 
 namespace App\HttpController;
 
-use EasySwoole\Core\Http\AbstractInterface\Controller;
+use EasySwoole\Http\AbstractInterface\Controller;
 
+
+/**
+ * Class Index
+ * @package App\HttpController
+ */
 class Index extends Controller
 {
     function index()
@@ -78,65 +76,54 @@ class Index extends Controller
 }
 ```
 
-执行 ab 测试，其中 **172.18.95.34** 为测试机器的内网IP，50万次请求测试结果如下
+### 阿里云1核1G机器ab压测结果
 
-```bash
-ab -c 100 -n 500000 http://172.18.95.34:9501/
+> 执行压测命令 : ab -c 100 -n 10000 http://192.168.0.11:9501/
 
-This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
-Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
-Licensed to The Apache Software Foundation, http://www.apache.org/
-
-Benchmarking 172.18.95.34 (be patient)
-Completed 50000 requests
-Completed 100000 requests
-Completed 150000 requests
-Completed 200000 requests
-Completed 250000 requests
-Completed 300000 requests
-Completed 350000 requests
-Completed 400000 requests
-Completed 450000 requests
-Completed 500000 requests
-Finished 500000 requests
-
-
-Server Software:        swoole-http-server
-Server Hostname:        172.18.95.34
+```
+Server Software:        EasySwoole
+Server Hostname:        192.168.0.11
 Server Port:            9501
 
 Document Path:          /
-Document Length:        63 bytes
+Document Length:        21 bytes
 
 Concurrency Level:      100
-Time taken for tests:   41.405 seconds
-Complete requests:      500000
+Time taken for tests:   0.652 seconds
+Complete requests:      10000
 Failed requests:        0
-Non-2xx responses:      500000
-Total transferred:      119000000 bytes
-HTML transferred:       31500000 bytes
-Requests per second:    12075.71 [#/sec] (mean)
-Time per request:       8.281 [ms] (mean)
-Time per request:       0.083 [ms] (mean, across all concurrent requests)
-Transfer rate:          2806.66 [Kbytes/sec] received
+Write errors:           0
+Total transferred:      1690000 bytes
+HTML transferred:       210000 bytes
+Requests per second:    15325.16 [#/sec] (mean)
+Time per request:       9.685 [ms] (mean)
+Time per request:       0.097 [ms] (mean, across all concurrent requests)
+Transfer rate:          2592.05 [Kbytes/sec] received
+```
 
-Connection Times (ms)
-              min  mean[+/-sd] median   max
-Connect:        0    1   0.5      1       4
-Processing:     2    7   2.4      7      66
-Waiting:        1    6   2.4      6      66
-Total:          3    8   2.4      8      67
+### 阿里云8核16G机器ab压测结果
 
-Percentage of the requests served within a certain time (ms)
-  50%      8
-  66%      9
-  75%      9
-  80%      9
-  90%     10
-  95%     10
-  98%     11
-  99%     12
- 100%     67 (longest request)
+> 执行压测命令 : ab -c 100 -n 10000 http://192.168.0.4:9501/
+
+```
+Server Software:        EasySwoole
+Server Hostname:        192.168.0.4
+Server Port:            9501
+
+Document Path:          /
+Document Length:        21 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.746 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1690000 bytes
+HTML transferred:       210000 bytes
+Requests per second:    66935.97 [#/sec] (mean)
+Time per request:       1.149 [ms] (mean)
+Time per request:       0.015 [ms] (mean, across all concurrent requests)
+Transfer rate:          2265.40 [Kbytes/sec] received
 ```
 
 ## 其他
