@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Crontab;
 
 use Cron\CronExpression;
+use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
 use EasySwoole\EasySwoole\Swoole\Process\AbstractProcess;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\EasySwoole\Swoole\Time\Timer;
@@ -39,13 +40,18 @@ class CronRunner extends AbstractProcess
 
     private function cronProcess()
     {
-        foreach ($this->tasks as $task) {
-            $cronRule = $task::getRule();
-            $nextRunTime = CronExpression::factory($cronRule)->getNextRunDate();
+        $table = TableManager::getInstance()->get('CrontabRuleTable');
+        foreach ($table as $taskName => $task) {
+            $taskRule = $task['taskRule'];
+            $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate();
             $distanceTime = $nextRunTime->getTimestamp() - time();
             if ($distanceTime < 30) {
-                Timer::delay($distanceTime * 1000, function () use ($task) {
-                    TaskManager::processAsync($task);
+                Timer::delay($distanceTime * 1000, function () use ($taskName, $taskRule) {
+                    $nextRunTime = CronExpression::factory($taskRule)->getNextRunDate();
+                    $table = TableManager::getInstance()->get('CrontabRuleTable');
+                    $table->incr($taskName, 'taskRunTimes', 1);
+                    $table->set($taskName, ['taskNextRunTime' => $nextRunTime->getTimestamp()]);
+                    TaskManager::processAsync($this->tasks[$taskName]);
                 });
             }
         }
