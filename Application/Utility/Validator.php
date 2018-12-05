@@ -16,6 +16,12 @@ class Validator
      */
     private $validateRes = null;
 
+    /**
+     * 自定义字段名称的msg
+     * @var array
+     */
+    private $msg = array();
+
     public function __construct(){
     }
 
@@ -41,6 +47,33 @@ class Validator
     public function mobile(array &$data, string &$field) :bool {
         if(isset($data[$field])){
             return preg_match("/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\\d{8}$/", $data[$field]);
+        }
+        return true; //如果没有这个字段则不校验, 因为判断是否存在这个字段通过required决定
+    }
+
+
+    /**
+     * 逗号间隔电话校验如:   312312-31-413,14123-413,1846113
+     * @param array $data 数组数据
+     * @param string $field 需要校验的字段
+     * @return bool
+     */
+    public function csPhone(array &$data, string &$field) :bool {
+        if(isset($data[$field])){
+            $data[$field] = str_replace("，", ",", $data[$field]); //将汉字逗号转为英文逗号保存
+            $phones = explode(",", $data[$field]);
+            foreach ($phones as $phone) {
+                if(!preg_match("/^[0-9-]+$/", (string)$phone)) {
+                    return false;
+                }
+                $eachPhones = explode("-", $phone);
+                foreach ($eachPhones as $phoneNum) {
+                    //如果不是数字, 则校验失败
+                    if(!preg_match("/^[0-9]+$/", (string)$phoneNum)) {
+                        return false;
+                    }
+                }
+            }
         }
         return true; //如果没有这个字段则不校验, 因为判断是否存在这个字段通过required决定
     }
@@ -242,6 +275,27 @@ class Validator
     }
 
     /**
+     * 值范围校验, 比如有个需求, 客户端传入的某个字段参数必须在foo,good,park这三个值内, 如果不是则校验不过
+     * @param array $data
+     * @param string $field
+     * @param string $args
+     * @return bool
+     */
+    public function notIn(array &$data, string &$field, string $args) :bool{
+        $argsArr = @explode(",", $args);
+        $res = true;
+        if (isset($data[$field])) {
+            foreach ($argsArr as $v){
+                if($v === $data[$field]){
+                    $res = false;
+                    break;
+                }
+            }
+        }
+        return $res;
+    }
+
+    /**
      * 验证url
      * @param array $data
      * @param string $field
@@ -254,6 +308,20 @@ class Validator
                 return true;
             }
             return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * string过滤, 去除html标签
+     * @param array $data
+     * @param string $field
+     * @return bool
+     */
+    public function string(array &$data, string &$field) :bool {
+        if(isset($data[$field])){
+            $data[$field] = strip_tags(strval($data[$field]));
         }
         return true;
     }
@@ -474,6 +542,7 @@ class Validator
      * @return bool
      */
     public function validate(&$data, array $fieldsRules=array(), array $msg=array()) :bool {
+        $this->msg = $msg;
         //遍历所有字段的校验规则, 针对每个字段的校验规则进行校验
         foreach ($fieldsRules as $field => $singleRules){
             $ruleArr = explode('|', $singleRules);
@@ -488,6 +557,7 @@ class Validator
                 $ruleContentLength = count($ruleContent);
                 //根据参数长度, 使用校验, TODO 单个校验目前最多只有1个外界参数, 不包含固定的data和field
                 switch ($ruleContentLength) {
+                    case 0 : break;
                     case 1 :
                         $res = $this->$method($data, $field) && $res;
                         break;
@@ -495,12 +565,15 @@ class Validator
                         $res = $this->$method($data, $field, $ruleContent[1]) && $res;
                         break;
                     default :
+                        //校验规则里携带":"符号
+                        unset($ruleContent[0]);
+                        $res = $this->$method($data, $field, implode(":", $ruleContent)) && $res;
                         break;
                 }
             }
             //如果单个字段校验没通过, 则将信息加入校验数组中
             if($res === false){
-                $this->validateRes[$field] = isset($msg[$field]) ? $msg[$field] : "校验失败";
+                $this->validateRes[$field] = "：内容过长或者格式不正确";
             }
         }
         return !$this->hasError();
@@ -533,10 +606,13 @@ class Validator
         $msg = "";
         if (is_array($this->validateRes) && !empty($this->validateRes)) {
             foreach ($this->validateRes as $k => $v) {
-                $msg .= $k . " " . $v . "\n";
+                $field = $k;
+                if (isset($this->msg[$k]) && !empty($this->msg[$k])) {
+                    $field = $this->msg[$k];
+                }
+                $msg .= $field . $v . "\r\n";
             }
         }
         return $msg;
     }
-
 }

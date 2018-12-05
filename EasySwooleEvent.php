@@ -49,8 +49,8 @@ Class EasySwooleEvent implements EventInterface {
         // 载入项目 Conf 文件夹中所有的配置文件
         self::loadConf(EASYSWOOLE_ROOT . '/Conf');
 
-        //异常拦截, 生产环境开启此配置, TODO 调试环境关闭有助于调试
-//        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
+        //异常拦截, 开启此配置, 测试环境也会拦截和打印内容
+        Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );
 //        Di::getInstance()->set(SysConst::CONTROLLER_MAX_DEPTH, 5);
     }
 
