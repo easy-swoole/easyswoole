@@ -44,12 +44,6 @@ class TcpService
                 $response->setStatus($response::STATUS_RESPONSE_AND_CLOSE);
             });
 
-            $conf->setOnExceptionHandler(function ($server, \Throwable $throwable, $data, $client, Response $response) {
-                Trigger::getInstance()->throwable($throwable);
-                $response->setMessage($throwable->getMessage());
-                $response->setStatus($response::STATUS_RESPONSE_AND_CLOSE);
-            });
-
             $dispatcher = new Dispatcher($conf);
             $sub = ServerManager::getInstance()->addServer('ConsoleTcp', $config['PORT'], SWOOLE_TCP, $config['LISTEN_ADDRESS'], [
                 'heartbeat_check_interval' => $config['EXPIRE'],
