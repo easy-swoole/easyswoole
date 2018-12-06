@@ -2,17 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: yf
- * Date: 2018/7/28
- * Time: 下午5:41
+ * Date: 2018/12/6
+ * Time: 11:23 PM
  */
 
 namespace EasySwoole\EasySwoole\Swoole\Memory;
 
 
 use EasySwoole\Component\Singleton;
-use Swoole\Channel;
+use Swoole\Coroutine\Channel;
 
-class ChannelManager
+class CoChannelManger
 {
     use Singleton;
     private $list = [];
