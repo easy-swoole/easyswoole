@@ -11,7 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 class SysConst
 {
-    const EASYSWOOLE_VERSION = '3.0.7';
+    const EASYSWOOLE_VERSION = '3.0.8';
     const ERROR_HANDLER = 'ERROR_HANDLER';
     const SHUTDOWN_FUNCTION = 'SHUTDOWN_FUNCTION';
 
