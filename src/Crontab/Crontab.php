@@ -17,7 +17,10 @@ class Crontab
     use Singleton;
 
     private $tasks = [];
-    private $cronTaskTableName = 'CrontabRuleTable';
+    /*
+     * 下划线开头表示不希望用户使用
+     */
+    public static $__swooleTableName = '__CrontabRuleTable';
 
     /*
      * 同名任务会被覆盖
@@ -52,7 +55,7 @@ class Crontab
      */
     function resetTaskRule($taskName, $taskRule)
     {
-        $table = TableManager::getInstance()->get('CrontabRuleTable');
+        $table = TableManager::getInstance()->get(self::$__swooleTableName);
         if ($table->exist($taskName)) {
             if (CronExpression::isValidExpression($taskRule)) {
                 $table->set($taskName, ['taskRule' => $taskRule]);
@@ -111,7 +114,7 @@ class Crontab
      */
     private function getTableTaskInfo($taskName)
     {
-        $table = TableManager::getInstance()->get($this->cronTaskTableName);
+        $table = TableManager::getInstance()->get(self::$__swooleTableName);
         if ($table) {
             if ($table->exist($taskName)) {
                 return $table->get($taskName);
@@ -134,13 +137,13 @@ class Crontab
             $runner = new CronRunner("{$name}.Crontab", $this->tasks);
 
             // 将当前任务的初始规则全部添加到swTable管理
-            TableManager::getInstance()->add($this->cronTaskTableName, [
+            TableManager::getInstance()->add(self::$__swooleTableName, [
                 'taskRule' => ['type' => Table::TYPE_STRING, 'size' => 35],
                 'taskRunTimes' => ['type' => Table::TYPE_INT, 'size' => 4],
                 'taskNextRunTime' => ['type' => Table::TYPE_INT, 'size' => 4]
             ], 1024);
 
-            $table = TableManager::getInstance()->get($this->cronTaskTableName);
+            $table = TableManager::getInstance()->get(self::$__swooleTableName);
 
             // 由于添加时已经确认过任务均是AbstractCronTask的子类 这里不再去确认
             foreach ($this->tasks as $cronTaskName => $cronTaskClass) {

@@ -40,7 +40,7 @@ class CronRunner extends AbstractProcess
 
     private function cronProcess()
     {
-        $table = TableManager::getInstance()->get('CrontabRuleTable');
+        $table = TableManager::getInstance()->get(Crontab::$__swooleTableName);
         foreach ($table as $taskName => $task) {
             $taskRule = $task['taskRule'];
             $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate();
@@ -48,7 +48,7 @@ class CronRunner extends AbstractProcess
             if ($distanceTime < 30) {
                 Timer::delay($distanceTime * 1000, function () use ($taskName, $taskRule) {
                     $nextRunTime = CronExpression::factory($taskRule)->getNextRunDate();
-                    $table = TableManager::getInstance()->get('CrontabRuleTable');
+                    $table = TableManager::getInstance()->get(Crontab::$__swooleTableName);
                     $table->incr($taskName, 'taskRunTimes', 1);
                     $table->set($taskName, ['taskNextRunTime' => $nextRunTime->getTimestamp()]);
                     TaskManager::processAsync($this->tasks[$taskName]);
