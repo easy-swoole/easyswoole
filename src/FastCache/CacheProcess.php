@@ -24,6 +24,7 @@ class CacheProcess extends AbstractProcess
 
     public function run(Process $process)
     {
+        \Swoole\Runtime::enableCoroutine(true);
         $this->splArray = new SplArray();
         // TODO: Implement run() method.
         go(function (){
@@ -145,10 +146,10 @@ class CacheProcess extends AbstractProcess
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-        if (file_exists($this->sock))
-        {
-            unlink($this->sock);
-        }
+//        if (file_exists($this->sock))
+//        {
+//            unlink($this->sock);
+//        }
     }
 
     public function onReceive(string $str)
