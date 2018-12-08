@@ -20,6 +20,7 @@ class CacheProcess extends AbstractProcess
      */
     protected $splArray;
     protected $queueArray = [];
+    protected $sock;
 
     public function run(Process $process)
     {
@@ -28,6 +29,7 @@ class CacheProcess extends AbstractProcess
         go(function (){
             $index = $this->getArg('index');
             $sockfile = EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
+            $this->sock = $sockfile;
             if (file_exists($sockfile))
             {
                 unlink($sockfile);
@@ -143,6 +145,10 @@ class CacheProcess extends AbstractProcess
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
+        if (file_exists($this->sock))
+        {
+            unlink($this->sock);
+        }
     }
 
     public function onReceive(string $str)
