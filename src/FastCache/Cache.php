@@ -50,6 +50,54 @@ class Cache
         return $this->sendAndRecv($key,$com,$timeout);
     }
 
+    function flush()
+    {
+
+    }
+
+    public function enQueue($key,$value,$timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('enQueue');
+        $com->setValue($value);
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    public function deQueue($key,$timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('deQueue');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    public function queueSize($key,$timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('queueSize');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    public function unsetQueue($key,$timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('unsetQueue');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    /*
+     * 返回当前队列的全部key名称
+     */
+    public function queueList($timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('queueList');
+        return $this->sendAndRecv('',$com,$timeout);
+    }
+
     private function generateSocket($key):string
     {
         //当以多维路径作为key的时候，以第一个路径为主。

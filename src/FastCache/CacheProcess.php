@@ -19,6 +19,8 @@ class CacheProcess extends AbstractProcess
      * @var $splArray SplArray
      */
     protected $splArray;
+    protected $queueArray = [];
+
     public function run(Process $process)
     {
         $this->splArray = new SplArray();
@@ -66,8 +68,44 @@ class CacheProcess extends AbstractProcess
                                         $this->splArray->unset($fromPackage->getKey());
                                         break;
                                     }
-
-
+                                    case 'enQueue':{
+                                        $que = $this->initQueue($fromPackage->getKey());
+                                        $data = $fromPackage->getValue();
+                                        if($data !== null){
+                                            $que->enqueue($fromPackage->getValue());
+                                            $com->setValue(true);
+                                        }else{
+                                            $com->setValue(false);
+                                        }
+                                        break;
+                                    }
+                                    case 'deQueue':{
+                                        $que = $this->initQueue($fromPackage->getKey());
+                                        if($que->isEmpty()){
+                                            $com->setValue(null);
+                                        }else{
+                                            $com->setValue($que->dequeue());
+                                        }
+                                        break;
+                                    }
+                                    case 'queueSize':{
+                                        $que = $this->initQueue($fromPackage->getKey());
+                                        $com->setValue($que->count());
+                                        break;
+                                    }
+                                    case 'unsetQueue':{
+                                        if(isset($this->queueArray[$fromPackage->getKey()])){
+                                            unset($this->queueArray[$fromPackage->getKey()]);
+                                            $com->setValue(true);
+                                        }else{
+                                            $com->setValue(false);
+                                        }
+                                        break;
+                                    }
+                                    case 'queueList':{
+                                        $com->setValue(array_keys($this->queueArray));
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -79,14 +117,22 @@ class CacheProcess extends AbstractProcess
         });
     }
 
+    private function initQueue($key):\SplQueue
+    {
+        if(!isset($this->queueArray[$key])){
+            $this->queueArray[$key] = new \SplQueue();
+        }
+        return $this->queueArray[$key];
+    }
+
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-        file_put_contents(EASYSWOOLE_ROOT.'/sh.txt',date('h:i:s'));
     }
 
     public function onReceive(string $str)
     {
         // TODO: Implement onReceive() method.
     }
+
 }
