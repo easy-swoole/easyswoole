@@ -27,6 +27,9 @@ class Cache
 
     function set($key,$value,float $timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return false;
+        }
         $com = new Package();
         $com->setCommand('set');
         $com->setValue($value);
@@ -36,6 +39,9 @@ class Cache
 
     function get($key,float $timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return null;
+        }
         $com = new Package();
         $com->setCommand('get');
         $com->setKey($key);
@@ -44,19 +50,34 @@ class Cache
 
     function unset($key,float $timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return false;
+        }
         $com = new Package();
         $com->setCommand('unset');
         $com->setKey($key);
         return $this->sendAndRecv($key,$com,$timeout);
     }
 
-    function flush()
+    function flush(float $timeout = 0.1)
     {
-
+        if($this->processNum <= 0){
+            return false;
+        }
+        $com = new Package();
+        $com->setCommand('flush');
+        for( $i=0 ; $i < $this->processNum ; $i++){
+            $sockFile = EASYSWOOLE_TEMP_DIR."/server{$i}.sock";
+            $this->sendAndRecv('',$com,$timeout,$sockFile);
+        }
+        return true;
     }
 
     public function enQueue($key,$value,$timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return false;
+        }
         $com = new Package();
         $com->setCommand('enQueue');
         $com->setValue($value);
@@ -66,6 +87,9 @@ class Cache
 
     public function deQueue($key,$timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return null;
+        }
         $com = new Package();
         $com->setCommand('deQueue');
         $com->setKey($key);
@@ -74,14 +98,20 @@ class Cache
 
     public function queueSize($key,$timeout = 0.1)
     {
+        if($this->processNum <= 0){
+            return null;
+        }
         $com = new Package();
         $com->setCommand('queueSize');
         $com->setKey($key);
         return $this->sendAndRecv($key,$com,$timeout);
     }
 
-    public function unsetQueue($key,$timeout = 0.1)
+    public function unsetQueue($key,$timeout = 0.1):?bool
     {
+        if($this->processNum <= 0){
+            return false;
+        }
         $com = new Package();
         $com->setCommand('unsetQueue');
         $com->setKey($key);
@@ -91,11 +121,28 @@ class Cache
     /*
      * 返回当前队列的全部key名称
      */
-    public function queueList($timeout = 0.1)
+    public function queueList($timeout = 0.1):?array
     {
+        if($this->processNum <= 0){
+            return [];
+        }
         $com = new Package();
         $com->setCommand('queueList');
         return $this->sendAndRecv('',$com,$timeout);
+    }
+
+    function flushQueue(float $timeout = 0.1):bool
+    {
+        if($this->processNum <= 0){
+            return false;
+        }
+        $com = new Package();
+        $com->setCommand('flushQueue');
+        for( $i=0 ; $i < $this->processNum ; $i++){
+            $sockFile = EASYSWOOLE_TEMP_DIR."/server{$i}.sock";
+            $this->sendAndRecv('',$com,$timeout,$sockFile);
+        }
+        return true;
     }
 
     private function generateSocket($key):string
@@ -107,9 +154,12 @@ class Cache
         return EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
     }
 
-    private function sendAndRecv($key,Package $package,$timeout)
+    private function sendAndRecv($key,Package $package,$timeout,$socketFile = null)
     {
-        $client = new Client($this->generateSocket($key));
+        if(empty($socketFile)){
+            $socketFile = $this->generateSocket($key);
+        }
+        $client = new Client($socketFile);
         $client->send(serialize($package));
         $ret =  $client->recv($timeout);
         if(!empty($ret)){
@@ -124,12 +174,11 @@ class Cache
     /*
      * 请勿私自调用
      */
-    function __hook()
+    function __run()
     {
-        $this->processNum = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
         $this->serverName = Config::getInstance()->getConf('SERVER_NAME');
         for( $i=0 ; $i < $this->processNum ; $i++){
-            ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$this->serverName}.FAST_CACHE",['index'=>$i]))->getProcess());
+            ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$this->serverName}.FastCache.{$i}",['index'=>$i]))->getProcess());
         }
     }
 }

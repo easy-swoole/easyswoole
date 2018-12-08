@@ -68,6 +68,11 @@ class CacheProcess extends AbstractProcess
                                         $this->splArray->unset($fromPackage->getKey());
                                         break;
                                     }
+                                    case 'flush':{
+                                        $com->setValue(true);
+                                        $this->splArray = new SplArray();
+                                        break;
+                                    }
                                     case 'enQueue':{
                                         $que = $this->initQueue($fromPackage->getKey());
                                         $data = $fromPackage->getValue();
@@ -104,6 +109,11 @@ class CacheProcess extends AbstractProcess
                                     }
                                     case 'queueList':{
                                         $com->setValue(array_keys($this->queueArray));
+                                        break;
+                                    }
+                                    case 'flushQueue':{
+                                        $this->queueArray = [];
+                                        $com->setValue(true);
                                         break;
                                     }
                                 }

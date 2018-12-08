@@ -14,6 +14,7 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Console\TcpService;
 use EasySwoole\EasySwoole\Crontab\Crontab;
+use EasySwoole\EasySwoole\FastCache\Cache;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
@@ -96,7 +97,10 @@ class Core
             $name = Config::getInstance()->getConf('SERVER_NAME');
             cli_set_process_title($name);
         }
+        //注册crontab进程
         Crontab::getInstance()->__run();
+        //注册fastCache进程
+        Cache::getInstance()->__run();
         ServerManager::getInstance()->start();
     }
 
