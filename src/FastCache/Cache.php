@@ -17,12 +17,71 @@ class Cache
 {
     use Singleton;
 
+    private $processNum = 0;
+    private $serverName;
+
     function __construct()
     {
-        $num = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
-        if($num > 0){
-            $serverNAme = Config::getInstance()->getConf('SERVER_NAME');
-            ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$serverNAme}.FAST_CACHE"))->getProcess());
+        $this->processNum = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
+    }
+
+    function set($key,$value,float $timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('set');
+        $com->setValue($value);
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    function get($key,float $timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('get');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    function unset($key,float $timeout = 0.1)
+    {
+        $com = new Package();
+        $com->setCommand('unset');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
+    private function generateSocket($key):string
+    {
+        //当以多维路径作为key的时候，以第一个路径为主。
+        $list = explode('.',$key);
+        $key = array_shift($list);
+        $index = base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
+        return EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
+    }
+
+    private function sendAndRecv($key,Package $package,$timeout)
+    {
+        $client = new Client($this->generateSocket($key));
+        $client->send(serialize($package));
+        $ret =  $client->recv($timeout);
+        if(!empty($ret)){
+            $ret = unserialize($ret);
+            if($ret instanceof Package){
+                return $ret->getValue();
+            }
+        }
+        return null;
+    }
+
+    /*
+     * 请勿私自调用
+     */
+    function __hook()
+    {
+        $this->processNum = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
+        $this->serverName = Config::getInstance()->getConf('SERVER_NAME');
+        for( $i=0 ; $i < $this->processNum ; $i++){
+            ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$this->serverName}.FAST_CACHE",['index'=>$i]))->getProcess());
         }
     }
 }

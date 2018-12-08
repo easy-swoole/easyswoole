@@ -8,21 +8,24 @@
 
 namespace EasySwoole\EasySwoole\FastCache;
 
-
-use EasySwoole\EasySwoole\Swoole\Memory\ChannelManager;
 use EasySwoole\EasySwoole\Swoole\Process\AbstractProcess;
 use EasySwoole\EasySwoole\Trigger;
-use Swoole\Coroutine\Channel;
+use EasySwoole\Spl\SplArray;
 use Swoole\Process;
 
 class CacheProcess extends AbstractProcess
 {
-
+    /*
+     * @var $splArray SplArray
+     */
+    protected $splArray;
     public function run(Process $process)
     {
+        $this->splArray = new SplArray();
         // TODO: Implement run() method.
         go(function (){
-            $sockfile = EASYSWOOLE_ROOT."/server.sock";
+            $index = $this->getArg('index');
+            $sockfile = EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
             if (file_exists($sockfile))
             {
                 unlink($sockfile);
@@ -36,6 +39,7 @@ class CacheProcess extends AbstractProcess
             while (1){
                 $conn = stream_socket_accept($socket,-1);
                 if($conn){
+                    $com = new Package();
                     stream_set_timeout($conn,2);
                     //先取4个字节的头
                     $header = fread($conn,4);
@@ -44,29 +48,33 @@ class CacheProcess extends AbstractProcess
                         $data = fread($conn,$allLength );
                         if(strlen($data) == $allLength){
                             //开始数据包+命令处理，并返回数据
-                            fwrite($conn,Protocol::pack(time()));
-                            fclose($conn);
+                            $fromPackage = unserialize($data);
+                            if($fromPackage instanceof Package){
+                                switch ($fromPackage->getCommand())
+                                {
+                                    case 'set':{
+                                        $com->setValue(true);
+                                        $this->splArray->set($fromPackage->getKey(),$fromPackage->getValue());
+                                        break;
+                                    }
+                                    case 'get':{
+                                        $com->setValue($this->splArray->get($fromPackage->getKey()));
+                                        break;
+                                    }
+                                    case 'unset':{
+                                        $com->setValue(true);
+                                        $this->splArray->unset($fromPackage->getKey());
+                                        break;
+                                    }
+
+
+                                }
+                            }
                         }
                     }
+                    fwrite($conn,Protocol::pack(serialize($com)));
+                    fclose($conn);
                 }
-
-                  /*
-                   * stream_select暂时无法被协程化
-                    $read = [$socket];
-                    $mod_fd = stream_select($read, $write, $except , 1);
-                    var_dump('select');
-                    if ($mod_fd === FALSE) {
-                        return;
-                    }
-                    while ($mod_fd > 0){
-                        $conn = stream_socket_accept($socket);
-                        stream_set_blocking($conn,0);
-                        $data = fread($conn,1024);
-                        var_dump($data);
-                        fwrite($conn,time());
-                        $mod_fd--;
-                    }
-                   */
             }
         });
     }
