@@ -111,6 +111,7 @@ class Core
         if(!is_dir($tempDir)){
             mkdir($tempDir);
         }
+        defined('EASYSWOOLE_TEMP_DIR') or define('EASYSWOOLE_TEMP_DIR',$tempDir);
 
         $logDir = Config::getInstance()->getConf('LOG_DIR');
         if(empty($logDir)){
@@ -120,6 +121,8 @@ class Core
         if(!is_dir($logDir)){
             mkdir($logDir);
         }
+        defined('EASYSWOOLE_LOG_DIR') or define('EASYSWOOLE_LOG_DIR',$logDir);
+
         //设置默认文件目录值
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
