@@ -68,6 +68,11 @@ class CacheProcess extends AbstractProcess
                                         $this->splArray->unset($fromPackage->getKey());
                                         break;
                                     }
+                                    case 'keys':{
+                                        $key = $fromPackage->getKey();
+                                        $com->setValue($this->splArray->keys($key));
+                                        break;
+                                    }
                                     case 'flush':{
                                         $com->setValue(true);
                                         $this->splArray = new SplArray();

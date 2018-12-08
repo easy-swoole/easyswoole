@@ -59,6 +59,17 @@ class Cache
         return $this->sendAndRecv($key,$com,$timeout);
     }
 
+    function keys($key = null,float $timeout = 0.1):?array
+    {
+        if($this->processNum <= 0){
+            return [];
+        }
+        $com = new Package();
+        $com->setCommand('keys');
+        $com->setKey($key);
+        return $this->sendAndRecv($key,$com,$timeout);
+    }
+
     function flush(float $timeout = 0.1)
     {
         if($this->processNum <= 0){
