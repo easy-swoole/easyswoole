@@ -48,6 +48,11 @@ class Core
         return $this;
     }
 
+    function isDev():bool
+    {
+        return $this->isDev;
+    }
+
     function initialize()
     {
         //检查全局文件是否存在.
