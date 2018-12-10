@@ -18,6 +18,8 @@ EasySwoole is a distributed, persistent memory PHP framework based on the Swoole
 - Fast and flexible parameter validator
 - Powerful log component
 - Universal connection pools
+- Remote Console support
+- Crontab Rule Timer support
 
 ## ab Test
 
