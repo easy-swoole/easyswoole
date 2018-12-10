@@ -92,9 +92,16 @@ Time per request:       0.015 [ms] (mean, across all concurrent requests)
 Transfer rate:          2265.40 [Kbytes/sec] received
 ```
 
-## Others 
+## Quick Start
+```
+composer require easyswoole/easyswoole=3.x
+php vendor/bin/easyswoole.php install
+php easyswoole start
+```
 
+## Others 
 - [Home Page](https://www.easyswoole.com)
 - [Git For Doc](https://github.com/easy-swoole/doc)
+- [Git For Demo](https://github.com/easy-swoole/demo)
 - QQ Group : **633921431**
 
