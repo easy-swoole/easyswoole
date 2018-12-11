@@ -30,7 +30,7 @@ class ActorProcess extends AbstractProcess
             $index = $this->getArg('index');
             $this->actorClass = $this->getArg('actorClass');
             $this->processIndex = str_pad($index,4,'0',STR_PAD_LEFT);
-            $sockfile = EASYSWOOLE_TEMP_DIR."/actor.{$this->getProcessName()}.{$index}.sock";
+            $sockfile = EASYSWOOLE_TEMP_DIR."/{$this->getProcessName()}.sock";
             var_dump($sockfile);
             $this->sock = $sockfile;
             if (file_exists($sockfile))

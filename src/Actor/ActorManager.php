@@ -46,7 +46,7 @@ class ActorManager
         $name = Config::getInstance()->getConf('SERVER_NAME');
         foreach ($this->list as $conf){
             $num = $conf->getActorProcessNum();
-            $subName = "{$name}.{$conf->getActorName()}";
+            $subName = "{$name}.ActorProcess.{$conf->getActorName()}";
             for ($index = 0;$index < $num; $index++){
                 $process = new ActorProcess("{$subName}.{$index}",[
                     'index'=>$index,
