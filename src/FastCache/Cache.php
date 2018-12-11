@@ -23,6 +23,7 @@ class Cache
     function __construct()
     {
         $this->processNum = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
+        $this->serverName = Config::getInstance()->getConf('SERVER_NAME');
     }
 
     function set($key,$value,float $timeout = 0.1)
@@ -150,7 +151,7 @@ class Cache
         $com = new Package();
         $com->setCommand('flushQueue');
         for( $i=0 ; $i < $this->processNum ; $i++){
-            $sockFile = EASYSWOOLE_TEMP_DIR."/server{$i}.sock";
+            $sockFile = EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCache.{$i}.sock";
             $this->sendAndRecv('',$com,$timeout,$sockFile);
         }
         return true;
@@ -162,7 +163,7 @@ class Cache
         $list = explode('.',$key);
         $key = array_shift($list);
         $index = base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
-        return EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
+        return EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCache.{$index}.sock";
     }
 
     private function sendAndRecv($key,Package $package,$timeout,$socketFile = null)
@@ -187,7 +188,6 @@ class Cache
      */
     function __run()
     {
-        $this->serverName = Config::getInstance()->getConf('SERVER_NAME');
         for( $i=0 ; $i < $this->processNum ; $i++){
             ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$this->serverName}.FastCache.{$i}",['index'=>$i]))->getProcess());
         }

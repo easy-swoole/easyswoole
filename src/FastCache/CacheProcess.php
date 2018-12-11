@@ -29,7 +29,7 @@ class CacheProcess extends AbstractProcess
         // TODO: Implement run() method.
         go(function (){
             $index = $this->getArg('index');
-            $sockfile = EASYSWOOLE_TEMP_DIR."/server{$index}.sock";
+            $sockfile = EASYSWOOLE_TEMP_DIR."/{$this->getProcessName()}.sock";
             $this->sock = $sockfile;
             if (file_exists($sockfile))
             {
