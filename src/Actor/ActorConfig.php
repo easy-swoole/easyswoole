@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole\Actor;
 
 class ActorConfig
 {
+    protected $actorName = 'actor';
     protected $actorClass;
     protected $actorProcessNum = 3;
     protected $maxActorNum = 10000;
@@ -61,5 +62,21 @@ class ActorConfig
     public function setMaxActorNum(int $maxActorNum): void
     {
         $this->maxActorNum = $maxActorNum;
+    }
+
+    /**
+     * @return string
+     */
+    public function getActorName(): string
+    {
+        return $this->actorName;
+    }
+
+    /**
+     * @param string $actorName
+     */
+    public function setActorName(string $actorName): void
+    {
+        $this->actorName = $actorName;
     }
 }
