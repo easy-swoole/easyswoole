@@ -24,7 +24,7 @@ abstract class AbstractActor
     abstract function onCommand(Command $command);
     abstract function onExit();
 
-    function __construct(string $actorId,Channel $channel,$args)
+    final function __construct(string $actorId,Channel $channel,$args)
     {
         $this->actorId = $actorId;
         $this->args = $args;

@@ -8,8 +8,6 @@
 
 namespace EasySwoole\EasySwoole\Actor;
 
-
-use App\MyActor;
 use EasySwoole\EasySwoole\Swoole\Process\AbstractProcess;
 use EasySwoole\EasySwoole\Trigger;
 use Swoole\Coroutine\Channel;
@@ -18,6 +16,7 @@ use Swoole\Process;
 class ActorProcess extends AbstractProcess
 {
     protected $actorIndex = 1;
+    protected $actorAtomic = 0;
     protected $processIndex;
     protected $actorList = [];
     protected $actorClass;
@@ -29,9 +28,8 @@ class ActorProcess extends AbstractProcess
         go(function (){
             $index = $this->getArg('index');
             $this->actorClass = $this->getArg('actorClass');
-            $this->processIndex = str_pad($index,4,'0',STR_PAD_LEFT);
+            $this->processIndex = str_pad($index,3,'0',STR_PAD_LEFT);
             $sockfile = EASYSWOOLE_TEMP_DIR."/{$this->getProcessName()}.sock";
-            var_dump($sockfile);
             $this->sock = $sockfile;
             if (file_exists($sockfile))
             {
@@ -60,11 +58,18 @@ class ActorProcess extends AbstractProcess
                                     case 'create':{
                                         $actorId = $this->processIndex.$this->actorIndex;
                                         $this->actorIndex++;
-                                        go(function ()use($actorId,$fromPackage){
-                                            $actor = new $this->actorClass($actorId,new Channel(8),$fromPackage->getArg());
-                                            $this->actorList[$actorId] = $actor;
-                                            $actor->__run();
-                                        });
+                                        $this->actorAtomic++;
+                                        try{
+                                            go(function ()use($actorId,$fromPackage){
+                                                $actor = new $this->actorClass($actorId,new Channel(8),$fromPackage->getArg());
+                                                $this->actorList[$actorId] = $actor;
+                                                $actor->__run();
+                                            });
+                                        }catch (\Throwable $throwable){
+                                            $this->actorAtomic--;
+                                            Trigger::getInstance()->throwable($throwable);
+                                            $actorId = null;
+                                        }
                                         fwrite($conn,Protocol::pack(serialize($actorId)));
                                         fclose($conn);
                                         break;
@@ -83,6 +88,29 @@ class ActorProcess extends AbstractProcess
                                             }
                                         }
                                         fwrite($conn,Protocol::pack(serialize('')));
+                                        fclose($conn);
+                                        break;
+                                    }
+                                    case 'exit':{
+                                        //退出一个actor
+                                        $args = $fromPackage->getArg();
+                                        if(isset($args['actorId'])){
+                                            $actorId = $args['actorId'];
+                                            if(isset($this->actorList[$actorId])){
+                                                $this->actorList[$actorId]->exit();
+                                                unset($this->actorList[$actorId]);
+                                                $this->actorAtomic--;
+                                                fwrite($conn,Protocol::pack(serialize(true)));
+                                                fclose($conn);
+                                                break;
+                                            }
+                                        }
+                                        fwrite($conn,Protocol::pack(serialize(false)));
+                                        fclose($conn);
+                                        break;
+                                    }
+                                    case 'createdNum':{
+                                        fwrite($conn,Protocol::pack(serialize($this->actorAtomic)));
                                         fclose($conn);
                                         break;
                                     }
