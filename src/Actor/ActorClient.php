@@ -53,14 +53,21 @@ class ActorClient
         }
     }
 
-    function delete()
+    function exit(string $actorId,$timeout = 0.1)
     {
-
+        return $this->push($actorId,'exit',$timeout);
     }
 
-    function push()
+    function push(string $actorId,$arg = null,$timeout = 0.1)
     {
-
+        $processIndex = ltrim(substr($actorId,0,3),'0');
+        $command = new Command();
+        $command->setCommand('sendTo');
+        $command->setArg([
+            'actorId'=>$actorId,
+            'msg'=>$arg
+        ]);
+        return $this->sendAndRecv($command,$timeout,$this->generateSocket($processIndex));
     }
 
     function status($timeout = 0.1)

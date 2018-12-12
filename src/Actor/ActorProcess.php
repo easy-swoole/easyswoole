@@ -82,30 +82,16 @@ class ActorProcess extends AbstractProcess
                                                 //消息回复在actor中
                                                 $this->actorList[$actorId]->getChannel()->push([
                                                     'connection'=>$conn,
-                                                    'command'=>$args['command']
+                                                    'msg'=>$args['msg']
                                                 ]);
+                                                if($args['msg'] == 'exit'){
+                                                    $this->actorAtomic--;
+                                                    unset($this->actorList[$actorId]);
+                                                }
                                                 break;
                                             }
                                         }
-                                        fwrite($conn,Protocol::pack(serialize('')));
-                                        fclose($conn);
-                                        break;
-                                    }
-                                    case 'exit':{
-                                        //退出一个actor
-                                        $args = $fromPackage->getArg();
-                                        if(isset($args['actorId'])){
-                                            $actorId = $args['actorId'];
-                                            if(isset($this->actorList[$actorId])){
-                                                $this->actorList[$actorId]->exit();
-                                                unset($this->actorList[$actorId]);
-                                                $this->actorAtomic--;
-                                                fwrite($conn,Protocol::pack(serialize(true)));
-                                                fclose($conn);
-                                                break;
-                                            }
-                                        }
-                                        fwrite($conn,Protocol::pack(serialize(false)));
+                                        fwrite($conn,Protocol::pack(serialize(null)));
                                         fclose($conn);
                                         break;
                                     }

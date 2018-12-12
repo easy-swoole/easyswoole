@@ -14,14 +14,14 @@ use Swoole\Coroutine\Channel;
 
 abstract class AbstractActor
 {
-    private $exit = false;
+    private $hasDoExit = false;
     private $actorId;
     private $args;
     private $channel;
     private $tickList = [];
 
     abstract function onStart();
-    abstract function onCommand(Command $command);
+    abstract function onMessage($arg);
     abstract function onExit();
 
     final function __construct(string $actorId,Channel $channel,$args)
@@ -29,11 +29,6 @@ abstract class AbstractActor
         $this->actorId = $actorId;
         $this->args = $args;
         $this->channel = $channel;
-    }
-
-    function exit()
-    {
-        $this->exit = true;
     }
 
     function actorId()
@@ -67,31 +62,40 @@ abstract class AbstractActor
         }catch (\Throwable $throwable){
             Trigger::getInstance()->throwable($throwable);
         }
-        while (1){
-            /*
-             * 确保全部消息被执行
-             */
-            if($this->exit && $this->channel->isEmpty()){
-                try{
-                    //清理定时器
-                    foreach ($this->tickList as $tickId){
-                        swoole_timer_clear($tickId);
-                    }
-                    $this->onExit();
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-                $this->channel->close();
-                break;
-            }
+        while (1 && !$this->hasDoExit){
             $msg = $this->channel->pop(1);
             if(!empty($msg)){
                 $conn = $msg['connection'];
-                $com = $msg['command'];
-                $reply = $this->onCommand($com);
+                $msg = $msg['msg'];
+                if($msg === 'exit'){
+                    try{
+                        //清理定时器
+                        foreach ($this->tickList as $tickId){
+                            swoole_timer_clear($tickId);
+                        }
+                        $this->hasDoExit = true;
+                        $reply = $this->onExit();
+                        if($reply === null){
+                            $reply = true;
+                        }
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
+                    $this->channel->close();
+                }else{
+                    $reply = $this->onMessage($msg);
+                }
                 fwrite($conn,Protocol::pack(serialize($reply)));
                 fclose($conn);
             }
+        }
+    }
+
+    function __destruct()
+    {
+        // TODO: Implement __destruct() method.
+        if($this->hasDoExit == false){
+            $this->onExit();
         }
     }
 }
