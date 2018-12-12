@@ -108,4 +108,9 @@ abstract class AbstractActor
         }
         return $reply;
     }
+
+    public static function invoke():?ActorClient
+    {
+        return ActorManager::getInstance()->actorClient(static::class);
+    }
 }
