@@ -54,14 +54,6 @@ abstract class AbstractActor
         return $this->channel;
     }
 
-    /*
-     * 用户exitAll命令
-     */
-    function __kill()
-    {
-        $this->isKill = true;
-    }
-
     function __run()
     {
         try{
