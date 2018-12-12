@@ -100,6 +100,17 @@ class ActorProcess extends AbstractProcess
                                         fclose($conn);
                                         break;
                                     }
+                                    case 'exitAll':{
+                                        $this->actorAtomic = 0;
+                                        foreach ($this->actorList as $actorId => $item){
+                                            $item->getChannel()->push(['msg'=>'exitAll']);
+                                            unset($this->actorList[$actorId]);
+                                        }
+                                        gc_collect_cycles();
+                                        fwrite($conn,Protocol::pack(serialize(true)));
+                                        fclose($conn);
+                                        break;
+                                    }
                                     default:{
                                         fwrite($conn,Protocol::pack(serialize(null)));
                                         fclose($conn);

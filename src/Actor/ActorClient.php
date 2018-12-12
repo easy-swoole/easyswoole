@@ -58,9 +58,16 @@ class ActorClient
         return $this->push($actorId,'exit',$timeout);
     }
 
+    function exitAll($timeout = 0.1)
+    {
+        $command = new Command();
+        $command->setCommand('exitAll');
+        return $this->broadcast($command,$timeout);
+    }
+
     function push(string $actorId,$arg = null,$timeout = 0.1)
     {
-        $processIndex = ltrim(substr($actorId,0,3),'0');
+        $processIndex = self::actorIdToProcessIndex($actorId);
         $command = new Command();
         $command->setCommand('sendTo');
         $command->setArg([
@@ -68,6 +75,34 @@ class ActorClient
             'msg'=>$arg
         ]);
         return $this->sendAndRecv($command,$timeout,$this->generateSocket($processIndex));
+    }
+
+    /*
+     * ['actorId1'=>$data,'actorId2'=>$data]
+     */
+    function pushMulti(array $data,$timeout = 0.1)
+    {
+        $allNum = count($data);
+        $channel = new Channel($allNum+1);
+        foreach ($data as $actorId => $msg){
+            go(function ()use($channel,$actorId,$msg,$timeout){
+                $channel->push([
+                    $actorId=>$this->push($actorId,$msg,$timeout)
+                ]);
+            });
+        }
+        $ret = [];
+        $start = microtime(true);
+        while (1){
+            if(microtime(true) - $start > $timeout){
+                break;
+            }
+            $temp = $channel->pop($timeout);
+            if(is_array($temp)){
+                $ret = $ret + $temp;
+            }
+        }
+        return $ret;
     }
 
     function status($timeout = 0.1)
@@ -96,7 +131,11 @@ class ActorClient
                 ]);
             });
         }
-        for ($i = 0;$i < $this->conf->getActorProcessNum();$i++){
+        $start = microtime(true);
+        while (1){
+            if(microtime(true) - $start > $timeout){
+                break;
+            }
             $temp = $channel->pop($timeout);
             if(is_array($temp)){
                 $info[$temp['index']] = $temp['result'];
@@ -120,6 +159,16 @@ class ActorClient
             return unserialize($ret);
         }
         return null;
+    }
+
+    public static function actorIdToProcessIndex(string $actorId):int
+    {
+        $processIndex = ltrim(substr($actorId,0,3),'0');
+        if(empty($processIndex)){
+            return 0;
+        }else{
+            return $processIndex;
+        }
     }
 
 }

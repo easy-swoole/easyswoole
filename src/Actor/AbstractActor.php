@@ -19,7 +19,6 @@ abstract class AbstractActor
     private $args;
     private $channel;
     private $tickList = [];
-
     abstract function onStart();
     abstract function onMessage($arg);
     abstract function onExit();
@@ -55,6 +54,14 @@ abstract class AbstractActor
         return $this->channel;
     }
 
+    /*
+     * 用户exitAll命令
+     */
+    function __kill()
+    {
+        $this->isKill = true;
+    }
+
     function __run()
     {
         try{
@@ -63,26 +70,17 @@ abstract class AbstractActor
             Trigger::getInstance()->throwable($throwable);
         }
         while (1 && !$this->hasDoExit){
-            $msg = $this->channel->pop(1);
-            if(!empty($msg)){
-                $conn = $msg['connection'];
-                $msg = $msg['msg'];
+            $array = $this->channel->pop(0.1);
+            if(!empty($array)){
+                $msg = $array['msg'];
                 if($msg === 'exit'){
-                    try{
-                        //清理定时器
-                        foreach ($this->tickList as $tickId){
-                            swoole_timer_clear($tickId);
-                        }
-                        $this->hasDoExit = true;
-                        $reply = $this->onExit();
-                        if($reply === null){
-                            $reply = true;
-                        }
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                    $this->channel->close();
+                    $conn = $array['connection'];
+                    $reply = $this->exit();
+                }else if($msg == 'exitAll'){
+                    $this->exit();
+                    return;
                 }else{
+                    $conn = $array['connection'];
                     $reply = $this->onMessage($msg);
                 }
                 fwrite($conn,Protocol::pack(serialize($reply)));
@@ -91,11 +89,23 @@ abstract class AbstractActor
         }
     }
 
-    function __destruct()
+    private function exit()
     {
-        // TODO: Implement __destruct() method.
-        if($this->hasDoExit == false){
-            $this->onExit();
+        $reply = null;
+        try{
+            //清理定时器
+            foreach ($this->tickList as $tickId){
+                swoole_timer_clear($tickId);
+            }
+            $this->hasDoExit = true;
+            $this->channel->close();
+            $reply = $this->onExit();
+            if($reply === null){
+                $reply = true;
+            }
+        }catch (\Throwable $throwable){
+            Trigger::getInstance()->throwable($throwable);
         }
+        return $reply;
     }
 }
