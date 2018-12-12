@@ -20,7 +20,7 @@ abstract class AbstractActor
     private $channel;
     private $tickList = [];
     abstract function onStart();
-    abstract function onMessage($arg);
+    abstract function onMessage($msg);
     abstract function onExit();
 
     final function __construct(string $actorId,Channel $channel,$args)
@@ -73,18 +73,16 @@ abstract class AbstractActor
             $array = $this->channel->pop(0.1);
             if(!empty($array)){
                 $msg = $array['msg'];
-                if($msg === 'exit'){
-                    $conn = $array['connection'];
+                if($msg == 'exit'){
                     $reply = $this->exit();
-                }else if($msg == 'exitAll'){
-                    $this->exit();
-                    return;
                 }else{
-                    $conn = $array['connection'];
                     $reply = $this->onMessage($msg);
                 }
-                fwrite($conn,Protocol::pack(serialize($reply)));
-                fclose($conn);
+                if($array['reply']){
+                    $conn = $array['connection'];
+                    fwrite($conn,Protocol::pack(serialize($reply)));
+                    fclose($conn);
+                }
             }
         }
     }

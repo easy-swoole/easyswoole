@@ -82,7 +82,8 @@ class ActorProcess extends AbstractProcess
                                                 //消息回复在actor中
                                                 $this->actorList[$actorId]->getChannel()->push([
                                                     'connection'=>$conn,
-                                                    'msg'=>$args['msg']
+                                                    'msg'=>$args['msg'],
+                                                    'reply'=>true
                                                 ]);
                                                 if($args['msg'] == 'exit'){
                                                     $this->actorAtomic--;
@@ -103,10 +104,18 @@ class ActorProcess extends AbstractProcess
                                     case 'exitAll':{
                                         $this->actorAtomic = 0;
                                         foreach ($this->actorList as $actorId => $item){
-                                            $item->getChannel()->push(['msg'=>'exitAll']);
+                                            $item->getChannel()->push(['msg'=>'exit','reply'=>false]);
                                             unset($this->actorList[$actorId]);
                                         }
-                                        gc_collect_cycles();
+                                        fwrite($conn,Protocol::pack(serialize(true)));
+                                        fclose($conn);
+                                        break;
+                                    }
+                                    case 'broadcast':{
+                                        $args = $fromPackage->getArg();
+                                        foreach ($this->actorList as $actorId => $item){
+                                            $item->getChannel()->push(['msg'=>$args,'reply'=>false]);
+                                        }
                                         fwrite($conn,Protocol::pack(serialize(true)));
                                         fclose($conn);
                                         break;

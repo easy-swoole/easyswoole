@@ -24,11 +24,11 @@ class ActorClient
     /*
      * 创建默认一直等待
      */
-    function create($args = null,$timeout = -1)
+    function create($arg = null,$timeout = -1)
     {
         $command = new Command();
         $command->setCommand('create');
-        $command->setArg($args);
+        $command->setArg($arg);
         //快速获得全部进程的创建结果
         $info = $this->status();
         //先计算总数 并找出最小key
@@ -103,6 +103,14 @@ class ActorClient
             }
         }
         return $ret;
+    }
+
+    function broadcastPush($arg,$timeout = 0.1)
+    {
+        $command = new Command();
+        $command->setCommand('broadcast');
+        $command->setArg($arg);
+        return $this->broadcast($command,$timeout);
     }
 
     function status($timeout = 0.1)
