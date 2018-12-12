@@ -115,7 +115,7 @@ class ActorProcess extends AbstractProcess
                                         break;
                                     }
                                     default:{
-                                        fwrite($conn,Protocol::pack(serialize('')));
+                                        fwrite($conn,Protocol::pack(serialize(null)));
                                         fclose($conn);
                                         break;
                                     }

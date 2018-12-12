@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole\Actor;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Trigger;
 
 class ActorManager
 {
@@ -43,8 +44,19 @@ class ActorManager
 
     function __run()
     {
+        $actorNameList = [];
         $name = Config::getInstance()->getConf('SERVER_NAME');
         foreach ($this->list as $conf){
+            if(empty($conf->getActorName())){
+                Trigger::getInstance()->error("actor class: {$conf->getActorClass()} has no name");
+                continue;
+            }
+            if(in_array($conf->getActorName(),$actorNameList)){
+                Trigger::getInstance()->error("actor name: {$conf->getActorName()} hasduplicated");
+                continue;
+            }else{
+                $actorNameList[] = $conf->getActorName();
+            }
             $num = $conf->getActorProcessNum();
             $subName = "{$name}.ActorProcess.{$conf->getActorName()}";
             for ($index = 0;$index < $num; $index++){

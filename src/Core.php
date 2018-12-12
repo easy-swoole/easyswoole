@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\Actor\ActorManager;
 use EasySwoole\EasySwoole\Console\TcpService;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\FastCache\Cache;
@@ -106,6 +107,8 @@ class Core
         Crontab::getInstance()->__run();
         //注册fastCache进程
         Cache::getInstance()->__run();
+        //执行Actor注册进程
+        ActorManager::getInstance()->__run();
         ServerManager::getInstance()->start();
     }
 

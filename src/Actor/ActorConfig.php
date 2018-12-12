@@ -11,7 +11,7 @@ namespace EasySwoole\EasySwoole\Actor;
 
 class ActorConfig
 {
-    protected $actorName = 'actor';
+    protected $actorName;
     protected $actorClass;
     protected $actorProcessNum = 3;
     protected $maxActorNum = 10000;
@@ -24,12 +24,11 @@ class ActorConfig
         return $this->actorClass;
     }
 
-    /**
-     * @param mixed $actorClass
-     */
-    public function setActorClass($actorClass): void
+
+    public function setActorClass($actorClass): ActorConfig
     {
         $this->actorClass = $actorClass;
+        return $this;
     }
 
     /**
@@ -40,12 +39,10 @@ class ActorConfig
         return $this->actorProcessNum;
     }
 
-    /**
-     * @param int $actorProcessNum
-     */
-    public function setActorProcessNum(int $actorProcessNum): void
+    public function setActorProcessNum(int $actorProcessNum): ActorConfig
     {
         $this->actorProcessNum = $actorProcessNum;
+        return $this;
     }
 
     /**
@@ -56,27 +53,23 @@ class ActorConfig
         return $this->maxActorNum;
     }
 
-    /**
-     * @param int $maxActorNum
-     */
-    public function setMaxActorNum(int $maxActorNum): void
+    public function setMaxActorNum(int $maxActorNum): ActorConfig
     {
         $this->maxActorNum = $maxActorNum;
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getActorName(): string
+    public function getActorName()
     {
         return $this->actorName;
     }
 
-    /**
-     * @param string $actorName
-     */
-    public function setActorName(string $actorName): void
+    public function setActorName(string $actorName): ActorConfig
     {
         $this->actorName = $actorName;
+        return $this;
     }
 }
