@@ -215,12 +215,12 @@ class Core
                         $dispatcher->dispatch($request_psr,$response_psr);
                     }
                 }catch (\Throwable $throwable){
-                    call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER,$throwable,$request_psr,$response_psr));
+                    call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
                 }finally{
                     try{
                         EasySwooleEvent::afterRequest($request_psr,$response_psr);
                     }catch (\Throwable $throwable){
-                        call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER,$throwable,$request_psr,$response_psr));
+                        call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
                     }
                 }
                 $response_psr->__response();
