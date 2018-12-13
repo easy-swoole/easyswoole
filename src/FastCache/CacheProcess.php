@@ -44,92 +44,94 @@ class CacheProcess extends AbstractProcess
             while (1){
                 $conn = stream_socket_accept($socket,-1);
                 if($conn){
-                    $com = new Package();
-                    stream_set_timeout($conn,2);
-                    //先取4个字节的头
-                    $header = fread($conn,4);
-                    if(strlen($header) == 4){
-                        $allLength = Protocol::packDataLength($header);
-                        $data = fread($conn,$allLength );
-                        if(strlen($data) == $allLength){
-                            //开始数据包+命令处理，并返回数据
-                            $fromPackage = unserialize($data);
-                            if($fromPackage instanceof Package){
-                                switch ($fromPackage->getCommand())
-                                {
-                                    case 'set':{
-                                        $com->setValue(true);
-                                        $this->splArray->set($fromPackage->getKey(),$fromPackage->getValue());
-                                        break;
-                                    }
-                                    case 'get':{
-                                        $com->setValue($this->splArray->get($fromPackage->getKey()));
-                                        break;
-                                    }
-                                    case 'unset':{
-                                        $com->setValue(true);
-                                        $this->splArray->unset($fromPackage->getKey());
-                                        break;
-                                    }
-                                    case 'keys':{
-                                        $key = $fromPackage->getKey();
-                                        $com->setValue($this->splArray->keys($key));
-                                        break;
-                                    }
-                                    case 'flush':{
-                                        $com->setValue(true);
-                                        $this->splArray = new SplArray();
-                                        break;
-                                    }
-                                    case 'enQueue':{
-                                        $que = $this->initQueue($fromPackage->getKey());
-                                        $data = $fromPackage->getValue();
-                                        if($data !== null){
-                                            $que->enqueue($fromPackage->getValue());
+                    go(function ()use($conn){
+                        $com = new Package();
+                        stream_set_timeout($conn,2);
+                        //先取4个字节的头
+                        $header = fread($conn,4);
+                        if(strlen($header) == 4){
+                            $allLength = Protocol::packDataLength($header);
+                            $data = fread($conn,$allLength );
+                            if(strlen($data) == $allLength){
+                                //开始数据包+命令处理，并返回数据
+                                $fromPackage = unserialize($data);
+                                if($fromPackage instanceof Package){
+                                    switch ($fromPackage->getCommand())
+                                    {
+                                        case 'set':{
                                             $com->setValue(true);
-                                        }else{
-                                            $com->setValue(false);
+                                            $this->splArray->set($fromPackage->getKey(),$fromPackage->getValue());
+                                            break;
                                         }
-                                        break;
-                                    }
-                                    case 'deQueue':{
-                                        $que = $this->initQueue($fromPackage->getKey());
-                                        if($que->isEmpty()){
-                                            $com->setValue(null);
-                                        }else{
-                                            $com->setValue($que->dequeue());
+                                        case 'get':{
+                                            $com->setValue($this->splArray->get($fromPackage->getKey()));
+                                            break;
                                         }
-                                        break;
-                                    }
-                                    case 'queueSize':{
-                                        $que = $this->initQueue($fromPackage->getKey());
-                                        $com->setValue($que->count());
-                                        break;
-                                    }
-                                    case 'unsetQueue':{
-                                        if(isset($this->queueArray[$fromPackage->getKey()])){
-                                            unset($this->queueArray[$fromPackage->getKey()]);
+                                        case 'unset':{
                                             $com->setValue(true);
-                                        }else{
-                                            $com->setValue(false);
+                                            $this->splArray->unset($fromPackage->getKey());
+                                            break;
                                         }
-                                        break;
-                                    }
-                                    case 'queueList':{
-                                        $com->setValue(array_keys($this->queueArray));
-                                        break;
-                                    }
-                                    case 'flushQueue':{
-                                        $this->queueArray = [];
-                                        $com->setValue(true);
-                                        break;
+                                        case 'keys':{
+                                            $key = $fromPackage->getKey();
+                                            $com->setValue($this->splArray->keys($key));
+                                            break;
+                                        }
+                                        case 'flush':{
+                                            $com->setValue(true);
+                                            $this->splArray = new SplArray();
+                                            break;
+                                        }
+                                        case 'enQueue':{
+                                            $que = $this->initQueue($fromPackage->getKey());
+                                            $data = $fromPackage->getValue();
+                                            if($data !== null){
+                                                $que->enqueue($fromPackage->getValue());
+                                                $com->setValue(true);
+                                            }else{
+                                                $com->setValue(false);
+                                            }
+                                            break;
+                                        }
+                                        case 'deQueue':{
+                                            $que = $this->initQueue($fromPackage->getKey());
+                                            if($que->isEmpty()){
+                                                $com->setValue(null);
+                                            }else{
+                                                $com->setValue($que->dequeue());
+                                            }
+                                            break;
+                                        }
+                                        case 'queueSize':{
+                                            $que = $this->initQueue($fromPackage->getKey());
+                                            $com->setValue($que->count());
+                                            break;
+                                        }
+                                        case 'unsetQueue':{
+                                            if(isset($this->queueArray[$fromPackage->getKey()])){
+                                                unset($this->queueArray[$fromPackage->getKey()]);
+                                                $com->setValue(true);
+                                            }else{
+                                                $com->setValue(false);
+                                            }
+                                            break;
+                                        }
+                                        case 'queueList':{
+                                            $com->setValue(array_keys($this->queueArray));
+                                            break;
+                                        }
+                                        case 'flushQueue':{
+                                            $this->queueArray = [];
+                                            $com->setValue(true);
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    fwrite($conn,Protocol::pack(serialize($com)));
-                    fclose($conn);
+                        fwrite($conn,Protocol::pack(serialize($com)));
+                        fclose($conn);
+                    });
                 }
             }
         });
