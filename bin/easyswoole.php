@@ -223,6 +223,9 @@ switch ($mainCommand){
         if(in_array('force',$commandList)){
             $force = true;
         }
+        if(in_array('produce',$commandList)){
+            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+        }
         \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $Conf = \EasySwoole\EasySwoole\Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
@@ -268,6 +271,9 @@ switch ($mainCommand){
         $all = false;
         if(in_array('all',$commandList)){
             $all = true;
+        }
+        if(in_array('produce',$commandList)){
+            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
         }
         \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $Conf = \EasySwoole\EasySwoole\Config::getInstance();
