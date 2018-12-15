@@ -31,25 +31,40 @@ class TaskManager
     public static function processAsync($task)
     {
         $conf = ServerManager::getInstance()->getSwooleServer()->setting;
-        if(!isset($conf['task_worker_num'])){
+        if (!isset($conf['task_worker_num'])) {
             return false;
         }
         $taskNum = $conf['task_worker_num'];
         $workerNum = $conf['worker_num'];
-        if($task instanceof \Closure){
-            try{
-                $task = new SuperClosure($task);
-            }catch (\Throwable $throwable){
-                Trigger::getInstance()->throwable($throwable);
-                return false;
+        
+        // 随机取进程，避免取到同一进程。
+        // fixed：[Swoole\Server::sendMessage(): can't send message to self.]
+        // tips:开启的task进程数过少时，若自定义进程执行嵌套的异步task会出现随机到同一进程
+        mt_srand();
+        $workerId = null;
+        for ($i = 0; $i < $taskNum; $i++) {
+            $workerId = mt_rand($workerNum, ($workerNum+$taskNum)-1);
+            if ($workerId !== ServerManager::getInstance()->getSwooleServer()->worker_id) {
+                break;
             }
         }
-        $message = new Message();
-        $message->setCommand('TASK');
-        $message->setData($task);
-        mt_srand();
-        $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
-        ServerManager::getInstance()->getSwooleServer()->sendMessage(serialize($message),$workerId);
+        if (!$workerId || $workerId === ServerManager::getInstance()->getSwooleServer()->worker_id) {
+            // 无空闲task进程，自动切为同步阻塞执行
+            $task->run($task->getData(), -1, ServerManager::getInstance()->getSwooleServer()->worker_id);
+        } else {
+            if ($task instanceof \Closure) {
+                try {
+                    $task = new SuperClosure($task);
+                } catch (\Throwable $throwable) {
+                    Trigger::getInstance()->throwable($throwable);
+                    return false;
+                }
+            }
+            $message = new Message();
+            $message->setCommand('TASK');
+            $message->setData($task);
+            ServerManager::getInstance()->getSwooleServer()->sendMessage(serialize($message), $workerId);
+        }
         return true;
     }
 
