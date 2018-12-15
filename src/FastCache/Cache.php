@@ -162,7 +162,7 @@ class Cache
         //当以多维路径作为key的时候，以第一个路径为主。
         $list = explode('.',$key);
         $key = array_shift($list);
-        $index = base_convert( md5( $key,true ), 16, 10 )%$this->processNum;
+        $index = base_convert( substr(md5( $key),0,2), 16, 10 )%$this->processNum;
         return EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCacheProcess.{$index}.sock";
     }
 
