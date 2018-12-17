@@ -72,7 +72,9 @@ class Cache
         for( $i=0 ; $i < $this->processNum ; $i++){
             $sockFile = EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCacheProcess.{$i}.sock";
             $keys = $this->sendAndRecv('',$com,$timeout,$sockFile);
-            $data = array_merge($data,$keys);
+            if($keys!==null){
+                $data = array_merge($data,$keys);
+            }
         }
         return $data;
     }
@@ -150,7 +152,9 @@ class Cache
         for( $i=0 ; $i < $this->processNum ; $i++){
             $sockFile = EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCacheProcess.{$i}.sock";
             $keys = $this->sendAndRecv('',$com,$timeout,$sockFile);
-            $data = array_merge($data,$keys);
+            if($keys!==null){
+                $data = array_merge($data,$keys);
+            }
         }
         return $data;
     }
