@@ -68,7 +68,13 @@ class Cache
         $com = new Package();
         $com->setCommand('keys');
         $com->setKey($key);
-        return $this->sendAndRecv($key,$com,$timeout);
+        $data = [];
+        for( $i=0 ; $i < $this->processNum ; $i++){
+            $sockFile = EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCacheProcess.{$i}.sock";
+            $keys = $this->sendAndRecv('',$com,$timeout,$sockFile);
+            $data = array_merge($data,$keys);
+        }
+        return $data;
     }
 
     function flush(float $timeout = 0.1)
@@ -140,7 +146,13 @@ class Cache
         }
         $com = new Package();
         $com->setCommand('queueList');
-        return $this->sendAndRecv('',$com,$timeout);
+        $data = [];
+        for( $i=0 ; $i < $this->processNum ; $i++){
+            $sockFile = EASYSWOOLE_TEMP_DIR."/{$this->serverName}.FastCacheProcess.{$i}.sock";
+            $keys = $this->sendAndRecv('',$com,$timeout,$sockFile);
+            $data = array_merge($data,$keys);
+        }
+        return $data;
     }
 
     function flushQueue(float $timeout = 0.1):bool
