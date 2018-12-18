@@ -188,7 +188,7 @@ switch ($mainCommand){
         $index = 1;
         foreach ($list as $serverName => $item){
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            Install::showTag('sub-Server'.$index, "{$serverName} => {$type}@{$item['listenAddress']}:{$item['port']}");
+            Install::showTag('sub server'.$index, "{$serverName} => {$type}@{$item['listenAddress']}:{$item['port']}");
             $index++;
         }
 
@@ -212,8 +212,10 @@ switch ($mainCommand){
         Install::showTag('daemonize', $daemonize);
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
-        Install::showTag('EasySwoole ', \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION);
+        Install::showTag('easy swoole', \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION);
         Install::showTag('run mode', $mode);
+        Install::showTag('temp dir', EASYSWOOLE_TEMP_DIR);
+        Install::showTag('log dir', EASYSWOOLE_LOG_DIR);
         \EasySwoole\EasySwoole\Core::getInstance()->start();
         break;
     }

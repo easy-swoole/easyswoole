@@ -125,11 +125,18 @@ class Config
                 if(!empty($line)){
                     //若以 # 开头的则为注释，不解析
                     if(strpos($line,"#") !== 0){
-                        $arr = explode('=',$line);
-                        if(!empty($arr)){
-                            $val = trim(explode("#",$arr[1])[0]);
-                            foreach ($defines as $key => $define){
-                                $val = str_replace($key,$define,$val);
+                        $key = trim(substr($line,0,strpos($line,'=')),' ');
+                        if(!empty($key)){
+                            //# 后面的为注释
+                            $val = trim(explode("#",substr($line,strpos($line,'=')+1))[0]);
+                            preg_match_all('([A-Z_]+)',$val,$ret);
+                            if(!empty($ret)){
+                                $constList = $ret[0];
+                                foreach ($constList as $const){
+                                    if(isset($defines[$const])){
+                                        $val = str_replace($const,$defines[$const],$val);
+                                    }
+                                }
                             }
                             if(is_numeric($val) && is_int($val + 0)){
                                 $val = (int)$val;
@@ -142,7 +149,7 @@ class Config
                                     $val = false;
                                 }
                             }
-                            $this->setConf(trim($arr[0]),$val);
+                            $this->setConf($key,$val);
                         }
                     }
                 }
