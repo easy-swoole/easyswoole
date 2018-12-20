@@ -61,12 +61,12 @@ abstract class AbstractActor
         }catch (\Throwable $throwable){
             Trigger::getInstance()->throwable($throwable);
         }
-        while (1 && !$this->hasDoExit){
+        while (!$this->hasDoExit){
             $array = $this->channel->pop(0.1);
             if(!empty($array)){
                 $msg = $array['msg'];
                 if($msg == 'exit'){
-                    $reply = $this->exit();
+                    $reply = $this->exitHandler();
                 }else{
                     $reply = $this->onMessage($msg);
                 }
@@ -79,7 +79,18 @@ abstract class AbstractActor
         }
     }
 
-    private function exit()
+    /*
+     * 一个actor可以自杀
+     */
+    protected function exit()
+    {
+        $this->channel->push([
+            'msg'=>'exit',
+            'reply'=>false
+        ]);
+    }
+
+    private function exitHandler()
     {
         $reply = null;
         try{
