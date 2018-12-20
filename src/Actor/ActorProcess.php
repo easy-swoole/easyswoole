@@ -57,7 +57,7 @@ class ActorProcess extends AbstractProcess
                                 if($fromPackage instanceof Command){
                                     switch ($fromPackage->getCommand()){
                                         case 'create':{
-                                            $actorId = $this->processIndex.$this->actorIndex;
+                                            $actorId = $this->processIndex.str_pad($this->actorIndex,10,'0',STR_PAD_LEFT);
                                             $this->actorIndex++;
                                             $this->actorAtomic++;
                                             try{
@@ -118,6 +118,16 @@ class ActorProcess extends AbstractProcess
                                                 $item->getChannel()->push(['msg'=>$args,'reply'=>false]);
                                             }
                                             fwrite($conn,Protocol::pack(serialize(true)));
+                                            fclose($conn);
+                                            break;
+                                        }
+                                        case 'exist':{
+                                            $actorId = $fromPackage->getArg();
+                                            if(isset($this->actorList[$actorId])){
+                                                fwrite($conn,Protocol::pack(serialize(true)));
+                                            }else{
+                                                fwrite($conn,Protocol::pack(serialize(false)));
+                                            }
                                             fclose($conn);
                                             break;
                                         }

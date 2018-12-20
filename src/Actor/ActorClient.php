@@ -15,10 +15,11 @@ use Swoole\Coroutine\Channel;
 class ActorClient
 {
     protected $conf;
-
+    private $serverName;
     function __construct(ActorConfig $conf)
     {
         $this->conf = $conf;
+        $this->serverName = Config::getInstance()->getConf('SERVER_NAME');;
     }
 
     /*
@@ -49,7 +50,7 @@ class ActorClient
         if($all > $this->conf->getMaxActorNum()){
             return -1;
         }else{
-            return $this->sendAndRecv($command,$timeout,$this->generateSocket($minKey));
+            return $this->sendAndRecv($command,$timeout,$this->generateSocketByProcessIndex($minKey));
         }
     }
 
@@ -65,16 +66,16 @@ class ActorClient
         return $this->broadcast($command,$timeout);
     }
 
-    function push(string $actorId,$arg = null,$timeout = 0.1)
+    function push(string $actorId, $msg = null, $timeout = 0.1)
     {
         $processIndex = self::actorIdToProcessIndex($actorId);
         $command = new Command();
         $command->setCommand('sendTo');
         $command->setArg([
             'actorId'=>$actorId,
-            'msg'=>$arg
+            'msg'=>$msg
         ]);
-        return $this->sendAndRecv($command,$timeout,$this->generateSocket($processIndex));
+        return $this->sendAndRecv($command,$timeout,$this->generateSocketByProcessIndex($processIndex));
     }
 
     /*
@@ -105,11 +106,11 @@ class ActorClient
         return $ret;
     }
 
-    function broadcastPush($arg,$timeout = 0.1)
+    function broadcastPush($msg, $timeout = 0.1)
     {
         $command = new Command();
         $command->setCommand('broadcast');
-        $command->setArg($arg);
+        $command->setArg($msg);
         return $this->broadcast($command,$timeout);
     }
 
@@ -126,13 +127,21 @@ class ActorClient
         ];
     }
 
+    function exist(string $actorId,$timeout = 0.1)
+    {
+        $command = new Command();
+        $command->setCommand('exist');
+        $command->setArg($actorId);
+        return $this->sendAndRecv($command,$timeout,$this->generateSocketByActorId($actorId));
+    }
+
     private function broadcast(Command $command,$timeout = 0.1)
     {
         $info = [];
         $channel = new Channel($this->conf->getActorProcessNum()+1);
         for ($i = 0;$i < $this->conf->getActorProcessNum();$i++){
             go(function ()use($command,$channel,$i,$timeout){
-                $ret = $this->sendAndRecv($command,$timeout,$this->generateSocket($i));
+                $ret = $this->sendAndRecv($command,$timeout,$this->generateSocketByProcessIndex($i));
                 $channel->push([
                     'index'=>$i,
                     'result'=>$ret
@@ -152,10 +161,14 @@ class ActorClient
         return $info;
     }
 
-    private function generateSocket($index):string
+    private function generateSocketByProcessIndex($processIndex):string
     {
-        $name = Config::getInstance()->getConf('SERVER_NAME');
-        return EASYSWOOLE_TEMP_DIR."/{$name}.ActorProcess.{$this->conf->getActorName()}.{$index}.sock";
+        return EASYSWOOLE_TEMP_DIR."/{$this->serverName}.ActorProcess.{$this->conf->getActorName()}.{$processIndex}.sock";
+    }
+
+    private function generateSocketByActorId(string $actorId):string
+    {
+        return $this->generateSocketByProcessIndex(self::actorIdToProcessIndex($actorId));
     }
 
     private function sendAndRecv(Command $command,$timeout,$socketFile)
