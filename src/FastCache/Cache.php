@@ -19,11 +19,47 @@ class Cache
 
     private $processNum = 0;
     private $serverName;
+    private $tickCall = null;
+    private $tickInterval = 5*1000;
+    private $onStart;
+    private $onShutdown;
 
     function __construct()
     {
         $this->processNum = Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM');
         $this->serverName = Config::getInstance()->getConf('SERVER_NAME');
+    }
+
+    /**
+     * @param null $tickCall
+     */
+    public function __setTickCall($tickCall): void
+    {
+        $this->tickCall = $tickCall;
+    }
+
+    /**
+     * @param float|int $tickInterval
+     */
+    public function __setTickInterval($tickInterval): void
+    {
+        $this->tickInterval = $tickInterval;
+    }
+
+    /**
+     * @param mixed $onStart
+     */
+    public function __setOnStart(callable $onStart): void
+    {
+        $this->onStart = $onStart;
+    }
+
+    /**
+     * @param mixed $onShutdown
+     */
+    public function __setOnShutdown(callable $onShutdown): void
+    {
+        $this->onShutdown = $onShutdown;
     }
 
     function set($key,$value,float $timeout = 0.1)
@@ -205,7 +241,15 @@ class Cache
     function __run()
     {
         for( $i=0 ; $i < $this->processNum ; $i++){
-            ServerManager::getInstance()->getSwooleServer()->addProcess((new CacheProcess("{$this->serverName}.FastCacheProcess.{$i}",['index'=>$i]))->getProcess());
+            ServerManager::getInstance()->getSwooleServer()->addProcess(
+                (new CacheProcess("{$this->serverName}.FastCacheProcess.{$i}",[
+                    'index'=>$i,
+                    'tickCall'=>$this->tickCall,
+                    'tickInterval'=>$this->tickInterval,
+                    'onStart'=>$this->onStart,
+                    'onShutdown'=>$this->onShutdown
+                ]))->getProcess()
+            );
         }
     }
 }

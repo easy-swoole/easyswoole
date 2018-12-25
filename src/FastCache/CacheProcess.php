@@ -22,13 +22,57 @@ class CacheProcess extends AbstractProcess
     protected $queueArray = [];
     protected $sock;
 
+    /**
+     * @return mixed
+     */
+    public function getSplArray()
+    {
+        return $this->splArray;
+    }
+
+    /**
+     * @param mixed $splArray
+     */
+    public function setSplArray($splArray): void
+    {
+        $this->splArray = $splArray;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueueArray(): array
+    {
+        return $this->queueArray;
+    }
+
+    /**
+     * @param array $queueArray
+     */
+    public function setQueueArray(array $queueArray): void
+    {
+        $this->queueArray = $queueArray;
+    }
+
     public function run(Process $process)
     {
-        \Swoole\Runtime::enableCoroutine(true);
         $this->splArray = new SplArray();
+        $onStart = $this->getArg('onStart');
+        if(is_callable($onStart)){
+            try{
+                call_user_func($onStart,$this);
+            }catch (\Throwable $throwable){
+                Trigger::getInstance()->throwable($throwable);
+            }
+        }
+
+        if(is_callable($this->getArg('tickCall'))){
+            $this->addTick($this->getArg('tickInterval'),$this->getArg('tickCall'));
+        }
+
+        \Swoole\Runtime::enableCoroutine(true);
         // TODO: Implement run() method.
         go(function (){
-            $index = $this->getArg('index');
             $sockfile = EASYSWOOLE_TEMP_DIR."/{$this->getProcessName()}.sock";
             $this->sock = $sockfile;
             if (file_exists($sockfile))
@@ -148,10 +192,18 @@ class CacheProcess extends AbstractProcess
     public function onShutDown()
     {
         // TODO: Implement onShutDown() method.
-//        if (file_exists($this->sock))
-//        {
-//            unlink($this->sock);
-//        }
+        if (file_exists($this->sock))
+        {
+            unlink($this->sock);
+        }
+        $onShutdown = $this->getArg('onShutdown');
+        if(is_callable($onShutdown)){
+            try{
+                call_user_func($onShutdown,$this);
+            }catch (\Throwable $throwable){
+                Trigger::getInstance()->throwable($throwable);
+            }
+        }
     }
 
     public function onReceive(string $str)
