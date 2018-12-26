@@ -67,7 +67,13 @@ class CacheProcess extends AbstractProcess
         }
 
         if(is_callable($this->getArg('tickCall'))){
-            $this->addTick($this->getArg('tickInterval'),$this->getArg('tickCall'));
+            $this->addTick($this->getArg('tickInterval'),function (){
+                try{
+                    call_user_func($this->getArg('tickCall'),$this);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
+            });
         }
 
         \Swoole\Runtime::enableCoroutine(true);
