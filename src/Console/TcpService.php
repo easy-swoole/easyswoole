@@ -9,11 +9,11 @@
 namespace EasySwoole\EasySwoole\Console;
 
 
+use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Console\DefaultCommand\Auth;
 use EasySwoole\EasySwoole\Console\DefaultCommand\Help;
 use EasySwoole\EasySwoole\Console\DefaultCommand\Server;
 use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
 use EasySwoole\Socket\Bean\Response;
 use EasySwoole\Socket\Config;
 use EasySwoole\Socket\Dispatcher;

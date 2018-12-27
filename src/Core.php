@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\Actor\Actor;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -17,6 +18,7 @@ use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
+use EasySwoole\FastCache\Cache;
 use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
@@ -119,16 +121,23 @@ class Core
     function start()
     {
         //给主进程也命名
+        $serverName = Config::getInstance()->getConf('SERVER_NAME');
         if(PHP_OS != 'Darwin'){
-            $name = Config::getInstance()->getConf('SERVER_NAME');
-            cli_set_process_title($name);
+            cli_set_process_title($serverName);
         }
         //注册crontab进程
         Crontab::getInstance()->__run();
         //注册fastCache进程
-        Cache::getInstance()->__run();
+        if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
+            Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
+                    ->setProcessNum(Config::getInstance()
+                    ->getConf('FAST_CACHE.PROCESS_NUM'))
+                    ->setServerName($serverName)
+                    ->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        }
+
         //执行Actor注册进程
-        ActorManager::getInstance()->__run();
+        Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
         ServerManager::getInstance()->start();
     }
 

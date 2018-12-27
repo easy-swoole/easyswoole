@@ -9,8 +9,8 @@
 namespace EasySwoole\EasySwoole\Console;
 
 
+use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
 use EasySwoole\Socket\AbstractInterface\Controller;
 
 class TcpController extends Controller
