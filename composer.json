@@ -21,10 +21,10 @@
         "jeremeamia/SuperClosure": "^2.4",
         "easyswoole/trace": "^1.0",
         "easyswoole/socket": "^1.0",
-        "dragonmantank/cron-expression": "^2.2"
-    },
-    "require-dev": {
-        "easyswoole/swoole-ide-helper": "dev-master"
+        "dragonmantank/cron-expression": "^2.2",
+        "easyswoole/fast-cache": "^1.0",
+        "easyswoole/swoole-ide-helper": "^1.2",
+        "easyswoole/actor": "^1.0"
     },
     "autoload": {
         "psr-4": {

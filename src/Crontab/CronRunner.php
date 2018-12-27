@@ -9,21 +9,20 @@
 namespace EasySwoole\EasySwoole\Crontab;
 
 use Cron\CronExpression;
-use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
-use EasySwoole\EasySwoole\Swoole\Process\AbstractProcess;
+use EasySwoole\Component\TableManager;
+use EasySwoole\Component\Timer;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
-use EasySwoole\EasySwoole\Swoole\Time\Timer;
-use Swoole\Process;
+use EasySwoole\Component\Process\AbstractProcess;
 
 class CronRunner extends AbstractProcess
 {
     protected $tasks;
 
-    public function run(Process $process)
+    public function run($arg)
     {
-        $this->tasks = $this->getArgs();
+        $this->tasks = $arg;
         $this->cronProcess();
-        Timer::loop(29 * 1000, function () {
+        Timer::getInstance()->loop(29 * 1000, function () {
             $this->cronProcess();
         });
     }
@@ -46,7 +45,7 @@ class CronRunner extends AbstractProcess
             $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate();
             $distanceTime = $nextRunTime->getTimestamp() - time();
             if ($distanceTime < 30) {
-                Timer::delay($distanceTime * 1000, function () use ($taskName, $taskRule) {
+                Timer::getInstance()->after($distanceTime * 1000, function () use ($taskName, $taskRule) {
                     $nextRunTime = CronExpression::factory($taskRule)->getNextRunDate();
                     $table = TableManager::getInstance()->get(Crontab::$__swooleTableName);
                     $table->incr($taskName, 'taskRunTimes', 1);

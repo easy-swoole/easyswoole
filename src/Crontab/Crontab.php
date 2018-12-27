@@ -5,11 +5,11 @@ namespace EasySwoole\EasySwoole\Crontab;
 
 use Cron\CronExpression;
 use EasySwoole\Component\Singleton;
+use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskNotExist;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
 use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
 use Swoole\Table;
 
 class Crontab
