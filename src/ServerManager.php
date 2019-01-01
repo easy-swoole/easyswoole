@@ -22,11 +22,6 @@ class ServerManager
     private $subServer = [];
     private $subServerRegister = [];
 
-    const TYPE_SERVER = 'SERVER';
-    const TYPE_WEB_SERVER = 'WEB_SERVER';
-    const TYPE_WEB_SOCKET_SERVER = 'WEB_SOCKET_SERVER';
-
-
     function __construct()
     {
         $this->mainServerEventRegister = new EventRegister();
@@ -47,18 +42,18 @@ class ServerManager
         }
     }
 
-    function createSwooleServer($port,$type = self::TYPE_SERVER,$address = '0.0.0.0',array $setting = [],...$args):bool
+    function createSwooleServer($port,$type ,$address = '0.0.0.0',array $setting = [],...$args):bool
     {
         switch ($type){
-            case self::TYPE_SERVER:{
+            case EASYSWOOLE_SERVER:{
                 $this->swooleServer = new \swoole_server($address,$port,...$args);
                 break;
             }
-            case self::TYPE_WEB_SERVER:{
+            case EASYSWOOLE_WEB_SERVER:{
                 $this->swooleServer = new \swoole_http_server($address,$port,...$args);
                 break;
             }
-            case self::TYPE_WEB_SOCKET_SERVER:{
+            case EASYSWOOLE_WEB_SOCKET_SERVER:{
                 $this->swooleServer = new \swoole_websocket_server($address,$port,...$args);
                 break;
             }

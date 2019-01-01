@@ -61,6 +61,9 @@ class Core
     {
         defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
         defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
+        defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER',1);
+        defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER',2);
+        defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER',3);
     }
 
     function setIsDev(bool $isDev)
@@ -204,7 +207,7 @@ class Core
     private function registerDefaultCallBack(\swoole_server $server,string $serverType)
     {
         //如果主服务仅仅是swoole server，那么设置默认onReceive为全局的onReceive
-        if($serverType === ServerManager::TYPE_SERVER){
+        if($serverType === EASYSWOOLE_SERVER){
             $server->on(EventRegister::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data){
                 EasySwooleEvent::onReceive($server,$fd,$reactor_id,$data);
             });
@@ -378,9 +381,9 @@ class Core
     {
         //加载之前，先清空原来的
         if($this->isDev){
-            $file  = EASYSWOOLE_ROOT.'/dev.env';
+            $file  = EASYSWOOLE_ROOT.'/dev.php';
         }else{
-            $file  = EASYSWOOLE_ROOT.'/produce.env';
+            $file  = EASYSWOOLE_ROOT.'/produce.php';
         }
         Config::getInstance()->loadEnv($file);
     }

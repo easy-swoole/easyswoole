@@ -117,43 +117,9 @@ class Config
 
     public function loadEnv(string $file)
     {
-        $defines = get_defined_constants();
         if(file_exists($file)){
-            $file = file($file);
-            foreach ($file as $line){
-                $line = trim($line);
-                if(!empty($line)){
-                    //若以 # 开头的则为注释，不解析
-                    if(strpos($line,"#") !== 0){
-                        $key = trim(substr($line,0,strpos($line,'=')),' ');
-                        if(!empty($key)){
-                            //# 后面的为注释
-                            $val = trim(explode("#",substr($line,strpos($line,'=')+1))[0]);
-                            preg_match_all('([A-Z_]+)',$val,$ret);
-                            if(!empty($ret)){
-                                $constList = $ret[0];
-                                foreach ($constList as $const){
-                                    if(isset($defines[$const])){
-                                        $val = str_replace($const,$defines[$const],$val);
-                                    }
-                                }
-                            }
-                            if(is_numeric($val) && is_int($val + 0)){
-                                $val = (int)$val;
-                            }else if(is_string($val)){
-                                if($val== 'null' || empty($val)){
-                                    $val = null;
-                                }else if($val == 'true'){
-                                    $val = true;
-                                }else if($val == 'false'){
-                                    $val = false;
-                                }
-                            }
-                            $this->setConf($key,$val);
-                        }
-                    }
-                }
-            }
+            $data = require $file;
+            $this->conf->loadArray($data);
         }else{
             throw new \Exception("config file : {$file} is miss");
         }

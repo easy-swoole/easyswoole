@@ -27,8 +27,8 @@ class Install
         $path = '.'.str_replace(EASYSWOOLE_ROOT,'',__FILE__);
         file_put_contents(EASYSWOOLE_ROOT . '/easyswoole',"<?php require '{$path}';");
         self::releaseResource(__DIR__ . '/../src/Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
-        self::releaseResource(__DIR__ . '/../src/Resource/config.env', EASYSWOOLE_ROOT . '/dev.env');
-        self::releaseResource(__DIR__ . '/../src/Resource/config.env', EASYSWOOLE_ROOT . '/produce.env');
+        self::releaseResource(__DIR__ . '/../src/Resource/Config.php', EASYSWOOLE_ROOT . '/dev.php');
+        self::releaseResource(__DIR__ . '/../src/Resource/Config.php', EASYSWOOLE_ROOT . '/produce.php');
     }
 
     static function showTag($name, $value)
