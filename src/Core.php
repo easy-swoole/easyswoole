@@ -204,7 +204,7 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function registerDefaultCallBack(\swoole_server $server,string $serverType)
+    private function registerDefaultCallBack(\swoole_server $server,int $serverType)
     {
         //如果主服务仅仅是swoole server，那么设置默认onReceive为全局的onReceive
         if($serverType === EASYSWOOLE_SERVER){

@@ -180,7 +180,25 @@ switch ($mainCommand){
         }
         //创建主服务
         \EasySwoole\EasySwoole\Core::getInstance()->createServer();
-        Install::showTag('main server', $conf->getConf('MAIN_SERVER.SERVER_TYPE'));
+        $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
+        switch ($serverType){
+            case 1:{
+                $serverType = 'SWOOLE_TCP';
+                break;
+            }
+            case 2:{
+                $serverType = 'SWOOLE_WEB';
+                break;
+            }
+            case 3:{
+                $serverType = 'SWOOLE_WEB_SOCKET';
+                break;
+            }
+            default:{
+                $serverType = 'UNKNOWN';
+            }
+        }
+        Install::showTag('main server', $serverType);
         Install::showTag('listen address', $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
 
