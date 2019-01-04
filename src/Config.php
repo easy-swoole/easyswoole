@@ -106,6 +106,11 @@ class Config
             $confData = require_once $filePath;
             if (is_array($confData) && !empty($confData)) {
                 $basename = strtolower(basename($filePath, '.php'));
+                if (Core::getInstance()->isDev()) {
+                    $confData = isset($confData['dev']) ? $confData['dev'] : $confData;
+                } else {
+                    $confData = isset($confData['produce']) ? $confData['produce'] : $confData;
+                }
                 if (!$merge) {
                     $this->conf[$basename] = $confData;
                 } else {
