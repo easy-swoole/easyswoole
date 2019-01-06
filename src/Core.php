@@ -268,6 +268,13 @@ class Core
                 $response_psr->__response();
                 ContextManager::getInstance()->destroy();
             });
+
+            if($serverType == EASYSWOOLE_WEB_SOCKET_SERVER){
+                $server->on('message',function (\swoole_websocket_server  $server, \swoole_websocket_frame $frame){
+                    EasySwooleEvent::onMessage($server,$frame);
+                    ContextManager::getInstance()->destroy();
+                });
+            }
         }
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
         EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
