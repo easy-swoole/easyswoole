@@ -44,4 +44,9 @@ class EasySwooleEvent implements Event
 
     }
 
+    public static function onPacket(\swoole_server $server, string $data, array $client_info):void
+    {
+
+    }
+
 }
