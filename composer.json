@@ -32,6 +32,6 @@
         }
     },
     "bin": [
-        "bin/easyswoole.php"
+        "bin/easyswoole"
     ]
 }

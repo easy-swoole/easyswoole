@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 define('EASYSWOOLE_ROOT', realpath(getcwd()));
