@@ -38,19 +38,4 @@ class EasySwooleEvent implements Event
     {
         // TODO: Implement afterAction() method.
     }
-
-    public static function onMessage(\swoole_websocket_server  $server, \swoole_websocket_frame $frame):void
-    {
-
-    }
-
-    public static function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data):void
-    {
-
-    }
-
-    public static function onPacket(\swoole_server $server, string $data, array $client_info):void
-    {
-
-    }
 }

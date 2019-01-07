@@ -22,8 +22,4 @@ interface Event
     public static function onRequest(Request $request,Response $response):bool ;
 
     public static function afterRequest(Request $request,Response $response):void;
-
-    public static function onPacket(\swoole_server $server, string $data, array $client_info):void;
-
-    public static function onMessage(\swoole_websocket_server  $server, \swoole_websocket_frame $frame):void;
 }

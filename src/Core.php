@@ -211,15 +211,13 @@ class Core
         if($serverType === EASYSWOOLE_SERVER){
             $socketType = Config::getInstance()->getConf('MAIN_SERVER.SOCK_TYPE');
             if(in_array($socketType,[SWOOLE_TCP,SWOOLE_TCP6])){
-                $server->on(EventRegister::onReceive,function (\swoole_server $server, int $fd, int $reactor_id, string $data){
-                    EasySwooleEvent::onReceive($server,$fd,$reactor_id,$data);
+                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onReceive,function (){
+                    ContextManager::getInstance()->destroy();
                 });
-                ContextManager::getInstance()->destroy();
             }else if(in_array($socketType,[SWOOLE_UDP,SWOOLE_UDP6])){
-                $server->on(EventRegister::onPacket,function (\swoole_server $server, string $data, array $client_info){
-                    EasySwooleEvent::onPacket($server,$data,$client_info);
+                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onPacket,function (){
+                    ContextManager::getInstance()->destroy();
                 });
-                ContextManager::getInstance()->destroy();
             }
         }else{
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
