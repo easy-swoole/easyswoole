@@ -268,8 +268,7 @@ class Core
             });
 
             if($serverType == EASYSWOOLE_WEB_SOCKET_SERVER){
-                $server->on('message',function (\swoole_websocket_server  $server, \swoole_websocket_frame $frame){
-                    EasySwooleEvent::onMessage($server,$frame);
+                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onMessage,function (){
                     ContextManager::getInstance()->destroy();
                 });
             }
