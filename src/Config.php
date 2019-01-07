@@ -26,23 +26,23 @@ class Config
          * 用于存储动态配置,不适合存储大量\大长度的的配置下，仅仅建议用于开关存储
          */
         $this->swooleTable = new \swoole_table(1024);
-        $this->swooleTable->column('value',Table::TYPE_STRING,512);
+        $this->swooleTable->column('value', Table::TYPE_STRING, 512);
         $this->swooleTable->create();
     }
 
-    function setDynamicConf($key,$val)
+    function setDynamicConf($key, $val)
     {
-        $this->swooleTable->set($key,[
-            'value'=> serialize($val)
+        $this->swooleTable->set($key, [
+            'value' => serialize($val)
         ]);
     }
 
     function getDynamicConf($key)
     {
         $data = $this->swooleTable->get($key);
-        if(!empty($data)){
+        if (!empty($data)) {
             return unserialize($data['value']);
-        }else{
+        } else {
             return null;
         }
     }
@@ -69,7 +69,7 @@ class Config
      * 设置配置项
      * 在server启动以后，无法动态的去添加，修改配置信息（进程数据独立）
      * @param string $keyPath 配置项名称 支持点语法
-     * @param mixed  $data    配置项数据
+     * @param mixed $data 配置项数据
      */
     public function setConf($keyPath, $data): void
     {
@@ -97,7 +97,7 @@ class Config
     /**
      * 载入一个文件的配置项
      * @param string $filePath 配置文件路径
-     * @param bool   $merge    是否将内容合并入主配置
+     * @param bool $merge 是否将内容合并入主配置
      * @author : evalor <master@evalor.cn>
      */
     public function loadFile($filePath, $merge = false)
@@ -117,10 +117,10 @@ class Config
 
     public function loadEnv(string $file)
     {
-        if(file_exists($file)){
+        if (is_file($file)) {
             $data = require $file;
             $this->conf->loadArray($data);
-        }else{
+        } else {
             throw new \Exception("config file : {$file} is miss");
         }
     }
