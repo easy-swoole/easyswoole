@@ -117,7 +117,7 @@ class Config
 
     public function loadEnv(string $file)
     {
-        if(file_exists($file)){
+        if(is_file($file)){
             $data = require $file;
             $this->conf->loadArray($data);
         }else{
