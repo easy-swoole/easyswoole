@@ -84,7 +84,7 @@ class Core
     {
         //检查全局文件是否存在.
         $file = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
-        if(is_file($file)){
+        if(file_exists($file)){
             require_once $file;
             try{
                 $ref = new \ReflectionClass('EasySwoole\EasySwoole\EasySwooleEvent');

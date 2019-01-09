@@ -4,7 +4,7 @@
 define('EASYSWOOLE_ROOT', realpath(getcwd()));
 
 $file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
-if (is_file($file)) {
+if (file_exists($file)) {
     require $file;
 }else{
     die("include composer autoload.php fail\n");
@@ -12,7 +12,7 @@ if (is_file($file)) {
 
 // require swoole version greater then 4.2.6
 $version = phpversion('swoole');
-if (version_compare($version,'4.2.6','<')){
+if (version_compare(phpversion('swoole'),'4.2.6','<')){
     die("the swoole extension version must be >= 4.2.6 (current: {$version})\n");
 }
 
@@ -250,7 +250,7 @@ switch ($mainCommand){
         \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $Conf = \EasySwoole\EasySwoole\Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
-        if (is_file($pidFile)) {
+        if (file_exists($pidFile)) {
             $pid = file_get_contents($pidFile);
             if (!swoole_process::kill($pid, 0)) {
                 echo "PID :{$pid} not exist \n";
@@ -299,7 +299,7 @@ switch ($mainCommand){
         \EasySwoole\EasySwoole\Core::getInstance()->initialize();
         $Conf = \EasySwoole\EasySwoole\Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
-        if (is_file($pidFile)) {
+        if (file_exists($pidFile)) {
             if (!$all) {
                 $sig = SIGUSR2;
                 Install::showTag('reloadType',"only-task");
