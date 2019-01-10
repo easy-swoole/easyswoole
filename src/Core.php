@@ -29,7 +29,7 @@ use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
 use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
 use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
-use  Swoole\Server\Task;
+use Swoole\Server\Task;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -360,11 +360,18 @@ class Core
             //空逻辑
         });
 
-
-
         //通过pipe通讯，也就是processAsync投递的闭包任务，是没有taskId信息的，因此参数传递默认-1
         OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromWorkerId){
-            $server->task($taskObj);
+            //闭包任务无法再次二次序列化,因此直接执行
+            if($taskObj instanceof SuperClosure){
+                try{
+                    call_user_func($taskObj,$server,-1,$fromWorkerId);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
+                }
+            }else{
+                $server->task($taskObj);
+            }
         });
 
         EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){

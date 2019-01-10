@@ -32,9 +32,15 @@ class TaskManager
     {
         $conf = ServerManager::getInstance()->getSwooleServer()->setting;
         $workerNum = $conf['worker_num'];
+        if(!isset($conf['task_worker_num'])){
+            return false;
+        }
+        $taskNum = $conf['task_worker_num'];
+        $closure = false;
         if($task instanceof \Closure){
             try{
                 $task = new SuperClosure($task);
+                $closure = true;
             }catch (\Throwable $throwable){
                 Trigger::getInstance()->throwable($throwable);
                 return false;
@@ -44,7 +50,12 @@ class TaskManager
         $message->setCommand('TASK');
         $message->setData($task);
         mt_srand();
-        $workerId = mt_rand(0,$workerNum-1);
+        //闭包无法再onPipeMessage中再次被序列化，因此直接投递给task进程直接执行。
+        if($closure){
+            $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
+        }else{
+            $workerId = mt_rand(0,$workerNum -1);
+        }
         ServerManager::getInstance()->getSwooleServer()->sendMessage(serialize($message),$workerId);
         return true;
     }
