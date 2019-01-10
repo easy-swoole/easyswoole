@@ -12,36 +12,34 @@ namespace EasySwoole\EasySwoole\Swoole\Task;
 abstract class AbstractAsyncTask
 {
     private $data = null;
-    private $result = null;
     final public function __construct($data = null)
     {
         $this->data = $data;
     }
-
-    /**
-     * @return null
+    /*
+     * if has return ,do finish call
      */
-    public function getData()
+    function __onTaskHook($taskId,$fromWorkerId)
     {
-        return $this->data;
+        try{
+            return $this->run($this->data,$taskId,$fromWorkerId);
+        }catch (\Throwable $throwable){
+            $this->onException($throwable);
+        }
     }
 
-    /**
-     * @return mixed
-     */
-    public function getResult()
+    function __onFinishHook($finishData,$task_id)
     {
-        return $this->result;
+        try{
+            $this->finish($finishData,$task_id);
+        }catch (\Throwable $throwable){
+            $this->onException($throwable);
+        }
     }
 
-    public function setResult($data):void
-    {
-        $this->result = $data;
-    }
+    abstract protected function run($taskData,$taskId,$fromWorkerId);
 
-    abstract function run($taskData,$taskId,$fromWorkerId);
-
-    abstract function finish($result,$task_id);
+    abstract protected function finish($result,$task_id);
 
     public function onException(\Throwable $throwable):void
     {

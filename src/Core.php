@@ -274,6 +274,7 @@ class Core
             }
         }
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
+        //其次finish逻辑在同进程中实现、
         EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
             if(is_string($taskObj) && class_exists($taskObj)){
                 $ref = new \ReflectionClass($taskObj);
@@ -290,15 +291,12 @@ class Core
             }
             if($taskObj instanceof AbstractAsyncTask){
                 try{
-                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
+                    $ret = $taskObj->__onTaskHook($taskId,$fromWorkerId);
+                    if($ret !== null){
+                        $taskObj->__onFinishHook($ret,$taskId);
                     }
                 }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
+                    Trigger::getInstance()->throwable($throwable);
                 }
             }else if($taskObj instanceof SuperClosure){
                 try{
@@ -315,58 +313,16 @@ class Core
             }
             return null;
         });
-        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $server, $taskId, $taskObj){
-            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $taskObj->finish($taskObj->getResult(),$taskId);
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }
+
+        EventHelper::on($server,EventRegister::onFinish,function (){
+            //空逻辑
         });
 
-        //注册默认的pipe通讯
+
+
         //通过pipe通讯，也就是processAsync投递的闭包任务，是没有taskId信息的，因此参数传递默认-1
         OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromWorkerId){
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $ref = new \ReflectionClass($taskObj);
-                if($ref->implementsInterface(QuickTaskInterface::class)){
-                    try{
-                        $taskObj::run($server,-1,$fromWorkerId);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                    return;
-                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    $taskObj = new $taskObj;
-                }
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret =  $taskObj->run($taskObj->getData(),-1,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
-                    }
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    return $taskObj( $server, -1, $fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }else if(is_callable($taskObj)){
-                try{
-                    call_user_func($taskObj,$server,-1,$fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }
+            $server->task($taskObj);
         });
 
         EventHelper::on($server,EventRegister::onPipeMessage,function (\swoole_server $server,$fromWorkerId,$data){

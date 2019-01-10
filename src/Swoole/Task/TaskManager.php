@@ -31,10 +31,6 @@ class TaskManager
     public static function processAsync($task)
     {
         $conf = ServerManager::getInstance()->getSwooleServer()->setting;
-        if(!isset($conf['task_worker_num'])){
-            return false;
-        }
-        $taskNum = $conf['task_worker_num'];
         $workerNum = $conf['worker_num'];
         if($task instanceof \Closure){
             try{
@@ -48,7 +44,7 @@ class TaskManager
         $message->setCommand('TASK');
         $message->setData($task);
         mt_srand();
-        $workerId = mt_rand($workerNum,($workerNum+$taskNum)-1);
+        $workerId = mt_rand(0,$workerNum-1);
         ServerManager::getInstance()->getSwooleServer()->sendMessage(serialize($message),$workerId);
         return true;
     }
