@@ -24,6 +24,8 @@ use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
+use EasySwoole\Trace\AbstractInterface\LoggerInterface;
+use EasySwoole\Trace\AbstractInterface\TriggerInterface;
 use EasySwoole\Trace\Bean\Location;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
@@ -172,24 +174,42 @@ class Core
         //设置默认文件目录值
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
-        //设置目录
-        Logger::getInstance($logDir);
     }
 
     private function registerErrorHandler()
     {
         ini_set("display_errors", "On");
         error_reporting(E_ALL | E_STRICT);
-        $userHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
-        if(!is_callable($userHandler)){
-            $userHandler = function($errorCode, $description, $file = null, $line = null){
+
+        //初始化配置Logger
+        $logger = Di::getInstance()->get(SysConst::LOGGER_HANDLER);
+        if(!$logger instanceof LoggerInterface){
+            $logger = new \EasySwoole\Trace\Logger(EASYSWOOLE_LOG_DIR);
+        }
+        Logger::getInstance($logger);
+
+        //初始化追追踪器
+        $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
+        if(!$trigger instanceof TriggerInterface){
+            /*
+             * DISPLAY_ERROR
+             */
+            $display = Config::getInstance()->getConf('DISPLAY_ERROR');
+            $trigger = new \EasySwoole\Trace\Trigger(Logger::getInstance(),$display);
+        }
+        Trigger::getInstance($trigger);
+
+        //在没有配置自定义错误处理器的情况下，转化为trigger处理
+        $errorHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
+        if(!is_callable($errorHandler)){
+            $errorHandler = function($errorCode, $description, $file = null, $line = null){
                 $l = new Location();
                 $l->setFile($file);
                 $l->setLine($line);
-                Trigger::getInstance()->error($description,$l);
+                Trigger::getInstance()->error($description,$errorCode,$l);
             };
         }
-        set_error_handler($userHandler);
+        set_error_handler($errorHandler);
 
         $func = Di::getInstance()->get(SysConst::SHUTDOWN_FUNCTION);
         if(!is_callable($func)){
@@ -199,7 +219,7 @@ class Core
                     $l = new Location();
                     $l->setFile($error['file']);
                     $l->setLine($error['line']);
-                    Trigger::getInstance()->error($error['message'],$l);
+                    Trigger::getInstance()->error($error['message'],$error['type'],$l);
                 }
             };
         }

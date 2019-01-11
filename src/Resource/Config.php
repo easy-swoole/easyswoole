@@ -31,5 +31,6 @@ return [
         'EXPIRE'=>'120',
         'AUTH'=>null,
         'PUSH_LOG'=>true
-    ]
+    ],
+    'DISPLAY_ERROR'=>true
 ];
