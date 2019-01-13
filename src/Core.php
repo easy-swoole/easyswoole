@@ -137,12 +137,11 @@ class Core
         //注册fastCache进程
         if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
             Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
-                    ->setProcessNum(Config::getInstance()
-                    ->getConf('FAST_CACHE.PROCESS_NUM'))
+                    ->setProcessNum(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM'))
+                    ->setBacklog(Config::getInstance()->getConf('FAST_CACHE.BACKLOG'))
                     ->setServerName($serverName)
                     ->attachToServer(ServerManager::getInstance()->getSwooleServer());
         }
-
         //执行Actor注册进程
         Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
         ServerManager::getInstance()->start();
