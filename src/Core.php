@@ -24,11 +24,14 @@ use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
+use EasySwoole\Trace\AbstractInterface\LoggerInterface;
+use EasySwoole\Trace\AbstractInterface\TriggerInterface;
 use EasySwoole\Trace\Bean\Location;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\Message;
 use EasySwoole\EasySwoole\Swoole\PipeMessage\OnCommand;
 use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
 use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
+use Swoole\Server\Task;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -134,12 +137,11 @@ class Core
         //注册fastCache进程
         if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
             Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
-                    ->setProcessNum(Config::getInstance()
-                    ->getConf('FAST_CACHE.PROCESS_NUM'))
+                    ->setProcessNum(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM'))
+                    ->setBacklog(Config::getInstance()->getConf('FAST_CACHE.BACKLOG'))
                     ->setServerName($serverName)
                     ->attachToServer(ServerManager::getInstance()->getSwooleServer());
         }
-
         //执行Actor注册进程
         Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
         ServerManager::getInstance()->start();
@@ -171,24 +173,42 @@ class Core
         //设置默认文件目录值
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
         Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
-        //设置目录
-        Logger::getInstance($logDir);
     }
 
     private function registerErrorHandler()
     {
         ini_set("display_errors", "On");
         error_reporting(E_ALL | E_STRICT);
-        $userHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
-        if(!is_callable($userHandler)){
-            $userHandler = function($errorCode, $description, $file = null, $line = null){
+
+        //初始化配置Logger
+        $logger = Di::getInstance()->get(SysConst::LOGGER_HANDLER);
+        if(!$logger instanceof LoggerInterface){
+            $logger = new \EasySwoole\Trace\Logger(EASYSWOOLE_LOG_DIR);
+        }
+        Logger::getInstance($logger);
+
+        //初始化追追踪器
+        $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
+        if(!$trigger instanceof TriggerInterface){
+            /*
+             * DISPLAY_ERROR
+             */
+            $display = Config::getInstance()->getConf('DISPLAY_ERROR');
+            $trigger = new \EasySwoole\Trace\Trigger(Logger::getInstance(),$display);
+        }
+        Trigger::getInstance($trigger);
+
+        //在没有配置自定义错误处理器的情况下，转化为trigger处理
+        $errorHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
+        if(!is_callable($errorHandler)){
+            $errorHandler = function($errorCode, $description, $file = null, $line = null){
                 $l = new Location();
                 $l->setFile($file);
                 $l->setLine($line);
-                Trigger::getInstance()->error($description,$l);
+                Trigger::getInstance()->error($description,$errorCode,$l);
             };
         }
-        set_error_handler($userHandler);
+        set_error_handler($errorHandler);
 
         $func = Di::getInstance()->get(SysConst::SHUTDOWN_FUNCTION);
         if(!is_callable($func)){
@@ -198,7 +218,7 @@ class Core
                     $l = new Location();
                     $l->setFile($error['file']);
                     $l->setLine($error['line']);
-                    Trigger::getInstance()->error($error['message'],$l);
+                    Trigger::getInstance()->error($error['message'],$error['type'],$l);
                 }
             };
         }
@@ -274,98 +294,102 @@ class Core
             }
         }
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
-        EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $ref = new \ReflectionClass($taskObj);
-                if($ref->implementsInterface(QuickTaskInterface::class)){
+        //其次finish逻辑在同进程中实现、
+        if(Config::getInstance()->getConf('MAIN_SERVER.SETTING.task_enable_coroutine')){
+            EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, Task $task){
+                $taskObj = $task->data;
+                if(is_string($taskObj) && class_exists($taskObj)){
+                    $ref = new \ReflectionClass($taskObj);
+                    if($ref->implementsInterface(QuickTaskInterface::class)){
+                        try{
+                            $taskObj::run($server,$task->id,$task->worker_id,$task->flags);
+                        }catch (\Throwable $throwable){
+                            Trigger::getInstance()->throwable($throwable);
+                        }
+                        return;
+                    }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
+                        $taskObj = new $taskObj;
+                    }
+                }
+                if($taskObj instanceof AbstractAsyncTask){
                     try{
-                        $taskObj::run($server,$taskId,$fromWorkerId);
+                        $ret = $taskObj->__onTaskHook($task->id,$task->worker_id,$task->flags);
+                        if($ret !== null){
+                            $taskObj->__onFinishHook($ret,$task->id);
+                        }
                     }catch (\Throwable $throwable){
                         Trigger::getInstance()->throwable($throwable);
                     }
-                    return;
-                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    $taskObj = new $taskObj;
-                }
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret =  $taskObj->run($taskObj->getData(),$taskId,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
+                }else if($taskObj instanceof SuperClosure){
+                    try{
+                        return $taskObj( $server, $task->id,$task->worker_id,$task->flags);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
                     }
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
+                }else if(is_callable($taskObj)){
+                    try{
+                        call_user_func($taskObj,$server,$task->id,$task->worker_id,$task->flags);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
                 }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    return $taskObj( $server, $taskId, $fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
+                return null;
+            });
+        }else{
+            EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
+                if(is_string($taskObj) && class_exists($taskObj)){
+                    $ref = new \ReflectionClass($taskObj);
+                    if($ref->implementsInterface(QuickTaskInterface::class)){
+                        try{
+                            $taskObj::run($server,$taskId,$fromWorkerId);
+                        }catch (\Throwable $throwable){
+                            Trigger::getInstance()->throwable($throwable);
+                        }
+                        return;
+                    }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
+                        $taskObj = new $taskObj;
+                    }
                 }
-            }else if(is_callable($taskObj)){
-                try{
-                    call_user_func($taskObj,$server,$taskId,$fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
+                if($taskObj instanceof AbstractAsyncTask){
+                    try{
+                        $ret = $taskObj->__onTaskHook($taskId,$fromWorkerId);
+                        if($ret !== null){
+                            $taskObj->__onFinishHook($ret,$taskId);
+                        }
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
+                }else if($taskObj instanceof SuperClosure){
+                    try{
+                        return $taskObj( $server, $taskId, $fromWorkerId);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
+                }else if(is_callable($taskObj)){
+                    try{
+                        call_user_func($taskObj,$server,$taskId,$fromWorkerId);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
+                    }
                 }
-            }
-            return null;
-        });
-        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $server, $taskId, $taskObj){
-            //finish 在仅仅对AbstractAsyncTask做处理，其余处理无意义。
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $taskObj->finish($taskObj->getResult(),$taskId);
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }
+                return null;
+            });
+        }
+        EventHelper::on($server,EventRegister::onFinish,function (){
+            //空逻辑
         });
 
-        //注册默认的pipe通讯
         //通过pipe通讯，也就是processAsync投递的闭包任务，是没有taskId信息的，因此参数传递默认-1
         OnCommand::getInstance()->set('TASK',function (\swoole_server $server,$taskObj,$fromWorkerId){
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $ref = new \ReflectionClass($taskObj);
-                if($ref->implementsInterface(QuickTaskInterface::class)){
-                    try{
-                        $taskObj::run($server,-1,$fromWorkerId);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                    return;
-                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    $taskObj = new $taskObj;
-                }
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret =  $taskObj->run($taskObj->getData(),-1,$fromWorkerId);
-                    //在有return或者设置了结果的时候  说明需要执行结束回调
-                    $ret = is_null($ret) ? $taskObj->getResult() : $ret;
-                    if(!is_null($ret)){
-                        $taskObj->setResult($ret);
-                        return $taskObj;
-                    }
-                }catch (\Throwable $throwable){
-                    $taskObj->onException($throwable);
-                }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    return $taskObj( $server, -1, $fromWorkerId);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }else if(is_callable($taskObj)){
+            //闭包任务无法再次二次序列化,因此直接执行
+            if($taskObj instanceof SuperClosure){
                 try{
                     call_user_func($taskObj,$server,-1,$fromWorkerId);
                 }catch (\Throwable $throwable){
                     Trigger::getInstance()->throwable($throwable);
                 }
+            }else{
+                $server->task($taskObj);
             }
         });
 

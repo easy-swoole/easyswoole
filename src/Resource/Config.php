@@ -31,5 +31,10 @@ return [
         'EXPIRE'=>'120',
         'AUTH'=>null,
         'PUSH_LOG'=>true
-    ]
+    ],
+    'FAST_CACHE'=>[
+        'PROCESS_NUM'=>0,
+        'BACKLOG'=>256
+    ],
+    'DISPLAY_ERROR'=>true
 ];

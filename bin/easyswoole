@@ -184,7 +184,7 @@ switch ($mainCommand){
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         switch ($serverType){
             case 1:{
-                $serverType = 'SWOOLE_TCP';
+                $serverType = 'SWOOLE_SERVER';
                 break;
             }
             case 2:{
