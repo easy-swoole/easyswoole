@@ -97,7 +97,7 @@ Transfer rate:          2265.40 [Kbytes/sec] received
 ## Quick Start
 ```
 composer require easyswoole/easyswoole=3.x
-php vendor/bin/easyswoole.php install
+php vendor/bin/easyswoole install
 php easyswoole start
 ```
 
