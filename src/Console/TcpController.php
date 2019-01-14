@@ -8,20 +8,19 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
-
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\Socket\AbstractInterface\Controller;
 
 class TcpController extends Controller
 {
-    function onRequest(?string $actionName): bool
+    public function onRequest(?string $actionName): bool
     {
         $fd = $this->caller()->getClient()->getFd();
         $authKey = Config::getInstance()->getConf('CONSOLE.AUTH');
         //如果开启了权限验证
         if (!empty($authKey)) {
-            $info = TableManager::getInstance()->get(TcpService::$__swooleTableName)->get($fd);
+            $info = TableManager::getInstance()->get(TcpService::$swooleTableName)->get($fd);
             //如果是执行鉴权命令
             if ($actionName == 'auth') {
                 return true;

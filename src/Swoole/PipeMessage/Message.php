@@ -8,7 +8,6 @@
 
 namespace EasySwoole\EasySwoole\Swoole\PipeMessage;
 
-
 class Message
 {
     private $command;

@@ -8,7 +8,6 @@
 
 namespace EasySwoole\EasySwoole\Swoole;
 
-
 use EasySwoole\Component\MultiContainer;
 
 class EventRegister extends MultiContainer
@@ -36,7 +35,7 @@ class EventRegister extends MultiContainer
     const onMessage = 'message';
     const onOpen = 'open';
 
-    function __construct(array $allowKeys = null)
+    public function __construct(array $allowKeys = null)
     {
         parent::__construct([
             'start','shutdown','workerStart','workerStop','workerExit','timer',
