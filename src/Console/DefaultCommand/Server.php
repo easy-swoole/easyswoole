@@ -37,15 +37,31 @@ class Server implements CommandInterface
             $actionName = array_shift($args);
             $caller->setArgs($args);
             switch ($actionName) {
-                case 'status': $this->status($caller, $response); break;
-                case 'hostIp': $this->hostIp($caller, $response); break;
-                case 'reload': $this->reload($caller, $response); break;
-                case 'shutdown': $this->shutdown($caller, $response); break;
-                case 'close': $this->close($caller, $response); break;
-                case 'clientInfo': $this->clientInfo($caller, $response); break;
-                case 'serverList': $this->serverList($caller, $response); break;
-                case 'pushLog' : $this->pushLog($caller,$response); break;
-                default :
+                case 'status':
+                    $this->status($caller, $response);
+                    break;
+                case 'hostIp':
+                    $this->hostIp($caller, $response);
+                    break;
+                case 'reload':
+                    $this->reload($caller, $response);
+                    break;
+                case 'shutdown':
+                    $this->shutdown($caller, $response);
+                    break;
+                case 'close':
+                    $this->close($caller, $response);
+                    break;
+                case 'clientInfo':
+                    $this->clientInfo($caller, $response);
+                    break;
+                case 'serverList':
+                    $this->serverList($caller, $response);
+                    break;
+                case 'pushLog':
+                    $this->pushLog($caller, $response);
+                    break;
+                default:
                     $response->setMessage("action {$actionName} not supported!");
             }
         }
@@ -83,7 +99,7 @@ HELP;
     private function status(Caller $caller, Response $response)
     {
         $stats = ServerManager::getInstance()->getSwooleServer()->stats();
-        $message = new ArrayToTextTable([ $stats ]);
+        $message = new ArrayToTextTable([$stats]);
         $response->setMessage($message);
     }
 
@@ -97,7 +113,7 @@ HELP;
     private function hostIp(Caller $caller, Response $response)
     {
         $list = swoole_get_local_ip();
-        $message = new ArrayToTextTable([ $list ]);
+        $message = new ArrayToTextTable([$list]);
         $response->setMessage($message);
     }
 
@@ -153,7 +169,7 @@ HELP;
         $fd = array_shift($args);
         if (!empty($fd)) {
             $info = ServerManager::getInstance()->getSwooleServer()->getClientInfo($fd);
-            $info = new ArrayToTextTable([ $info ]);
+            $info = new ArrayToTextTable([$info]);
         } else {
             $info = 'missing parameter usage: server clientInfo fd';
         }
@@ -171,11 +187,21 @@ HELP;
     {
         $serverInfo = [];
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
-        $serverInfo[] = [ 'serverName' => 'mainServer', 'serverType' => $conf['SERVER_TYPE'], 'serverHost' => $conf['LISTEN_ADDRESS'], 'listenPort' => $conf['PORT'] ];
+        $serverInfo[] = [
+            'serverName' => 'mainServer',
+            'serverType' => $conf['SERVER_TYPE'],
+            'serverHost' => $conf['LISTEN_ADDRESS'],
+            'listenPort' => $conf['PORT'],
+        ];
         $list = ServerManager::getInstance()->getSubServerRegister();
         foreach ($list as $serverName => $item) {
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            $serverInfo[] = [ 'serverName' => $serverName, 'serverType' => $type, 'listenAddress' => $item['listenAddress'], 'listenPort' => $item['port'] ];
+            $serverInfo[] = [
+                'serverName' => $serverName,
+                'serverType' => $type,
+                'listenAddress' => $item['listenAddress'],
+                'listenPort' => $item['port'],
+            ];
         }
         $info = new ArrayToTextTable($serverInfo);
         $response->setMessage($info);
@@ -194,7 +220,7 @@ HELP;
         if ($command == 'enable') {
             Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG', true);
             $str = 'enable console push log';
-        } else if ($command == 'disable') {
+        } elseif ($command == 'disable') {
             Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG', false);
             $str = 'disable console push log';
         } else {

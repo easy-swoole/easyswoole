@@ -56,6 +56,6 @@ class Help implements CommandInterface
 {$allCommand}
 
 HELP;
-    $response->setMessage($help);
+        $response->setMessage($help);
     }
 }

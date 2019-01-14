@@ -25,7 +25,7 @@ class Crontab
     /*
      * 同名任务会被覆盖
      */
-    function addTask(string $cronTaskClass): Crontab
+    public function addTask(string $cronTaskClass): Crontab
     {
         try {
             $ref = new \ReflectionClass($cronTaskClass);
@@ -53,7 +53,7 @@ class Crontab
      * @throws CronTaskNotExist
      * @throws CronTaskRuleInvalid
      */
-    function resetTaskRule($taskName, $taskRule)
+    public function resetTaskRule($taskName, $taskRule)
     {
         $table = TableManager::getInstance()->get(self::$__swooleTableName);
         if ($table->exist($taskName)) {
@@ -74,7 +74,7 @@ class Crontab
      * @return string 任务当前规则
      * @throws CronTaskNotExist|\Exception
      */
-    function getTaskCurrentRule($taskName)
+    public function getTaskCurrentRule($taskName)
     {
         $taskInfo = $this->getTableTaskInfo($taskName);
         return $taskInfo['taskRule'];
@@ -87,7 +87,7 @@ class Crontab
      * @return integer 任务下次执行的时间戳
      * @throws \Exception
      */
-    function getTaskNextRunTime($taskName)
+    public function getTaskNextRunTime($taskName)
     {
         $taskInfo = $this->getTableTaskInfo($taskName);
         return $taskInfo['taskNextRunTime'];
@@ -100,7 +100,7 @@ class Crontab
      * @return integer 已执行的次数
      * @throws \Exception
      */
-    function getTaskRunNumberOfTimes($taskName)
+    public function getTaskRunNumberOfTimes($taskName)
     {
         $taskInfo = $this->getTableTaskInfo($taskName);
         return $taskInfo['taskRunTimes'];
@@ -129,7 +129,7 @@ class Crontab
     /*
      * 请用户不要私自调用
      */
-    function __run()
+    public function __run()
     {
         if (!empty($this->tasks)) {
             $server = ServerManager::getInstance()->getSwooleServer();
@@ -140,7 +140,7 @@ class Crontab
             TableManager::getInstance()->add(self::$__swooleTableName, [
                 'taskRule' => ['type' => Table::TYPE_STRING, 'size' => 35],
                 'taskRunTimes' => ['type' => Table::TYPE_INT, 'size' => 4],
-                'taskNextRunTime' => ['type' => Table::TYPE_INT, 'size' => 4]
+                'taskNextRunTime' => ['type' => Table::TYPE_INT, 'size' => 4],
             ], 1024);
 
             $table = TableManager::getInstance()->get(self::$__swooleTableName);
@@ -149,7 +149,10 @@ class Crontab
             foreach ($this->tasks as $cronTaskName => $cronTaskClass) {
                 $taskRule = $cronTaskClass::getRule();
                 $nextTime = CronExpression::factory($taskRule)->getNextRunDate()->getTimestamp();
-                $table->set($cronTaskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime]);
+                $table->set(
+                    $cronTaskName,
+                    ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime]
+                );
             }
 
             $server->addProcess($runner->getProcess());
