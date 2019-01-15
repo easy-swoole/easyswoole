@@ -41,14 +41,17 @@ class Logger implements LoggerInterface
         return $this->log($str,$logCategory);
     }
 
-    public function console(string $str, $category = null, $saveLog = true):?string
+    public function console(string $str, $category = 'console', $saveLog = true):?string
     {
         // TODO: Implement console() method.
-        $str = $this->logger->console($str,$category,$saveLog);
-        return $str;
+        $final = $this->logger->console($str,$category,false);
+        if($saveLog){
+            $this->log($str,$category);
+        }
+        return $final;
     }
 
-    public function consoleWithLocation(string $str, $category = null, $saveLog = true):?string
+    public function consoleWithLocation(string $str, $category = 'console', $saveLog = true):?string
     {
         // TODO: Implement console() method.
         $location = $this->getLocation();
