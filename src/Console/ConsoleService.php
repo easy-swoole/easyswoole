@@ -20,7 +20,7 @@ use EasySwoole\Socket\Dispatcher;
 use Swoole\Table;
 use EasySwoole\EasySwoole\Config as GlobalConfig;
 
-class TcpService
+class ConsoleService
 {
     /*
     * 下划线开头表示不希望用户使用

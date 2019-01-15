@@ -10,8 +10,9 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Console\TcpService;
+use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\Trace\AbstractInterface\LoggerInterface;
+use EasySwoole\Trace\Bean\Location;
 
 class Logger implements LoggerInterface
 {
@@ -23,15 +24,49 @@ class Logger implements LoggerInterface
         $this->logger = $logger;
     }
     
-    public function log(string $str, $logCategory, int $timestamp = null)
+    public function log(string $str, $logCategory = 'default', int $timestamp = null):?string
     {
         // TODO: Implement log() method.
-        $this->logger->log($str,$logCategory,$timestamp);
+        $str = $this->logger->log($str,$logCategory,$timestamp);
+        if(Config::getInstance()->getConf('CONSOLE.PUSH_LOG')){
+            ConsoleService::push($str);
+        }
+        return $str;
     }
 
-    public function console(string $str, $category = null, $saveLog = true)
+    public function logWithLocation(string $str,$logCategory = 'default',int $timestamp = null):?string
+    {
+        $location = $this->getLocation();
+        $str = "[file:{$location->getFile()}][line:{$location->getLine()}]{$str}";
+        return $this->log($str,$logCategory);
+    }
+
+    public function console(string $str, $category = null, $saveLog = true):?string
     {
         // TODO: Implement console() method.
-        $this->logger->console($str,$category,$saveLog);
+        $str = $this->logger->console($str,$category,$saveLog);
+        if(Config::getInstance()->getConf('CONSOLE.PUSH_LOG')){
+            ConsoleService::push($str);
+        }
+        return $str;
+    }
+
+    public function consoleWithLocation(string $str, $category = null, $saveLog = true):?string
+    {
+        // TODO: Implement console() method.
+        $location = $this->getLocation();
+        $str = "[file:{$location->getFile()}][line:{$location->getLine()}]{$str}";
+        return $this->console($str,$category,$saveLog);
+    }
+
+    private function getLocation():Location
+    {
+        $location = new Location();
+        $debugTrace = debug_backtrace();
+        array_shift($debugTrace);
+        $caller = array_shift($debugTrace);
+        $location->setLine($caller['line']);
+        $location->setFile($caller['file']);
+        return $location;
     }
 }

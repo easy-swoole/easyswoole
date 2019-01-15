@@ -215,8 +215,10 @@ switch ($mainCommand){
         foreach ($ips as $eth => $val){
             Install::showTag('ip@'.$eth, $val);
         }
-        Install::showTag('worker num', $conf->getConf('MAIN_SERVER.SETTING.worker_num'));
-        Install::showTag('task worker num', $conf->getConf('MAIN_SERVER.SETTING.task_worker_num'));
+        $data = $conf->getConf('MAIN_SERVER.SETTING');
+        foreach ($data as $key => $datum){
+            Install::showTag($key, (string)$datum);
+        }
         $user = $conf->getConf('MAIN_SERVER.SETTING.user');
         if(empty($user)){
             $user = get_current_user();
@@ -232,7 +234,7 @@ switch ($mainCommand){
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
         Install::showTag('easy swoole', \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION);
-        Install::showTag('run mode', $mode);
+        Install::showTag('develop/produce', $mode);
         Install::showTag('temp dir', EASYSWOOLE_TEMP_DIR);
         Install::showTag('log dir', EASYSWOOLE_LOG_DIR);
         \EasySwoole\EasySwoole\Core::getInstance()->start();

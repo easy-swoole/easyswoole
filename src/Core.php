@@ -14,7 +14,7 @@ use EasySwoole\Component\Context\ContextManager;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
-use EasySwoole\EasySwoole\Console\TcpService;
+use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -121,7 +121,7 @@ class Core
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         //创建主服务后，创建Tcp子服务
-        (new TcpService(Config::getInstance()->getConf('CONSOLE')));
+        (new ConsoleService(Config::getInstance()->getConf('CONSOLE')));
         return $this;
     }
 

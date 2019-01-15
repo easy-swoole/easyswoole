@@ -8,10 +8,10 @@
 
 namespace EasySwoole\EasySwoole\Console\DefaultCommand;
 
+use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Console\CommandInterface;
-use EasySwoole\EasySwoole\Console\TcpService;
-use EasySwoole\EasySwoole\Swoole\Memory\TableManager;
+use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
 
@@ -34,24 +34,24 @@ class Auth implements CommandInterface
         $fd = $caller->getClient()->getFd();
         $args = $caller->getArgs();
         if (Config::getInstance()->getConf('CONSOLE.AUTH') == array_shift($args)) {
-            TableManager::getInstance()->get(TcpService::$__swooleTableName)->set($fd, [
+            TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
                 'isAuth'   => 1,
                 'tryTimes' => 0
             ]);
             $response->setMessage('auth succeed');
         } else {
-            $info = TableManager::getInstance()->get(TcpService::$__swooleTableName)->get($fd);
+            $info = TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->get($fd);
             if (!empty($info)) {
                 if ($info['tryTimes'] > 5) {
                     $response->setStatus(Response::STATUS_RESPONSE_AND_CLOSE);
                 } else {
-                    TableManager::getInstance()->get(TcpService::$__swooleTableName)->set($fd, [
+                    TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
                         'isAuth'   => 0,
                         'tryTimes' => $info['tryTimes'] + 1
                     ]);
                 }
             } else {
-                TableManager::getInstance()->get(TcpService::$__swooleTableName)->set($fd, [
+                TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
                     'isAuth'   => 0,
                     'tryTimes' => 1
                 ]);
