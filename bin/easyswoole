@@ -2,25 +2,28 @@
 <?php
 
 define('EASYSWOOLE_ROOT', realpath(getcwd()));
-
 $file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
 if (file_exists($file)) {
     require $file;
 }else{
     die("include composer autoload.php fail\n");
 }
-
-// require swoole version greater then 4.2.6
 $version = phpversion('swoole');
 if (version_compare(phpversion('swoole'),'4.2.6','<')){
     die("the swoole extension version must be >= 4.2.6 (current: {$version})\n");
 }
 
+use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\SysConst;
+use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Console\Client;
+
 class Install
 {
     public static function init()
     {
-        \EasySwoole\EasySwoole\Core::getInstance();
+        Core::getInstance();
         //强制更新easyswoole bin管理文件
         if(is_file(EASYSWOOLE_ROOT . '/easyswoole')){
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
@@ -34,7 +37,7 @@ class Install
 
     static function showTag($name, $value)
     {
-        echo "\e[32m" . str_pad($name, 20, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m\n";
+        echo "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m\n";
     }
 
     public static function releaseResource($source, $destination)
@@ -134,7 +137,7 @@ HELP_RELOAD;
 
     public static function showHelp()
     {
-        $version = \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION;
+        $version = SysConst::EASYSWOOLE_VERSION;
         echo <<<DEFAULTHELP
 \n欢迎使用为API而生的\e[32m easySwoole\e[0m 框架 当前版本: \e[34m{$version}\e[0m
 
@@ -152,12 +155,14 @@ DEFAULTHELP;
     }
 }
 
+
+
+
+
+
 Install::showLogo();
-
-
 $commandList = $argv;
 array_shift($commandList);
-
 $mainCommand = array_shift($commandList);
 
 switch ($mainCommand){
@@ -172,15 +177,15 @@ switch ($mainCommand){
         $mode = 'develop';
         if(in_array('produce',$commandList)){
             $mode = 'produce';
-            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+            Core::getInstance()->setIsDev(false);
         }
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-        $conf = \EasySwoole\EasySwoole\Config::getInstance();
+        Core::getInstance()->initialize();
+        $conf = Config::getInstance();
         if(in_array("d",$commandList) || in_array("daemonize",$commandList)){
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
         //创建主服务
-        \EasySwoole\EasySwoole\Core::getInstance()->createServer();
+        Core::getInstance()->createServer();
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         switch ($serverType){
             case 1:{
@@ -203,7 +208,7 @@ switch ($mainCommand){
         Install::showTag('listen address', $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS'));
         Install::showTag('listen port', $conf->getConf('MAIN_SERVER.PORT'));
 
-        $list  = \EasySwoole\EasySwoole\ServerManager::getInstance()->getSubServerRegister();
+        $list  = ServerManager::getInstance()->getSubServerRegister();
         $index = 1;
         foreach ($list as $serverName => $item){
             $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
@@ -233,11 +238,11 @@ switch ($mainCommand){
         Install::showTag('daemonize', $daemonize);
         Install::showTag('swoole version', phpversion('swoole'));
         Install::showTag('php version', phpversion());
-        Install::showTag('easy swoole', \EasySwoole\EasySwoole\SysConst::EASYSWOOLE_VERSION);
+        Install::showTag('easy swoole', SysConst::EASYSWOOLE_VERSION);
         Install::showTag('develop/produce', $mode);
         Install::showTag('temp dir', EASYSWOOLE_TEMP_DIR);
         Install::showTag('log dir', EASYSWOOLE_LOG_DIR);
-        \EasySwoole\EasySwoole\Core::getInstance()->start();
+        Core::getInstance()->start();
         break;
     }
 
@@ -247,10 +252,10 @@ switch ($mainCommand){
             $force = true;
         }
         if(in_array('produce',$commandList)){
-            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+            Core::getInstance()->setIsDev(false);
         }
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-        $Conf = \EasySwoole\EasySwoole\Config::getInstance();
+        Core::getInstance()->initialize();
+        $Conf = Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
         if (file_exists($pidFile)) {
             $pid = file_get_contents($pidFile);
@@ -296,10 +301,10 @@ switch ($mainCommand){
             $all = true;
         }
         if(in_array('produce',$commandList)){
-            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+            Core::getInstance()->setIsDev(false);
         }
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
-        $Conf = \EasySwoole\EasySwoole\Config::getInstance();
+        Core::getInstance()->initialize();
+        $Conf =Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
         if (file_exists($pidFile)) {
             if (!$all) {
@@ -325,12 +330,12 @@ switch ($mainCommand){
     }
 
     case 'console':{
-        \EasySwoole\EasySwoole\Core::getInstance()->initialize();
+        Core::getInstance()->initialize();
         if(in_array('produce',$commandList)){
-            \EasySwoole\EasySwoole\Core::getInstance()->setIsDev(false);
+            Core::getInstance()->setIsDev(false);
         }
-        $conf = \EasySwoole\EasySwoole\Config::getInstance()->getConf('CONSOLE');
-        $client = new \EasySwoole\EasySwoole\Console\Client($conf['HOST'],$conf['PORT']);
+        $conf = Config::getInstance()->getConf('CONSOLE');
+        $client = new Client($conf['HOST'],$conf['PORT']);
         if($client->connect()){
             swoole_event_add(STDIN,function()use($client){
                 $ret = trim(fgets(STDIN));
