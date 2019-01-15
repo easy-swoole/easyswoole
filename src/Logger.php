@@ -45,9 +45,6 @@ class Logger implements LoggerInterface
     {
         // TODO: Implement console() method.
         $str = $this->logger->console($str,$category,$saveLog);
-        if(Config::getInstance()->getConf('CONSOLE.PUSH_LOG')){
-            ConsoleService::push($str);
-        }
         return $str;
     }
 
