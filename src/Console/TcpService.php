@@ -8,6 +8,7 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
+
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\Console\DefaultCommand\Auth;
 use EasySwoole\EasySwoole\Console\DefaultCommand\Help;
@@ -24,15 +25,15 @@ class TcpService
     /*
     * 下划线开头表示不希望用户使用
     */
-    public static $swooleTableName = '__Console.Auth';
+    public static $__swooleTableName = '__Console.Auth';
 
-    public function __construct(?array $config)
+    function __construct(?array $config)
     {
         if ($config['ENABLE']) {
             //创建swoole table 用于记录客户端连接
-            TableManager::getInstance()->add(self::$swooleTableName, [
-                'isAuth' => ['type' => Table::TYPE_INT, 'size' => 1],
-                'tryTimes' => ['type' => Table::TYPE_INT, 'size' => 1],
+            TableManager::getInstance()->add(self::$__swooleTableName, [
+                'isAuth'   => [ 'type' => Table::TYPE_INT, 'size' => 1 ],
+                'tryTimes' => [ 'type' => Table::TYPE_INT, 'size' => 1 ]
             ]);
             $this->registerDefault();
             $conf = new Config();
@@ -41,28 +42,22 @@ class TcpService
             $conf->setOnExceptionHandler(function ($server, \Throwable $throwable, $raw, $client, Response $response) {
                 $response->setMessage($throwable->getMessage());
                 $response->setArgs([
-                    'raw' => $raw,
-                    'exception' => $throwable->getTraceAsString(),
+                    'raw'       => $raw,
+                    'exception' => $throwable->getTraceAsString()
                 ]);
                 $response->setStatus($response::STATUS_RESPONSE_AND_CLOSE);
             });
 
             $dispatcher = new Dispatcher($conf);
-            $sub = ServerManager::getInstance()->addServer(
-                'ConsoleTcp',
-                $config['PORT'],
-                SWOOLE_TCP,
-                $config['LISTEN_ADDRESS'],
-                [
-                    'heartbeat_check_interval' => $config['EXPIRE'],
-                    'heartbeat_idle_time' => $config['EXPIRE'],
-                    'open_length_check' => true,
-                    'package_length_type' => 'N',
-                    'package_length_offset' => 0,
-                    'package_body_offset' => 4,
-                    'package_max_length' => 1024 * 1024,
-                ]
-            );
+            $sub = ServerManager::getInstance()->addServer('ConsoleTcp', $config['PORT'], SWOOLE_TCP, $config['LISTEN_ADDRESS'], [
+                'heartbeat_check_interval' => $config['EXPIRE'],
+                'heartbeat_idle_time'      => $config['EXPIRE'],
+                'open_length_check'        => true,
+                'package_length_type'      => 'N',
+                'package_length_offset'    => 0,
+                'package_body_offset'      => 4,
+                'package_max_length'       => 1024 * 1024
+            ]);
             $sub->set($sub::onReceive, function (\swoole_server $server, $fd, $reactor_id, $data) use ($dispatcher) {
                 $dispatcher->dispatch($server, $data, $fd, $reactor_id);
             });
@@ -73,25 +68,22 @@ class TcpService
                     $server->send($fd, TcpParser::pack('please enter your auth key; auth $authKey'), $reactorId);
                 } else {
                     //在不需要鉴权的时候，全部用户都是允许的
-                    TableManager::getInstance()->get(self::$swooleTableName)->set($fd, [
-                        'isAuth' => 1,
-                        'tryTimes' => 0,
+                    TableManager::getInstance()->get(self::$__swooleTableName)->set($fd, [
+                        'isAuth'   => 1,
+                        'tryTimes' => 0
                     ]);
                 }
             });
             $sub->set($sub::onClose, function (\swoole_server $server, int $fd, int $reactorId) {
-                TableManager::getInstance()->get(self::$swooleTableName)->del($fd);
+                TableManager::getInstance()->get(self::$__swooleTableName)->del($fd);
             });
         }
-        GlobalConfig::getInstance()->setDynamicConf(
-            'CONSOLE.PUSH_LOG',
-            GlobalConfig::getInstance()->getConf('CONSOLE.PUSH_LOG')
-        );
+        GlobalConfig::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG', GlobalConfig::getInstance()->getConf('CONSOLE.PUSH_LOG'));
     }
 
-    public static function push(string $string)
+    static function push(string $string)
     {
-        $table = TableManager::getInstance()->get(self::$swooleTableName);
+        $table = TableManager::getInstance()->get(self::$__swooleTableName);
         if ($table instanceof Table) {
             $string = TcpParser::pack($string);
             foreach ($table as $fd => $value) {

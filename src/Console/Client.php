@@ -18,33 +18,33 @@ class Client
     private $port;
     private $client = null;
 
-    public function __construct($host, $port)
+    function __construct($host,$port)
     {
         $this->host = $host;
         $this->port = $port;
     }
 
-    public function close():bool
+    function close():bool
     {
-        if ($this->client instanceof \swoole_client && $this->client->isConnected()) {
+        if($this->client instanceof \swoole_client && $this->client->isConnected()){
             $this->client->close();
             $this->client = null;
             return true;
-        } elseif ($this->client instanceof \swoole_client) {
+        }else if($this->client instanceof \swoole_client){
             //若服务端主动断开的时候
             $this->client = null;
             return true;
-        } else {
+        }else{
             return false;
         }
     }
 
-    public function getClient():?\swoole_client
+    function getClient():?\swoole_client
     {
         return $this->client;
     }
 
-    public function connect():bool
+    function connect():bool
     {
         $this->close();
 
@@ -58,23 +58,23 @@ class Client
                 'package_max_length'    => 1024*1024
             ]
         );
-        $this->client->on("connect", function (\swoole_client $cli) {
+        $this->client->on("connect", function(\swoole_client $cli) {
             fwrite(STDOUT, "connect to tcp://{$this->host}:{$this->port} succeed \n");
         });
 
-        $this->client->on("close", function ($cli) {
+        $this->client->on("close", function($cli){
             $this->close();
-            fwrite(STDOUT, "tcp://{$this->host}:{$this->port} disconnect \n");
+            fwrite(STDOUT,"tcp://{$this->host}:{$this->port} disconnect \n");
             swoole_event_del(STDIN);
         });
 
-        $this->client->on("error", function ($cli) {
+        $this->client->on("error", function($cli){
             $this->close();
-            fwrite(STDOUT, "connection tcp://{$this->host}:{$this->port} error \n");
+            fwrite(STDOUT,"connection tcp://{$this->host}:{$this->port} error \n");
             swoole_event_del(STDIN);
         });
 
-        $this->client->on("receive", function ($cli, $data) {
+        $this->client->on("receive", function($cli, $data) {
             $str = TcpParser::unpack($data);
             echo $str . PHP_EOL;
         });
@@ -83,26 +83,26 @@ class Client
 
     public function sendCommand(string $commandLine):bool
     {
-        if ($this->client instanceof \swoole_client && $this->client->isConnected()) {
+        if($this->client instanceof \swoole_client && $this->client->isConnected()){
             $commandList = $this->commandParser($commandLine);
             $sendArr = [
                 'action'=>array_shift($commandList),
                 'args'=>$commandList
             ];
-            $this->client->send(TcpParser::pack(json_encode($sendArr, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)));
+            $this->client->send(TcpParser::pack(json_encode($sendArr,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)));
             return true;
-        } else {
+        }else{
             return false;
         }
     }
 
     private function commandParser(string $data):array
     {
-        $list = explode(' ', $data);
+        $list = explode(' ',$data);
         $ret = [];
-        foreach ($list as $item) {
-            if (!empty($item)) {
-                array_push($ret, $item);
+        foreach ($list as $item){
+            if(!empty($item)){
+                array_push($ret,$item);
             }
         }
         return $ret;

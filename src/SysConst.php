@@ -8,6 +8,7 @@
 
 namespace EasySwoole\EasySwoole;
 
+
 class SysConst
 {
     const EASYSWOOLE_VERSION = '3.1.8';
@@ -21,4 +22,5 @@ class SysConst
     const HTTP_EXCEPTION_HANDLER = 'HTTP_EXCEPTION_HANDLER';
     const HTTP_CONTROLLER_POOL_MAX_NUM = 'HTTP_CONTROLLER_POOL_MAX_NUM';
     const HTTP_CONTROLLER_POOL_WAIT_TIME = 'HTTP_CONTROLLER_POOL_WAIT_TIME';
+
 }

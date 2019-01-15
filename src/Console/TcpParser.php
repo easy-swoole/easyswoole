@@ -8,6 +8,7 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
+
 use EasySwoole\Socket\AbstractInterface\ParserInterface;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
@@ -19,15 +20,15 @@ class TcpParser implements ParserInterface
         // TODO: Implement decode() method.
         $caller =  new Caller();
         $data = self::unpack($raw);
-        $arr = json_decode($data, true);
-        if (!is_array($arr)) {
+        $arr = json_decode($data,true);
+        if(!is_array($arr)){
             $arr = [
                 'action'=>'help',
                 'controller'=>TcpController::class,
                 'args'=>[
                 ]
             ];
-        } else {
+        }else{
             $arr['controller'] = TcpController::class;
         }
         $caller->setAction($arr['action']);
@@ -40,7 +41,7 @@ class TcpParser implements ParserInterface
     {
         // TODO: Implement encode() method.
         $str = $response->getMessage();
-        if (empty($str)) {
+        if(empty($str)){
             $str = 'empty response';
         }
         return self::pack(trim($str));
@@ -53,6 +54,6 @@ class TcpParser implements ParserInterface
 
     public static function unpack(string $data):string
     {
-        return substr($data, '4');
+        return substr($data,'4');
     }
 }

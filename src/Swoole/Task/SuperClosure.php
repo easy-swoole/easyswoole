@@ -7,7 +7,6 @@
  */
 
 namespace EasySwoole\EasySwoole\Swoole\Task;
-
 use SuperClosure\Serializer;
 
 class SuperClosure
@@ -15,7 +14,7 @@ class SuperClosure
     private $closure;
     private $serialized;
 
-    public function __construct(\Closure $closure)
+    function __construct(\Closure $closure)
     {
         $this->closure = $closure;
     }
@@ -38,11 +37,11 @@ class SuperClosure
     {
         // TODO: Implement __invoke() method.
         $args = func_get_args();
-        return call_user_func($this->closure, ...$args);
+        return call_user_func($this->closure,...$args);
     }
 
-    final public function call(...$args)
+    final function call(...$args)
     {
-        return call_user_func($this->closure, ...$args);
+        return call_user_func($this->closure,...$args);
     }
 }

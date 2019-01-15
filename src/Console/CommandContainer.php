@@ -23,7 +23,7 @@ class CommandContainer
         $this->container[$key] = $command;
     }
 
-    public function get($key): ?CommandInterface
+    function get($key): ?CommandInterface
     {
         if (isset($this->container[$key])) {
             return $this->container[$key];
@@ -37,7 +37,7 @@ class CommandContainer
      * @return array
      * @author: eValor < master@evalor.cn >
      */
-    public function getCommandList()
+    function getCommandList()
     {
         return array_keys($this->container);
     }
@@ -49,7 +49,7 @@ class CommandContainer
      * @param Response $response
      * @author: eValor < master@evalor.cn >
      */
-    public function hook($actionName, Caller $caller, Response $response)
+    function hook($actionName, Caller $caller, Response $response)
     {
         $call = CommandContainer::getInstance()->get($actionName);
         if ($call instanceof CommandInterface) {

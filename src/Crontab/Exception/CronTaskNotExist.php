@@ -19,13 +19,13 @@ class CronTaskNotExist extends \Exception
 {
     protected $taskName;
 
-    public function __construct(string $taskName = "", int $code = 0, Throwable $previous = null)
+    function __construct(string $taskName = "", int $code = 0, Throwable $previous = null)
     {
         $this->taskName = $taskName;
         parent::__construct("the cron task {$taskName} does not exist", $code, $previous);
     }
 
-    public function getTaskName()
+    function getTaskName()
     {
         return $this->taskName;
     }

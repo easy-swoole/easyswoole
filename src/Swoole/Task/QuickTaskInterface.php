@@ -8,7 +8,8 @@
 
 namespace EasySwoole\EasySwoole\Swoole\Task;
 
+
 interface QuickTaskInterface
 {
-    public static function run(\swoole_server $server, int $taskId, int $fromWorkerId, $flags = null);
+    static function run(\swoole_server $server,int $taskId,int $fromWorkerId,$flags = null);
 }
