@@ -8,8 +8,7 @@
 
 namespace EasySwoole\EasySwoole\Console\DefaultCommand;
 
-use EasySwoole\Component\TableManager;
-use EasySwoole\EasySwoole\Config;
+
 use EasySwoole\EasySwoole\Console\CommandInterface;
 use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\Socket\Bean\Caller;
@@ -22,6 +21,12 @@ use EasySwoole\Socket\Bean\Response;
  */
 class Auth implements CommandInterface
 {
+    public function moduleName(): string
+    {
+        // TODO: Implement moduleName() method.
+        return 'auth';
+    }
+
     /**
      * 执行鉴权
      * @example auth password
@@ -33,29 +38,16 @@ class Auth implements CommandInterface
     {
         $fd = $caller->getClient()->getFd();
         $args = $caller->getArgs();
-        if (Config::getInstance()->getConf('CONSOLE.AUTH') == array_shift($args)) {
-            TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
-                'isAuth'   => 1,
-                'tryTimes' => 0
+        $user = array_shift($args);
+        $password = array_shift($args);
+        $info = ConsoleService::getInstance()->authTable->get($user);
+        if(!empty($info) && $info['password'] === $password){
+            ConsoleService::getInstance()->authTable->set($user,[
+                'fd'=>$fd
             ]);
-            $response->setMessage('auth succeed');
-        } else {
-            $info = TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->get($fd);
-            if (!empty($info)) {
-                if ($info['tryTimes'] > 5) {
-                    $response->setStatus(Response::STATUS_RESPONSE_AND_CLOSE);
-                } else {
-                    TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
-                        'isAuth'   => 0,
-                        'tryTimes' => $info['tryTimes'] + 1
-                    ]);
-                }
-            } else {
-                TableManager::getInstance()->get(ConsoleService::$__swooleTableName)->set($fd, [
-                    'isAuth'   => 0,
-                    'tryTimes' => 1
-                ]);
-            }
+            $response->setMessage('auth success');
+        }else{
+            $response->setStatus($response::STATUS_RESPONSE_AND_CLOSE);
             $response->setMessage('auth fail');
         }
     }
@@ -72,7 +64,7 @@ class Auth implements CommandInterface
         $help = <<<HELP
         
 在服务端设置需要授权才能连接时，可以使用本命令进行授权
-用法 : auth password
+用法 : auth {user} {password}
 
 HELP;
         $response->setMessage($help);

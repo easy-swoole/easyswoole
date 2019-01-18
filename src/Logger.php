@@ -32,7 +32,7 @@ class Logger implements LoggerInterface
         }
         $str = $this->logger->log($str,$logCategory,$timestamp);
         if(Config::getInstance()->getConf('CONSOLE.PUSH_LOG')){
-            ConsoleService::push($str);
+            ConsoleService::getInstance()->push($str);
         }
         return $str;
     }

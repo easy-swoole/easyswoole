@@ -14,6 +14,7 @@ use EasySwoole\Socket\Bean\Response;
 
 interface CommandInterface
 {
+    public function moduleName():string;
     public function exec(Caller $caller,Response $response);
     public function help(Caller $caller,Response $response);
 }

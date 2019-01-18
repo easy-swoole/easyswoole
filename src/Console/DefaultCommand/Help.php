@@ -20,6 +20,11 @@ use EasySwoole\Socket\Bean\Response;
  */
 class Help implements CommandInterface
 {
+    function moduleName(): string
+    {
+        // TODO: Implement moduleName() method.
+        return 'help';
+    }
 
     /**
      * 获取某个命令的帮助信息

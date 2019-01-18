@@ -120,8 +120,8 @@ class Core
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
-        //创建主服务后，创建Tcp子服务
-        (new ConsoleService(Config::getInstance()->getConf('CONSOLE')));
+        //注册ConsoleService
+        ConsoleService::getInstance()->__registerTcpServer();
         return $this;
     }
 
@@ -144,6 +144,7 @@ class Core
         }
         //执行Actor注册进程
         Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        //启动
         ServerManager::getInstance()->start();
     }
 

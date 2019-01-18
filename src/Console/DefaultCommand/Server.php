@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole\Console\DefaultCommand;
 
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Console\CommandInterface;
+use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
@@ -22,6 +23,12 @@ use EasySwoole\Utility\ArrayToTextTable;
  */
 class Server implements CommandInterface
 {
+    function moduleName(): string
+    {
+        // TODO: Implement moduleName() method.
+        return 'server';
+    }
+
     /**
      * 执行一条管理命令
      * @param Caller $caller
@@ -192,13 +199,17 @@ HELP;
         $args = $caller->getArgs();
         $command = array_shift($args);
         if ($command == 'enable') {
-            Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG', true);
+            ConsoleService::getInstance()->authTable->set($caller->user,[
+                'pushLogTemp'=>1
+            ]);
             $str = 'enable console push log';
         } else if ($command == 'disable') {
-            Config::getInstance()->setDynamicConf('CONSOLE.PUSH_LOG', false);
+            ConsoleService::getInstance()->authTable->set($caller->user,[
+                'pushLogTemp'=>0
+            ]);
             $str = 'disable console push log';
         } else {
-            $status = Config::getInstance()->getDynamicConf('CONSOLE.PUSH_LOG');
+            $status = ConsoleService::getInstance()->authTable->get($caller->user)['pushLogTemp'];
             $str = 'console push log is ' . ($status ? 'enable' : 'disable');
         }
         $response->setMessage($str);

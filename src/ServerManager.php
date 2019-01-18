@@ -21,6 +21,7 @@ class ServerManager
 
     private $subServer = [];
     private $subServerRegister = [];
+    private $isStart = false;
 
     function __construct()
     {
@@ -100,7 +101,13 @@ class ServerManager
             });
         }
         $this->attachListener();
+        $this->isStart = true;
         $this->getSwooleServer()->start();
+    }
+
+    function isStart():bool
+    {
+        return $this->isStart;
     }
 
     private function attachListener():void

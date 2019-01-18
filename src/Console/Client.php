@@ -75,7 +75,7 @@ class Client
         });
 
         $this->client->on("receive", function($cli, $data) {
-            $str = TcpParser::unpack($data);
+            $str = unserialize(ConsoleProtocolParser::unpack($data));
             echo $str . PHP_EOL;
         });
         return $this->client->connect($this->host, $this->port, 0.5);
@@ -85,11 +85,7 @@ class Client
     {
         if($this->client instanceof \swoole_client && $this->client->isConnected()){
             $commandList = $this->commandParser($commandLine);
-            $sendArr = [
-                'action'=>array_shift($commandList),
-                'args'=>$commandList
-            ];
-            $this->client->send(TcpParser::pack(json_encode($sendArr,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)));
+            $this->client->send(ConsoleProtocolParser::pack(serialize($commandList)));
             return true;
         }else{
             return false;
