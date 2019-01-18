@@ -23,8 +23,10 @@
         "easyswoole/socket": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
         "easyswoole/fast-cache": "^1.0",
-        "easyswoole/swoole-ide-helper": "^1.2",
         "easyswoole/actor": "^1.0"
+    },
+    "require-dev": {
+        "easyswoole/swoole-ide-helper": "^1.2"
     },
     "autoload": {
         "psr-4": {
