@@ -10,7 +10,6 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Actor\Actor;
-use EasySwoole\Component\Context\ContextManager;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -228,19 +227,10 @@ class Core
 
     private function registerDefaultCallBack(\swoole_server $server,int $serverType)
     {
-        //如果主服务仅仅是swoole server，那么设置默认onReceive为全局的onReceive
-        if($serverType === EASYSWOOLE_SERVER){
-            $socketType = Config::getInstance()->getConf('MAIN_SERVER.SOCK_TYPE');
-            if(in_array($socketType,[SWOOLE_TCP,SWOOLE_TCP6])){
-                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onReceive,function (){
-                    ContextManager::getInstance()->destroy();
-                });
-            }else if(in_array($socketType,[SWOOLE_UDP,SWOOLE_UDP6])){
-                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onPacket,function (){
-                    ContextManager::getInstance()->destroy();
-                });
-            }
-        }else{
+        /*
+         * 注册默认回调
+         */
+        if($serverType !== EASYSWOOLE_SERVER){
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
             if(empty($namespace)){
                 $namespace = 'App\\HttpController\\';
@@ -285,14 +275,7 @@ class Core
                     }
                 }
                 $response_psr->__response();
-                ContextManager::getInstance()->destroy();
             });
-
-            if($serverType == EASYSWOOLE_WEB_SOCKET_SERVER){
-                ServerManager::getInstance()->getMainEventRegister()->add(EventRegister::onMessage,function (){
-                    ContextManager::getInstance()->destroy();
-                });
-            }
         }
         //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
         //其次finish逻辑在同进程中实现、
