@@ -80,9 +80,9 @@ class ConsoleService
      */
     private function registerDefault()
     {
-        CommandContainer::getInstance()->set('help', new Help());
-        CommandContainer::getInstance()->set('auth', new Auth());
-        CommandContainer::getInstance()->set('server', new Server());
+        CommandContainer::getInstance()->set(new Help());
+        CommandContainer::getInstance()->set(new Auth());
+        CommandContainer::getInstance()->set(new Server());
     }
 
     public function __registerTcpServer()
