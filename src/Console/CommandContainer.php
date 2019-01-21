@@ -18,13 +18,14 @@ class CommandContainer
 
     private $container = [];
 
-    public function set($key, CommandInterface $command)
+    public function set(CommandInterface $command)
     {
-        $this->container[$key] = $command;
+        $this->container[strtolower($command->moduleName())] = $command;
     }
 
     function get($key): ?CommandInterface
     {
+        $key = strtolower($key);
         if (isset($this->container[$key])) {
             return $this->container[$key];
         } else {
