@@ -63,6 +63,9 @@ class ConsoleService
 
     public function push(string $string)
     {
+        /*
+         * 服务启动前不做push.为cli单元测试预备
+         */
         if(!ServerManager::getInstance()->isStart()){
             return;
         }
@@ -121,7 +124,9 @@ class ConsoleService
             $sub->set($sub::onClose, function (\swoole_server $server, int $fd, int $reactorId) {
                 foreach ($this->authTable as $key => $value){
                     if($value['fd'] === $fd){
-                        $this->authTable->del($key);
+                        $this->authTable->set($key,[
+                            'fd'=>null
+                        ]);
                     }
                 }
             });
