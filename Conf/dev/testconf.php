@@ -6,10 +6,8 @@
  * Time: 10:51
  */
 return [
-    "host" => "127.0.0.1",
-    "password" => "123456",
     "MASTER_MYSQL" => [
-        'host' => getenv()['MYSQL_HOST'],
+        'host' => "192.168.1.189",
         'username' => 'root',
         'password' => 'root',
         'db'=> 'dev',
@@ -18,7 +16,7 @@ return [
         'timeout' => 3
     ],
     "SLAVE_MYSQL" => [
-        'host' => getenv()['MYSQL_HOST'],
+        'host' => "192.168.1.189",
         'username' => 'root',
         'password' => 'root',
         'db'=> 'dev',
@@ -27,7 +25,7 @@ return [
         'timeout' => 3
     ],
     "CO_MYSQL" => [
-        'host' => getenv()['MYSQL_HOST'],
+        'host' => "192.168.1.189",
         'user' => 'root',
         'password' => 'root',
         'database'=> 'dev',
@@ -36,7 +34,7 @@ return [
         'timeout' => 3
     ],
     "REDIS" => [
-        "host"=>getenv()['REDIS_HOST'],
+        "host"=> "127.0.0.1",
         "port"=>6379,
         "auth"=>'',
         "db" => 1,

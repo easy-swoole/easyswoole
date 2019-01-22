@@ -284,10 +284,10 @@ class BaseController extends Controller
      * @param  int $expire token redis里的过期时间(单位:秒)
      * @return string|bool 返回token
      */
-    protected function tokenStart(&$userInfoArr, int &$expire = 0) {
+    protected function tokenStart(&$userInfoArr, int $expire = 0) {
         $token = "";
         while (1){
-            $token = Utils::randomStr(Config::getInstance()->getConf("TOKEN")["length"]);
+            $token = Utils::randomStr(Config::getInstance()->getConf()['testconf']["TOKEN"]["length"]);
             /*如果token存在, 则重新生成一个新的token, 不存在则跳出循环*/
             if(!$this->redis->exists($this->tokenPrefix.$token)){
                 break;
