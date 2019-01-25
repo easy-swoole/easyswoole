@@ -6,10 +6,10 @@
  * Time: 9:59 PM
  */
 
-namespace EasySwoole\EasySwoole\Console\DefaultCommand;
+namespace EasySwoole\EasySwoole\Console\DefaultModule;
 
-use EasySwoole\EasySwoole\Console\CommandContainer;
-use EasySwoole\EasySwoole\Console\CommandInterface;
+use EasySwoole\EasySwoole\Console\ModuleContainer;
+use EasySwoole\EasySwoole\Console\ModuleInterface;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
 
@@ -18,7 +18,7 @@ use EasySwoole\Socket\Bean\Response;
  * Class Help
  * @package EasySwoole\EasySwoole\Console\DefaultCommand
  */
-class Help implements CommandInterface
+class Help implements ModuleInterface
 {
     function moduleName(): string
     {
@@ -39,8 +39,8 @@ class Help implements CommandInterface
             $this->help($caller, $response);
         } else {
             $actionName = $args[0];
-            $call = CommandContainer::getInstance()->get($actionName);
-            if ($call instanceof CommandInterface) {
+            $call = ModuleContainer::getInstance()->get($actionName);
+            if ($call instanceof ModuleInterface) {
                 $call->help($caller, $response);
             } else {
                 $response->setMessage("no help message for command {$actionName} was found.");
@@ -50,7 +50,7 @@ class Help implements CommandInterface
 
     public function help(Caller $caller, Response $response)
     {
-        $allCommand = implode(PHP_EOL, CommandContainer::getInstance()->getCommandList());
+        $allCommand = implode(PHP_EOL, ModuleContainer::getInstance()->getCommandList());
         $help = <<<HELP
 
 欢迎使用EASYSWOOLE远程控制台!

@@ -6,10 +6,10 @@
  * Time: 10:08 PM
  */
 
-namespace EasySwoole\EasySwoole\Console\DefaultCommand;
+namespace EasySwoole\EasySwoole\Console\DefaultModule;
 
 
-use EasySwoole\EasySwoole\Console\CommandInterface;
+use EasySwoole\EasySwoole\Console\ModuleInterface;
 use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
@@ -19,7 +19,7 @@ use EasySwoole\Socket\Bean\Response;
  * Class Auth
  * @package EasySwoole\EasySwoole\Console\DefaultCommand
  */
-class Auth implements CommandInterface
+class Auth implements ModuleInterface
 {
     public function moduleName(): string
     {

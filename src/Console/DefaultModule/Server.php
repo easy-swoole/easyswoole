@@ -6,10 +6,10 @@
  * Time: 上午11:03
  */
 
-namespace EasySwoole\EasySwoole\Console\DefaultCommand;
+namespace EasySwoole\EasySwoole\Console\DefaultModule;
 
 use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Console\CommandInterface;
+use EasySwoole\EasySwoole\Console\ModuleInterface;
 use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\Bean\Caller;
@@ -21,7 +21,7 @@ use EasySwoole\Utility\ArrayToTextTable;
  * Class Server
  * @package EasySwoole\EasySwoole\Console\DefaultCommand
  */
-class Server implements CommandInterface
+class Server implements ModuleInterface
 {
     function moduleName(): string
     {

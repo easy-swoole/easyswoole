@@ -12,7 +12,7 @@ namespace EasySwoole\EasySwoole\Console;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
 
-interface CommandInterface
+interface ModuleInterface
 {
     public function moduleName():string;
     public function exec(Caller $caller,Response $response);

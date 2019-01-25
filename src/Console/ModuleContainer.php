@@ -12,18 +12,18 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\Socket\Bean\Caller;
 use EasySwoole\Socket\Bean\Response;
 
-class CommandContainer
+class ModuleContainer
 {
     use Singleton;
 
     private $container = [];
 
-    public function set(CommandInterface $command)
+    public function set(ModuleInterface $command)
     {
         $this->container[strtolower($command->moduleName())] = $command;
     }
 
-    function get($key): ?CommandInterface
+    function get($key): ?ModuleInterface
     {
         $key = strtolower($key);
         if (isset($this->container[$key])) {
@@ -52,8 +52,8 @@ class CommandContainer
      */
     function hook($actionName, Caller $caller, Response $response)
     {
-        $call = CommandContainer::getInstance()->get($actionName);
-        if ($call instanceof CommandInterface) {
+        $call = ModuleContainer::getInstance()->get($actionName);
+        if ($call instanceof ModuleInterface) {
             $call->exec($caller, $response);
         } else {
             $response->setMessage("action {$actionName} miss");

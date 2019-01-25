@@ -11,9 +11,9 @@ namespace EasySwoole\EasySwoole\Console;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
-use EasySwoole\EasySwoole\Console\DefaultCommand\Auth;
-use EasySwoole\EasySwoole\Console\DefaultCommand\Help;
-use EasySwoole\EasySwoole\Console\DefaultCommand\Server;
+use EasySwoole\EasySwoole\Console\DefaultModule\Auth;
+use EasySwoole\EasySwoole\Console\DefaultModule\Help;
+use EasySwoole\EasySwoole\Console\DefaultModule\Server;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\Bean\Response;
 use EasySwoole\Socket\Config;
@@ -83,9 +83,9 @@ class ConsoleService
      */
     private function registerDefault()
     {
-        CommandContainer::getInstance()->set(new Help());
-        CommandContainer::getInstance()->set(new Auth());
-        CommandContainer::getInstance()->set(new Server());
+        ModuleContainer::getInstance()->set(new Help());
+        ModuleContainer::getInstance()->set(new Auth());
+        ModuleContainer::getInstance()->set(new Server());
     }
 
     public function __registerTcpServer()

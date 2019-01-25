@@ -41,6 +41,6 @@ class ConsoleTcpController extends Controller
      */
     protected function actionNotFound(?string $actionName)
     {
-        CommandContainer::getInstance()->hook($actionName, $this->caller(), $this->response());
+        ModuleContainer::getInstance()->hook($actionName, $this->caller(), $this->response());
     }
 }
