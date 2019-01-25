@@ -33,7 +33,6 @@ class Stop implements CommandInterface
         if(in_array('produce',$args)){
             Core::getInstance()->setIsDev(false);
         }
-        Core::getInstance()->initialize();
         $Conf = Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
         if (file_exists($pidFile)) {

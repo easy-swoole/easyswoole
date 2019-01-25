@@ -33,7 +33,6 @@ class Reload implements CommandInterface
         if(in_array('produce',$args)){
             Core::getInstance()->setIsDev(false);
         }
-        Core::getInstance()->initialize();
         $Conf = Config::getInstance();
         $res = '';
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
