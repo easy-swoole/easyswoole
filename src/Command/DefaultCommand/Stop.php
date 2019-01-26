@@ -53,7 +53,7 @@ class Stop implements CommandInterface
                     if (is_file($pidFile)) {
                         unlink($pidFile);
                     }
-                    return "server stop at " . date("y-m-d h:i:s") ;
+                    return "server stop at " . date("Y-m-d H:i:s") ;
                     break;
                 } else {
                     if (time() - $time > 5) {

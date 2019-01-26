@@ -50,7 +50,7 @@ class Reload implements CommandInterface
                 return "pid :{$pid} not exist ";
             }
             \swoole_process::kill($pid, $sig);
-            return $res. "send server reload command at " . date("y-m-d h:i:s");
+            return $res. "send server reload command at " . date("Y-m-d H:i:s");
         } else {
             return "PID file does not exist, please check whether to run in the daemon mode!";
         }
