@@ -104,8 +104,6 @@ class Core
         $this->loadEnv();
         //执行框架初始化事件
         EasySwooleEvent::initialize();
-        //临时文件和Log目录初始化
-        $this->sysDirectoryInit();
         //注册错误回调
         $this->registerErrorHandler();
         return $this;
@@ -409,5 +407,7 @@ class Core
             $file  = EASYSWOOLE_ROOT.'/produce.php';
         }
         Config::getInstance()->loadEnv($file);
+        //临时文件和Log目录初始化
+        $this->sysDirectoryInit();
     }
 }
