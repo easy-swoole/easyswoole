@@ -72,8 +72,6 @@ class Core
     function setIsDev(bool $isDev)
     {
         $this->isDev = $isDev;
-        //变更这里的时候，例如在全局的事件里面修改的，，重新加载配置项
-        $this->loadEnv();
         return $this;
     }
 
@@ -154,6 +152,8 @@ class Core
         if(empty($tempDir)){
             $tempDir = EASYSWOOLE_ROOT.'/Temp';
             Config::getInstance()->setConf('TEMP_DIR',$tempDir);
+        }else{
+            $tempDir = rtrim($tempDir,'/');
         }
         if(!is_dir($tempDir)){
             mkdir($tempDir);
@@ -164,6 +164,8 @@ class Core
         if(empty($logDir)){
             $logDir = EASYSWOOLE_ROOT.'/Log';
             Config::getInstance()->setConf('LOG_DIR',$logDir);
+        }else{
+            $logDir = rtrim($logDir,'/');
         }
         if(!is_dir($logDir)){
             mkdir($logDir);
@@ -400,7 +402,7 @@ class Core
         });
     }
 
-    private function loadEnv()
+    public function loadEnv()
     {
         //加载之前，先清空原来的
         if($this->isDev){

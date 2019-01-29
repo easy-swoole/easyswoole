@@ -38,6 +38,10 @@ class CommandRunner
         if(empty($command)){
             $command = 'help';
         }else if($command != 'install'){
+            //预先加载配置
+            if(in_array('produce',$args)){
+                Core::getInstance()->setIsDev(false);
+            }
             Core::getInstance()->initialize();
         }
         if(!CommandContainer::getInstance()->get($command)){

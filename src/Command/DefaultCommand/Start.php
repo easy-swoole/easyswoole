@@ -31,9 +31,8 @@ class Start implements CommandInterface
         Utility::opCacheClear();
         $response = Utility::easySwooleLog();
         $mode = 'develop';
-        if(in_array('produce',$args)){
+        if(!Core::getInstance()->isDev()){
             $mode = 'produce';
-            Core::getInstance()->setIsDev(false);
         }
         $conf = Config::getInstance();
         if(in_array("d",$args) || in_array("daemonize",$args)){
