@@ -8,9 +8,7 @@
 
 namespace EasySwoole\EasySwoole\Console;
 
-/*
- * 注意，该客户端仅供cli或者独立process使用
- */
+use Swoole\Coroutine\Client as CoClient;
 
 class Client
 {
@@ -24,31 +22,14 @@ class Client
         $this->port = $port;
     }
 
-    function close():bool
-    {
-        if($this->client instanceof \swoole_client && $this->client->isConnected()){
-            $this->client->close();
-            $this->client = null;
-            return true;
-        }else if($this->client instanceof \swoole_client){
-            //若服务端主动断开的时候
-            $this->client = null;
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    function getClient():?\swoole_client
+    function getClient():?CoClient
     {
         return $this->client;
     }
 
     function connect():bool
     {
-        $this->close();
-
-        $this->client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
+        $this->client = new CoClient(SWOOLE_SOCK_TCP);
         $this->client->set(
             [
                 'open_length_check' => true,
@@ -58,32 +39,12 @@ class Client
                 'package_max_length'    => 1024*1024
             ]
         );
-        $this->client->on("connect", function(\swoole_client $cli) {
-            fwrite(STDOUT, "connect to tcp://{$this->host}:{$this->port} succeed \n");
-        });
-
-        $this->client->on("close", function($cli){
-            $this->close();
-            fwrite(STDOUT,"tcp://{$this->host}:{$this->port} disconnect \n");
-            swoole_event_del(STDIN);
-        });
-
-        $this->client->on("error", function($cli){
-            $this->close();
-            fwrite(STDOUT,"connection tcp://{$this->host}:{$this->port} error \n");
-            swoole_event_del(STDIN);
-        });
-
-        $this->client->on("receive", function($cli, $data) {
-            $str = unserialize(ConsoleProtocolParser::unpack($data));
-            echo $str . PHP_EOL;
-        });
         return $this->client->connect($this->host, $this->port, 0.5);
     }
 
     public function sendCommand(string $commandLine):bool
     {
-        if($this->client instanceof \swoole_client && $this->client->isConnected()){
+        if($this->client instanceof CoClient && $this->client->isConnected()){
             $commandList = $this->commandParser($commandLine);
             $this->client->send(ConsoleProtocolParser::pack(serialize($commandList)));
             return true;
@@ -102,5 +63,17 @@ class Client
             }
         }
         return $ret;
+    }
+
+    public function recv(float $timeout = -1)
+    {
+        if($this->client instanceof CoClient && $this->client->isConnected()){
+            $data = $this->client->recv($timeout);
+            if($data !== false){
+                $data = ConsoleProtocolParser::unpack($data);
+                return unserialize($data);
+            }
+        }
+        return false;
     }
 }

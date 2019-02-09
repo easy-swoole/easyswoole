@@ -32,17 +32,33 @@ class Console implements CommandInterface
             Core::getInstance()->setIsDev(false);
         }
         $conf = Config::getInstance()->getConf('CONSOLE');
-        $client = new Client($conf['HOST'],$conf['PORT']);
-        if($client->connect()){
-            swoole_event_add(STDIN,function()use($client){
-                $ret = trim(fgets(STDIN));
-                if(!empty($ret)){
-                    $client->sendCommand($ret);
-                }
-            });
-        }else{
-            return "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." fail ";
-        }
+
+        go(function ()use($conf){
+            $client = new Client($conf['HOST'],$conf['PORT']);
+            if($client->connect()){
+                echo "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." success \n";
+                go(function ()use($client){
+                    while (1){
+                        $data = $client->recv(-1);
+                        if(!empty($data)){
+                            echo $data."\n";
+                        }else if(!$client->getClient()->isConnected()){
+                            exit();
+                        }
+                    };
+                });
+                swoole_event_add(STDIN,function()use($client){
+                    $ret = trim(fgets(STDIN));
+                    if(!empty($ret)){
+                        go(function ()use($client,$ret){
+                            $client->sendCommand($ret);
+                        });
+                    }
+                });
+            }else{
+                echo "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." fail \n";
+            }
+        });
         return null;
     }
 
