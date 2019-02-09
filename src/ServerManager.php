@@ -29,7 +29,7 @@ class ServerManager
     }
     /**
      * @param string $serverName
-     * @return null|\swoole_server|\swoole_server_port
+     * @return null|\swoole_server|\swoole_server_port|\swoole_websocket_server|\swoole_http_server
      */
     function getSwooleServer(string $serverName = null)
     {
