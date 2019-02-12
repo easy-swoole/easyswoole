@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "ext-swoole": ">=4.2.6",
+        "ext-swoole": ">=4.2.13",
         "easyswoole/component": "^1.0",
         "easyswoole/spl": "^1.0",
         "easyswoole/http": "^1.0",
