@@ -27,12 +27,7 @@ class Console implements CommandInterface
     public function exec(array $args): ?string
     {
         // TODO: Implement exec() method.
-        Core::getInstance()->initialize();
-        if(in_array('produce',$args)){
-            Core::getInstance()->setIsDev(false);
-        }
         $conf = Config::getInstance()->getConf('CONSOLE');
-
         go(function ()use($conf){
             $client = new Client($conf['HOST'],$conf['PORT']);
             if($client->connect()){
