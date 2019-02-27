@@ -1,28 +1,29 @@
-English  |  [中文](./README.zh-CN.md)  
+中文  |  [English](./README.md)  
 ![](easyswoole.png)
 ## EasySwoole
 
-EasySwoole is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
-          
-- Base on Swoole extension
-- Built-in HTTP, TCP, WebSocket,Udp Coroutine Server
-- Global dependency injection container
-- PSR-7 based HTTP message implementation
-- HTTP,TCP, WebSocket, Udp middleware support
-- Scalable high performance RPC
-- Database ORM
-- Mysql, Redis, RPC, HTTP Coroutine Clients
-- Coroutine and asynchronous task delivery
-- Custom user processes
-- RESTful supported
-- High performance router
-- Fast and flexible parameter validator
-- Powerful log component
-- Universal connection pools
-- Remote Console support
-- Crontab Rule Timer support
 
-## ab Test
+EasySwoole 是一款基于Swoole Server 开发的常驻内存型的分布式PHP框架，专为API而生，摆脱传统PHP运行模式在进程唤起和文件加载上带来的性能损失。EasySwoole 高度封装了 Swoole Server 而依旧维持 Swoole Server 原有特性，支持同时混合监听HTTP、自定义TCP、UDP协议，让开发者以最低的学习成本和精力编写出多进程，可异步，高可用的应用服务
+          
+- 基于 Swoole 拓展
+- 内置 HTTP, TCP, WebSocket,Udp 控制器
+- 全局依赖注入容器
+- PSR-7 HTTP 消息接口规范
+- HTTP,TCP, WebSocket, Udp 中间件支持
+- 可伸缩高性能RPC
+- 数据库 ORM
+- Mysql, Redis, RPC, HTTP 协程客户端
+- 异步客户端与协程对象池
+- 自定义用户进程
+- 支持RESTful
+- 高性能路由
+- 快速灵活的参数验证器
+- 强大的日志组件
+- 通用连接池
+- 支持远程控制台
+- Crontab定时规则支持
+
+## 基准测试
 
 ```php
 <?php
@@ -45,7 +46,7 @@ class Index extends Controller
 }
 ```
 
-### 1 Core 1G RAM
+### 1核1G
 
 > command : ab -c 100 -n 10000 http://192.168.0.11:9501/
 
@@ -70,7 +71,7 @@ Time per request:       0.097 [ms] (mean, across all concurrent requests)
 Transfer rate:          2592.05 [Kbytes/sec] received
 ```
 
-### 8 Core 16G RAM
+### 8核16G
 
 > command : ab -c 100 -n 10000 http://192.168.0.4:9501/
 
@@ -95,14 +96,14 @@ Time per request:       0.015 [ms] (mean, across all concurrent requests)
 Transfer rate:          2265.40 [Kbytes/sec] received
 ```
 
-## Quick Start
+## 快速开始
 ```
 composer require easyswoole/easyswoole=3.x
 php vendor/bin/easyswoole install
 php easyswoole start
 ```
 
-## DockerFile
+## Docker文件File
 ```
 FROM php:7.2
 
@@ -174,8 +175,8 @@ ENTRYPOINT ["php", "/var/www/code/easyswoole", "start"]
 ```
 
 ## Others 
-- [Home Page](https://www.easyswoole.com)
-- [Git For Doc](https://github.com/easy-swoole/doc)
-- [Git For Demo](https://github.com/easy-swoole/demo)
-- QQ Group : **633921431**
+- [主页](https://www.easyswoole.com)
+- [文档](https://github.com/easy-swoole/doc)
+- [示例](https://github.com/easy-swoole/demo)
+- QQ群 : **633921431**
 
