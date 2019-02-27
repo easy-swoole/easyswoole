@@ -11,6 +11,9 @@ if (file_exists($file)) {
     die("include composer autoload.php fail\n");
 }
 
+!class_exists("swoole_client") && 
+	die("===Swoole must be installed to run this framework===\n      https://wiki.swoole.com/wiki/page/7.html\n");
+
 $args = $argv;
 //trim first command
 array_shift($args);
