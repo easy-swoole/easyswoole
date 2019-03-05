@@ -176,5 +176,7 @@ ENTRYPOINT ["php", "/var/www/code/easyswoole", "start"]
 - [Home Page](https://www.easyswoole.com)
 - [Git For Doc](https://github.com/easy-swoole/doc)
 - [Git For Demo](https://github.com/easy-swoole/demo)
-- QQ Group : **633921431**
+- QQ Group 
+   - group1 **633921431**(full)
+   - group2 **709134628**
 
