@@ -13,7 +13,10 @@ use EasySwoole\Actor\Actor;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Console\Console;
+use EasySwoole\Console\ModuleContainer;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\Console\Module\Auth;
+use EasySwoole\EasySwoole\Console\Module\Server;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -121,7 +124,10 @@ class Core
             ServerManager::getInstance()->addServer('CONSOLE',$config['PORT'],SWOOLE_TCP,$config['LISTEN_ADDRESS']);
             Console::getInstance()->attachServer(ServerManager::getInstance()->getSwooleServer('CONSOLE'),new ConsoleConfig());
             Console::getInstance()->setServer(ServerManager::getInstance()->getSwooleServer());
+            ModuleContainer::getInstance()->set(new Auth());
+            ModuleContainer::getInstance()->set(new Server());
         }
+        //hook 全局的mainServerCreate事件
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         return $this;
     }

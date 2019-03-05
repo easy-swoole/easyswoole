@@ -104,7 +104,7 @@ class ServerManager
                 }
             });
         }
-        $this->attachListener();
+        $this->registerSubPortCallback();
         $this->isStart = true;
         $this->getSwooleServer()->start();
     }
@@ -114,7 +114,7 @@ class ServerManager
         return $this->isStart;
     }
 
-    private function attachListener():void
+    private function registerSubPortCallback():void
     {
         foreach ($this->subServer as $serverName => $subPort ){
             $events = $this->subServerRegister[$serverName]['eventRegister']->all();
