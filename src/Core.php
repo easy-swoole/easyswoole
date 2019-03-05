@@ -12,8 +12,8 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Actor\Actor;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
+use EasySwoole\Console\Console;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
-use EasySwoole\EasySwoole\Console\ConsoleService;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -29,6 +29,7 @@ use EasySwoole\Trace\Bean\Location;
 use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
 use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
 use Swoole\Server\Task;
+use EasySwoole\Console\Config as ConsoleConfig;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -114,9 +115,14 @@ class Core
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
+        //注册console，子端口需要提前注册，避免在mainServerCreate被注册后覆盖冲突
+        if(Config::getInstance()->getConf('CONSOLE.ENABLE')){
+            $config = Config::getInstance()->getConf('CONSOLE');
+            ServerManager::getInstance()->addServer('CONSOLE',$config['PORT'],SWOOLE_TCP,$config['LISTEN_ADDRESS']);
+            Console::getInstance()->attachServer(ServerManager::getInstance()->getSwooleServer('CONSOLE'),new ConsoleConfig());
+            Console::getInstance()->setServer(ServerManager::getInstance()->getSwooleServer());
+        }
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
-        //注册ConsoleService
-        ConsoleService::getInstance()->__registerTcpServer();
         return $this;
     }
 
