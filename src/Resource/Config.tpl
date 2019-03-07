@@ -28,7 +28,7 @@ return [
         'LISTEN_ADDRESS' => '127.0.0.1',
         'HOST' => '127.0.0.1',
         'PORT' => 9500,
-         USER'=>'root',
+        'USER'=> 'root',
         'PASSWORD'=>'123456'
     ],
     'FAST_CACHE' => [
