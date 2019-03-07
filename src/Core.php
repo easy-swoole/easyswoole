@@ -119,9 +119,9 @@ class Core
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
-        $this->extraHandler();
         //hook 全局的mainServerCreate事件
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        $this->extraHandler();
         return $this;
     }
 
@@ -386,7 +386,7 @@ class Core
     {
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
 
-        //注册console，子端口需要提前注册，避免在mainServerCreate被注册后覆盖冲突
+        //注册Console
         if(Config::getInstance()->getConf('CONSOLE.ENABLE')){
             $config = Config::getInstance()->getConf('CONSOLE');
             ServerManager::getInstance()->addServer('CONSOLE',$config['PORT'],SWOOLE_TCP,$config['LISTEN_ADDRESS']);
