@@ -28,8 +28,8 @@ return [
         'LISTEN_ADDRESS' => '127.0.0.1',
         'HOST' => '127.0.0.1',
         'PORT' => 9500,
-        'USER'=> 'root',
-        'PASSWORD'=>'123456'
+        'USER' => 'root',
+        'PASSWORD' =>'123456'
     ],
     'FAST_CACHE' => [
         'PROCESS_NUM' => 0,
