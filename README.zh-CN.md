@@ -178,6 +178,11 @@ ENTRYPOINT ["php", "/var/www/code/easyswoole", "start"]
 - [主页](https://www.easyswoole.com)
 - [文档](https://github.com/easy-swoole/doc)
 - [示例](https://github.com/easy-swoole/demo)
-- QQ群
-   - 群1 **633921431**(群满)
-   - 群2 **709134628**
+- QQ交流群
+    - VIP群 579434607 （本群需要付费599元）
+    - EasySwoole官方一群 633921431(已满)
+    - EasySwoole官方二群 709134628
+    
+- 商业支持：
+    - QQ 291323003
+    - EMAIL admin@fosuss.com
