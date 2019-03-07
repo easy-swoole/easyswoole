@@ -29,8 +29,7 @@ return [
         'HOST' => '127.0.0.1',
         'PORT' => 9500,
         'EXPIRE' => '120',
-        'PUSH_LOG' => true,
-        USER'=>'root',
+         USER'=>'root',
         'PASSWORD'=>'123456'
     ],
     'FAST_CACHE' => [

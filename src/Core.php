@@ -16,6 +16,7 @@ use EasySwoole\Console\Console;
 use EasySwoole\Console\ConsoleModuleContainer;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Console\Module\Auth;
+use EasySwoole\EasySwoole\Console\Module\Log;
 use EasySwoole\EasySwoole\Console\Module\Server;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
@@ -398,6 +399,7 @@ class Core
             });
             ConsoleModuleContainer::getInstance()->set(new Auth());
             ConsoleModuleContainer ::getInstance()->set(new Server());
+            ConsoleModuleContainer ::getInstance()->set(new Log());
         }
         //注册crontab进程
         Crontab::getInstance()->__run();

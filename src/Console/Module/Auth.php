@@ -20,10 +20,12 @@ use Swoole\Table;
 class Auth implements ModuleInterface
 {
     public static $authTable;
+    private static $user;
     protected $config;
     public function __construct()
     {
         $this->config = Config::getInstance()->getConf('CONSOLE');
+        self::$user = $this->config['USER'];
         TableManager::getInstance()->add('__Console.Auth', [
             'fd' => ['type' => Table::TYPE_INT, 'size' => 4],
         ],4);
@@ -82,10 +84,19 @@ HELP;
 
     protected function isAuth(int $fd):bool
     {
-        $user = $this->config['USER'];
-        $info = self::$authTable->get($user);
+        $info = self::$authTable->get(self::$user);
         if($info){
             return $info['fd'] === $fd;
+        }else{
+            return false;
+        }
+    }
+
+    public static function currentFd()
+    {
+        $info = self::$authTable->get(self::$user);
+        if($info){
+            return $info['fd'];
         }else{
             return false;
         }
