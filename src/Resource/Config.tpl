@@ -28,7 +28,6 @@ return [
         'LISTEN_ADDRESS' => '127.0.0.1',
         'HOST' => '127.0.0.1',
         'PORT' => 9500,
-        'EXPIRE' => '120',
          USER'=>'root',
         'PASSWORD'=>'123456'
     ],
