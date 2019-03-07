@@ -13,7 +13,7 @@ use EasySwoole\Actor\Actor;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Console\Console;
-use EasySwoole\Console\ModuleContainer;
+use EasySwoole\Console\ConsoleModuleContainer;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Console\Module\Auth;
 use EasySwoole\EasySwoole\Console\Module\Server;
@@ -118,15 +118,7 @@ class Core
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
         $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
-        //注册console，子端口需要提前注册，避免在mainServerCreate被注册后覆盖冲突
-        if(Config::getInstance()->getConf('CONSOLE.ENABLE')){
-            $config = Config::getInstance()->getConf('CONSOLE');
-            ServerManager::getInstance()->addServer('CONSOLE',$config['PORT'],SWOOLE_TCP,$config['LISTEN_ADDRESS']);
-            Console::getInstance()->attachServer(ServerManager::getInstance()->getSwooleServer('CONSOLE'),new ConsoleConfig());
-            Console::getInstance()->setServer(ServerManager::getInstance()->getSwooleServer());
-            ModuleContainer::getInstance()->set(new Auth());
-            ModuleContainer::getInstance()->set(new Server());
-        }
+        $this->extraHandler();
         //hook 全局的mainServerCreate事件
         EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         return $this;
@@ -139,18 +131,6 @@ class Core
         if(PHP_OS != 'Darwin'){
             cli_set_process_title($serverName);
         }
-        //注册crontab进程
-        Crontab::getInstance()->__run();
-        //注册fastCache进程
-        if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
-            Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
-                    ->setProcessNum(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM'))
-                    ->setBacklog(Config::getInstance()->getConf('FAST_CACHE.BACKLOG'))
-                    ->setServerName($serverName)
-                    ->attachToServer(ServerManager::getInstance()->getSwooleServer());
-        }
-        //执行Actor注册进程
-        Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
         //启动
         ServerManager::getInstance()->start();
     }
@@ -399,5 +379,38 @@ class Core
             $file  = EASYSWOOLE_ROOT.'/produce.php';
         }
         Config::getInstance()->loadEnv($file);
+    }
+
+    private function extraHandler()
+    {
+        $serverName = Config::getInstance()->getConf('SERVER_NAME');
+
+        //注册console，子端口需要提前注册，避免在mainServerCreate被注册后覆盖冲突
+        if(Config::getInstance()->getConf('CONSOLE.ENABLE')){
+            $config = Config::getInstance()->getConf('CONSOLE');
+            ServerManager::getInstance()->addServer('CONSOLE',$config['PORT'],SWOOLE_TCP,$config['LISTEN_ADDRESS']);
+            Console::getInstance()->attachServer(ServerManager::getInstance()->getSwooleServer('CONSOLE'),new ConsoleConfig());
+            Console::getInstance()->setServer(ServerManager::getInstance()->getSwooleServer());
+            ServerManager::getInstance()->getSwooleServer('CONSOLE')->on('close',function (){
+                Auth::$authTable->set(Config::getInstance()->getConf('CONSOLE.USER'),[
+                    'fd'=>0
+                ]);
+            });
+            ConsoleModuleContainer::getInstance()->set(new Auth());
+            ConsoleModuleContainer ::getInstance()->set(new Server());
+        }
+        //注册crontab进程
+        Crontab::getInstance()->__run();
+        //注册fastCache进程
+        if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
+            Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
+                ->setProcessNum(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM'))
+                ->setBacklog(Config::getInstance()->getConf('FAST_CACHE.BACKLOG'))
+                ->setServerName($serverName)
+                ->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        }
+        //执行Actor注册进程
+        Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
+
     }
 }

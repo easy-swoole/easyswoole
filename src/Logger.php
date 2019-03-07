@@ -10,7 +10,7 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Console\ConsoleService;
+use EasySwoole\EasySwoole\Console\Module\Log;
 use EasySwoole\Trace\AbstractInterface\LoggerInterface;
 use EasySwoole\Trace\Bean\Location;
 
@@ -31,9 +31,7 @@ class Logger implements LoggerInterface
             $logCategory = 'default';
         }
         $str = $this->logger->log($str,$logCategory,$timestamp);
-        if(Config::getInstance()->getConf('CONSOLE.PUSH_LOG')){
-            ConsoleService::getInstance()->push($str);
-        }
+        Log::push($str,$logCategory);
         return $str;
     }
 
