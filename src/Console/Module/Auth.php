@@ -82,7 +82,7 @@ HELP;
         $response->setMessage($help);
     }
 
-    protected function isAuth(int $fd):bool
+    private function isAuth(int $fd):bool
     {
         $info = self::$authTable->get(self::$user);
         if($info){
@@ -92,13 +92,16 @@ HELP;
         }
     }
 
-    public static function currentFd()
+    public static function currentFd():?int
     {
+        if(!self::$authTable){
+            return null;
+        }
         $info = self::$authTable->get(self::$user);
         if($info){
             return $info['fd'];
         }else{
-            return false;
+            return null;
         }
     }
 }
