@@ -232,7 +232,7 @@ class Core
             $depth = $depth > 5 ? $depth : 5;
             $max = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM));
             if($max == 0){
-                $max = 15;
+                $max = 500;
             }
             $waitTime = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_WAIT_TIME));
             if($waitTime == 0){
