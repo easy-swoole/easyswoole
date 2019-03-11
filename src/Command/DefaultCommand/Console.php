@@ -29,9 +29,9 @@ class Console implements CommandInterface
         // TODO: Implement exec() method.
         $conf = Config::getInstance()->getConf('CONSOLE');
         go(function ()use($conf){
-            $client = new Client($conf['HOST'],$conf['PORT']);
+            $client = new Client($conf['LISTEN_ADDRESS'],$conf['PORT']);
             if($client->connect()){
-                echo "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." success \n";
+                echo "connect to  tcp://".$conf['LISTEN_ADDRESS'].":".$conf['PORT']." success \n";
                 go(function ()use($client){
                     while (1){
                         $data = $client->recv(-1);
@@ -51,7 +51,7 @@ class Console implements CommandInterface
                     }
                 });
             }else{
-                echo "connect to  tcp://".$conf['HOST'].":".$conf['PORT']." fail \n";
+                echo "connect to  tcp://".$conf['LISTEN_ADDRESS'].":".$conf['PORT']." fail \n";
             }
         });
         return null;
