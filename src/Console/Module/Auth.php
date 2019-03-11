@@ -22,25 +22,26 @@ class Auth implements ModuleInterface
     public static $authTable;
     private static $user;
     protected $config;
+
     public function __construct()
     {
         $this->config = Config::getInstance()->getConf('CONSOLE');
         self::$user = $this->config['USER'];
         TableManager::getInstance()->add('__Console.Auth', [
             'fd' => ['type' => Table::TYPE_INT, 'size' => 4],
-        ],4);
+        ], 4);
         self::$authTable = TableManager::getInstance()->get('__Console.Auth');
-        ConsoleInterceptor::getInstance()->set(function (Caller $caller,Response $response){
-            if(in_array($caller->getAction(),['q','quit'])){
+        ConsoleInterceptor::getInstance()->set(function (Caller $caller, Response $response) {
+            if (in_array($caller->getAction(), ['q', 'quit'])) {
                 $response->setMessage('bye bye!!!');
                 $response->setStatus($response::STATUS_RESPONSE_AND_CLOSE);
-                self::$authTable->set($this->config['USER'],['fd'=>null]);
+                self::$authTable->set($this->config['USER'], ['fd' => null]);
                 return false;
-            }else if($caller->getAction() == 'help'){
+            } else if ($caller->getAction() == 'help') {
                 return true;
-            }else if($caller->getAction() != 'auth'){
+            } else if ($caller->getAction() != 'auth') {
                 $ret = $this->isAuth($caller->getClient()->getFd());
-                if(!$ret){
+                if (!$ret) {
                     $response->setMessage('please auth, auth {USER} {PASSWORD}');
                 }
                 return $ret;
@@ -60,13 +61,15 @@ class Auth implements ModuleInterface
         // TODO: Implement exec() method.
         $info = $caller->getArgs();
         $user = array_shift($info);
-        $password =  array_shift($info);
-        if($user === $this->config['USER'] && $password === $this->config['PASSWORD']){
-            self::$authTable->set($user,[
-                'fd'=>$caller->getClient()->getFd()
+        $password = array_shift($info);
+        isset($this->config['USER']) || ($this->config['USER'] = null);
+        isset($this->config['PASSWORD']) || ($this->config['PASSWORD'] = null);
+        if ($user === $this->config['USER'] && $password === $this->config['PASSWORD']) {
+            self::$authTable->set($user, [
+                'fd' => $caller->getClient()->getFd()
             ]);
             $response->setMessage('auth success');
-        }else{
+        } else {
             $response->setMessage('auth fail,please auth, auth {USER} {PASSWORD}');
         }
     }
@@ -82,25 +85,25 @@ HELP;
         $response->setMessage($help);
     }
 
-    private function isAuth(int $fd):bool
+    private function isAuth(int $fd): bool
     {
         $info = self::$authTable->get(self::$user);
-        if($info){
+        if ($info) {
             return $info['fd'] === $fd;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public static function currentFd():?int
+    public static function currentFd(): ?int
     {
-        if(!self::$authTable){
+        if (!self::$authTable) {
             return null;
         }
         $info = self::$authTable->get(self::$user);
-        if($info){
+        if ($info) {
             return $info['fd'];
-        }else{
+        } else {
             return null;
         }
     }
