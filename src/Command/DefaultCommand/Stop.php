@@ -36,7 +36,7 @@ class Stop implements CommandInterface
         $Conf = Config::getInstance();
         $pidFile = $Conf->getConf("MAIN_SERVER.SETTING.pid_file");
         if (file_exists($pidFile)) {
-            $pid = file_get_contents($pidFile);
+            $pid = intval(file_get_contents($pidFile));
             if (!\swoole_process::kill($pid, 0)) {
                 return "PID :{$pid} not exist ";
             }
