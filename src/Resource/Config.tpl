@@ -16,9 +16,8 @@ return [
         'RUN_MODEL' => SWOOLE_PROCESS,
         'SETTING' => [
             'worker_num' => 8,
-            'max_request' => 5000,
             'task_worker_num' => 8,
-            'task_max_request' => 1000,
+            'reload_async'=>true
         ],
     ],
     'TEMP_DIR' => null,
