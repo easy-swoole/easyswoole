@@ -35,4 +35,7 @@ return [
         'BACKLOG' => 256,
     ],
     'DISPLAY_ERROR' => true,
+    'PHAR' => [
+        'EXCLUDE' => ['.idea', 'Log', 'Temp', 'easyswoole', 'easyswoole.install']
+    ]
 ];
