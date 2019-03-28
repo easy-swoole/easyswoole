@@ -270,91 +270,49 @@ class Core
                 $response_psr->__response();
             });
         }
-        //注册默认的on task,finish  不经过 event register。因为on task需要返回值。不建议重写onTask,否则es自带的异步任务事件失效
-        //其次finish逻辑在同进程中实现、
-        if(Config::getInstance()->getConf('MAIN_SERVER.SETTING.task_enable_coroutine')){
-            EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, Task $task){
-                $taskObj = $task->data;
-                if(is_string($taskObj) && class_exists($taskObj)){
-                    $ref = new \ReflectionClass($taskObj);
-                    if($ref->implementsInterface(QuickTaskInterface::class)){
-                        try{
-                            $taskObj::run($server,$task->id,$task->worker_id,$task->flags);
-                        }catch (\Throwable $throwable){
-                            Trigger::getInstance()->throwable($throwable);
-                        }
-                        return;
-                    }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                        $taskObj = new $taskObj;
+        EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, Task $task){
+            $finishData = null;
+            $taskObj = $task->data;
+            if(is_string($taskObj) && class_exists($taskObj)){
+                $ref = new \ReflectionClass($taskObj);
+                if($ref->implementsInterface(QuickTaskInterface::class)){
+                    try{
+                        $finishData = $taskObj::run($server,$task->id,$task->worker_id,$task->flags);
+                    }catch (\Throwable $throwable){
+                        Trigger::getInstance()->throwable($throwable);
                     }
+                    goto finish;
+                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
+                    $taskObj = new $taskObj;
                 }
-                if($taskObj instanceof AbstractAsyncTask){
-                    try{
-                        $ret = $taskObj->__onTaskHook($task->id,$task->worker_id,$task->flags);
-                        if($ret !== null){
-                            $taskObj->__onFinishHook($ret,$task->id);
-                        }
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                }else if($taskObj instanceof SuperClosure){
-                    try{
-                        return $taskObj( $server, $task->id,$task->worker_id,$task->flags);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                }else if(is_callable($taskObj)){
-                    try{
-                        call_user_func($taskObj,$server,$task->id,$task->worker_id,$task->flags);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
+            }
+            if($taskObj instanceof AbstractAsyncTask){
+                try{
+                    $ret = $taskObj->__onTaskHook($task->id,$task->worker_id,$task->flags);
+                    $finishData = $taskObj->__onFinishHook($ret,$task->id);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
                 }
-                return null;
-            });
-        }else{
-            EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, $taskId, $fromWorkerId,$taskObj){
-                if(is_string($taskObj) && class_exists($taskObj)){
-                    $ref = new \ReflectionClass($taskObj);
-                    if($ref->implementsInterface(QuickTaskInterface::class)){
-                        try{
-                            $taskObj::run($server,$taskId,$fromWorkerId);
-                        }catch (\Throwable $throwable){
-                            Trigger::getInstance()->throwable($throwable);
-                        }
-                        return;
-                    }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                        $taskObj = new $taskObj;
-                    }
+            }else if($taskObj instanceof SuperClosure){
+                try{
+                    $finishData = $taskObj( $server, $task->id,$task->worker_id,$task->flags);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
                 }
-                if($taskObj instanceof AbstractAsyncTask){
-                    try{
-                        $ret = $taskObj->__onTaskHook($taskId,$fromWorkerId);
-                        if($ret !== null){
-                            $taskObj->__onFinishHook($ret,$taskId);
-                        }
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                }else if($taskObj instanceof SuperClosure){
-                    try{
-                        return $taskObj( $server, $taskId, $fromWorkerId);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                }else if(is_callable($taskObj)){
-                    try{
-                        call_user_func($taskObj,$server,$taskId,$fromWorkerId);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
+            }else if(is_callable($taskObj)){
+                try{
+                    $finishData =  call_user_func($taskObj,$server,$task->id,$task->worker_id,$task->flags);
+                }catch (\Throwable $throwable){
+                    Trigger::getInstance()->throwable($throwable);
                 }
-                return null;
-            });
-        }
+            }
+            finish :{
+                $task->finish($finishData);
+            }
+        });
 
-        EventHelper::on($server,EventRegister::onFinish,function (){
-            //空逻辑
+        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $serv, int $task_id, string $data){
+            return $data;
         });
 
         //注册默认的worker start

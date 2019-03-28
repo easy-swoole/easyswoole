@@ -32,7 +32,7 @@ abstract class AbstractAsyncTask
     function __onFinishHook($finishData,$task_id)
     {
         try{
-            $this->finish($finishData,$task_id);
+            return $this->finish($finishData,$task_id);
         }catch (\Throwable $throwable){
             $this->onException($throwable);
         }
@@ -42,7 +42,7 @@ abstract class AbstractAsyncTask
 
     abstract protected function finish($result,$task_id);
 
-    public function onException(\Throwable $throwable):void
+    protected function onException(\Throwable $throwable):void
     {
         throw $throwable;
     }

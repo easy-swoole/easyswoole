@@ -45,30 +45,35 @@ class TaskManager
         return ServerManager::getInstance()->getSwooleServer()->taskwait($task,$timeout,$taskWorkerId);
     }
 
-    public static  function barrier(array $taskList,$timeout = 0.5)
+    public static function barrier(array $taskList,$timeout = 0.5):array
     {
-        $temp =[];
-        $map = [];
-        $result = [];
-        foreach ($taskList as $name => $task){
-            if($task instanceof \Closure){
+        return self::taskCo($taskList,$timeout);
+    }
+
+    public static function taskCo(array $taskList,$timeout = 0.5):array
+    {
+        $taskMap = [];
+        $finalTask = [];
+        foreach ($taskList as $key => $item){
+            if($item instanceof \Closure){
                 try{
-                    $task = new SuperClosure($task);
+                    $temp = new SuperClosure($item);
+                    $taskList[$key] = $temp;
                 }catch (\Throwable $throwable){
+                    unset($taskList[$key]);
                     Trigger::getInstance()->throwable($throwable);
-                    return false;
                 }
             }
-            $temp[] = $task;
-            $map[] = $name;
+            if(isset($taskList[$key])){
+                $finalTask[] = $taskList[$key];
+                $taskMap[count($finalTask) - 1] = $key;
+            }
         }
-        if(!empty($temp)){
-            $ret = ServerManager::getInstance()->getSwooleServer()->taskWaitMulti($temp,$timeout);
-            if(!empty($ret)){
-                //极端情况下  所有任务都超时
-                foreach ($ret as $index => $subRet){
-                    $result[$map[$index]] = $subRet;
-                }
+        $result = [];
+        $ret = ServerManager::getInstance()->getSwooleServer()->taskCo($taskList,$timeout);
+        if(is_array($ret)){
+            foreach ($ret as $index => $temp){
+                $result[$taskMap[$index]] = $temp;
             }
         }
         return $result;
