@@ -66,7 +66,9 @@ class Core
     function __construct()
     {
         defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
-        defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT',realpath(getcwd()));
+        defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
+        defined('RUNNING_ROOT') or define('RUNNING_ROOT', realpath(getcwd()));
+        defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', IN_PHAR ? \Phar::running() : realpath(getcwd()));
         defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER',1);
         defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER',2);
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER',3);
