@@ -313,7 +313,7 @@ class Core
             }
         });
 
-        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $serv, int $task_id, string $data){
+        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $serv, int $task_id,$data){
             return $data;
         });
 
