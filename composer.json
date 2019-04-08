@@ -22,8 +22,6 @@
         "easyswoole/trace": "^1.0",
         "easyswoole/socket": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
-        "easyswoole/fast-cache": "^1.0",
-        "easyswoole/actor": "^1.0",
         "easyswoole/console": "^1.0"
     },
     "require-dev": {

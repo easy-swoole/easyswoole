@@ -9,7 +9,6 @@
 namespace EasySwoole\EasySwoole;
 
 
-use EasySwoole\Actor\Actor;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Console\Console;
@@ -22,7 +21,6 @@ use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
-use EasySwoole\FastCache\Cache;
 use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
@@ -363,16 +361,5 @@ class Core
         }
         //注册crontab进程
         Crontab::getInstance()->__run();
-        //注册fastCache进程
-        if(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM') > 0){
-            Cache::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)
-                ->setProcessNum(Config::getInstance()->getConf('FAST_CACHE.PROCESS_NUM'))
-                ->setBacklog(Config::getInstance()->getConf('FAST_CACHE.BACKLOG'))
-                ->setServerName($serverName)
-                ->attachToServer(ServerManager::getInstance()->getSwooleServer());
-        }
-        //执行Actor注册进程
-        Actor::getInstance()->setTempDir(EASYSWOOLE_TEMP_DIR)->setServerName($serverName)->attachToServer(ServerManager::getInstance()->getSwooleServer());
-
     }
 }
