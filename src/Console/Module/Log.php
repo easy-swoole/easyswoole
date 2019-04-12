@@ -92,7 +92,7 @@ HELP;
         $response->setMessage($help);
     }
 
-    public static function push(string $str, $logCategory = null)
+    public static function push(?string $str, $logCategory = null)
     {
         $fd = Auth::currentFd();
         if($fd > 0){
