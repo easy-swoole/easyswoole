@@ -1,4 +1,4 @@
-<?php
+swoole.zip<?php
 /**
  * Created by PhpStorm.
  * User: yf
@@ -56,7 +56,7 @@ class Stop implements CommandInterface
                     return "server stop at " . date("Y-m-d H:i:s") ;
                     break;
                 } else {
-                    if (time() - $time > 5) {
+                    if (time() - $time > 15) {
                         return "stop server fail.try -f again ";
                         break;
                     }
