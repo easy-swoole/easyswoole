@@ -37,7 +37,7 @@ class Console implements CommandInterface
                         $data = $client->recv(-1);
                         if(!empty($data)){
                             echo $data."\n";
-                        }else if(!$client->getClient()->isConnected()){
+                        }else if($client !== false){
                             exit();
                         }
                     };
