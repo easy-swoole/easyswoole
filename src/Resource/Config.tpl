@@ -31,10 +31,6 @@ return [
         'USER' => 'root',
         'PASSWORD' =>'123456'
     ],
-    'FAST_CACHE' => [
-        'PROCESS_NUM' => 0,
-        'BACKLOG' => 256,
-    ],
     'DISPLAY_ERROR' => true,
     'PHAR' => [
         'EXCLUDE' => ['.idea', 'Log', 'Temp', 'easyswoole', 'easyswoole.install']
