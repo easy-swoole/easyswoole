@@ -18,7 +18,7 @@
         "easyswoole/spl": "^1.0",
         "easyswoole/http": "^1.0",
         "easyswoole/utility": "^1.0",
-        "jeremeamia/SuperClosure": "^2.4",
+        "jeremeamia/superclosure": "^2.4",
         "easyswoole/trace": "^1.0",
         "easyswoole/socket": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
