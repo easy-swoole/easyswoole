@@ -307,7 +307,10 @@ class Core
                 }
             }
             finish :{
-                $task->finish($finishData);
+                //禁止 process执行回调
+                if(($server->setting['worker_num'] + $server->setting['task_worker_num']) > $task->worker_id){
+                    $task->finish($finishData);
+                }
             }
         });
 
@@ -342,8 +345,6 @@ class Core
 
     private function extraHandler()
     {
-        $serverName = Config::getInstance()->getConf('SERVER_NAME');
-
         //注册Console
         if(Config::getInstance()->getConf('CONSOLE.ENABLE')){
             $config = Config::getInstance()->getConf('CONSOLE');
@@ -356,8 +357,8 @@ class Core
                 ]);
             });
             ConsoleModuleContainer::getInstance()->set(new Auth());
-            ConsoleModuleContainer ::getInstance()->set(new Server());
-            ConsoleModuleContainer ::getInstance()->set(new Log());
+            ConsoleModuleContainer::getInstance()->set(new Server());
+            ConsoleModuleContainer::getInstance()->set(new Log());
         }
         //注册crontab进程
         Crontab::getInstance()->__run();
