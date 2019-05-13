@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
+use Swoole\Redis\Server as RedisServer;
 
 class ServerManager
 {
@@ -57,6 +58,10 @@ class ServerManager
             }
             case EASYSWOOLE_WEB_SOCKET_SERVER:{
                 $this->swooleServer = new \swoole_websocket_server($address,$port,...$args);
+                break;
+            }
+            case EASYSWOOLE_REDIS_SERVER:{
+                $this->swooleServer = new RedisServer($address,$port,...$args);
                 break;
             }
             default:{
