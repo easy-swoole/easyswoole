@@ -11,7 +11,6 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Log\LoggerInterface;
-use EasySwoole\Trigger\Location;
 
 class Logger implements LoggerInterface
 {
