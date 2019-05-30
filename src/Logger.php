@@ -10,13 +10,15 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Console\Module\Log;
-use EasySwoole\Trace\AbstractInterface\LoggerInterface;
-use EasySwoole\Trace\Bean\Location;
+use EasySwoole\Log\LoggerInterface;
+use EasySwoole\Trigger\Location;
 
 class Logger implements LoggerInterface
 {
     private $logger;
+
+    private $callback;
+
     use Singleton;
 
     function __construct(LoggerInterface $logger)
@@ -24,53 +26,23 @@ class Logger implements LoggerInterface
         $this->logger = $logger;
     }
     
-    public function log(string $str, $logCategory = null, int $timestamp = null):?string
+    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG'):string
     {
-        // TODO: Implement log() method.
-        if($logCategory == null){
-            $logCategory = 'default';
+        $str = $this->logger->log($msg,$logLevel,$category);
+        if($this->callback){
+            call_user_func($this->callback,$msg,$logLevel,$category);
         }
-        $str = $this->logger->log($str,$logCategory,$timestamp);
-        Log::push($str,$logCategory);
         return $str;
     }
 
-    public function logWithLocation(string $str,$logCategory = null,int $timestamp = null):?string
+    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG')
     {
-        $location = $this->getLocation();
-        $str = "[file:{$location->getFile()}][line:{$location->getLine()}]{$str}";
-        return $this->log($str,$logCategory);
+        $this->logger->console($msg,$logLevel,$category);
+        $this->log($msg,$logLevel,$category);
     }
 
-    public function console(string $str, $category = null, $saveLog = true):?string
+    public function onLogEvent(callable $call)
     {
-        // TODO: Implement console() method.
-        if($category == null){
-            $category = 'default';
-        }
-        $final = $this->logger->console($str,$category,false);
-        if($saveLog){
-            $this->log($str,$category);
-        }
-        return $final;
-    }
-
-    public function consoleWithLocation(string $str, $category = null, $saveLog = true):?string
-    {
-        // TODO: Implement console() method.
-        $location = $this->getLocation();
-        $str = "[file:{$location->getFile()}][line:{$location->getLine()}]{$str}";
-        return $this->console($str,$category,$saveLog);
-    }
-
-    private function getLocation():Location
-    {
-        $location = new Location();
-        $debugTrace = debug_backtrace();
-        array_shift($debugTrace);
-        $caller = array_shift($debugTrace);
-        $location->setLine($caller['line']);
-        $location->setFile($caller['file']);
-        return $location;
+        $this->callback = $call;
     }
 }

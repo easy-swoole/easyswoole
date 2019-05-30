@@ -24,15 +24,6 @@ return [
     ],
     'TEMP_DIR' => null,
     'LOG_DIR' => null,
-    'CONSOLE' => [
-        'ENABLE' => true,
-        'LISTEN_ADDRESS' => '127.0.0.1',
-        'HOST' => '127.0.0.1',
-        'PORT' => 9500,
-        'USER' => 'root',
-        'PASSWORD' =>'123456'
-    ],
-    'DISPLAY_ERROR' => true,
     'PHAR' => [
         'EXCLUDE' => ['.idea', 'Log', 'Temp', 'easyswoole', 'easyswoole.install']
     ]

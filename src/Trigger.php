@@ -10,12 +10,13 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
-use EasySwoole\Trace\AbstractInterface\TriggerInterface;
-use EasySwoole\Trace\Bean\Location;
+use EasySwoole\Trigger\Location;
+use EasySwoole\Trigger\TriggerInterface;
 
 class Trigger implements TriggerInterface
 {
     use Singleton;
+
     private $trigger;
 
     function __construct(TriggerInterface $trigger)
@@ -23,7 +24,7 @@ class Trigger implements TriggerInterface
         $this->trigger = $trigger;
     }
 
-    public function error($msg, int $errorCode = E_USER_ERROR, Location $location = null)
+    public function error($msg,int $errorCode = E_USER_ERROR,Location $location = null)
     {
         // TODO: Implement error() method.
         if($location == null){
