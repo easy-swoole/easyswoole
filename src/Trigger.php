@@ -48,12 +48,12 @@ class Trigger implements TriggerInterface
         }
     }
 
-    public function setOnError(callable $call)
+    public function onError(callable $call)
     {
         $this->onError = $call;
     }
 
-    public function setOnException(callable $call)
+    public function onException(callable $call)
     {
         $this->onException = $call;
     }

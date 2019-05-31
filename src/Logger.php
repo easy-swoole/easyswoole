@@ -61,7 +61,7 @@ class Logger implements LoggerInterface
         $this->console($msg,self::LOG_LEVEL_ERROR,$category);
     }
 
-    public function onLogEvent(callable $call)
+    public function onLog(callable $call)
     {
         $this->callback = $call;
     }
