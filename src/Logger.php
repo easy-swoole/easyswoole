@@ -40,6 +40,27 @@ class Logger implements LoggerInterface
         $this->log($msg,$logLevel,$category);
     }
 
+
+    public function info(?string $msg,string $category = 'DEBUG')
+    {
+        $this->console($msg,self::LOG_LEVEL_INFO,$category);
+    }
+
+    public function notice(?string $msg,string $category = 'DEBUG')
+    {
+        $this->console($msg,self::LOG_LEVEL_NOTICE,$category);
+    }
+
+    public function waring(?string $msg,string $category = 'DEBUG')
+    {
+        $this->console($msg,self::LOG_LEVEL_WARNING,$category);
+    }
+
+    public function error(?string $msg,string $category = 'DEBUG')
+    {
+        $this->console($msg,self::LOG_LEVEL_ERROR,$category);
+    }
+
     public function onLogEvent(callable $call)
     {
         $this->callback = $call;
