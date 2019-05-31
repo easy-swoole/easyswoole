@@ -25,6 +25,7 @@ use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
 use EasySwoole\Log\LoggerInterface;
 use EasySwoole\Trigger\Location;
 use EasySwoole\Trigger\TriggerInterface;
+use EasySwoole\Utility\File;
 use Swoole\Server\Task;
 use EasySwoole\Log\Logger as DefaultLogger;
 use EasySwoole\Trigger\Trigger as DefaultTrigger;
@@ -144,7 +145,7 @@ class Core
             $tempDir = rtrim($tempDir,'/');
         }
         if(!is_dir($tempDir)){
-            mkdir($tempDir);
+            File::createDirectory($tempDir);
         }
         defined('EASYSWOOLE_TEMP_DIR') or define('EASYSWOOLE_TEMP_DIR',$tempDir);
 
@@ -156,13 +157,17 @@ class Core
             $logDir = rtrim($logDir,'/');
         }
         if(!is_dir($logDir)){
-            mkdir($logDir);
+            File::createDirectory($logDir);
         }
-        defined('EASYSWOOLE_LOG_DIR') or define('EASYSWOOLE_LOG_DIR',$logDir);
+        defined('EASYSWOOLE_LOG_DIR') or define('EASYSWOOLE_LOG_DIR', $logDir);
 
-        //设置默认文件目录值
-        Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file',$tempDir.'/pid.pid');
-        Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file',$logDir.'/swoole.log');
+        // 设置默认文件目录值(如果自行指定了目录则优先使用指定的)
+        if (!Config::getInstance()->getConf('MAIN_SERVER.SETTING.pid_file')) {
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file', $tempDir . '/pid.pid');
+        }
+        if (!Config::getInstance()->getConf('MAIN_SERVER.SETTING.log_file')) {
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file', $logDir . '/swoole.log');
+        }
     }
 
     private function registerErrorHandler()
