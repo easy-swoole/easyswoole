@@ -23,8 +23,5 @@ return [
         ],
     ],
     'TEMP_DIR' => null,
-    'LOG_DIR' => null,
-    'PHAR' => [
-        'EXCLUDE' => ['.idea', 'Log', 'Temp', 'easyswoole', 'easyswoole.install']
-    ]
+    'LOG_DIR' => null
 ];

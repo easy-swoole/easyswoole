@@ -12,7 +12,6 @@ namespace EasySwoole\EasySwoole\Command;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Help;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Phar;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Reload;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Stop;
@@ -29,7 +28,6 @@ class CommandRunner
         CommandContainer::getInstance()->set(new Start());
         CommandContainer::getInstance()->set(new Stop());
         CommandContainer::getInstance()->set(new Reload());
-        CommandContainer::getInstance()->set(new Phar());
     }
 
     function run(array $args):?string
