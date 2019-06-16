@@ -58,7 +58,7 @@ class Trigger implements TriggerInterface
         return $this->onError;
     }
 
-    public function onException(callable $call):Event
+    public function onException():Event
     {
         return $this->onException;
     }
