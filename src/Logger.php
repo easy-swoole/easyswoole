@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\Component\Event;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Log\LoggerInterface;
 
@@ -23,13 +24,15 @@ class Logger implements LoggerInterface
     function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
+        $this->callback = new Event();
     }
     
     public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG'):string
     {
         $str = $this->logger->log($msg,$logLevel,$category);
-        if($this->callback){
-            call_user_func($this->callback,$msg,$logLevel,$category);
+        $calls = $this->callback->all();
+        foreach ($calls as $call){
+            call_user_func($call,$msg,$logLevel,$category);
         }
         return $str;
     }
@@ -61,8 +64,8 @@ class Logger implements LoggerInterface
         $this->console($msg,self::LOG_LEVEL_ERROR,$category);
     }
 
-    public function onLog(callable $call)
+    public function onLog():Event
     {
-        $this->callback = $call;
+        return $this->callback;
     }
 }

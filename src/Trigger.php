@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\Component\Event;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Trigger\Location;
 use EasySwoole\Trigger\TriggerInterface;
@@ -25,6 +26,8 @@ class Trigger implements TriggerInterface
     function __construct(TriggerInterface $trigger)
     {
         $this->trigger = $trigger;
+        $this->onError = new Event();
+        $this->onException = new Event();
     }
 
     public function error($msg,int $errorCode = E_USER_ERROR,Location $location = null)
@@ -34,8 +37,9 @@ class Trigger implements TriggerInterface
             $location = $this->getLocation();
         }
         $this->trigger->error($msg,$errorCode,$location);
-        if($this->onError){
-            call_user_func($this->onError,$msg,$errorCode,$location);
+        $all = $this->onError->all();
+        foreach ($all as $call){
+            call_user_func($call,$msg,$errorCode,$location);
         }
     }
 
@@ -43,19 +47,20 @@ class Trigger implements TriggerInterface
     {
         // TODO: Implement throwable() method.
         $this->trigger->throwable($throwable);
-        if($this->onException){
-            call_user_func($this->onException,$throwable);
+        $all = $this->onException->all();
+        foreach ($all as $call){
+            call_user_func($call,$throwable);
         }
     }
 
-    public function onError(callable $call)
+    public function onError():Event
     {
-        $this->onError = $call;
+        return $this->onError;
     }
 
-    public function onException(callable $call)
+    public function onException(callable $call):Event
     {
-        $this->onException = $call;
+        return $this->onException;
     }
 
     private function getLocation():Location
