@@ -1,0 +1,319 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yf
+ * Date: 2017/1/22
+ * Time: 下午9:46
+ */
+
+////////////////////////////////////////////////////////////////////
+//                          _ooOoo_                               //
+//                         o8888888o                              //
+//                         88" . "88                              //
+//                         (| ^_^ |)                              //
+//                         O\  =  /O                              //
+//                      ____/`---'\____                           //
+//                    .'  \\|     |//  `.                         //
+//                   /  \\|||  :  |||//  \                        //
+//                  /  _||||| -:- |||||-  \                       //
+//                  |   | \\\  -  /// |   |                       //
+//                  | \_|  ''\---/''  |   |                       //
+//                  \  .-\__  `-`  ___/-. /                       //
+//                ___`. .'  /--.--\  `. . ___                     //
+//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
+//      ========`-.____`-.___\_____/___.-`____.-'========         //
+//                           `=---='                              //
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
+//         佛祖保佑       永无BUG       永不修改                     //
+////////////////////////////////////////////////////////////////////
+
+
+require_once 'Core/Core.php';
+$server = \Core\Core::getInstance()->frameWorkInitialize();
+function commandParser(){
+    global $argv;
+    $command = '';
+    $options = array();
+    if(isset($argv[1])){
+        $command = $argv[1];
+    }
+    foreach ($argv as $item){
+        if(substr($item,0,2) === '--'){
+            $temp = trim($item,"--");
+            $temp = explode("-",$temp);
+            $key = array_shift($temp);
+            $options[$key] = array_shift($temp) ?: '';
+        }
+    }
+    return array(
+        "command"=>$command,
+        "options"=>$options
+    );
+}
+
+function commandHandler(){
+    $command = commandParser();
+    switch ($command['command']){
+        case "start":{
+            startServer($command['options']);
+            break;
+        }
+        case 'stop':{
+            stopServer($command['options']);
+            break;
+        }
+        case 'reload':{
+            reloadServer($command['options']);
+            break;
+        }
+        case 'update':{
+            echo "start download\n";
+            exec('curl -sS -o master.tar.gz https://codeload.github.com/easy-swoole/easyswoole/tar.gz/master');
+            echo "download success\n";
+            exec('tar -xzvf master.tar.gz');
+            if (isset($command['options']['ide'])){
+                exec('rm -rf ./ide_helper');
+                exec('mv ./easyswoole-master/ide_helper ./');
+            }else{
+                exec('rm -rf ./Core');
+                exec('rm -rf ./server');
+                exec('mv ./easyswoole-master/src/Core ./');
+                exec('mv ./easyswoole-master/src/server ./');
+            }
+            exec('rm -rf ./easyswoole-master master.tar.gz');
+            echo "update success\n";
+            break;
+        }
+        case 'version':{
+            echo \Core\Component\Di::getInstance()->get(\Core\Component\SysConst::VERSION);
+            echo "\n";
+            break;
+        }
+        case 'help':
+        default:{
+            help($command['options']);
+        }
+
+    }
+}
+
+function startServer($options){
+    $log =
+        '
+  ______                          _____                              _
+ |  ____|                        / ____|                            | |
+ | |__      __ _   ___   _   _  | (___   __      __   ___     ___   | |   ___
+ |  __|    / _` | / __| | | | |  \___ \  \ \ /\ / /  / _ \   / _ \  | |  / _ \
+ | |____  | (_| | \__ \ | |_| |  ____) |  \ V  V /  | (_) | | (_) | | | |  __/
+ |______|  \__,_| |___/  \__, | |_____/    \_/\_/    \___/   \___/  |_|  \___|
+                          __/ |
+                         |___/
+';
+    echo $log."\n";
+    opCacheClear();
+    global $server;
+    $conf = \Conf\Config::getInstance();
+    if(isset($options['ip'])){
+        $conf->setConf("SERVER.LISTEN",$options['ip']);
+    }
+    echo 'listen address       '.$conf->getConf('SERVER.LISTEN')."\n";
+
+    if(!empty($options['p'])){
+        $conf->setConf("SERVER.PORT",$options['p']);
+    }
+    echo 'listen port          '.$conf->getConf('SERVER.PORT')."\n";
+
+    if(!empty($options['pid'])){
+        $pidFile = $options['pid'];
+        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",$pidFile);
+    }
+
+    if(isset($options['workerNum'])){
+        $conf->setConf("SERVER.CONFIG.worker_num",$options['workerNum']);
+    }
+    echo 'worker num           '.$conf->getConf('SERVER.CONFIG.worker_num')."\n";
+
+    if(isset($options['taskWorkerNum'])){
+        $conf->setConf("SERVER.CONFIG.task_worker_num",$options['taskWorkerNum']);
+    }
+    echo 'task worker num      '.$conf->getConf('SERVER.CONFIG.task_worker_num')."\n";
+    if(isset($options['user'])){
+        $conf->setConf("SERVER.CONFIG.user",$options['user']);
+    }
+    echo 'user             '.$conf->getConf('SERVER.CONFIG.user')."\n";
+
+    if(isset($options['group'])){
+        $conf->setConf("SERVER.CONFIG.group",$options['group']);
+    }
+    echo 'user group            '.$conf->getConf('SERVER.CONFIG.group')."\n";
+    if(isset($options['cpuAffinity'])){
+        $conf->setConf("SERVER.CONFIG.open_cpu_affinity",true);
+    }
+    $label = 'false';
+    if(isset($options['d'])){
+        $conf->setConf("SERVER.CONFIG.daemonize",true);
+        $label = 'true';
+    }else{
+        \Conf\Config::getInstance()->setConf("SERVER.CONFIG.pid_file",null);
+    }
+    echo "daemonize            {$label} \n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.ENABLE')){
+         $label = 'true';
+    }
+    echo 'debug enable         '.$label."\n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.LOG')){
+             $label = 'true';
+    }
+    echo 'debug log error      '.$label."\n";
+    $label = 'false';
+    if($conf->getConf('DEBUG.DISPLAY_ERROR')){
+                 $label = 'true';
+    }
+    echo 'debug display error  '.$label."\n";
+    echo 'swoole version       '.phpversion('swoole')."\n";
+    echo 'easyswoole version   '.\Core\Component\Di::getInstance()->get(Core\Component\SysConst::VERSION)."\n";
+    $server->run();
+
+}
+
+function stopServer($options){
+    $pidFile = \Conf\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+    if(!empty($options['pid'])){
+        $pidFile = $options['pid'];
+    }
+    if(!file_exists($pidFile)){
+        echo "pid file :{$pidFile} not exist \n";
+        return;
+    }
+    $pid = file_get_contents($pidFile);
+    if(!swoole_process::kill($pid,0)){
+        echo "pid :{$pid} not exist \n";
+        return;
+    }
+    if(isset($options['f'])){
+        swoole_process::kill($pid,SIGKILL);
+    }else{
+        swoole_process::kill($pid);
+    }
+    //等待两秒
+    $time = time();
+    while (true){
+        usleep(1000);
+        if(!swoole_process::kill($pid,0)){
+            echo "server stop at ".date("y-m-d h:i:s")."\n";
+            if(is_file($pidFile)){
+                unlink($pidFile);
+            }
+            break;
+        }else{
+            if(time() - $time > 2){
+                echo "stop server fail.try --force again \n";
+                break;
+            }
+        }
+    }
+}
+
+function reloadServer($options){
+    $pidFile = \Conf\Config::getInstance()->getConf("SERVER.CONFIG.pid_file");
+    if(isset($options['pid'])){
+        if(!empty($options['pid'])){
+            $pidFile = $options['pid'];
+        }
+    }
+    if(isset($options['all']) && $options['all'] == false){
+        $sig = SIGUSR2;
+    }else{
+        $sig = SIGUSR1;
+    }
+    if(!file_exists($pidFile)){
+        echo "pid file :{$pidFile} not exist \n";
+        return;
+    }
+    $pid = file_get_contents($pidFile);
+    opCacheClear();
+    if(!swoole_process::kill($pid,0)){
+        echo "pid :{$pid} not exist \n";
+        return;
+    }
+    swoole_process::kill($pid,$sig);
+    echo "send server reload command at ".date("y-m-d h:i:s")."\n";
+}
+
+function help($options){
+    $opName = '';
+    $args = array_keys($options);
+    if(isset($args[0])){
+        $opName = $args[0];
+    }
+    switch ($opName){
+        case 'start':{
+            echo "------------easySwoole 启动命令------------\n";
+            echo "执行php server.php start 即可启动服务。启动可选参数为:\n";
+            echo "--d                       是否以系统守护模式运行\n";
+            echo "--p-portNumber            指定服务监听端口\n";
+            echo "--pid-fileName            指定服务PID存储文件\n";
+            echo "--workerNum-num           设置worker进程数\n";
+            echo "--taskWorkerNum-num       设置Task进程数\n";
+            echo "--user-userName           指定以某个用户身份执行\n";
+            echo "--group-groupName         指定以某个用户组身份执行\n";
+            echo "--taskWorkerNum-num       设置Task进程数\n";
+            echo "--cpuAffinity-boolean     是否开启CPU亲和\n";
+            break;
+        }
+        case 'stop':{
+            echo "------------easySwoole 停止命令------------\n";
+            echo "执行php server.php stop 即可停止服务。停止可选参数为:\n";
+            echo "--pid-fileName        指定服务PID存储文件\n";
+            echo "--f                   强制停止服务\n";
+            break;
+        }
+        case 'reload':{
+            echo "------------easySwoole 重启命令------------\n";
+            echo "执行php server.php reload 即可重启服务。重启可选参数为:\n";
+            echo "--pid-fileName        指定服务PID存储文件\n";
+            echo "--pid-all             是否重启所有进程，默认true\n";
+            break;
+        }
+        case 'update':{
+            echo "------------easySwoole 更新命令------------\n";
+            echo "执行php server.php update 即可更新框架。更新可选参数为:\n";
+            echo "--ide-help               更新ide助手文件，不存在则下载\n";
+            break;
+        }
+        default:{
+            echo "------------欢迎使用easySwoole------------\n";
+            echo "有关某个命令的详细信息，请使用 help 命令, 如help --start 可选参数为:\n";
+            echo "--start            启动easySwoole\n";
+            echo "--stop             停止easySwoole\n";
+            echo "--reload           重启easySwoole\n";
+            echo "--update           更新框架文件\n";
+        }
+    }
+}
+
+function evenCheck(){
+    if(version_compare(phpversion(),'5.6','<')){
+        die("php version must >= 5.6");
+    }
+    if(version_compare(phpversion('swoole'),'1.9.5','<')){
+        die("swoole version must >= 1.9.5");
+    }
+
+}
+function opCacheClear(){
+    if(function_exists('apc_clear_cache')){
+        apc_clear_cache();
+    }
+    if(function_exists('opcache_reset')){
+        opcache_reset();
+    }
+}
+evenCheck();
+commandHandler();
+
+
+
