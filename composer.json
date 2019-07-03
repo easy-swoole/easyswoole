@@ -23,7 +23,8 @@
         "dragonmantank/cron-expression": "^2.2"
     },
     "require-dev": {
-        "easyswoole/swoole-ide-helper": "^1.2"
+        "easyswoole/swoole-ide-helper": "^1.2",
+        "easyswoole/phpunit": "^1.0"
     },
     "autoload": {
         "psr-4": {
