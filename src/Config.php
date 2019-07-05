@@ -10,46 +10,29 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Singleton;
+use EasySwoole\Config\AbstractConfig;
+use EasySwoole\Config\TableConfig;
 use EasySwoole\Spl\SplArray;
 use Swoole\Table;
 
 class Config
 {
     private $conf;
-    private $swooleTable;
+
     use Singleton;
 
-    public function __construct()
+    public function __construct($isDev = true,?AbstractConfig $config = null)
     {
-        $this->conf = new SplArray();
-        /*
-         * 用于存储动态配置,不适合存储大量\大长度的的配置下，仅仅建议用于开关存储
-         */
-        $this->swooleTable = new \swoole_table(1024);
-        $this->swooleTable->column('value',Table::TYPE_STRING,512);
-        $this->swooleTable->create();
-    }
-
-    function setDynamicConf($key,$val)
-    {
-        $this->swooleTable->set($key,[
-            'value'=> serialize($val)
-        ]);
-    }
-
-    function getDynamicConf($key)
-    {
-        $data = $this->swooleTable->get($key);
-        if(!empty($data)){
-            return unserialize($data['value']);
-        }else{
-            return null;
+        if($config == null){
+            $config = new TableConfig($isDev);
         }
+        $this->conf = $config;
     }
 
-    function delDynamicConf($key)
+    function storageHandler(AbstractConfig $config):Config
     {
-        $this->swooleTable->del($key);
+        $this->conf = $config;
+        return $this;
     }
 
     /**
@@ -62,36 +45,30 @@ class Config
         if ($keyPath == '') {
             return $this->toArray();
         }
-        return $this->conf->get($keyPath);
+        return $this->conf->getConf($keyPath);
     }
 
-    /**
-     * 设置配置项
-     * 在server启动以后，无法动态的去添加，修改配置信息（进程数据独立）
-     * @param string $keyPath 配置项名称 支持点语法
-     * @param mixed  $data    配置项数据
-     */
-    public function setConf($keyPath, $data): void
+
+    public function setConf($keyPath, $data): bool
     {
-        $this->conf->set($keyPath, $data);
+        return $this->conf->setConf($keyPath, $data);
     }
 
-    /**
-     * 获取全部配置项
-     * @return array
-     */
+
     public function toArray(): array
     {
-        return $this->conf->getArrayCopy();
+        return $this->conf->getConf();
     }
 
-    /**
-     * 覆盖配置项
-     * @param array $conf 配置项数组
-     */
-    public function load(array $conf): void
+
+    public function load(array $conf): bool
     {
-        $this->conf = new SplArray($conf);
+        return $this->conf->load($conf);
+    }
+
+    public function merge(array $conf):bool
+    {
+        return $this->conf->merge($conf);
     }
 
     /**
@@ -109,7 +86,7 @@ class Config
                 if (!$merge) {
                     $this->conf[$basename] = $confData;
                 } else {
-                    $this->conf = new SplArray(array_merge($this->toArray(), $confData));
+                    $this->conf->merge($confData);
                 }
             }
         }
@@ -119,14 +96,16 @@ class Config
     {
         if(file_exists($file)){
             $data = require $file;
-            $this->conf->loadArray($data);
+            if(is_array($data)){
+                $this->load($data);
+            }
         }else{
             throw new \Exception("config file : {$file} is miss");
         }
     }
 
-    function clear()
+    function clear():bool
     {
-        $this->conf = new SplArray();
+        return $this->conf->clear();
     }
 }

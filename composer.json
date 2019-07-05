@@ -20,7 +20,8 @@
         "easyswoole/utility": "^1.0",
         "jeremeamia/superclosure": "^2.4",
         "easyswoole/trigger": "^1.0",
-        "dragonmantank/cron-expression": "^2.2"
+        "dragonmantank/cron-expression": "^2.2",
+        "easyswoole/config": "^1.0"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "^1.2",
