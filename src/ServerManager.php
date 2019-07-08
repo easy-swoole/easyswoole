@@ -76,13 +76,13 @@ class ServerManager
     }
 
 
-    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $listenAddress = '0.0.0.0',array $setting = [
-        "open_eof_check"=>false,
-    ]):EventRegister
+    public function addServer(string $serverName,int $port,int $type = SWOOLE_TCP,string $listenAddress = '0.0.0.0',array $setting = []):EventRegister
     {
         $eventRegister = new EventRegister();
         $subPort = $this->swooleServer->addlistener($listenAddress,$port,$type);
-        $subPort->set($setting);
+        if(!empty($setting)){
+            $subPort->set($setting);
+        }
         $this->subServer[$serverName] = $subPort;
         $this->subServerRegister[$serverName] = [
             'port'=>$port,
