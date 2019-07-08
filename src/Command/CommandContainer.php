@@ -17,9 +17,11 @@ class CommandContainer
 
     private $container = [];
 
-    public function set(CommandInterface $command)
+    public function set(CommandInterface $command,$cover = false)
     {
-        $this->container[strtolower($command->commandName())] = $command;
+        if(!isset($this->container[strtolower($command->commandName())]) || $cover){
+            $this->container[strtolower($command->commandName())] = $command;
+        }
     }
 
     function get($key): ?CommandInterface
