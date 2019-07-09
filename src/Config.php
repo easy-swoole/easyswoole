@@ -84,7 +84,7 @@ class Config
             if (is_array($confData) && !empty($confData)) {
                 $basename = strtolower(basename($filePath, '.php'));
                 if (!$merge) {
-                    $this->conf[$basename] = $confData;
+                    $this->conf->setConf($basename,$confData);
                 } else {
                     $this->conf->merge($confData);
                 }
