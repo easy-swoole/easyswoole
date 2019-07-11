@@ -68,8 +68,12 @@ class Start implements CommandInterface
         $list  = ServerManager::getInstance()->getSubServerRegister();
         $index = 1;
         foreach ($list as $serverName => $item){
-            $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            $response = $response.Utility::displayItem('sub server'.$index,"{$serverName} => {$type}@{$item['listenAddress']}:{$item['port']}")."\n";
+            if(empty($item['setting'])){
+                $type = $serverType;
+            }else{
+                $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
+            }
+            $response = $response.Utility::displayItem("sub server:{$serverName}","{$type}@{$item['listenAddress']}:{$item['port']}")."\n";
             $index++;
         }
         $ips = swoole_get_local_ip();
