@@ -4,6 +4,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Component\Timer;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Trigger;
@@ -46,6 +47,7 @@ class PhpUnit implements CommandInterface
                     Trigger::getInstance()->throwable($throwable);
                 }
             }
+            Timer::getInstance()->clearAll();
         });
         $scheduler->start();
         return null;
