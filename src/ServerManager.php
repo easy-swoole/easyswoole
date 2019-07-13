@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use Swoole\Redis\Server as RedisServer;
@@ -92,6 +93,11 @@ class ServerManager
             'eventRegister'=>$eventRegister
         ];
         return $eventRegister;
+    }
+
+    public function addProcess(AbstractProcess $process)
+    {
+        $this->getSwooleServer()->addProcess($process->getProcess());
     }
 
     function getMainEventRegister():EventRegister
