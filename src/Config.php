@@ -104,7 +104,7 @@ class Config
         }
     }
 
-    function clear():bool
+    public function clear():bool
     {
         return $this->conf->clear();
     }
