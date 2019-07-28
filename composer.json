@@ -22,13 +22,15 @@
         "easyswoole/trigger": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
         "easyswoole/config": "^1.0",
-        "easyswoole/phpunit": "^1.0",
         "easyswoole/swoole-ide-helper": "^1.2"
     },
     "autoload": {
         "psr-4": {
             "EasySwoole\\EasySwoole\\": "src/"
         }
+    },
+    "require-dev": {
+        "easyswoole/phpunit": "^1.0"
     },
     "bin": [
         "bin/easyswoole"

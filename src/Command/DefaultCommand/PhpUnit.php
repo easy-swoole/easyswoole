@@ -8,6 +8,7 @@ use EasySwoole\Component\Timer;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Trigger;
+use EasySwoole\Phpunit\Runner;
 use PHPUnit\TextUI\Command;
 use Swoole\Coroutine\Scheduler;
 use Swoole\ExitException;
@@ -35,19 +36,12 @@ class PhpUnit implements CommandInterface
         if(file_exists(getcwd().'/phpunit.php')){
             require_once getcwd().'/phpunit.php';
         }
+        if(!class_exists(Runner::class)){
+            return 'please require easyswoole/phpunit at first';
+        }
         $scheduler = new Scheduler();
         $scheduler->add(function() {
-            try{
-                Command::main(false);
-            }catch (\Throwable $throwable){
-                /*
-                 * 屏蔽swoole exit报错
-                 */
-                if(!$throwable instanceof ExitException){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }
-            Timer::getInstance()->clearAll();
+            Runner::run();
         });
         $scheduler->start();
         return null;
