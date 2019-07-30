@@ -336,7 +336,7 @@ class Core
         }else{
             $file  = EASYSWOOLE_ROOT.'/produce.php';
         }
-        Config::getInstance($this->isDev)->loadEnv($file);
+        Config::getInstance()->loadEnv($file);
     }
 
     private function extraHandler()
