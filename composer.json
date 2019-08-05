@@ -21,16 +21,17 @@
         "jeremeamia/superclosure": "^2.4",
         "easyswoole/trigger": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
-        "easyswoole/config": "^1.0",
-        "easyswoole/swoole-ide-helper": "^1.2"
+        "easyswoole/config": "^1.0"
     },
     "autoload": {
         "psr-4": {
-            "EasySwoole\\EasySwoole\\": "src/"
+            "EasySwoole\\EasySwoole\\": "src/",
+            "EasySwoole\\EasySwoole\\Test\\": "tests/"
         }
     },
     "require-dev": {
-        "easyswoole/phpunit": "^1.0"
+        "easyswoole/phpunit": "^1.0",
+        "easyswoole/swoole-ide-helper": "^1.2"
     },
     "bin": [
         "bin/easyswoole"
