@@ -21,7 +21,8 @@
         "jeremeamia/superclosure": "^2.4",
         "easyswoole/trigger": "^1.0",
         "dragonmantank/cron-expression": "^2.2",
-        "easyswoole/config": "^1.0"
+        "easyswoole/config": "^1.0",
+        "easyswoole/task": "^1.0"
     },
     "autoload": {
         "psr-4": {

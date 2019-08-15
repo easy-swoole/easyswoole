@@ -15,7 +15,7 @@ use Throwable;
  * Class CronTaskNotExist
  * @package EasySwoole\EasySwoole\Crontab
  */
-class CronTaskNotExist extends \Exception
+class CronTaskNotExist extends Exception
 {
     protected $taskName;
 

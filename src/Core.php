@@ -15,20 +15,18 @@ use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
-use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
+use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
-use EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask;
-use EasySwoole\EasySwoole\Swoole\Task\SuperClosure;
 use EasySwoole\Log\LoggerInterface;
 use EasySwoole\Trigger\Location;
 use EasySwoole\Trigger\TriggerInterface;
 use EasySwoole\Utility\File;
-use Swoole\Server\Task;
 use EasySwoole\Log\Logger as DefaultLogger;
 use EasySwoole\Trigger\Trigger as DefaultTrigger;
+use EasySwoole\Task\Config as TaskConfig;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -266,53 +264,6 @@ class Core
                 $response_psr->__response();
             });
         }
-        EventHelper::on($server,EventRegister::onTask,function (\swoole_server $server, Task $task){
-            $finishData = null;
-            $taskObj = $task->data;
-            if(is_string($taskObj) && class_exists($taskObj)){
-                $ref = new \ReflectionClass($taskObj);
-                if($ref->implementsInterface(QuickTaskInterface::class)){
-                    try{
-                        $finishData = $taskObj::run($server,$task->id,$task->worker_id,$task->flags);
-                    }catch (\Throwable $throwable){
-                        Trigger::getInstance()->throwable($throwable);
-                    }
-                    goto finish;
-                }else if($ref->isSubclassOf(AbstractAsyncTask::class)){
-                    $taskObj = new $taskObj;
-                }
-            }
-            if($taskObj instanceof AbstractAsyncTask){
-                try{
-                    $ret = $taskObj->__onTaskHook($task->id,$task->worker_id,$task->flags);
-                    $finishData = $taskObj->__onFinishHook($ret,$task->id);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }else if($taskObj instanceof SuperClosure){
-                try{
-                    $finishData = $taskObj( $server, $task->id,$task->worker_id,$task->flags);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }else if(is_callable($taskObj)){
-                try{
-                    $finishData =  call_user_func($taskObj,$server,$task->id,$task->worker_id,$task->flags);
-                }catch (\Throwable $throwable){
-                    Trigger::getInstance()->throwable($throwable);
-                }
-            }
-            finish :{
-                //禁止 process执行回调
-                if(($server->setting['worker_num'] + $server->setting['task_worker_num']) > $task->worker_id){
-                    $task->finish($finishData);
-                }
-            }
-        });
-
-        EventHelper::on($server,EventRegister::onFinish,function (\swoole_server $serv, int $task_id,$data){
-            return $data;
-        });
 
         //注册默认的worker start
         EventHelper::registerWithAdd(ServerManager::getInstance()->getMainEventRegister(),EventRegister::onWorkerStart,function (\swoole_server $server,$workerId){
@@ -343,5 +294,14 @@ class Core
     {
         //注册crontab进程
         Crontab::getInstance()->__run();
+        //注册Task进程
+        $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
+        $config = new TaskConfig($config);
+        $config->setTempDir(EASYSWOOLE_TEMP_DIR);
+        $config->setServerName(Config::getInstance()->getConf('SERVER_NAME'));
+        $config->setOnException(function (\Throwable $throwable){
+            Trigger::getInstance()->throwable($throwable);
+        });
+        TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
     }
 }

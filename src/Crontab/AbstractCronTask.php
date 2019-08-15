@@ -8,10 +8,9 @@
 
 namespace EasySwoole\EasySwoole\Crontab;
 
+use EasySwoole\Task\AbstractInterface\TaskInterface;
 
-use EasySwoole\EasySwoole\Swoole\Task\QuickTaskInterface;
-
-abstract class AbstractCronTask implements QuickTaskInterface
+abstract class AbstractCronTask implements TaskInterface
 {
     abstract public static function getRule():string ;
     abstract public static function getTaskName():string ;

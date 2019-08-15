@@ -11,8 +11,8 @@ namespace EasySwoole\EasySwoole\Crontab;
 use Cron\CronExpression;
 use EasySwoole\Component\TableManager;
 use EasySwoole\Component\Timer;
-use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\Component\Process\AbstractProcess;
+use EasySwoole\EasySwoole\Task\TaskManager;
 
 class CronRunner extends AbstractProcess
 {
@@ -50,7 +50,7 @@ class CronRunner extends AbstractProcess
                     $table = TableManager::getInstance()->get(Crontab::$__swooleTableName);
                     $table->incr($taskName, 'taskRunTimes', 1);
                     $table->set($taskName, ['taskNextRunTime' => $nextRunTime->getTimestamp()]);
-                    TaskManager::processAsync($this->tasks[$taskName]);
+                    TaskManager::getInstance()->async($this->tasks[$taskName]);
                 });
             }
         }

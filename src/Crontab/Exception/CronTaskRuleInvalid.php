@@ -10,7 +10,7 @@ namespace EasySwoole\EasySwoole\Crontab\Exception;
 
 use Throwable;
 
-class CronTaskRuleInvalid extends CrontabException
+class CronTaskRuleInvalid extends Exception
 {
     protected $taskName;
     protected $taskRule;
