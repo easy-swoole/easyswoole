@@ -17,7 +17,6 @@ return [
         'SETTING' => [
             'worker_num' => 8,
             'reload_async' => true,
-            'task_enable_coroutine' => true,
             'max_wait_time'=>3
         ],
         'TASK'=>[
