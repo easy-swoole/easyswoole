@@ -27,41 +27,41 @@ class Logger implements LoggerInterface
         $this->callback = new Event();
     }
     
-    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG'):string
+    public function log(?string $msg,string $filename = 'log',int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG'):string
     {
-        $str = $this->logger->log($msg,$logLevel,$category);
+        $str = $this->logger->log($msg,$filename,$logLevel,$category);
         $calls = $this->callback->all();
         foreach ($calls as $call){
-            call_user_func($call,$msg,$logLevel,$category);
+            call_user_func($call,$msg,$filename,$logLevel,$category);
         }
         return $str;
     }
 
-    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG')
+    public function console(?string $msg,string $filename = 'log',int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG')
     {
-        $this->logger->console($msg,$logLevel,$category);
-        $this->log($msg,$logLevel,$category);
+        $this->logger->console($msg,$filename,$logLevel,$category);
+        $this->log($msg,$filename,$logLevel,$category);
     }
 
 
-    public function info(?string $msg,string $category = 'DEBUG')
+    public function info(?string $msg,string $filename = 'log',string $category = 'DEBUG')
     {
-        $this->console($msg,self::LOG_LEVEL_INFO,$category);
+        $this->console($msg,$filename,self::LOG_LEVEL_INFO,$category);
     }
 
-    public function notice(?string $msg,string $category = 'DEBUG')
+    public function notice(?string $msg,string $filename = 'log',string $category = 'DEBUG')
     {
-        $this->console($msg,self::LOG_LEVEL_NOTICE,$category);
+        $this->console($msg,$filename,self::LOG_LEVEL_NOTICE,$category);
     }
 
-    public function waring(?string $msg,string $category = 'DEBUG')
+    public function waring(?string $msg,string $filename = 'log',string $category = 'DEBUG')
     {
-        $this->console($msg,self::LOG_LEVEL_WARNING,$category);
+        $this->console($msg,string $filename,self::LOG_LEVEL_WARNING,$category);
     }
 
-    public function error(?string $msg,string $category = 'DEBUG')
+    public function error(?string $msg,string $filename = 'log',string $category = 'DEBUG')
     {
-        $this->console($msg,self::LOG_LEVEL_ERROR,$category);
+        $this->console($msg,$filename,self::LOG_LEVEL_ERROR,$category);
     }
 
     public function onLog():Event
