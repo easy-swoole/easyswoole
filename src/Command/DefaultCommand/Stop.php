@@ -57,7 +57,7 @@ class Stop implements CommandInterface
                     break;
                 } else {
                     if (time() - $time > 15) {
-                        return "stop server fail.try -f again ";
+                        return "stop server fail , try : php easyswoole stop force";
                         break;
                     }
                 }
