@@ -28,12 +28,13 @@ class PhpUnit implements CommandInterface
             * 清除输入变量
         */
         global $argv;
-        array_shift($argv);
-        $key = array_search('produce',$argv);
+        $temp = $argv;
+        array_shift($temp);
+        $key = array_search('produce',$temp);
         if($key){
-            unset($argv[$key]);
+            unset($temp[$key]);
         }
-        $_SERVER['argv'] = $argv;
+        $_SERVER['argv'] = $temp;
 
         /*
         * 允许自动的执行一些初始化操作，只初始化一次
