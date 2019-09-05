@@ -113,7 +113,7 @@ php easyswoole start
 ## Unit Test
 after install easyswoole,run:
 ```
-php easyswoole ./vendor/easyswoole/easyswoole/tests
+php easyswoole phpunit ./vendor/easyswoole/easyswoole/tests
 ```
 
 ## Docker
