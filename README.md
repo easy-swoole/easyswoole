@@ -110,6 +110,12 @@ php vendor/bin/easyswoole install
 php easyswoole start
 ```
 
+## Unit Test
+after install easyswoole,run:
+```
+php easyswoole ./vendor/easyswoole/easyswoole/tests
+```
+
 ## Docker
 ### Get Docker Image
 ```
