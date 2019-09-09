@@ -9,6 +9,8 @@
 namespace EasySwoole\EasySwoole\Command;
 
 
+use EasySwoole\Utility\File;
+
 class Utility
 {
     public static function easySwooleLog()
@@ -44,7 +46,7 @@ LOGO;
             }
         }
         if ($replace) {
-            copy($source, $destination);
+            File::copyFile($source, $destination);
         }
     }
 

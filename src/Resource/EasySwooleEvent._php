@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yf
- * Date: 2018/5/28
- * Time: 下午6:33
- */
-
 namespace EasySwoole\EasySwoole;
 
 

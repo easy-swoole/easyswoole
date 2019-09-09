@@ -29,9 +29,10 @@ class Install implements CommandInterface
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
         }
         file_put_contents(EASYSWOOLE_ROOT . '/easyswoole',file_get_contents(__DIR__.'/../../../bin/easyswoole'));
-        Utility::releaseResource(__DIR__ . '/../../Resource/EasySwooleEvent.tpl', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
-        Utility::releaseResource(__DIR__ . '/../../Resource/Config.tpl', EASYSWOOLE_ROOT . '/dev.php');
-        Utility::releaseResource(__DIR__ . '/../../Resource/Config.tpl', EASYSWOOLE_ROOT . '/produce.php');
+        Utility::releaseResource(__DIR__ . '/../../Resource/EasySwooleEvent._php', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
+        Utility::releaseResource(__DIR__ . '/../../Resource/Http/Index._php', EASYSWOOLE_ROOT . '/App/HttpController/Index.php');
+        Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/dev.php');
+        Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/produce.php');
         echo "install success,enjoy! \n";
         return null;
     }
