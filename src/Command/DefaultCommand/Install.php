@@ -33,7 +33,8 @@ class Install implements CommandInterface
         Utility::releaseResource(__DIR__ . '/../../Resource/Http/Index._php', EASYSWOOLE_ROOT . '/App/HttpController/Index.php');
         Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/dev.php');
         Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/produce.php');
-        echo "install success,enjoy! \n";
+        echo chr(27)."[42minstall success,enjoy! ".chr(27)."[0m \n";
+        echo chr(27)."[42mdont forget to add the psr-4 namespace map \"App\\\\\":\"App/\" into composer.json and run composer dump-autoload ".chr(27)."[0m \n";
         return null;
     }
 
