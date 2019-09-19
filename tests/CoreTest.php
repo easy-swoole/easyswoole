@@ -1,8 +1,6 @@
 <?php
 
-
 namespace EasySwoole\EasySwoole\Test;
-
 
 use EasySwoole\EasySwoole\Core;
 use PHPUnit\Framework\TestCase;
@@ -29,4 +27,15 @@ class CoreTest extends TestCase
     {
         $this->assertEquals(EASYSWOOLE_ROOT.'/Temp',EASYSWOOLE_TEMP_DIR);
     }
+
+    public function testSetIsDev() {
+        Core::getInstance()->setIsDev(true);
+        $this->assertTrue(Core::getInstance()->isDev());
+    }
+
+    public function testCreateServer() {
+        $server = Core::getInstance()->createServer();
+        $this->assertEquals('EasySwoole\EasySwoole\Core', get_class($server));
+    }
+
 }
