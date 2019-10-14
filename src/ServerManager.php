@@ -68,7 +68,7 @@ class ServerManager
                 break;
             }
             default:{
-                Trigger::getInstance()->error('"unknown server type :{$type}"');
+                Trigger::getInstance()->error("unknown server type :{$type}");
                 return false;
             }
         }
