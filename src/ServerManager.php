@@ -97,19 +97,23 @@ class ServerManager
         return $eventRegister;
     }
 
-    public function addProcess(AbstractProcess $process) :string
+    public function addProcess(AbstractProcess $process)
     {
         if (empty($process->getProcessName())) {
             $key = md5(microtime());
         } else {
-            $key = (string)$process->getProcessName();
+            $key = (int)$process->getProcessName();
+        }
+        if (isset($this->customProcess[$key])) {
+            Trigger::getInstance()->error("Custom process names must be unique :{$key}");
+            return false;
         }
         $this->customProcess[$key] = $process->getProcess();
         $this->getSwooleServer()->addProcess($process->getProcess());
         return $key;
     }
 
-    public function getProcess(string $processName) :Process
+    public function getProcess(string $processName) : ?process
     {
         return $this->customProcess[$processName];
     }
