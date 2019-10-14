@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
+use Swoole\Process;
 use Swoole\Redis\Server as RedisServer;
 
 class ServerManager
@@ -25,6 +26,7 @@ class ServerManager
     private $subServer = [];
     private $subServerRegister = [];
     private $isStart = false;
+    private $customProcess = [];
 
     function __construct()
     {
@@ -95,9 +97,21 @@ class ServerManager
         return $eventRegister;
     }
 
-    public function addProcess(AbstractProcess $process)
+    public function addProcess(AbstractProcess $process) :string
     {
+        if (empty($process->getProcessName())) {
+            $key = md5(microtime());
+        } else {
+            $key = (string)$process->getProcessName();
+        }
+        $this->customProcess[$key] = $process->getProcess();
         $this->getSwooleServer()->addProcess($process->getProcess());
+        return $key;
+    }
+
+    public function getProcess(string $processName) :Process
+    {
+        return $this->customProcess[$processName];
     }
 
     function getMainEventRegister():EventRegister
