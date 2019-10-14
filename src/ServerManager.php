@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
+use Swoole\Process;
 use Swoole\Redis\Server as RedisServer;
 
 class ServerManager
@@ -25,6 +26,7 @@ class ServerManager
     private $subServer = [];
     private $subServerRegister = [];
     private $isStart = false;
+    private $customProcess = [];
 
     function __construct()
     {
@@ -66,7 +68,7 @@ class ServerManager
                 break;
             }
             default:{
-                Trigger::getInstance()->error('"unknown server type :{$type}"');
+                Trigger::getInstance()->error("unknown server type :{$type}");
                 return false;
             }
         }
@@ -95,9 +97,27 @@ class ServerManager
         return $eventRegister;
     }
 
-    public function addProcess(AbstractProcess $process)
+    public function addProcess(AbstractProcess $process, string $processName=null)
     {
+        if ($processName === null) {
+            $processName = $process->getProcessName();
+            if ($processName === null) {
+                $processClass = get_class($process);
+                $processName = basename(str_replace('\\','/',$processClass));
+            }
+        }
+
+        if (isset($this->customProcess[$processName])) {
+            throw new \Exception("Custom process names must be unique :{$processName}");
+        }
+
+        $this->customProcess[$processName] = $process->getProcess();
         $this->getSwooleServer()->addProcess($process->getProcess());
+    }
+
+    public function getProcess(string $processName) : ?process
+    {
+        return $this->customProcess[$processName];
     }
 
     function getMainEventRegister():EventRegister
