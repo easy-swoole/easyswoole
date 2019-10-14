@@ -12,7 +12,6 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
-use mysql_xdevapi\Exception;
 use Swoole\Process;
 use Swoole\Redis\Server as RedisServer;
 
@@ -109,7 +108,7 @@ class ServerManager
         }
 
         if (isset($this->customProcess[$processName])) {
-            throw new Exception("Custom process names must be unique :{$processName}");
+            throw new \Exception("Custom process names must be unique :{$processName}");
         }
 
         $this->customProcess[$processName] = $process->getProcess();
