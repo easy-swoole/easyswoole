@@ -94,6 +94,8 @@ class Restart implements CommandInterface
 \e[31m  php easyswoole restart [arg1] \e[0m
 \e[33mIntro:\e[0m
 \e[36m  to restart current easyswoole server \e[0m
+\e[33mArg:\e[0m
+\e[32m  produce \e[0m                     load produce.php
 HELP_START;
     }
 }
