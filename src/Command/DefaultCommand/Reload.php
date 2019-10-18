@@ -65,11 +65,12 @@ class Reload implements CommandInterface
         $logo = Utility::easySwooleLog();
         return  $logo.<<<HELP_RELOAD
 \e[33mOperation:\e[0m
-\e[31m  php easyswoole reload [arg1]\e[0m
+\e[31m  php easyswoole reload [arg1] [arg2]\e[0m
 \e[33mIntro:\e[0m
 \e[36m  you can reload current easyswoole server\e[0m
 \e[33mAgs:\e[0m
-\e[32m  all \e[0m           reload all worker and task_worker process
+\e[32m  all(default)|task \e[0m           reload all worker and task_worker process
+\e[32m  produce \e[0m                     load produce.php
 HELP_RELOAD;
     }
 }
