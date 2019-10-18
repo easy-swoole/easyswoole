@@ -26,9 +26,12 @@ class Reload implements CommandInterface
     public function exec(array $args): ?string
     {
         // TODO: Implement exec() method.
-        $all = false;
+        $all = true;
         if(in_array('all',$args)){
             $all = true;
+        }
+        if(in_array('task',$args)){
+            $all = false;
         }
         if(in_array('produce',$args)){
             Core::getInstance()->setIsDev(false);
