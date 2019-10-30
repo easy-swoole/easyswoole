@@ -36,7 +36,8 @@ class Install implements CommandInterface
         Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/produce.php');
         echo chr(27)."[42minstall success,enjoy! ".chr(27)."[0m \n";
         $this->updateComposerJson();
-//        echo chr(27)."[42mdont forget to add the psr-4 namespace map \"App\\\\\":\"App/\" into composer.json and run composer dump-autoload ".chr(27)."[0m \n";
+        $this->execComposerDumpAutoload();
+        echo chr(27)."[42mdont forget run composer dump-autoload ".chr(27)."[0m \n";
         return null;
     }
 
@@ -44,7 +45,10 @@ class Install implements CommandInterface
         $arr = json_decode(file_get_contents(EASYSWOOLE_ROOT.'/composer.json'),true);
         $arr['autoload']['psr-4']['App\\'] = "App/";
         File::createFile(EASYSWOOLE_ROOT.'/composer.json',json_encode($arr,JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-        exec('composer dump-autoload');
+    }
+
+    protected function execComposerDumpAutoload(){
+        @exec('composer dump-autoload');
     }
 
     public function help(array $args): ?string
