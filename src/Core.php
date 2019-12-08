@@ -124,7 +124,7 @@ class Core
     {
         //给主进程也命名
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
-        if(PHP_OS != 'Darwin'){
+        if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
             cli_set_process_title($serverName);
         }
         //启动
@@ -269,7 +269,7 @@ class Core
         $register = ServerManager::getInstance()->getMainEventRegister();
         //注册默认的worker start
         EventHelper::registerWithAdd($register,EventRegister::onWorkerStart,function (\swoole_server $server,$workerId){
-            if(PHP_OS != 'Darwin'){
+            if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
                 $name = Config::getInstance()->getConf('SERVER_NAME');
                 if( ($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
                     $type = 'Worker';
