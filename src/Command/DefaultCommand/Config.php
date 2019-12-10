@@ -1,40 +1,32 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yf
- * Date: 2019-01-24
- * Time: 23:44
- */
+
 
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
-use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\Config as GlobalConfig;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\SysConst;
 
-class Start implements CommandInterface
+class Config implements CommandInterface
 {
 
     public function commandName(): string
     {
-        // TODO: Implement commandName() method.
-        return 'start';
+        return 'config';
     }
 
     public function exec(array $args): ?string
     {
-        // TODO: Implement exec() method.
-        Utility::opCacheClear();
         $response = Utility::easySwooleLog();
         $mode = 'develop';
         if (!Core::getInstance()->isDev()) {
             $mode = 'produce';
         }
-        $conf = Config::getInstance();
+        $conf = GlobalConfig::getInstance();
         if (in_array("d", $args) || in_array("daemonize", $args)) {
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
@@ -43,29 +35,29 @@ class Start implements CommandInterface
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         switch ($serverType) {
             case EASYSWOOLE_SERVER:
-                {
-                    $serverType = 'SWOOLE_SERVER';
-                    break;
-                }
+            {
+                $serverType = 'SWOOLE_SERVER';
+                break;
+            }
             case EASYSWOOLE_WEB_SERVER:
-                {
-                    $serverType = 'SWOOLE_WEB';
-                    break;
-                }
+            {
+                $serverType = 'SWOOLE_WEB';
+                break;
+            }
             case EASYSWOOLE_WEB_SOCKET_SERVER:
-                {
-                    $serverType = 'SWOOLE_WEB_SOCKET';
-                    break;
-                }
+            {
+                $serverType = 'SWOOLE_WEB_SOCKET';
+                break;
+            }
             case EASYSWOOLE_REDIS_SERVER:
-                {
-                    $serverType = 'SWOOLE_REDIS';
-                    break;
-                }
+            {
+                $serverType = 'SWOOLE_REDIS';
+                break;
+            }
             default:
-                {
-                    $serverType = 'UNKNOWN';
-                }
+            {
+                $serverType = 'UNKNOWN';
+            }
         }
         $response = $response . Utility::displayItem('main server', $serverType) . "\n";
         $response = $response . Utility::displayItem('listen address', $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS')) . "\n";
@@ -105,23 +97,11 @@ class Start implements CommandInterface
         $response = $response . Utility::displayItem('develop/produce', $mode) . "\n";
         $response = $response . Utility::displayItem('temp dir', EASYSWOOLE_TEMP_DIR) . "\n";
         $response = $response . Utility::displayItem('log dir', EASYSWOOLE_LOG_DIR) . "\n";
-        echo $response;
-        Core::getInstance()->start();
-        return null;
+        return $response;
     }
 
     public function help(array $args): ?string
     {
-        // TODO: Implement help() method.
-        $logo = Utility::easySwooleLog();
-        return $logo . <<<HELP_START
-\e[33mOperation:\e[0m
-\e[31m  php easyswoole start [arg1] [arg2]\e[0m
-\e[33mIntro:\e[0m
-\e[36m  to start current easyswoole server \e[0m
-\e[33mArg:\e[0m
-\e[32m  daemonize \e[0m                   run in daemonize
-\e[32m  produce \e[0m                     load produce.php
-HELP_START;
+        return  'run php easyswoole version';
     }
 }

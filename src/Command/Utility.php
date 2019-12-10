@@ -30,6 +30,13 @@ LOGO;
 
     static function displayItem($name, $value)
     {
+        if($value === true){
+            $value = 'true';
+        }else if($value === false){
+            $value = 'false';
+        }else if($value === null){
+            $value = 'null';
+        }
         return "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m";
     }
 
