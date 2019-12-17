@@ -51,7 +51,7 @@ use EasySwoole\Http\AbstractInterface\Controller;
  */
 class Index extends Controller
 {
-    function index()
+    public function index()
     {
         $this->response()->write('Hello World');
     }
