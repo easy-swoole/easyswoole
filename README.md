@@ -1,4 +1,3 @@
-English  |  [中文](./README.zh-CN.md)  
 ![](easyswoole.png)
 
 [![Latest Stable Version](https://poser.pugx.org/easyswoole/easyswoole/v/stable)](https://packagist.org/packages/easyswoole/easyswoole)
@@ -8,7 +7,7 @@ English  |  [中文](./README.zh-CN.md)
 [![Monthly Downloads](https://poser.pugx.org/easyswoole/easyswoole/d/monthly)](https://packagist.org/packages/easyswoole/easyswoole)
 
 
-## EasySwoole
+# EasySwoole,an high performance swoole framework
 
 [EasySwoole](https://www.easyswoole.com/En/) is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
           
