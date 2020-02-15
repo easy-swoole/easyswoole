@@ -9,7 +9,7 @@
 
 # EasySwoole - A High Performance Swoole Framework
 
-[EasySwoole](https://www.easyswoole.com/En/) is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
+[EasySwoole](https://www.easyswoole.com/) is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
           
 - Base on Swoole extension
 - Built-in HTTP, TCP, WebSocket,Udp Coroutine Server
@@ -31,8 +31,8 @@
 
 ## Doc 
 
-- [Doc](https://www.easyswoole.com/En/)
-- [Git For Doc](https://github.com/easy-swoole/doc)
+- [Doc](https://www.easyswoole.com/)
+- [Git For Doc](https://github.com/easy-swoole/doc-3.3.x)
 
 ## ab Test
 
