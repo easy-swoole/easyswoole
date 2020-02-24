@@ -9,24 +9,24 @@
 namespace EasySwoole\EasySwoole;
 
 
-use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
-use Swoole\Process;
 use Swoole\Redis\Server as RedisServer;
+use Swoole\Server;
+use Swoole\WebSocket\Server as WebSocketServer;
+use Swoole\Http\Server as HttpServer;
 
 class ServerManager
 {
     use Singleton;
     /**
-     * @var \swoole_server $swooleServer
+     * @var Server $swooleServer
      */
     private $swooleServer;
     private $mainServerEventRegister;
     private $subServer = [];
     private $subServerRegister = [];
     private $isStart = false;
-    private $customProcess = [];
 
     function __construct()
     {
@@ -34,7 +34,7 @@ class ServerManager
     }
     /**
      * @param string $serverName
-     * @return null|\swoole_server|\swoole_server_port|\swoole_websocket_server|\swoole_http_server
+     * @return null|Server|Server\Port|WebSocketServer|HttpServer
      */
     function getSwooleServer(string $serverName = null)
     {
@@ -52,15 +52,15 @@ class ServerManager
     {
         switch ($type){
             case EASYSWOOLE_SERVER:{
-                $this->swooleServer = new \swoole_server($address,$port,...$args);
+                $this->swooleServer = new Server($address,$port,...$args);
                 break;
             }
             case EASYSWOOLE_WEB_SERVER:{
-                $this->swooleServer = new \swoole_http_server($address,$port,...$args);
+                $this->swooleServer = new HttpServer($address,$port,...$args);
                 break;
             }
             case EASYSWOOLE_WEB_SOCKET_SERVER:{
-                $this->swooleServer = new \swoole_websocket_server($address,$port,...$args);
+                $this->swooleServer = new WebSocketServer($address,$port,...$args);
                 break;
             }
             case EASYSWOOLE_REDIS_SERVER:{
@@ -95,29 +95,6 @@ class ServerManager
             'eventRegister'=>$eventRegister
         ];
         return $eventRegister;
-    }
-
-    public function addProcess(AbstractProcess $process, string $processName=null)
-    {
-        if ($processName === null) {
-            $processName = $process->getProcessName();
-            if ($processName === null) {
-                $processClass = get_class($process);
-                $processName = basename(str_replace('\\','/',$processClass));
-            }
-        }
-
-        if (isset($this->customProcess[$processName])) {
-            throw new \Exception("Custom process names must be unique :{$processName}");
-        }
-
-        $this->customProcess[$processName] = $process->getProcess();
-        $this->getSwooleServer()->addProcess($process->getProcess());
-    }
-
-    public function getProcess(string $processName) : ?process
-    {
-        return $this->customProcess[$processName];
     }
 
     function getMainEventRegister():EventRegister

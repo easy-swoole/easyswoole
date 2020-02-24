@@ -11,6 +11,7 @@ use EasySwoole\EasySwoole\Crontab\Exception\CronTaskNotExist;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
 use EasySwoole\EasySwoole\ServerManager;
 use Swoole\Table;
+use EasySwoole\Component\Process\Config as ProcessConfig;
 
 class Crontab
 {
@@ -134,7 +135,11 @@ class Crontab
         if (!empty($this->tasks)) {
             $server = ServerManager::getInstance()->getSwooleServer();
             $name = Config::getInstance()->getConf('SERVER_NAME');
-            $runner = new CronRunner("{$name}.Crontab", $this->tasks);
+            $config = new ProcessConfig();
+            $config->setArg($this->tasks);
+            $config->setProcessName("{$name}.Crontab");
+            $config->setProcessGroup("EasySwoole.Crontab");
+            $runner = new CronRunner($config);
 
             // 将当前任务的初始规则全部添加到swTable管理
             TableManager::getInstance()->add(self::$__swooleTableName, [

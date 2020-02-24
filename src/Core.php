@@ -13,6 +13,8 @@ use EasySwoole\Component\Di;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Crontab\Crontab;
+use EasySwoole\EasySwoole\Process\BaseService;
+use EasySwoole\EasySwoole\Process\Manager;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Task\TaskManager;
@@ -28,6 +30,7 @@ use EasySwoole\Log\Logger as DefaultLogger;
 use EasySwoole\Trigger\Trigger as DefaultTrigger;
 use EasySwoole\Task\Config as TaskConfig;
 use Swoole\Timer;
+use EasySwoole\Component\Process\Config as ProcessConfig;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -296,16 +299,26 @@ class Core
 
     private function extraHandler()
     {
+        $serverName = Config::getInstance()->getConf('SERVER_NAME');
         //注册crontab进程
         Crontab::getInstance()->__run();
         //注册Task进程
         $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
         $config = new TaskConfig($config);
         $config->setTempDir(EASYSWOOLE_TEMP_DIR);
-        $config->setServerName(Config::getInstance()->getConf('SERVER_NAME'));
+        $config->setServerName($serverName);
         $config->setOnException(function (\Throwable $throwable){
             Trigger::getInstance()->throwable($throwable);
         });
         TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        /*
+         * 注册基础服务进程
+         */
+        $config = new ProcessConfig();
+        $config->setProcessName($serverName.'.BaseService');
+        $config->setProcessGroup('EasySwoole.BaseService');
+        $process = new BaseService($config);
+        Manager::getInstance()->addProcess($process);
+        Manager::getInstance()->attachToServer(ServerManager::getInstance()->getSwooleServer());
     }
 }
