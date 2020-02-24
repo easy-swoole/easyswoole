@@ -27,9 +27,6 @@ class Restart implements CommandInterface
     public function exec(array $args): ?string
     {
         // TODO: Implement exec() method.
-        if (in_array('produce', $args)) {
-            Core::getInstance()->setIsDev(false);
-        }
         $result = $this->stop();
         if ($result!== true) {
             return $result;

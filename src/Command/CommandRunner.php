@@ -13,6 +13,7 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Help;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\PhpUnit;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Reload;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Restart;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
@@ -34,6 +35,7 @@ class CommandRunner
         CommandContainer::getInstance()->set(new PhpUnit());
         CommandContainer::getInstance()->set(new Restart());
         CommandContainer::getInstance()->set(new Config());
+        CommandContainer::getInstance()->set(new Process());
     }
 
     function run(array $args):?string

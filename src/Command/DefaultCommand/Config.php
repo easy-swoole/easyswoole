@@ -31,7 +31,6 @@ class Config implements CommandInterface
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
         //create main Server
-        Core::getInstance()->createServer();
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         switch ($serverType) {
             case EASYSWOOLE_SERVER:
@@ -62,17 +61,6 @@ class Config implements CommandInterface
         $response = $response . Utility::displayItem('main server', $serverType) . "\n";
         $response = $response . Utility::displayItem('listen address', $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS')) . "\n";
         $response = $response . Utility::displayItem('listen port', $conf->getConf('MAIN_SERVER.PORT')) . "\n";
-        $list = ServerManager::getInstance()->getSubServerRegister();
-        $index = 1;
-        foreach ($list as $serverName => $item) {
-            if (empty($item['setting'])) {
-                $type = $serverType;
-            } else {
-                $type = $item['type'] % 2 > 0 ? 'SWOOLE_TCP' : 'SWOOLE_UDP';
-            }
-            $response = $response . Utility::displayItem("sub server:{$serverName}", "{$type}@{$item['listenAddress']}:{$item['port']}") . "\n";
-            $index++;
-        }
         $ips = swoole_get_local_ip();
         foreach ($ips as $eth => $val) {
             $response = $response . Utility::displayItem('ip@' . $eth, $val) . "\n";
@@ -102,6 +90,7 @@ class Config implements CommandInterface
 
     public function help(array $args): ?string
     {
-        return  'run php easyswoole version';
+        $logo = Utility::easySwooleLog();
+        return  $logo.'php easyswoole config';
     }
 }

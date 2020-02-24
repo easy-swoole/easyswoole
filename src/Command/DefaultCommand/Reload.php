@@ -25,10 +25,6 @@ class Reload implements CommandInterface
 
     public function exec(array $args): ?string
     {
-        // TODO: Implement exec() method.
-        if (in_array('produce', $args)) {
-            Core::getInstance()->setIsDev(false);
-        }
         $conf = Config::getInstance();
         $res = '';
         $pidFile = $conf->getConf("MAIN_SERVER.SETTING.pid_file");
