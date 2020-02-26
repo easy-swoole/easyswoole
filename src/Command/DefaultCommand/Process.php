@@ -67,10 +67,11 @@ class Process implements CommandInterface
             }else{
                 if($option == '-f'){
                     $sig = 9;
-                    $option = 'SIGTERM';
+                    $option = 'SIGKILL';
+
                 }else{
                     $sig = 15;
-                    $option = 'SIGKILL';
+                    $option = 'SIGTERM';
                 }
                 foreach ($list as $pid => $value){
                     \Swoole\Process::kill($pid,$sig);
