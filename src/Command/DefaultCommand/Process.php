@@ -6,6 +6,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\Utility\ArrayToTextTable;
 
 class Process implements CommandInterface
 {
@@ -23,6 +24,7 @@ class Process implements CommandInterface
          * php easyswoole process kill GroupName -f
          * php easyswoole process killAll
          * php easyswoole process killAll -f
+         * php easyswoole process show
          */
         $file = EASYSWOOLE_TEMP_DIR.'/process.json';
         if(file_exists($file)){
@@ -33,24 +35,29 @@ class Process implements CommandInterface
                 case 'kill':{
                     $pidOrGroupName = array_shift($args);
                     $option = array_shift($args);
-                    if(is_numeric($pidOrGroupName)){
-                        $list[] = $pidOrGroupName;
-                    }else{
-                        foreach ($json as $pid => $value){
+                    foreach ($json as $pid => $value){
+                        if(is_numeric($pidOrGroupName)){
+                            if($value['pid'] == $pidOrGroupName){
+                                $list[$pid] = $value;
+                            }
+                        }else{
                             if($value['group'] == $pidOrGroupName){
-                                $list[] = $pid;
+                                $list[$pid] = $value;
                             }
                         }
+
                     }
                     break;
                 }
                 case 'killAll':{
                     $option = array_shift($args);
-                    foreach ($json as $pid => $value){
-                        $list[] = $pid;
-                    }
+                    $list = $json;
                     break;
                 }
+                case 'show':{
+                    return new ArrayToTextTable($json);
+                }
+
                 default:{
                     return  $this->help($args);
                 }
@@ -60,15 +67,16 @@ class Process implements CommandInterface
             }else{
                 if($option == '-f'){
                     $sig = 9;
+                    $option = 'SIGTERM';
                 }else{
                     $sig = 15;
+                    $option = 'SIGKILL';
                 }
-                $ret = '';
-                foreach ($list as $pid){
+                foreach ($list as $pid => $value){
                     \Swoole\Process::kill($pid,$sig);
-                    $ret .= Utility::displayItem('kill pid :',$pid.' '.$option)."\n";
+                    $list[$pid]['option'] = $option;
                 }
-                return $ret;
+                return new ArrayToTextTable($list);
             }
         }else{
             return "there is not process info";
@@ -84,6 +92,7 @@ php easyswoole process kill PID -f
 php easyswoole process kill GroupName -f
 php easyswoole process killAll
 php easyswoole process killAll -f
+php easyswoole process show
 ";
     }
 }
