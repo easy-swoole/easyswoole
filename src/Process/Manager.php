@@ -38,22 +38,26 @@ class Manager
     }
 
 
-    function kill($pidOrGroupName,$sig = SIGTERM)
+    function kill($pidOrGroupName,$sig = SIGTERM):array
     {
         $list = [];
         if(is_numeric($pidOrGroupName)){
-            $list[] = $pidOrGroupName;
+            $info = $this->table->get($pidOrGroupName);
+            if($info){
+                $list[$pidOrGroupName] = $pidOrGroupName;
+            }
         }else{
             foreach ($this->table as $key => $value){
                 if($value['group'] == $pidOrGroupName){
-                    $list[] = $value['pid'];
+                    $list[$key] = $value;
                 }
             }
         }
-
+        $this->clearPid($list);
         foreach ($list as $pid){
             Process::kill($pid,$sig);
         }
+        return $list;
     }
 
     function info($pidOrGroupName = null)
@@ -76,7 +80,13 @@ class Manager
             }
         }
 
-        return $list;
+        $sort = array_column($list,'group');
+        array_multisort($sort,SORT_DESC,$list);
+        foreach ($list as $key => $value){
+            unset($list[$key]);
+            $list[$value['pid']] = $value;
+        }
+        return $this->clearPid($list);
     }
 
     function addProcess(AbstractProcess $process)
@@ -92,5 +102,21 @@ class Manager
         {
             $server->addProcess($process->getProcess());
         }
+    }
+
+    public function pidExist(int $pid)
+    {
+        return Process::kill($pid,0);
+    }
+
+    protected function clearPid(array $list)
+    {
+        foreach ($list as $pid => $value){
+            if(!$this->pidExist($pid)){
+                $this->table->del($pid);
+                unset($list[$pid]);
+            }
+        }
+        return $list;
     }
 }

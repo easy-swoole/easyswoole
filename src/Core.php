@@ -10,7 +10,9 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Di;
+use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Singleton;
+use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Process\BaseService;
@@ -116,9 +118,12 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
-        $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
         //hook 全局的mainServerCreate事件
-        EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        //如果返回false,说明用户希望接管全部事件
+        if($ret !== false){
+            $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
+        }
         $this->extraHandler();
         return $this;
     }
@@ -272,17 +277,42 @@ class Core
         $register = ServerManager::getInstance()->getMainEventRegister();
         //注册默认的worker start
         EventHelper::registerWithAdd($register,EventRegister::onWorkerStart,function (\swoole_server $server,$workerId){
+            $serverName = Config::getInstance()->getConf('SERVER_NAME');
+            $type = 'Unknown';
+            if(($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
+                $type = 'Worker';
+            }
+            $processName = "{$serverName}.{$type}.{$workerId}";
             if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
-                $name = Config::getInstance()->getConf('SERVER_NAME');
-                if( ($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
-                    $type = 'Worker';
-                    cli_set_process_title("{$name}.{$type}.{$workerId}");
-                }
+                cli_set_process_title($processName);
+            }
+            $table = TableManager::getInstance()->get(AbstractProcess::PROCESS_TABLE_NAME);
+            if($table){
+                $pid = getmypid();
+                $table->set($pid,[
+                    'pid'=>$pid,
+                    'name'=>$processName,
+                    'group'=>"EasySwoole.Worker"
+                ]);
             }
         });
 
+        EventHelper::registerWithAdd($register,$register::onWorkerStop,function (){
+            $table = TableManager::getInstance()->get(AbstractProcess::PROCESS_TABLE_NAME);
+            if($table){
+                $pid = getmypid();
+                $table->del($pid);
+            }
+            Timer::clearAll();
+            \Swoole\Event::exit();
+        });
+
+        /*
+         * 开启reload async的时候，清理事件
+         */
         EventHelper::registerWithAdd($register,$register::onWorkerExit,function (){
             Timer::clearAll();
+            \Swoole\Event::exit();
         });
     }
 
