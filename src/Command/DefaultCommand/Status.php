@@ -6,7 +6,6 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
-use EasySwoole\Utility\ArrayToTextTable;
 
 class Status implements CommandInterface
 {
