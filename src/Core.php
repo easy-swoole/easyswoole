@@ -11,12 +11,11 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\AbstractProcess;
+use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Crontab\Crontab;
-use EasySwoole\EasySwoole\Process\BaseService;
-use EasySwoole\EasySwoole\Process\Manager;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Task\TaskManager;
@@ -31,8 +30,11 @@ use EasySwoole\Utility\File;
 use EasySwoole\Log\Logger as DefaultLogger;
 use EasySwoole\Trigger\Trigger as DefaultTrigger;
 use EasySwoole\Task\Config as TaskConfig;
+use Swoole\Server;
 use Swoole\Timer;
 use EasySwoole\Component\Process\Config as ProcessConfig;
+use Swoole\Http\Request as SwooleRequest;
+use Swoole\Http\Response  as SwooleResponse;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -254,7 +256,7 @@ class Core
             }
             $dispatcher->setHttpExceptionHandler($httpExceptionHandler);
 
-            EventHelper::on($server,EventRegister::onRequest,function (\swoole_http_request $request,\swoole_http_response $response)use($dispatcher){
+            EventHelper::on($server,EventRegister::onRequest,function (SwooleRequest $request,SwooleResponse $response)use($dispatcher){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 try{
@@ -276,7 +278,7 @@ class Core
 
         $register = ServerManager::getInstance()->getMainEventRegister();
         //注册默认的worker start
-        EventHelper::registerWithAdd($register,EventRegister::onWorkerStart,function (\swoole_server $server,$workerId){
+        EventHelper::registerWithAdd($register,EventRegister::onWorkerStart,function (Server $server,$workerId){
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
             $type = 'Unknown';
             if(($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
