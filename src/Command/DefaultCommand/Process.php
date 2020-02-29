@@ -28,8 +28,13 @@ class Process implements CommandInterface
          */
         $file = EASYSWOOLE_TEMP_DIR.'/process.json';
         if(file_exists($file)){
+            $unit = ['b','kb','mb','gb','tb','pb'];
             $action = array_shift($args);
             $json = json_decode(file_get_contents($file),true);
+            foreach ($json as $key => $value){
+                $json[$key]['memoryUsage'] = round($value['memoryUsage']/pow(1024,($i = floor (log($value['memoryUsage'],1024)))),2).' '.$unit[$i];
+                $json[$key]['memoryPeakUsage'] = round($value['memoryPeakUsage']/pow(1024,($i = floor (log($value['memoryPeakUsage'],1024)))),2).' '.$unit[$i];
+            }
             $list = [];
             switch ($action){
                 case 'kill':{
