@@ -298,8 +298,8 @@ class Core
                 ]);
                 \Swoole\Timer::tick(1*1000,function ()use($table,$pid){
                     $table->set($pid,[
-                        'memoryUsage'=>memory_get_usage(),
-                        'memoryPeakUsage'=>memory_get_peak_usage()
+                        'memoryUsage'=>memory_get_usage(true),
+                        'memoryPeakUsage'=>memory_get_peak_usage(true)
                     ]);
                 });
             }
