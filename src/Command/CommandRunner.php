@@ -17,6 +17,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Reload;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Restart;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Status;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Stop;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Config;
 use EasySwoole\EasySwoole\Core;
@@ -36,6 +37,7 @@ class CommandRunner
         CommandContainer::getInstance()->set(new Restart());
         CommandContainer::getInstance()->set(new Config());
         CommandContainer::getInstance()->set(new Process());
+        CommandContainer::getInstance()->set(new Status());
     }
 
     function run(array $args):?string
