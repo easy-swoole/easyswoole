@@ -10,7 +10,7 @@ class Crontab implements CommandInterface
 {
     public function commandName(): string
     {
-        // TODO: Implement commandName() method.
+        return 'crontab';
     }
 
     public function exec(array $args): ?string
@@ -20,7 +20,7 @@ class Crontab implements CommandInterface
 
     public function help(array $args): ?string
     {
-        // TODO: Implement help() method.
+        return null;
     }
 
 }
