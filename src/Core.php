@@ -35,6 +35,7 @@ use Swoole\Timer;
 use EasySwoole\Component\Process\Config as ProcessConfig;
 use Swoole\Http\Request as SwooleRequest;
 use Swoole\Http\Response  as SwooleResponse;
+use Swoole\Event as SwooleEvent;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -296,7 +297,7 @@ class Core
                     'name'=>$processName,
                     'group'=>"EasySwoole.Worker"
                 ]);
-                \Swoole\Timer::tick(1*1000,function ()use($table,$pid){
+                Timer::tick(1*1000,function ()use($table,$pid){
                     $table->set($pid,[
                         'memoryUsage'=>memory_get_usage(true),
                         'memoryPeakUsage'=>memory_get_peak_usage(true)
@@ -312,7 +313,7 @@ class Core
                 $table->del($pid);
             }
             Timer::clearAll();
-            \Swoole\Event::exit();
+            SwooleEvent::exit();
         });
 
         /*
@@ -320,7 +321,7 @@ class Core
          */
         EventHelper::registerWithAdd($register,$register::onWorkerExit,function (){
             Timer::clearAll();
-            \Swoole\Event::exit();
+            SwooleEvent::exit();
         });
     }
 
@@ -349,13 +350,14 @@ class Core
             Trigger::getInstance()->throwable($throwable);
         });
         TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
-        /*
-         * 注册基础服务进程
-         */
-        $config = new ProcessConfig();
-        $config->setProcessName($serverName.'.BaseService');
-        $config->setProcessGroup('EasySwoole.BaseService');
-        $process = new BaseService($config);
+        //注册基础服务进程
+        $process = Di::getInstance()->get(SysConst::BASE_SERVICE);
+        if(!$process instanceof AbstractProcess){
+            $config = new ProcessConfig();
+            $config->setProcessName($serverName.'.BaseService');
+            $config->setProcessGroup('EasySwoole.BaseService');
+            $process = new BaseService($config);
+        }
         Manager::getInstance()->addProcess($process);
         Manager::getInstance()->attachToServer(ServerManager::getInstance()->getSwooleServer());
     }

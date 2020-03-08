@@ -6,11 +6,9 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Process\Manager;
-use EasySwoole\Component\TableManager;
-use EasySwoole\Component\Timer;
-use EasySwoole\EasySwoole\Crontab\CronRunner;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Task\TaskManager;
+use Swoole\Timer;
 
 class BaseService extends AbstractProcess
 {
@@ -26,19 +24,23 @@ class BaseService extends AbstractProcess
         $this->processJsonFile = EASYSWOOLE_TEMP_DIR.'/process.json';
         $this->serverStatusJsonFile = EASYSWOOLE_TEMP_DIR.'/status.json';
         $this->cronTabJsonFile = EASYSWOOLE_TEMP_DIR.'/crontab.json';
-        Timer::getInstance()->loop(1*1500,function (){
-            //落地进程信息
-            $list = Manager::getInstance()->info();
-            file_put_contents($this->processJsonFile,json_encode($list,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
-            //落地Crontab进程信息
-            //落地Task进程信息
-            TaskManager::getInstance()->status();
-            //落地server status
-            $info = ServerManager::getInstance()->getSwooleServer()->stats();
-            file_put_contents($this->serverStatusJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
-            //落地crontab信息
-            $info = Crontab::getInstance()->info();
-            file_put_contents($this->cronTabJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+        Timer::tick(1*1500,function (){
+           try{
+               //落地进程信息
+               $list = Manager::getInstance()->info();
+               file_put_contents($this->processJsonFile,json_encode($list,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+               //落地Crontab进程信息
+               //落地Task进程信息
+               TaskManager::getInstance()->status();
+               //落地server status
+               $info = ServerManager::getInstance()->getSwooleServer()->stats();
+               file_put_contents($this->serverStatusJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+               //落地crontab信息
+               $info = Crontab::getInstance()->info();
+               file_put_contents($this->cronTabJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+           }catch (\Throwable $throwable){
+               Trigger::getInstance()->throwable($throwable);
+           }
         });
     }
 
@@ -49,6 +51,9 @@ class BaseService extends AbstractProcess
         }
         if(is_file($this->serverStatusJsonFile)){
             unlink($this->serverStatusJsonFile);
+        }
+        if(is_file($this->cronTabJsonFile)){
+            unlink($this->cronTabJsonFile);
         }
     }
 }
