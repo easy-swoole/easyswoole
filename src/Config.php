@@ -27,11 +27,14 @@ class Config
         $this->conf = $config;
     }
 
-    function storageHandler(AbstractConfig $config):Config
+    function storageHandler(AbstractConfig $config = null):AbstractConfig
     {
-        $this->conf = $config;
-        return $this;
+        if($config){
+            $this->conf = $config;
+        }
+        return $this->conf;
     }
+
 
     /**
      * 获取配置项
