@@ -19,6 +19,8 @@ class Logger implements LoggerInterface
 
     private $callback;
 
+    private $logConsole = true;
+
     use Singleton;
 
     function __construct(LoggerInterface $logger)
@@ -26,8 +28,14 @@ class Logger implements LoggerInterface
         $this->logger = $logger;
         $this->callback = new Event();
     }
-    
-    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG'):string
+
+    public function setLogConsole(bool $is)
+    {
+        $this->logConsole = $is;
+        return $this;
+    }
+
+    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'debug'):string
     {
         $str = $this->logger->log($msg,$logLevel,$category);
         $calls = $this->callback->all();
@@ -37,29 +45,31 @@ class Logger implements LoggerInterface
         return $str;
     }
 
-    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'DEBUG')
+    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'console')
     {
         $this->logger->console($msg,$logLevel,$category);
-        $this->log($msg,$logLevel,$category);
+        if($this->logConsole){
+            $this->log($msg,$logLevel,$category);
+        }
     }
 
 
-    public function info(?string $msg,string $category = 'DEBUG')
+    public function info(?string $msg,string $category = 'info')
     {
         $this->console($msg,self::LOG_LEVEL_INFO,$category);
     }
 
-    public function notice(?string $msg,string $category = 'DEBUG')
+    public function notice(?string $msg,string $category = 'notice')
     {
         $this->console($msg,self::LOG_LEVEL_NOTICE,$category);
     }
 
-    public function waring(?string $msg,string $category = 'DEBUG')
+    public function waring(?string $msg,string $category = 'waring')
     {
         $this->console($msg,self::LOG_LEVEL_WARNING,$category);
     }
 
-    public function error(?string $msg,string $category = 'DEBUG')
+    public function error(?string $msg,string $category = 'error')
     {
         $this->console($msg,self::LOG_LEVEL_ERROR,$category);
     }
