@@ -34,6 +34,7 @@ class Crontab
      */
     function addTask(string $cronTaskClass): Crontab
     {
+        $ref = new \ReflectionClass($cronTaskClass);
         $this->tasks[$cronTaskClass] = $cronTaskClass;
         return $this;
 
@@ -77,6 +78,11 @@ class Crontab
     function infoTable():Table
     {
         return $this->table;
+    }
+
+    function rightNow(string $taskName)
+    {
+
     }
 
     /*
