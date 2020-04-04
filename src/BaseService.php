@@ -39,8 +39,9 @@ class BaseService extends AbstractProcess
                $info = ServerManager::getInstance()->getSwooleServer()->stats();
                file_put_contents($this->serverStatusJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
                //落地crontab信息
-               $info = Crontab::getInstance()->info();
-               file_put_contents($this->cronTabJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+               //这边返回的是table
+               $info = Crontab::getInstance()->infoTable();
+//               file_put_contents($this->cronTabJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
            }catch (\Throwable $throwable){
                Trigger::getInstance()->throwable($throwable);
            }

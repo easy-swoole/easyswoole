@@ -64,11 +64,6 @@ class CronRunner extends AbstractProcess
         // TODO: Implement onShutDown() method.
     }
 
-    public function onReceive(string $str)
-    {
-        // TODO: Implement onReceive() method.
-    }
-
     private function cronProcess()
     {
         $table = Crontab::getInstance()->infoTable();

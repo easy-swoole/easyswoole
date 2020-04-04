@@ -79,15 +79,6 @@ class Crontab
         return $this->table;
     }
 
-    function info()
-    {
-        $list = [];
-        foreach ($this->table as $key =>$value){
-            $list[$key] = $value;
-        }
-        return $list;
-    }
-
     /*
      * 请用户不要私自调用
      */
