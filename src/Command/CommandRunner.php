@@ -20,6 +20,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Status;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Stop;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Config;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Core;
 
 class CommandRunner
@@ -38,6 +39,7 @@ class CommandRunner
         CommandContainer::getInstance()->set(new Config());
         CommandContainer::getInstance()->set(new Process());
         CommandContainer::getInstance()->set(new Status());
+        CommandContainer::getInstance()->set(new Task());
     }
 
     function run(array $args):?string

@@ -16,6 +16,7 @@ class BaseService extends AbstractProcess
     private $processJsonFile;
     private $serverStatusJsonFile;
     private $cronTabJsonFile;
+    private $taskJsonFile;
     protected function run($arg)
     {
         /*
@@ -24,6 +25,7 @@ class BaseService extends AbstractProcess
         $this->processJsonFile = EASYSWOOLE_TEMP_DIR.'/process.json';
         $this->serverStatusJsonFile = EASYSWOOLE_TEMP_DIR.'/status.json';
         $this->cronTabJsonFile = EASYSWOOLE_TEMP_DIR.'/crontab.json';
+        $this->taskJsonFile = EASYSWOOLE_TEMP_DIR.'/task.json';
         Timer::tick(1*1500,function (){
            try{
                //落地进程信息
@@ -31,7 +33,8 @@ class BaseService extends AbstractProcess
                file_put_contents($this->processJsonFile,json_encode($list,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
                //落地Crontab进程信息
                //落地Task进程信息
-               TaskManager::getInstance()->status();
+               $taskInfo = TaskManager::getInstance()->status();
+               file_put_contents($this->taskJsonFile,json_encode($taskInfo,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
                //落地server status
                $info = ServerManager::getInstance()->getSwooleServer()->stats();
                file_put_contents($this->serverStatusJsonFile,json_encode($info,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
