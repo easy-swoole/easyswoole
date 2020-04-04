@@ -34,11 +34,11 @@ class Task implements CommandInterface
     {
         $file = EASYSWOOLE_TEMP_DIR . '/task.json';
         if (!file_exists($file)) {
-            return "there is not task status info";
+            return "there is not task info";
         }
         $json = json_decode(file_get_contents($file, true));
         if (empty($json)) {
-            return "task status info is abnormal";
+            return "task info is abnormal";
         }
         $result = new  ArrayToTextTable($json);
 
