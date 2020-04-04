@@ -9,10 +9,8 @@
 namespace EasySwoole\EasySwoole\Crontab;
 
 use Cron\CronExpression;
-use EasySwoole\Component\TableManager;
 use EasySwoole\Component\Timer;
 use EasySwoole\Component\Process\AbstractProcess;
-use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
 use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\EasySwoole\Trigger;
 use Swoole\Table;
