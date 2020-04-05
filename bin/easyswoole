@@ -21,7 +21,6 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
 $args = $argv;
 //trim first command
 array_shift($args);
-var_dump($args);
 
 if(!in_array($args[0],['crontab','process','status','task'])){
     $ret = CommandRunner::getInstance()->run($args);
