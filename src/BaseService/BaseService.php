@@ -146,8 +146,8 @@ class BaseService extends AbstractProcess
 
     protected function onShutDown()
     {
-        if (is_file($this->baseServiceSockFile)) {
-            unlink($this->baseServiceSockFile);
+        if (is_file(self::$baseServiceSockFile)) {
+            unlink(self::$baseServiceSockFile);
         }
     }
 }
