@@ -34,10 +34,17 @@ class Crontab
      */
     function addTask(string $cronTaskClass): Crontab
     {
+        //任务解析，存成   taskName=> taskInfo格式
         $ref = new \ReflectionClass($cronTaskClass);
         $this->tasks[$cronTaskClass] = $cronTaskClass;
         return $this;
 
+    }
+
+
+    function rightNow(string $taskName)
+    {
+        //立即在同进程执行一次，不再投递到task
     }
 
     /**
@@ -80,10 +87,6 @@ class Crontab
         return $this->table;
     }
 
-    function rightNow(string $taskName)
-    {
-
-    }
 
     /*
      * 请用户不要私自调用

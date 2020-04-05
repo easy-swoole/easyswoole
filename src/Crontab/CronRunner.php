@@ -31,6 +31,7 @@ class CronRunner extends AbstractProcess
             $table->del($key);
         }
 
+        //这部分的解析，迁移到Crontab.php做
         foreach ($tasks as $cronTaskClass) {
             try {
                 $ref = new \ReflectionClass($cronTaskClass);
