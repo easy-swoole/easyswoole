@@ -30,6 +30,9 @@ class Crontab implements CommandInterface
                 case 'stop':
                     $result = $this->stop($args);
                     break;
+                case 'resume':
+                    $result = $this->resume($args);
+                    break;
                 default:
                     $result = $this->help($args);
                     break;
@@ -42,13 +45,21 @@ class Crontab implements CommandInterface
 
     protected function stop($args){
         $taskName = array_shift($args);
-        $crontabTable = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
-        foreach ($crontabTable as $value){
-            var_dump($value);
-        }
-//        var_dump($crontabTable);
-//        $info = $crontabTable->get('test');
-//        var_dump($info);
+        $package = new Package();
+        $package->setOperation($package::OP_CRON_STOP);
+        $package->setData($taskName);
+        $data =  UnixSocket::unixSocketSendAndRecv(BaseService::$baseServiceSockFile,$package);
+        return $data;
+    }
+
+
+    protected function resume($args){
+        $taskName = array_shift($args);
+        $package = new Package();
+        $package->setOperation($package::OP_CRON_RESUME);
+        $package->setData($taskName);
+        $data =  UnixSocket::unixSocketSendAndRecv(BaseService::$baseServiceSockFile,$package);
+        return $data;
     }
 
     protected function show()

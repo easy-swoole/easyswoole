@@ -92,10 +92,10 @@ class BaseService extends AbstractProcess
                     $data = $this->getCrontabInfo();
                     break;
                 case $package::OP_CRON_STOP:
-
+                    $data = $this->crontabStop($package->getData());
                     break;
                 case $package::OP_CRON_RESUME:
-
+                    $data = $this->crontabResume($package->getData());
                     break;
             }
             $socket->sendAll(Protocol::pack(serialize($data)));
@@ -115,6 +115,33 @@ class BaseService extends AbstractProcess
             $data[$k] = $v;
         }
         return $data;
+    }
+
+    protected function crontabStop($contabName){
+        $info = Crontab::getInstance()->infoTable();
+        $crontab = $info->get($contabName);
+        if (empty($crontab)){
+            return "crontab is not found.";
+        }
+        if ($crontab['isStop']==1){
+            return "crontab is already stop.";
+        }
+
+        $info->set($contabName,['isStop'=>1]);
+        return "crontab:test is stop suceess.";
+    }
+
+    protected function crontabResume($contabName){
+        $info = Crontab::getInstance()->infoTable();
+        $crontab = $info->get($contabName);
+        if (empty($crontab)){
+            return "crontab is not found.";
+        }
+        if ($crontab['isStop']==0){
+            return "crontab is running.";
+        }
+        $info->set($contabName,['isStop'=>0]);
+        return "crontab:test resume suceess.";
     }
 
     protected function onShutDown()
