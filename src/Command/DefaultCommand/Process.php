@@ -4,6 +4,10 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\EasySwoole\BaseService\BaseService;
+use EasySwoole\EasySwoole\BaseService\Exception;
+use EasySwoole\EasySwoole\BaseService\Package;
+use EasySwoole\EasySwoole\BaseService\UnixSocket;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -19,25 +23,27 @@ class Process implements CommandInterface
     public function exec(array $args): ?string
     {
         $action = array_shift($args);
-        $file = EASYSWOOLE_TEMP_DIR . '/process.json';
-        if (!file_exists($file)) {
-            return "there is not process info";
+        try {
+            $package = new Package();
+            $package->setOperation($package::OP_PROCESS_INFO);
+            $data =  UnixSocket::unixSocketSendAndRecv(BaseService::$baseServiceSockFile,$package);
+            if (empty($data)) {
+                return "process info is abnormal";
+            }
+        } catch (Exception $exception) {
+            return $exception->getMessage();
         }
-        $json = json_decode(file_get_contents($file), true);
-        if (empty($json)) {
-            return "process info is abnormal";
-        }
-        $json = $this->processInfoHandel($json,$args);
+        $data = $this->processInfoHandel($data, $args);
 
         switch ($action) {
             case 'kill';
-                $result = $this->kill($json, $args);
+                $result = $this->kill($data, $args);
                 break;
             case 'killAll';
-                $result = $this->killAll($json, $args);
+                $result = $this->killAll($data, $args);
                 break;
             case 'show';
-                $result = $this->show($json, $args);
+                $result = $this->show($data, $args);
                 break;
             default:
                 $result = $this->help($args);
@@ -70,11 +76,11 @@ class Process implements CommandInterface
         $pidOrGroupName = array_shift($args);
         $list = [];
         foreach ($json as $pid => $value) {
-            if (in_array('-p', $args)){
+            if (in_array('-p', $args)) {
                 if ($value['pid'] == $pidOrGroupName) {
                     $list[$pid] = $value;
                 }
-            }else{
+            } else {
                 if ($value['group'] == $pidOrGroupName) {
                     $list[$pid] = $value;
                 }

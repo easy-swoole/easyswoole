@@ -4,6 +4,10 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\EasySwoole\BaseService\BaseService;
+use EasySwoole\EasySwoole\BaseService\Exception;
+use EasySwoole\EasySwoole\BaseService\Package;
+use EasySwoole\EasySwoole\BaseService\UnixSocket;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -32,15 +36,17 @@ class Task implements CommandInterface
 
     protected function status()
     {
-        $file = EASYSWOOLE_TEMP_DIR . '/task.json';
-        if (!file_exists($file)) {
-            return "there is not task info";
+        try {
+            $package = new Package();
+            $package->setOperation($package::OP_TASK_INFO);
+            $data =  UnixSocket::unixSocketSendAndRecv(BaseService::$baseServiceSockFile,$package);
+            if (empty($data)) {
+                return "task info is abnormal";
+            }
+        } catch (Exception $exception) {
+            return $exception->getMessage();
         }
-        $json = json_decode(file_get_contents($file, true));
-        if (empty($json)) {
-            return "task info is abnormal";
-        }
-        $result = new  ArrayToTextTable($json);
+        $result = new  ArrayToTextTable($data);
 
         return $result;
     }

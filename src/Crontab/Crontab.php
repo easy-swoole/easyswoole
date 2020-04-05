@@ -9,6 +9,7 @@ use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskNotExist;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Trigger;
 use Swoole\Table;
 use EasySwoole\Component\Process\Config as ProcessConfig;
 
@@ -22,10 +23,10 @@ class Crontab
     function __construct()
     {
         $this->table = new Table(1024);
-        $this->table->column('taskRule',Table::TYPE_STRING,35);
-        $this->table->column('taskRunTimes',Table::TYPE_INT,8);
-        $this->table->column('taskNextRunTime',Table::TYPE_INT,8);
-        $this->table->column('isStop',Table::TYPE_INT,1);
+        $this->table->column('taskRule', Table::TYPE_STRING, 35);
+        $this->table->column('taskRunTimes', Table::TYPE_INT, 8);
+        $this->table->column('taskNextRunTime', Table::TYPE_INT, 8);
+        $this->table->column('isStop', Table::TYPE_INT, 1);
         $this->table->create();
     }
 
@@ -34,11 +35,30 @@ class Crontab
      */
     function addTask(string $cronTaskClass): Crontab
     {
-        //任务解析，存成   taskName=> taskInfo格式
-        $ref = new \ReflectionClass($cronTaskClass);
-        $this->tasks[$cronTaskClass] = $cronTaskClass;
-        return $this;
+        try {
+            $ref = new \ReflectionClass($cronTaskClass);
+            if (!$ref->isSubclassOf(AbstractCronTask::class)) {
+                throw new \InvalidArgumentException("the cron task class {$cronTaskClass} is invalid");
+            }
 
+            /**
+             * @var $cronTaskClass AbstractCronTask
+             */
+            $taskName = $cronTaskClass::getTaskName();
+            $taskRule = $cronTaskClass::getRule();
+            if (!CronExpression::isValidExpression($taskRule)) {
+                Trigger::getInstance()->error("{$cronTaskClass} not a valid cron task");
+                return $this;
+            }
+            if (isset($this->tasks[$taskName])) {
+                Trigger::getInstance()->error("crontab name:{$taskName} is already exist.");
+                return $this;
+            }
+            $this->tasks[$taskName] = $cronTaskClass;
+        } catch (\Throwable $throwable) {
+            Trigger::getInstance()->throwable($throwable);
+        }
+        return $this;
     }
 
 
@@ -82,7 +102,7 @@ class Crontab
         }
     }
 
-    function infoTable():Table
+    function infoTable(): Table
     {
         return $this->table;
     }

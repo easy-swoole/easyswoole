@@ -15,6 +15,7 @@ use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\BaseService\BaseService;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -356,6 +357,7 @@ class Core
             $config = new ProcessConfig();
             $config->setProcessName($serverName.'.BaseService');
             $config->setProcessGroup('EasySwoole.BaseService');
+            $config->setEnableCoroutine(true);
             $process = new BaseService($config);
         }
         Manager::getInstance()->addProcess($process);
