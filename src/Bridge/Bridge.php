@@ -18,6 +18,9 @@ class Bridge
     function __construct()
     {
         $this->onCommand = new BridgeCommand();
+        $this->onCommand->add(BridgeCommand::PROCESS_INFO,function (){
+
+        });
     }
 
     function onCommand():BridgeCommand
