@@ -289,29 +289,25 @@ class Core
             if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
                 cli_set_process_title($processName);
             }
-            $table = TableManager::getInstance()->get(AbstractProcess::PROCESS_TABLE_NAME);
-            if($table){
-                $pid = getmypid();
+            $table = Manager::getInstance()->getProcessTable();
+            $pid = getmypid();
+            $table->set($pid,[
+                'pid'=>$pid,
+                'name'=>$processName,
+                'group'=>"{$serverName}.Worker"
+            ]);
+            Timer::tick(1*1000,function ()use($table,$pid){
                 $table->set($pid,[
-                    'pid'=>$pid,
-                    'name'=>$processName,
-                    'group'=>"{$serverName}.Worker"
+                    'memoryUsage'=>memory_get_usage(),
+                    'memoryPeakUsage'=>memory_get_peak_usage(true)
                 ]);
-                Timer::tick(1*1000,function ()use($table,$pid){
-                    $table->set($pid,[
-                        'memoryUsage'=>memory_get_usage(),
-                        'memoryPeakUsage'=>memory_get_peak_usage(true)
-                    ]);
-                });
-            }
+            });
         });
 
         EventHelper::registerWithAdd($register,$register::onWorkerStop,function (){
-            $table = TableManager::getInstance()->get(AbstractProcess::PROCESS_TABLE_NAME);
-            if($table){
-                $pid = getmypid();
-                $table->del($pid);
-            }
+            $table = Manager::getInstance()->getProcessTable();
+            $pid = getmypid();
+            $table->del($pid);
             Timer::clearAll();
             SwooleEvent::exit();
         });
