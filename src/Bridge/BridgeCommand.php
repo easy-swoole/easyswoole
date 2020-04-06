@@ -8,5 +8,5 @@ use EasySwoole\Component\MultiContainer;
 
 class BridgeCommand extends MultiContainer
 {
-
+//    const
 }

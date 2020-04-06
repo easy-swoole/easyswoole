@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\AbstractProcess;
+use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -348,5 +349,7 @@ class Core
             Trigger::getInstance()->throwable($throwable);
         });
         TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        //初始化进程管理器
+        Manager::getInstance()->attachToServer(ServerManager::getInstance()->getSwooleServer());
     }
 }
