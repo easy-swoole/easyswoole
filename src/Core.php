@@ -15,6 +15,7 @@ use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
+use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -294,11 +295,11 @@ class Core
                 $table->set($pid,[
                     'pid'=>$pid,
                     'name'=>$processName,
-                    'group'=>"EasySwoole.Worker"
+                    'group'=>"{$serverName}.Worker"
                 ]);
                 Timer::tick(1*1000,function ()use($table,$pid){
                     $table->set($pid,[
-                        'memoryUsage'=>memory_get_usage(true),
+                        'memoryUsage'=>memory_get_usage(),
                         'memoryPeakUsage'=>memory_get_peak_usage(true)
                     ]);
                 });
@@ -348,8 +349,11 @@ class Core
         $config->setOnException(function (\Throwable $throwable){
             Trigger::getInstance()->throwable($throwable);
         });
-        TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        $server = ServerManager::getInstance()->getSwooleServer();
+        TaskManager::getInstance($config)->attachToServer($server);
         //初始化进程管理器
-        Manager::getInstance()->attachToServer(ServerManager::getInstance()->getSwooleServer());
+        Manager::getInstance()->attachToServer($server);
+        //初始化Bridge
+        Bridge::getInstance()->attachServer($server);
     }
 }

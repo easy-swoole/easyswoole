@@ -9,7 +9,7 @@ use EasySwoole\EasySwoole\Trigger;
 use EasySwoole\Socket\Tools\Protocol;
 use Swoole\Coroutine\Socket;
 
-class ServiceProcess extends AbstractUnixProcess
+class BridgeProcess extends AbstractUnixProcess
 {
     function onAccept(Socket $socket)
     {
