@@ -11,7 +11,6 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\AbstractProcess;
-use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -32,7 +31,6 @@ use EasySwoole\Trigger\Trigger as DefaultTrigger;
 use EasySwoole\Task\Config as TaskConfig;
 use Swoole\Server;
 use Swoole\Timer;
-use EasySwoole\Component\Process\Config as ProcessConfig;
 use Swoole\Http\Request as SwooleRequest;
 use Swoole\Http\Response  as SwooleResponse;
 use Swoole\Event as SwooleEvent;
@@ -350,15 +348,5 @@ class Core
             Trigger::getInstance()->throwable($throwable);
         });
         TaskManager::getInstance($config)->attachToServer(ServerManager::getInstance()->getSwooleServer());
-        //注册基础服务进程
-        $process = Di::getInstance()->get(SysConst::BASE_SERVICE);
-        if(!$process instanceof AbstractProcess){
-            $config = new ProcessConfig();
-            $config->setProcessName($serverName.'.BaseService');
-            $config->setProcessGroup('EasySwoole.BaseService');
-            $process = new BaseService($config);
-        }
-        Manager::getInstance()->addProcess($process);
-        Manager::getInstance()->attachToServer(ServerManager::getInstance()->getSwooleServer());
     }
 }
