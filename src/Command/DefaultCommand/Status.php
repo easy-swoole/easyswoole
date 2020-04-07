@@ -9,6 +9,7 @@ use EasySwoole\EasySwoole\Bridge\BridgeCommand;
 use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
+use Swoole\Coroutine\Scheduler;
 
 class Status implements CommandInterface
 {
@@ -20,22 +21,28 @@ class Status implements CommandInterface
 
     public function exec(array $args): ?string
     {
-        try {
-            $package = new Package();
-            $package->setCommand(BridgeCommand::SERVER_STATUS_INFO);
-            $package = Bridge::getInstance()->send($package);
-            if (empty($package->getArgs())) {
-                return "server status info is abnormal";
-            }
-        } catch (\Throwable $throwable) {
-            return $throwable->getMessage();
-        }
-        $data = $package->getArgs();
-        $data['start_time'] = date('Y-m-d h:i:s', $data['start_time']);
         $ret = '';
-        foreach ($data as $key => $val) {
-            $ret .= Utility::displayItem($key, $val) . "\n";
-        }
+        $run = new Scheduler();
+        $run->add(function () use (&$ret, $args) {
+            try {
+                $package = new Package();
+                $package->setCommand(BridgeCommand::SERVER_STATUS_INFO);
+                $package = Bridge::getInstance()->send($package);
+                if (empty($package->getArgs())) {
+                    return "server status info is abnormal";
+                }
+            } catch (\Throwable $throwable) {
+                return $throwable->getMessage();
+            }
+            $data = $package->getArgs();
+            $data['start_time'] = date('Y-m-d h:i:s', $data['start_time']);
+            $result = '';
+            foreach ($data as $key => $val) {
+                $result .= Utility::displayItem($key, $val) . "\n";
+            }
+            $ret = $result;
+        });
+        $run->start();
         return $ret;
     }
 

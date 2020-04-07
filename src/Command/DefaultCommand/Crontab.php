@@ -4,6 +4,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use Swoole\Coroutine\Scheduler;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;
 use EasySwoole\EasySwoole\Bridge\Package;
@@ -20,26 +21,32 @@ class Crontab implements CommandInterface
 
     public function exec(array $args): ?string
     {
-        try {
-            $action = array_shift($args);
-            switch ($action) {
-                case 'show':
-                    $result = $this->show();
-                    break;
-                case 'stop':
-                    $result = $this->stop($args);
-                    break;
-                case 'resume':
-                    $result = $this->resume($args);
-                    break;
-                default:
-                    $result = $this->help($args);
-                    break;
+        $ret = '';
+        $run = new Scheduler();
+        $run->add(function () use (&$ret, $args) {
+            try {
+                $action = array_shift($args);
+                switch ($action) {
+                    case 'show':
+                        $result = $this->show();
+                        break;
+                    case 'stop':
+                        $result = $this->stop($args);
+                        break;
+                    case 'resume':
+                        $result = $this->resume($args);
+                        break;
+                    default:
+                        $result = $this->help($args);
+                        break;
+                }
+            } catch (\Throwable $exception) {
+                return $exception->getMessage();
             }
-        } catch (\Throwable $exception) {
-            return $exception->getMessage();
-        }
-        return $result;
+            $ret = $result;
+        });
+        $run->start();
+        return $ret;
     }
 
     protected function stop($args)
@@ -54,7 +61,7 @@ class Crontab implements CommandInterface
             return "stop error.";
         }
         $data = $package->getArgs();
-        $data.="\n".$this->show();
+        $data .= "\n" . $this->show();
         return $data;
     }
 
@@ -70,7 +77,7 @@ class Crontab implements CommandInterface
             return "resume error";
         }
         $data = $package->getArgs();
-        $data.="\n".$this->show();
+        $data .= "\n" . $this->show();
         return $data;
     }
 

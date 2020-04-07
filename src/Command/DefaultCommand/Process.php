@@ -10,6 +10,7 @@ use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Socket\Tools\Protocol;
 use EasySwoole\Utility\ArrayToTextTable;
+use Swoole\Coroutine\Scheduler;
 
 class Process implements CommandInterface
 {
@@ -21,36 +22,41 @@ class Process implements CommandInterface
 
     public function exec(array $args): ?string
     {
-        $action = array_shift($args);
-        $package = new Package();
-        $package->setCommand(BridgeCommand::PROCESS_INFO);
-        try {
-            $package = Bridge::getInstance()->send($package);
-            if (empty($package->getArgs())) {
-                return "process info is abnormal";
+        $ret = '';
+        $run = new Scheduler();
+        $run->add(function () use (&$ret, $args) {
+            $action = array_shift($args);
+            $package = new Package();
+            $package->setCommand(BridgeCommand::PROCESS_INFO);
+            try {
+                $package = Bridge::getInstance()->send($package);
+                if (empty($package->getArgs())) {
+                    return "process info is abnormal";
+                }
+            } catch (\Throwable $throwable) {
+                return $throwable->getMessage();
             }
+            $data = $package->getArgs();
+            $data = $this->processInfoHandel($data, $args);
 
-        } catch (\Throwable $throwable) {
-            return $throwable->getMessage();
-        }
-        $data = $package->getArgs();
-        $data = $this->processInfoHandel($data, $args);
-
-        switch ($action) {
-            case 'kill';
-                $result = $this->kill($data, $args);
-                break;
-            case 'killAll';
-                $result = $this->killAll($data, $args);
-                break;
-            case 'show';
-                $result = $this->show($data, $args);
-                break;
-            default:
-                $result = $this->help($args);
-                break;
-        }
-        return $result;
+            switch ($action) {
+                case 'kill';
+                    $result = $this->kill($data, $args);
+                    break;
+                case 'killAll';
+                    $result = $this->killAll($data, $args);
+                    break;
+                case 'show';
+                    $result = $this->show($data, $args);
+                    break;
+                default:
+                    $result = $this->help($args);
+                    break;
+            }
+            $ret = $result;
+        });
+        $run->start();
+        return $ret;
     }
 
     protected function killProcess(array $list, $args = null)

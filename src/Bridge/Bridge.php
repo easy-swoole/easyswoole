@@ -4,13 +4,12 @@
 namespace EasySwoole\EasySwoole\Bridge;
 
 
-use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Process\Socket\UnixProcessConfig;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Crontab;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Process;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Task;
 use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Crontab\Crontab;
-use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\Socket\Tools\Client;
 use Swoole\Server;
 
@@ -26,30 +25,11 @@ class Bridge
     function __construct()
     {
         $this->onCommand = new BridgeCommand();
-        $this->onCommand->set(BridgeCommand::PROCESS_INFO, function (Package $package) {
-            $data = Manager::getInstance()->info();
-            return $data;
-        });
-        $this->onCommand->set(BridgeCommand::SERVER_STATUS_INFO, function (Package $package) {
-            $data = ServerManager::getInstance()->getSwooleServer()->stats();
-            return $data;
-        });
-        $this->onCommand->set(BridgeCommand::TASK_INFO, function (Package $package) {
-            $data = TaskManager::getInstance()->status();
-            return $data;
-        });
-        $this->onCommand->set(BridgeCommand::CRON_INFO, function (Package $package) {
-            $data = $this->getCrontabInfo();
-            return $data;
-        });
-        $this->onCommand->set(BridgeCommand::CRON_STOP, function (Package $package) {
-            $data = $this->crontabStop($package->getArgs());
-            return $data;
-        });
-        $this->onCommand->set(BridgeCommand::CRON_RESUME, function (Package $package) {
-            $data = $this->crontabResume($package->getArgs());
-            return $data;
-        });
+        \EasySwoole\EasySwoole\Bridge\CommandHandel\Server::initCommand($this->onCommand);
+        Crontab::initCommand($this->onCommand);
+        Process::initCommand($this->onCommand);
+        Task::initCommand($this->onCommand);
+        \EasySwoole\EasySwoole\Bridge\CommandHandel\Config::initCommand($this->onCommand);
     }
 
     function onCommand(): BridgeCommand
@@ -60,15 +40,14 @@ class Bridge
     /**
      * send
      * @param Package $package
-     * @param $timeout
+     * @param         $timeout
      * @return Package
      * @throws Exception
      * @author Tioncico
      * Time: 13:53
      */
-    function send(Package $package,$timeout=3.0): Package
+    function send(Package $package, $timeout = 3.0): Package
     {
-
         $client = new Client(Bridge::getInstance()->getSocketFile());
         $client->send(serialize($package));
         $ret = $client->recv($timeout);
@@ -101,45 +80,7 @@ class Bridge
         $server->addProcess($p->getProcess());
     }
 
-
-    protected function getCrontabInfo()
-    {
-        $info = Crontab::getInstance()->infoTable();
-        $data = [];
-        foreach ($info as $k => $v) {
-            $data[$k] = $v;
-        }
-        return $data;
-    }
-
-    protected function crontabStop($contabName)
-    {
-        $info = Crontab::getInstance()->infoTable();
-        $crontab = $info->get($contabName);
-        if (empty($crontab)) {
-            return "crontab is not found.";
-        }
-        if ($crontab['isStop'] == 1) {
-            return "crontab is already stop.";
-        }
-
-        $info->set($contabName, ['isStop' => 1]);
-        return "crontab:test is stop suceess.";
-    }
-
-    protected function crontabResume($contabName)
-    {
-        $info = Crontab::getInstance()->infoTable();
-        $crontab = $info->get($contabName);
-        if (empty($crontab)) {
-            return "crontab is not found.";
-        }
-        if ($crontab['isStop'] == 0) {
-            return "crontab is running.";
-        }
-        $info->set($contabName, ['isStop' => 0]);
-        return "crontab:test resume suceess.";
-    }
+//    protected
 
     /**
      * @return string
@@ -148,5 +89,6 @@ class Bridge
     {
         return $this->socketFile;
     }
+
 
 }
