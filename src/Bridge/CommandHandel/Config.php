@@ -45,5 +45,4 @@ class Config extends Base
         \EasySwoole\EasySwoole\Config::getInstance()->setConf($key,$value);
         return "set up {$key}={$value} success";
     }
-
 }

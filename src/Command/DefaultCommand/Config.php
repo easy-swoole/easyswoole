@@ -58,7 +58,8 @@ class Config implements CommandInterface
         $package->setCommand(BridgeCommand::CONFIG_INFO);
         $package->setArgs(['key'=>$key]);
         $package = Bridge::getInstance()->send($package);
-        return json_encode($package->getArgs());
+
+        return var_export($package->getArgs(),1);
     }
 
     protected function set($key,$value){
