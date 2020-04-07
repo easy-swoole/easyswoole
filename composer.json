@@ -31,8 +31,7 @@
   },
   "autoload": {
     "psr-4": {
-      "EasySwoole\\EasySwoole\\": "src/",
-      "App\\": "App/"
+      "EasySwoole\\EasySwoole\\": "src/"
     }
   },
   "autoload-dev": {
