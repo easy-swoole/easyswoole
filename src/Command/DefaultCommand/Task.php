@@ -24,21 +24,20 @@ class Task implements CommandInterface
     {
         $ret = '';
         $run = new Scheduler();
-        $run->add(function ()use(&$ret){
-            $ret = 'xxxx';
+        $run->add(function ()use(&$ret,$args){
+            $action = array_shift($args);
+            switch ($action) {
+                case 'status':
+                    $result = $this->status();
+                    break;
+                default:
+                    $result = $this->help($args);
+                    break;
+            }
+            $ret = $result;
         });
         $run->start();
         return $ret;
-//        $action = array_shift($args);
-//        switch ($action) {
-//            case 'status':
-//                $result = $this->status();
-//                break;
-//            default:
-//                $result = $this->help($args);
-//                break;
-//        }
-//        return $result;
     }
 
     protected function status()
