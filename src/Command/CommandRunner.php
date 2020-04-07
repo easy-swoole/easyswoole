@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole\Command;
 
 
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Help;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\PhpUnit;
@@ -40,6 +41,7 @@ class CommandRunner
         CommandContainer::getInstance()->set(new Process());
         CommandContainer::getInstance()->set(new Status());
         CommandContainer::getInstance()->set(new Task());
+        CommandContainer::getInstance()->set(new Crontab());
     }
 
     function run(array $args):?string

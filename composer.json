@@ -1,51 +1,51 @@
 {
-    "name": "easyswoole/easyswoole",
-    "type": "library",
-    "description": "An efficient swoole framework",
-    "keywords": [
-        "swoole",
-        "framework",
-        "async",
-        "easyswoole"
-    ],
-    "homepage": "https://www.easyswoole.com/",
-    "license": "Apache-2.0",
-    "authors": [
-        {
-            "name": "YF",
-            "email": "291323003@qq.com"
-        }
-    ],
-    "require": {
-        "php": ">=7.1.0",
-        "ext-swoole": ">=4.4.4",
-        "easyswoole/component": "^2.0",
-        "easyswoole/spl": "^1.0",
-        "easyswoole/http": "^1.0",
-        "easyswoole/utility": "^1.0",
-        "easyswoole/trigger": "^1.0",
-        "dragonmantank/cron-expression": "^2.2",
-        "easyswoole/config": "^1.0",
-        "easyswoole/socket": "^1.1",
-        "easyswoole/task": "^1.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "EasySwoole\\EasySwoole\\": "src/",
-            "App\\": "App/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "EasySwoole\\EasySwoole\\Test\\": "tests/",
-            "App\\": "App/"
-        }
-    },
-    "require-dev": {
-        "easyswoole/phpunit": "^1.0",
-        "easyswoole/swoole-ide-helper": "^1.2"
-    },
-    "bin": [
-        "bin/easyswoole"
-    ]
+  "name": "easyswoole/easyswoole",
+  "type": "library",
+  "description": "An efficient swoole framework",
+  "keywords": [
+    "swoole",
+    "framework",
+    "async",
+    "easyswoole"
+  ],
+  "homepage": "https://www.easyswoole.com/",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "YF",
+      "email": "291323003@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "ext-swoole": ">=4.4.4",
+    "easyswoole/component": "^2.0",
+    "easyswoole/spl": "^1.0",
+    "easyswoole/http": "^1.0",
+    "easyswoole/utility": "^1.0",
+    "easyswoole/trigger": "^1.0",
+    "dragonmantank/cron-expression": "^2.2",
+    "easyswoole/config": "^1.0",
+    "easyswoole/socket": "^1.1",
+    "easyswoole/task": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "EasySwoole\\EasySwoole\\": "src/",
+      "App\\": "App/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "EasySwoole\\EasySwoole\\Test\\": "tests/",
+      "App\\": "App/"
+    }
+  },
+  "require-dev": {
+    "easyswoole/phpunit": "^1.0",
+    "easyswoole/swoole-ide-helper": "^1.2"
+  },
+  "bin": [
+    "bin/easyswoole"
+  ]
 }

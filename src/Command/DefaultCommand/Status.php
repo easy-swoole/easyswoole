@@ -4,6 +4,9 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Bridge\BridgeCommand;
+use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 
@@ -12,24 +15,28 @@ class Status implements CommandInterface
 
     public function commandName(): string
     {
-        return  "status";
+        return "status";
     }
 
     public function exec(array $args): ?string
     {
-        $file = EASYSWOOLE_TEMP_DIR.'/status.json';
-        if(is_file($file)){
-            $data = file_get_contents($file);
-            $data = json_decode($data,true);
-            $data['start_time'] = date('Y-m-d h:i:s',$data['start_time']);
-            $ret = '';
-            foreach ($data as $key => $val){
-                $ret .= Utility::displayItem($key,$val)."\n";
+        try {
+            $package = new Package();
+            $package->setCommand(BridgeCommand::SERVER_STATUS_INFO);
+            $package = Bridge::getInstance()->send($package);
+            if (empty($package->getArgs())) {
+                return "server status info is abnormal";
             }
-            return $ret;
-        }else{
-            return  'not server status info';
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
         }
+        $data = $package->getArgs();
+        $data['start_time'] = date('Y-m-d h:i:s', $data['start_time']);
+        $ret = '';
+        foreach ($data as $key => $val) {
+            $ret .= Utility::displayItem($key, $val) . "\n";
+        }
+        return $ret;
     }
 
     public function help(array $args): ?string
