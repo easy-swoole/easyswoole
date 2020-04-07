@@ -6,7 +6,7 @@
  * Time: 15:47
  */
 
-namespace EasySwoole\EasySwoole\Bridge\CommandHandel;
+namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
 use EasySwoole\Component\Process\Manager;

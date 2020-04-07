@@ -6,7 +6,7 @@
  * Time: 15:51
  */
 
-namespace EasySwoole\EasySwoole\Bridge\CommandHandel;
+namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;
@@ -28,9 +28,9 @@ class Config extends Base
         if (empty($data['key'])){
             $configArray = GlobalConfig::getInstance()->toArray();
             $configArray['mode'] = Core::getInstance()->isDev() ? 'develop' : 'produce';
-            return $configArray;
+        }else{
+            $configArray = GlobalConfig::getInstance()->getConf($data['key']);
         }
-        $configArray = GlobalConfig::getInstance()->getConf($data['key']);
         $response->setArgs($configArray);
     }
 

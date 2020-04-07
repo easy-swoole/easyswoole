@@ -6,7 +6,7 @@
  * Time: 15:51
  */
 
-namespace EasySwoole\EasySwoole\Bridge\CommandHandel;
+namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;

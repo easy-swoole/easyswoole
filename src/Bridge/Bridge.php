@@ -6,9 +6,9 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 use EasySwoole\Component\Process\Socket\UnixProcessConfig;
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Crontab;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Process;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Task;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Crontab;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Process;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\Socket\Tools\Client;
 use Swoole\Server;

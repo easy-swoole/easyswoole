@@ -5,11 +5,11 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 
 use EasySwoole\Component\Event;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Config;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Crontab;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Server;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Task;
-use EasySwoole\EasySwoole\Bridge\CommandHandel\Process;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Config;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Crontab;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Server;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Task;
+use EasySwoole\EasySwoole\Bridge\DefaultCommand\Process;
 
 class BridgeCommand extends Event
 {
