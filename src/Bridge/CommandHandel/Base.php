@@ -14,6 +14,4 @@ use EasySwoole\EasySwoole\Bridge\BridgeCommand;
 abstract class Base
 {
     abstract static function initCommand(BridgeCommand $command);
-
-
 }

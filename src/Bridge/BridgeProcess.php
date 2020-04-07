@@ -45,9 +45,8 @@ class BridgeProcess extends AbstractUnixProcess
         }
         $recvPackage = new Package();
         try{
-            $data = call_user_func($callback,$package,$socket);
-            $recvPackage->setStatus(Package::STATUS_SUCCESS);
-            $recvPackage->setArgs($data);
+            //结果在闭包中更改
+            call_user_func($callback,$package,$socket);
         }catch (\Throwable $throwable){
             $recvPackage->setStatus(Package::STATUS_COMMAND_ERROR);
             $recvPackage->setArgs($throwable->getMessage());

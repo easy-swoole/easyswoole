@@ -12,8 +12,7 @@ namespace EasySwoole\EasySwoole\Bridge\CommandHandel;
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;
 use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Core;
-use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\Task\TaskManager;
+use EasySwoole\EasySwoole\Config as GlobalConfig;
 
 class Config extends Base
 {
@@ -27,11 +26,11 @@ class Config extends Base
     {
         $data = $package->getArgs();
         if (empty($data['key'])){
-            $configArray = \EasySwoole\EasySwoole\Config::getInstance()->toArray();
+            $configArray = GlobalConfig::getInstance()->toArray();
             $configArray['mode'] = Core::getInstance()->isDev() ? 'develop' : 'produce';
             return $configArray;
         }
-        $configArray = \EasySwoole\EasySwoole\Config::getInstance()->getConf($data['key']);
+        $configArray = GlobalConfig::getInstance()->getConf($data['key']);
         return $configArray;
     }
 
@@ -42,7 +41,7 @@ class Config extends Base
         }
         $key = $data['key'];
         $value = $data['value']??null;
-        \EasySwoole\EasySwoole\Config::getInstance()->setConf($key,$value);
+        GlobalConfig::getInstance()->setConf($key,$value);
         return "set up {$key}={$value} success";
     }
 }
