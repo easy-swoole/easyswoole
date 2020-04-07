@@ -5,7 +5,6 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 
 use EasySwoole\Component\Event;
-use EasySwoole\Component\MultiContainer;
 
 class BridgeCommand extends Event
 {
