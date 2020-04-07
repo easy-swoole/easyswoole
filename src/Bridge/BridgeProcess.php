@@ -11,6 +11,15 @@ use Swoole\Coroutine\Socket;
 
 class BridgeProcess extends AbstractUnixProcess
 {
+    function run($arg)
+    {
+        $onStart = $arg['onStart'];
+        if($onStart){
+            call_user_func($onStart,$this);
+        }
+        parent::run($arg);
+    }
+
     function onAccept(Socket $socket)
     {
         $data = Protocol::socketReader($socket, 3);

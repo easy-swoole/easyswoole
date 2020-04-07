@@ -64,6 +64,9 @@ class Bridge
         $config->setSocketFile($this->socketFile);
         $config->setProcessName("{$serverName}.Bridge");
         $config->setProcessGroup("{$serverName}.Bridge");
+        $config->setArg([
+            'onStart'=>$this->onStart
+        ]);
         $p = new BridgeProcess($config);
         $server->addProcess($p->getProcess());
     }
@@ -76,5 +79,9 @@ class Bridge
         return $this->socketFile;
     }
 
-
+    function setOnStart(callable $call):Bridge
+    {
+        $this->onStart = $call;
+        return $this;
+    }
 }
