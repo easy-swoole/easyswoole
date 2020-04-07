@@ -6,12 +6,15 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 class Package
 {
-    protected $status = 1;
+    protected $status = self::STATUS_SUCCESS;
     protected $command;
     protected $args;
 
-    const STATUS_PACKAGE_ERROR = -1;
-    const STATUS_COMMAND_ERROR = -2;
+    const STATUS_UNIX_CONNECT_ERROR = -1;
+    const STATUS_PACKAGE_ERROR = -2;
+    const STATUS_COMMAND_NOT_EXIST = -3;
+    const STATUS_COMMAND_ERROR = -4;
+
     const STATUS_SUCCESS = 1;
 
     /**

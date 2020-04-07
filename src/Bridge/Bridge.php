@@ -22,14 +22,10 @@ class Bridge
 
     protected $socketFile = EASYSWOOLE_TEMP_DIR . '/bridge.sock';
 
+
     function __construct()
     {
         $this->onCommand = new BridgeCommand();
-        \EasySwoole\EasySwoole\Bridge\CommandHandel\Server::initCommand($this->onCommand);
-        Crontab::initCommand($this->onCommand);
-        Process::initCommand($this->onCommand);
-        Task::initCommand($this->onCommand);
-        \EasySwoole\EasySwoole\Bridge\CommandHandel\Config::initCommand($this->onCommand);
     }
 
     function onCommand(): BridgeCommand
@@ -52,20 +48,12 @@ class Bridge
         $client->send(serialize($package));
         $ret = $client->recv($timeout);
         $client->close();
-        if (empty($ret)) {
-            throw new Exception("connect server error");
-        }
         $package = unserialize($ret);
-        /**
-         * @var  $package Package
-         */
-        if ($package->getStatus() == $package::STATUS_COMMAND_ERROR) {
-            throw new Exception("command package error");
+        if(!$package instanceof Package){
+            $package = new Package();
+            $package->setArgs('connect to server fail');
+            $package->setStatus(Package::STATUS_UNIX_CONNECT_ERROR);
         }
-        if ($package->getStatus() == $package::STATUS_PACKAGE_ERROR) {
-            throw new Exception("command package error");
-        }
-
         return $package;
     }
 
@@ -79,8 +67,6 @@ class Bridge
         $p = new BridgeProcess($config);
         $server->addProcess($p->getProcess());
     }
-
-//    protected
 
     /**
      * @return string

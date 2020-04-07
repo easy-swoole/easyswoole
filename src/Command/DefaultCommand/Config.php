@@ -56,10 +56,13 @@ class Config implements CommandInterface
         $package->setCommand(BridgeCommand::CONFIG_INFO);
         $package->setArgs(['key' => $key]);
         $package = Bridge::getInstance()->send($package);
-
-        $data = $this->arrayConversion('', $package->getArgs());
-        $data = $this->handelArray($data);
-        return new ArrayToTextTable($data);
+        if($package->getStatus() == Package::STATUS_SUCCESS){
+            $data = $this->arrayConversion('', $package->getArgs());
+            $data = $this->handelArray($data);
+            return new ArrayToTextTable($data);
+        }else{
+            return $package->getArgs();
+        }
     }
 
     protected function set($key, $value)
