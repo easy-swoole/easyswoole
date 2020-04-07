@@ -22,7 +22,7 @@ class Config extends Base
         $command->set(BridgeCommand::CONFIG_SET, [Config::class, 'set']);
     }
 
-    static function info(Package $package)
+    static function info(Package $package,Package $response)
     {
         $data = $package->getArgs();
         if (empty($data['key'])){
@@ -31,7 +31,7 @@ class Config extends Base
             return $configArray;
         }
         $configArray = GlobalConfig::getInstance()->getConf($data['key']);
-        return $configArray;
+        $response->setArgs($configArray);
     }
 
     static function set(Package $package){

@@ -46,6 +46,7 @@ class BridgeProcess extends AbstractUnixProcess
         $responsePackage = new Package();
         try{
             //结果在闭包中更改
+            $responsePackage->setStatus(Package::STATUS_SUCCESS);
             call_user_func($callback,$package,$responsePackage,$socket);
         }catch (\Throwable $throwable){
             $responsePackage->setStatus(Package::STATUS_COMMAND_ERROR);
