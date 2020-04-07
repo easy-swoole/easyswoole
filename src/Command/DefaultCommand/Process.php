@@ -3,13 +3,12 @@
 
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
-
-use EasySwoole\EasySwoole\BaseService\BaseService;
-use EasySwoole\EasySwoole\BaseService\Exception;
-use EasySwoole\EasySwoole\BaseService\Package;
-use EasySwoole\EasySwoole\BaseService\UnixSocket;
+use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Bridge\BridgeCommand;
+use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\Socket\Tools\Protocol;
 use EasySwoole\Utility\ArrayToTextTable;
 
 class Process implements CommandInterface
@@ -23,16 +22,18 @@ class Process implements CommandInterface
     public function exec(array $args): ?string
     {
         $action = array_shift($args);
+        $package = new Package();
+        $package->setCommand(BridgeCommand::PROCESS_INFO);
         try {
-            $package = new Package();
-            $package->setOperation($package::OP_PROCESS_INFO);
-            $data =  UnixSocket::unixSocketSendAndRecv(BaseService::$baseServiceSockFile,$package);
-            if (empty($data)) {
+            $package = Bridge::getInstance()->send($package);
+            if (empty($package->getArgs())) {
                 return "process info is abnormal";
             }
-        } catch (Exception $exception) {
-            return $exception->getMessage();
+
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
         }
+        $data = $package->getArgs();
         $data = $this->processInfoHandel($data, $args);
 
         switch ($action) {
