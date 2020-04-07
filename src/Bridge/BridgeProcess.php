@@ -17,7 +17,7 @@ class BridgeProcess extends AbstractUnixProcess
         if ($data === null) {
             $package = new  Package();
             $package->setStatus(Package::STATUS_PACKAGE_ERROR);
-            $socket->sendAll(Protocol::pack(serialize($package)));
+            Protocol::socketWriter($socket, serialize($package));
             $socket->close();
             return null;
         }
@@ -26,10 +26,10 @@ class BridgeProcess extends AbstractUnixProcess
          */
         $package = unserialize($data);
         $callback = Bridge::getInstance()->onCommand()->get($package->getCommand());
-        if (!$callback){
+        if (!$callback) {
             $package = new  Package();
             $package->setStatus(Package::STATUS_COMMAND_ERROR);
-            $socket->sendAll(Protocol::pack(serialize($package)));
+            Protocol::socketWriter($socket, serialize($package));
             $socket->close();
             return null;
         }
@@ -39,7 +39,7 @@ class BridgeProcess extends AbstractUnixProcess
         $package->setStatus($package::STATUS_SUCCESS);
         $package->setArgs($data);
 
-        $socket->sendAll(Protocol::pack(serialize($package)));
+        Protocol::socketWriter($socket,serialize($package));
         $socket->close();
         return null;
     }

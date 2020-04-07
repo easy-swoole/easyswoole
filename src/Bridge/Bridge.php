@@ -11,7 +11,7 @@ use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Task\TaskManager;
-use EasySwoole\Socket\Tools\Protocol;
+use EasySwoole\Socket\Tools\Client;
 use Swoole\Server;
 
 class Bridge
@@ -60,14 +60,23 @@ class Bridge
     /**
      * send
      * @param Package $package
+     * @param $timeout
      * @return Package
      * @throws Exception
      * @author Tioncico
      * Time: 13:53
      */
-    function send(Package $package): Package
+    function send(Package $package,$timeout=3.0): Package
     {
-        $package = Protocol::unixSocketSendAndRecv(Bridge::getInstance()->getSocketFile(), $package);
+
+        $client = new Client(Bridge::getInstance()->getSocketFile());
+        $client->send(serialize($package));
+        $ret = $client->recv($timeout);
+        $client->close();
+        if (empty($ret)) {
+            throw new Exception("connect server error");
+        }
+        $package = unserialize($ret);
         /**
          * @var  $package Package
          */
