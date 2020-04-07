@@ -22,16 +22,7 @@ $args = $argv;
 //trim first command
 array_shift($args);
 
-if(!in_array($args[0],['crontab','process','status','task'])){
-    $ret = CommandRunner::getInstance()->run($args);
-    if(!empty($ret)){
-        echo $ret."\n";
-    }
-}else{
-    go(function()use($args){
-        $ret = CommandRunner::getInstance()->run($args);
-        if(!empty($ret)){
-            echo $ret."\n";
-        }
-    });
+$ret = CommandRunner::getInstance()->run($args);
+if(!empty($ret)){
+    echo $ret."\n";
 }
