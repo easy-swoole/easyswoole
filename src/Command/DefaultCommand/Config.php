@@ -14,6 +14,7 @@ use EasySwoole\EasySwoole\Config as GlobalConfig;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\SysConst;
+use EasySwoole\Utility\ArrayToTextTable;
 
 class Config implements CommandInterface
 {
@@ -37,7 +38,7 @@ class Config implements CommandInterface
                 case 'set':
                     $key = array_shift($args);
                     $value = array_shift($args);
-                    $result = $this->set($key,$value);
+                    $result = $this->set($key, $value);
                     break;
                 default:
                     $result = $this->help($args);
@@ -47,27 +48,56 @@ class Config implements CommandInterface
         });
         $run->start();
         return $ret;
-
-
-        return $response;
     }
 
     protected function show($key)
     {
         $package = new Package();
         $package->setCommand(BridgeCommand::CONFIG_INFO);
-        $package->setArgs(['key'=>$key]);
+        $package->setArgs(['key' => $key]);
         $package = Bridge::getInstance()->send($package);
 
-        return var_export($package->getArgs(),1);
+        $data = $this->arrayConversion('', $package->getArgs());
+        $data = $this->handelArray($data);
+        return new ArrayToTextTable($data);
     }
 
-    protected function set($key,$value){
+    protected function set($key, $value)
+    {
         $package = new Package();
         $package->setCommand(BridgeCommand::CONFIG_SET);
-        $package->setArgs(['key'=>$key,'value'=>$value]);
+        $package->setArgs(['key' => $key, 'value' => $value]);
         $package = Bridge::getInstance()->send($package);
-        return var_export($package->getArgs(),1);
+        $data = $this->arrayConversion('', $package->getArgs());
+        $data = $this->handelArray($data);
+        return new ArrayToTextTable($data);
+    }
+
+    protected function handelArray($array)
+    {
+
+        $temp = [];
+        foreach ($array as $key => $value) {
+            $temp[] = [
+                'key'   => $key,
+                'value' => $value
+            ];
+        }
+        return $temp;
+    }
+
+    protected function arrayConversion($key, $array)
+    {
+        $data = [];
+        foreach ($array as $k => $value) {
+            $keyName = empty($key) ? $k : "{$key}.{$k}";
+            if (is_array($value)) {
+                $data = array_merge($data, $this->arrayConversion($keyName, $value));
+            } else {
+                $data[$keyName] = $value;
+            }
+        }
+        return $data;
     }
 
     public function help(array $args): ?string
