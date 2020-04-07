@@ -10,10 +10,6 @@ use EasySwoole\EasySwoole\Bridge\BridgeCommand;
 use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
-use EasySwoole\EasySwoole\Config as GlobalConfig;
-use EasySwoole\EasySwoole\Core;
-use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\SysConst;
 use EasySwoole\Utility\ArrayToTextTable;
 
 class Config implements CommandInterface
@@ -71,14 +67,11 @@ class Config implements CommandInterface
         $package->setCommand(BridgeCommand::CONFIG_SET);
         $package->setArgs(['key' => $key, 'value' => $value]);
         $package = Bridge::getInstance()->send($package);
-        $data = $this->arrayConversion('', $package->getArgs());
-        $data = $this->handelArray($data);
-        return new ArrayToTextTable($data);
+        return $package->getArgs();
     }
 
     protected function handelArray($array)
     {
-
         $temp = [];
         foreach ($array as $key => $value) {
             $temp[] = [

@@ -24,24 +24,20 @@ class Crontab implements CommandInterface
         $ret = '';
         $run = new Scheduler();
         $run->add(function () use (&$ret, $args) {
-            try {
-                $action = array_shift($args);
-                switch ($action) {
-                    case 'show':
-                        $result = $this->show();
-                        break;
-                    case 'stop':
-                        $result = $this->stop($args);
-                        break;
-                    case 'resume':
-                        $result = $this->resume($args);
-                        break;
-                    default:
-                        $result = $this->help($args);
-                        break;
-                }
-            } catch (\Throwable $exception) {
-                return $exception->getMessage();
+            $action = array_shift($args);
+            switch ($action) {
+                case 'show':
+                    $result = $this->show();
+                    break;
+                case 'stop':
+                    $result = $this->stop($args);
+                    break;
+                case 'resume':
+                    $result = $this->resume($args);
+                    break;
+                default:
+                    $result = $this->help($args);
+                    break;
             }
             $ret = $result;
         });
@@ -57,6 +53,9 @@ class Crontab implements CommandInterface
         $package->setCommand(BridgeCommand::CRON_STOP);
         $package->setArgs($taskName);
         $package = Bridge::getInstance()->send($package);
+        if($package->getStatus() !== Package::STATUS_SUCCESS){
+            return $package->getArgs();
+        }
         if (empty($package->getArgs())) {
             return "stop error.";
         }
@@ -73,6 +72,9 @@ class Crontab implements CommandInterface
         $package->setCommand(BridgeCommand::CRON_RESUME);
         $package->setArgs($taskName);
         $package = Bridge::getInstance()->send($package);
+        if($package->getStatus() !== Package::STATUS_SUCCESS){
+            return $package->getArgs();
+        }
         if (empty($package->getArgs())) {
             return "resume error";
         }
@@ -86,6 +88,9 @@ class Crontab implements CommandInterface
         $package = new Package();
         $package->setCommand(BridgeCommand::CRON_INFO);
         $package = Bridge::getInstance()->send($package);
+        if($package->getStatus() !== Package::STATUS_SUCCESS){
+            return $package->getArgs();
+        }
         if (empty($package->getArgs())) {
             return "crontab info is abnormal";
         }

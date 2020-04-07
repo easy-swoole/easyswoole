@@ -24,7 +24,7 @@ class Task implements CommandInterface
     {
         $ret = '';
         $run = new Scheduler();
-        $run->add(function ()use(&$ret,$args){
+        $run->add(function () use (&$ret, $args) {
             $action = array_shift($args);
             switch ($action) {
                 case 'status':
@@ -42,15 +42,14 @@ class Task implements CommandInterface
 
     protected function status()
     {
-        try {
-            $package = new Package();
-            $package->setCommand(BridgeCommand::TASK_INFO);
-            $package = Bridge::getInstance()->send($package);
-            if (empty($package->getArgs())) {
-                return "task info is abnormal";
-            }
-        } catch (\Throwable $exception) {
-            return $exception->getMessage();
+        $package = new Package();
+        $package->setCommand(BridgeCommand::TASK_INFO);
+        $package = Bridge::getInstance()->send($package);
+        if ($package->getStatus() !== Package::STATUS_SUCCESS) {
+            return $package->getArgs();
+        }
+        if (empty($package->getArgs())) {
+            return "task info is abnormal";
         }
         $data = $package->getArgs();
 
