@@ -24,15 +24,14 @@ class Status implements CommandInterface
         $ret = '';
         $run = new Scheduler();
         $run->add(function () use (&$ret, $args) {
-            try {
-                $package = new Package();
-                $package->setCommand(BridgeCommand::SERVER_STATUS_INFO);
-                $package = Bridge::getInstance()->send($package);
-                if (empty($package->getArgs())) {
-                    return "server status info is abnormal";
-                }
-            } catch (\Throwable $throwable) {
-                return $throwable->getMessage();
+            $package = new Package();
+            $package->setCommand(BridgeCommand::SERVER_STATUS_INFO);
+            $package = Bridge::getInstance()->send($package);
+            if ($package->getStatus() !== Package::STATUS_SUCCESS) {
+                return $package->getArgs();
+            }
+            if (empty($package->getArgs())) {
+                return "server status info is abnormal";
             }
             $data = $package->getArgs();
             $data['start_time'] = date('Y-m-d h:i:s', $data['start_time']);

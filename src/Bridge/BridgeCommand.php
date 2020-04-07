@@ -5,8 +5,11 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 
 use EasySwoole\Component\Event;
-use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Config;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Crontab;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Server;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Task;
+use EasySwoole\EasySwoole\Bridge\CommandHandel\Process;
 
 class BridgeCommand extends Event
 {
@@ -23,21 +26,10 @@ class BridgeCommand extends Event
     function __construct(array $allowKeys = null)
     {
         parent::__construct($allowKeys);
-        $this->set(self::CONFIG_INFO,function (Package $package){
-            return self::configInfo($package);
-        });
-    }
-
-
-    private static function configInfo(Package $package)
-    {
-        $data = $package->getArgs();
-        if (empty($data['key'])){
-            $configArray = Config::getInstance()->toArray();
-            $configArray['mode'] = Core::getInstance()->isDev() ? 'develop' : 'produce';
-            return $configArray;
-        }
-        $configArray = Config::getInstance()->getConf($data['key']);
-        return $configArray;
+        Server::initCommand($this);
+        Crontab::initCommand($this);
+        Process::initCommand($this);
+        Task::initCommand($this);
+        Config::initCommand($this);
     }
 }

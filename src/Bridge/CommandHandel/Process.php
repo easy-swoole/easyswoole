@@ -18,6 +18,7 @@ class Process extends Base
     {
         $command->set(BridgeCommand::PROCESS_INFO, [Process::class,'info']);
     }
+
     static function info(){
         return Manager::getInstance()->info();
     }

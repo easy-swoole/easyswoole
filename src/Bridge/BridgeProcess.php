@@ -43,17 +43,17 @@ class BridgeProcess extends AbstractUnixProcess
             $socket->close();
             return null;
         }
-        $package = new Package();
+        $recvPackage = new Package();
         try{
             $data = call_user_func($callback,$package,$socket);
-            $package->setStatus(Package::STATUS_SUCCESS);
-            $package->setArgs($data);
+            $recvPackage->setStatus(Package::STATUS_SUCCESS);
+            $recvPackage->setArgs($data);
         }catch (\Throwable $throwable){
-            $package->setStatus(Package::STATUS_COMMAND_ERROR);
-            $package->setArgs($throwable->getMessage());
+            $recvPackage->setStatus(Package::STATUS_COMMAND_ERROR);
+            $recvPackage->setArgs($throwable->getMessage());
             $this->onException($throwable);
         } finally {
-            Protocol::socketWriter($socket,serialize($package));
+            Protocol::socketWriter($socket,serialize($recvPackage));
             $socket->close();
         }
     }
