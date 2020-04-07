@@ -10,6 +10,7 @@ use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\ArrayToTextTable;
+use Swoole\Coroutine\Scheduler;
 
 class Task implements CommandInterface
 {
@@ -21,16 +22,23 @@ class Task implements CommandInterface
 
     public function exec(array $args): ?string
     {
-        $action = array_shift($args);
-        switch ($action) {
-            case 'status':
-                $result = $this->status();
-                break;
-            default:
-                $result = $this->help($args);
-                break;
-        }
-        return $result;
+        $ret = '';
+        $run = new Scheduler();
+        $run->add(function ()use(&$ret){
+            $ret = 'xxxx';
+        });
+        $run->start();
+        return $ret;
+//        $action = array_shift($args);
+//        switch ($action) {
+//            case 'status':
+//                $result = $this->status();
+//                break;
+//            default:
+//                $result = $this->help($args);
+//                break;
+//        }
+//        return $result;
     }
 
     protected function status()
