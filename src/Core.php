@@ -95,7 +95,7 @@ class Core
             try{
                 $ref = new \ReflectionClass('EasySwoole\EasySwoole\EasySwooleEvent');
                 if(!$ref->implementsInterface(Event::class)){
-                    die('global file for EasySwooleEvent is not compatible for EasySwoole\EasySwoole\EasySwooleEvent');
+                    die('global file for EasySwooleEvent is not compatible for EasySwoole\EasySwoole\AbstractInterface\Event');
                 }
                 unset($ref);
             }catch (\Throwable $throwable){
