@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;
+use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\ServerManager;
 
 class Server extends Base
@@ -19,7 +20,8 @@ class Server extends Base
         $command->set(BridgeCommand::SERVER_STATUS_INFO,[Server::class,'statusInfo']);
 
     }
-    static function statusInfo(){
-        return ServerManager::getInstance()->getSwooleServer()->stats();
+    static function statusInfo(Package $package,Package $response){
+        $response->setArgs(ServerManager::getInstance()->getSwooleServer()->stats());
+        return true;
     }
 }

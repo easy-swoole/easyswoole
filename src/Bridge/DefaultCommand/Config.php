@@ -30,18 +30,22 @@ class Config extends Base
             $configArray['mode'] = Core::getInstance()->isDev() ? 'develop' : 'produce';
         }else{
             $configArray = GlobalConfig::getInstance()->getConf($data['key']);
+            $configArray = [$data['key']=>$configArray];
         }
         $response->setArgs($configArray);
+        return true;
     }
 
-    static function set(Package $package){
+    static function set(Package $package,Package $response){
         $data = $package->getArgs();
         if (empty($data['key'])){
-            return "config key can not be null";
+            $response->setArgs( "config key can not be null");
+            return false;
         }
         $key = $data['key'];
         $value = $data['value']??null;
         GlobalConfig::getInstance()->setConf($key,$value);
-        return "set up {$key}={$value} success";
+        $response->setArgs([$key=>$value]);
+        return true;
     }
 }
