@@ -22,45 +22,51 @@ class Crontab extends Base
         $command->set(BridgeCommand::CRON_RESUME, [Crontab::class, 'resume']);
     }
 
-    static function info()
+    static function info(Package $package,Package $response)
     {
         $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
         $data = [];
         foreach ($info as $k => $v) {
             $data[$k] = $v;
         }
-        return $data;
+        $response->setArgs($data);
     }
 
-    static function stop(Package $package)
+    static function stop(Package $package,Package $response)
     {
         $contabName = $package->getArgs();
         $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
         $crontab = $info->get($contabName);
         if (empty($crontab)) {
-            return "crontab is not found.";
+            $response->setArgs("crontab is not found.");
+            return false;
         }
         if ($crontab['isStop'] == 1) {
-            return "crontab is already stop.";
+            $response->setArgs("crontab is already stop.");
+            return false;
         }
 
         $info->set($contabName, ['isStop' => 1]);
-        return "crontab:test is stop suceess.";
+        $response->setArgs("crontab:test is stop suceess.");
+        return true;
     }
 
-    static function resume(Package $package)
+    static function resume(Package $package,Package $response)
     {
         $contabName = $package->getArgs();
         $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
         $crontab = $info->get($contabName);
         if (empty($crontab)) {
-            return "crontab is not found.";
+            $response->setArgs("crontab is not found.");
+            return false;
         }
         if ($crontab['isStop'] == 0) {
-            return "crontab is running.";
+            $response->setArgs("crontab is running.");
+            return false;
         }
         $info->set($contabName, ['isStop' => 0]);
-        return "crontab:test resume suceess.";
+        $response->setArgs("crontab:test resume suceess.");
+        return true;
     }
 
 }

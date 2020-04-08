@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\EasySwoole\Bridge\BridgeCommand;
+use EasySwoole\EasySwoole\Bridge\Package;
 
 class Process extends Base
 {
@@ -19,7 +20,8 @@ class Process extends Base
         $command->set(BridgeCommand::PROCESS_INFO, [Process::class,'info']);
     }
 
-    static function info(){
-        return Manager::getInstance()->info();
+    static function info(Package $package,Package $response){
+        $response->setArgs(Manager::getInstance()->info());
+        return true;
     }
 }
