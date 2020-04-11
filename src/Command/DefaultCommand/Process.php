@@ -30,10 +30,12 @@ class Process implements CommandInterface
             $package->setCommand(BridgeCommand::PROCESS_INFO);
             $package = Bridge::getInstance()->send($package);
             if ($package->getStatus() !== Package::STATUS_SUCCESS) {
-                return $package->getArgs();
+                $ret = $package->getArgs();
+                return false;
             }
             if (empty($package->getArgs())) {
-                return "process info is abnormal";
+                $ret = "process info is abnormal";
+                return false;
             }
             $data = $package->getArgs();
             $data = $this->processInfoHandel($data, $args);
