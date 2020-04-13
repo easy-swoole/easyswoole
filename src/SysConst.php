@@ -11,7 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 class SysConst
 {
-    const EASYSWOOLE_VERSION = '3.3.6';
+    const EASYSWOOLE_VERSION = '3.3.7-dev';
     const LOGGER_HANDLER = 'LOGGER_HANDLER';
     const ERROR_HANDLER = 'ERROR_HANDLER';
     const TRIGGER_HANDLER = 'TRIGGER_HANDLER';
