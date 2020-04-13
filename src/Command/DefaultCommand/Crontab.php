@@ -35,6 +35,9 @@ class Crontab implements CommandInterface
                 case 'resume':
                     $result = $this->resume($args);
                     break;
+                case 'run':
+                    $result = $this->run($args);
+                    break;
                 default:
                     $result = $this->help($args);
                     break;
@@ -83,6 +86,24 @@ class Crontab implements CommandInterface
         return $data;
     }
 
+    protected function run($args)
+    {
+        $taskName = array_shift($args);
+        $package = new Package();
+        $package->setCommand(BridgeCommand::CRON_RUN);
+        $package->setArgs($taskName);
+        $package = Bridge::getInstance()->send($package);
+        if($package->getStatus() !== Package::STATUS_SUCCESS){
+            return $package->getArgs();
+        }
+        if (empty($package->getArgs())) {
+            return "run error";
+        }
+        $data = $package->getArgs();
+        $data .= "\n" . $this->show();
+        return $data;
+    }
+
     protected function show()
     {
         $package = new Package();
@@ -111,6 +132,7 @@ class Crontab implements CommandInterface
 php easyswoole crontab show
 php easyswoole crontab stop taskName
 php easyswoole crontab resume taskName 
+php easyswoole crontab run taskName 
 ";
     }
 
