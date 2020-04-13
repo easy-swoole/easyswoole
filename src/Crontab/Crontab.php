@@ -9,6 +9,7 @@ use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskNotExist;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\EasySwoole\Trigger;
 use Swoole\Table;
 use EasySwoole\Component\Process\Config as ProcessConfig;
@@ -64,7 +65,12 @@ class Crontab
 
     function rightNow(string $taskName)
     {
-        //立即在同进程执行一次，不再投递到task
+        if(isset($this->tasks[$taskName])){
+            /** @var AbstractCronTask $class */
+            return TaskManager::getInstance()->async($this->tasks[$taskName]);
+        }else{
+            return false;
+        }
     }
 
     /**
