@@ -8,6 +8,7 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskNotExist;
 use EasySwoole\EasySwoole\Crontab\Exception\CronTaskRuleInvalid;
+use EasySwoole\EasySwoole\Crontab\Exception\Exception;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\EasySwoole\Trigger;
@@ -120,6 +121,10 @@ class Crontab
     function __run()
     {
         if (!empty($this->tasks)) {
+            //检查task配置
+            if(Config::getInstance()->getConf('MAIN_SERVER.TASK.workerNum') <= 0){
+                throw new Exception("config item MAIN_SERVER.TASK.workerNum can not be 0");
+            }
             $server = ServerManager::getInstance()->getSwooleServer();
             $name = Config::getInstance()->getConf('SERVER_NAME');
             $config = new ProcessConfig();
