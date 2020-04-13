@@ -19,6 +19,7 @@ class BridgeCommand extends Event
     const CRON_INFO = 201;
     const CRON_STOP = 202;
     const CRON_RESUME = 203;
+    const CRON_RUN = 204;
     const CONFIG_INFO = 301;
     const CONFIG_SET = 302;
 
