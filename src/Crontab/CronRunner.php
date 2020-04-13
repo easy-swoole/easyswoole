@@ -39,6 +39,7 @@ class CronRunner extends AbstractProcess
             $taskRule = $cronTaskClass::getRule();
             $nextTime = CronExpression::factory($taskRule)->getNextRunDate()->getTimestamp();
             $table->set($taskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime, 'isStop' => 0]);
+            $this->tasks[$taskName] = $cronTaskClass;
         }
         $this->cronProcess();
         Timer::getInstance()->loop(29 * 1000, function () {
