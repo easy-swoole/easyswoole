@@ -39,7 +39,7 @@ class Start implements CommandInterface
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         }
         //create main Server
-        Core::getInstance()->createServer();
+        Core::getInstance()->globalInitialize()->createServer();
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         switch ($serverType) {
             case EASYSWOOLE_SERVER:

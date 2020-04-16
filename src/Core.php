@@ -106,12 +106,17 @@ class Core
         }
         //先加载配置文件
         $this->loadEnv();
-        //执行框架初始化事件
-        EasySwooleEvent::initialize();
         //临时文件和Log目录初始化
         $this->sysDirectoryInit();
         //注册错误回调
         $this->registerErrorHandler();
+        return $this;
+    }
+
+    function globalInitialize():Core
+    {
+        //执行全局初始化事件
+        EasySwooleEvent::initialize();
         return $this;
     }
 
