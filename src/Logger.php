@@ -45,7 +45,7 @@ class Logger implements LoggerInterface
         return $str;
     }
 
-    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'console')
+    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'debug')
     {
         $this->logger->console($msg,$logLevel,$category);
         if($this->logConsole){
@@ -54,22 +54,22 @@ class Logger implements LoggerInterface
     }
 
 
-    public function info(?string $msg,string $category = 'info')
+    public function info(?string $msg,string $category = 'debug')
     {
         $this->console($msg,self::LOG_LEVEL_INFO,$category);
     }
 
-    public function notice(?string $msg,string $category = 'notice')
+    public function notice(?string $msg,string $category = 'debug')
     {
         $this->console($msg,self::LOG_LEVEL_NOTICE,$category);
     }
 
-    public function waring(?string $msg,string $category = 'waring')
+    public function waring(?string $msg,string $category = 'debug')
     {
         $this->console($msg,self::LOG_LEVEL_WARNING,$category);
     }
 
-    public function error(?string $msg,string $category = 'error')
+    public function error(?string $msg,string $category = 'debug')
     {
         $this->console($msg,self::LOG_LEVEL_ERROR,$category);
     }
