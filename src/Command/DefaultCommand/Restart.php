@@ -42,7 +42,7 @@ class Restart implements CommandInterface
         $conf = Config::getInstance();
         $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
         //create main Server
-        Core::getInstance()->createServer();
+        Core::getInstance()->globalInitialize()->createServer();
         echo "server restart at " . date("Y-m-d H:i:s").PHP_EOL;
         Core::getInstance()->start();
         return null;
