@@ -10,10 +10,8 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Component\Di;
-use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
-use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Crontab\Crontab;
