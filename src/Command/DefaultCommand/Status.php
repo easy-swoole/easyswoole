@@ -34,7 +34,7 @@ class Status implements CommandInterface
                 return "server status info is abnormal";
             }
             $data = $package->getArgs();
-            $data['start_time'] = date('Y-m-d h:i:s', $data['start_time']);
+            $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
             $result = '';
             foreach ($data as $key => $val) {
                 $result .= Utility::displayItem($key, $val) . "\n";
