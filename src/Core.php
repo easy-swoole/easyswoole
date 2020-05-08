@@ -184,7 +184,11 @@ class Core
     private function registerErrorHandler()
     {
         ini_set("display_errors", "On");
-        error_reporting(E_ALL | E_STRICT);
+        $level = Di::getInstance()->get(SysConst::ERROR_REPORT_LEVEL);
+        if($level === null){
+            $level = E_ALL;
+        }
+        error_reporting($level);
 
         //初始化配置Logger
         $logger = Di::getInstance()->get(SysConst::LOGGER_HANDLER);
