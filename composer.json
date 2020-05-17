@@ -21,7 +21,7 @@
     "ext-swoole": ">=4.4.4",
     "easyswoole/component": "^2.0",
     "easyswoole/spl": "^1.0",
-    "easyswoole/http": "^1.0",
+    "easyswoole/http": "dev-master",
     "easyswoole/utility": "^1.0",
     "easyswoole/trigger": "^1.0",
     "dragonmantank/cron-expression": "^2.2",
@@ -36,8 +36,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "EasySwoole\\EasySwoole\\Test\\": "tests/",
-      "App\\": "App/"
+      "EasySwoole\\EasySwoole\\Test\\": "tests/"
     }
   },
   "require-dev": {
