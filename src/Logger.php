@@ -35,14 +35,13 @@ class Logger implements LoggerInterface
         return $this;
     }
 
-    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'debug'):string
+    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'debug')
     {
-        $str = $this->logger->log($msg,$logLevel,$category);
+        $this->logger->log($msg,$logLevel,$category);
         $calls = $this->callback->all();
         foreach ($calls as $call){
             call_user_func($call,$msg,$logLevel,$category);
         }
-        return $str;
     }
 
     public function console(?string $msg,int $logLevel = self::LOG_LEVEL_INFO,string $category = 'debug')
