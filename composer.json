@@ -21,7 +21,7 @@
     "ext-swoole": ">=4.4.4",
     "easyswoole/component": "^2.0",
     "easyswoole/spl": "^1.0",
-    "easyswoole/http": "dev-master",
+    "easyswoole/http": "^1.0",
     "easyswoole/utility": "^1.0",
     "easyswoole/trigger": "^1.0",
     "dragonmantank/cron-expression": "^2.2",
