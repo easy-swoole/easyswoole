@@ -86,6 +86,17 @@ class Core
 
     function initialize()
     {
+        //先加载配置文件
+        $this->loadEnv();
+        //临时文件和Log目录初始化
+        $this->sysDirectoryInit();
+        //注册错误回调
+        $this->registerErrorHandler();
+        return $this;
+    }
+
+    function globalInitialize():Core
+    {
         //检查全局文件是否存在.
         $file = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
         if(file_exists($file)){
@@ -102,17 +113,6 @@ class Core
         }else{
             die('global event file missing');
         }
-        //先加载配置文件
-        $this->loadEnv();
-        //临时文件和Log目录初始化
-        $this->sysDirectoryInit();
-        //注册错误回调
-        $this->registerErrorHandler();
-        return $this;
-    }
-
-    function globalInitialize():Core
-    {
         //执行全局初始化事件
         EasySwooleEvent::initialize();
         return $this;

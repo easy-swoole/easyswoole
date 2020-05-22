@@ -7,11 +7,9 @@
  */
 
 namespace EasySwoole\EasySwoole\Command;
+use EasySwoole\Command\AbstractInterface\CommandInterface as CInterface;
 
-
-interface CommandInterface
+interface CommandInterface extends CInterface
 {
-    public function commandName():string;
-    public function exec(array $args):?string ;
-    public function help(array $args):?string ;
+
 }

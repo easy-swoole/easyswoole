@@ -75,34 +75,37 @@ class Config
     /**
      * 载入一个文件的配置项
      * @param string $filePath 配置文件路径
-     * @param bool   $merge    是否将内容合并入主配置
-     * @author : evalor <master@evalor.cn>
      */
-    public function loadFile($filePath, $merge = false)
+    public function loadFile($filePath,bool $merge = true):bool
     {
-        if (is_file($filePath)) {
+        if (file_exists($filePath)) {
             $confData = require_once $filePath;
-            if (is_array($confData) && !empty($confData)) {
-                $basename = strtolower(basename($filePath, '.php'));
-                if (!$merge) {
-                    $this->conf->setConf($basename,$confData);
-                } else {
+            if(is_array($confData)){
+                if($merge){
                     $this->conf->merge($confData);
+                }else{
+                    $this->conf->load($confData);
                 }
+                return true;
             }
         }
+        return false;
     }
 
-    public function loadEnv(string $file)
+    public function loadEnv(string $file,bool $merge = true):bool
     {
         if(file_exists($file)){
-            $data = require $file;
+            $data = parse_ini_file($file,true);
             if(is_array($data)){
-                $this->load($data);
+                if($merge){
+                    $this->conf->merge($data);
+                }else{
+                    $this->conf->load($data);
+                }
+                return true;
             }
-        }else{
-            throw new \Exception("config file : {$file} is miss");
         }
+        return false;
     }
 
     public function clear():bool

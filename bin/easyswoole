@@ -2,6 +2,7 @@
 <?php
 
 use EasySwoole\EasySwoole\Command\CommandRunner;
+use EasySwoole\Command\Caller;
 
 defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
 defined('RUNNING_ROOT') or define('RUNNING_ROOT', realpath(getcwd()));
@@ -21,8 +22,14 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
 $args = $argv;
 //trim first command
 array_shift($args);
-
-$ret = CommandRunner::getInstance()->run($args);
-if(!empty($ret)){
-    echo $ret."\n";
+$caller = new Caller();
+$action = array_shift($args);
+if(empty($action)){
+    $action = 'help';
+}
+$caller->setCommand($action);
+$caller->setParams($args);
+$ret = CommandRunner::getInstance()->run($caller);
+if($ret && !empty($ret->getMsg())){
+    echo $ret->getMsg()."\n";
 }
