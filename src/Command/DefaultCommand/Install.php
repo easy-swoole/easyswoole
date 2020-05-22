@@ -44,7 +44,9 @@ class Install implements CommandInterface
 
     public function help($args): ResultInterface
     {
-        // TODO: Implement help() method.
+        $result = new Result();
+        $result->setMsg('run [php easyswoole install] to install easyswoole !!!');
+        return $result;
     }
 
     protected function updateComposerJson(){

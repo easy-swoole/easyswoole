@@ -15,7 +15,6 @@ use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
-use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\SysConst;
 
 class Start implements CommandInterface
@@ -66,16 +65,31 @@ class Start implements CommandInterface
             $data['user'] = get_current_user();
         }
         $displayItem = $displayItem + $data;
+        $displayItem['swoole version'] = phpversion('swoole');
+        $displayItem['php version'] = phpversion();
+        $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
+        $displayItem['develop/produce'] = Core::getInstance()->isDev() ? 'dev' : 'produce';
+        $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
+        $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
         foreach ($displayItem as $key => $value){
             $msg .= Utility::displayItem($key,$value)."\n";
         }
-        $result->setMsg($msg);
+        echo $msg;
+        Core::getInstance()->initialize()->globalInitialize()->createServer()->start();
         return $result;
     }
 
     public function help($args): ResultInterface
     {
-        // TODO: Implement help() method.
+        $result = new Result();
+        $msg = <<<HELP_START
+php easyswoole start  
+php easyswoole start d
+php easyswoole start produce
+php easyswoole start produce d
+HELP_START;
+        $result->setMsg($msg);
+        return  $result;
     }
 
 }
