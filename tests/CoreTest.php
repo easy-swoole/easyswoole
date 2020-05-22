@@ -33,9 +33,4 @@ class CoreTest extends TestCase
         $this->assertTrue(Core::getInstance()->isDev());
     }
 
-    public function testCreateServer() {
-        $server = Core::getInstance()->createServer();
-        $this->assertEquals('EasySwoole\EasySwoole\Core', get_class($server));
-    }
-
 }
