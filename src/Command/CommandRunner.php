@@ -14,6 +14,7 @@ use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Container;
 use EasySwoole\Command\Runner;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
@@ -27,6 +28,7 @@ class CommandRunner extends Runner
     {
         parent::__construct($container);
         $this->commandContainer()->set(new Start());
+        $this->commandContainer()->set(new Install());
     }
 
     private $beforeCommand;
