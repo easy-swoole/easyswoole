@@ -70,7 +70,6 @@ class Core
         defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER',1);
         defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER',2);
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER',3);
-        defined('EASYSWOOLE_REDIS_SERVER') or define('EASYSWOOLE_REDIS_SERVER',4);
     }
 
     function setIsDev(bool $isDev)
