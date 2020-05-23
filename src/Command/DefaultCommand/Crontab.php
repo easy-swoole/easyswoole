@@ -43,8 +43,7 @@ class Crontab implements CommandInterface
                     break;
             }
         });
-        $run->$result();
-        return $ret;
+        return $result;
     }
 
     protected function stop($args)
