@@ -1,29 +1,21 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Tioncico
- * Date: 2020/4/7 0007
- * Time: 15:51
- */
+
 
 namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
-use EasySwoole\EasySwoole\Bridge\BridgeCommand;
-use EasySwoole\EasySwoole\Bridge\Package;
-use EasySwoole\EasySwoole\Task\TaskManager;
+use EasySwoole\Bridge\CommandInterface;
 
-class Task extends Base
+class Task implements CommandInterface
 {
-    static function initCommand(BridgeCommand $command)
+    public function commandName(): string
     {
-        $command->set(BridgeCommand::TASK_INFO, [Task::class, 'info']);
+        return 'task';
     }
 
-    static function info(Package $package, Package $response)
+    public function exec(...$arg)
     {
-        $response->setArgs(TaskManager::getInstance()->status());
-        return true;
+        // TODO: Implement exec() method.
     }
 
 }

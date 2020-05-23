@@ -356,6 +356,6 @@ class Core
         //初始化进程管理器
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
-        Bridge::getInstance()->attachServer($server);
+        Bridge::getInstance()->setSocketFile(EASYSWOOLE_TEMP_DIR.'/bridge.sock')->attachServer($server,$serverName);
     }
 }
