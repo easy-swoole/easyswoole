@@ -21,6 +21,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Reload;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Restart;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Stop;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Config as ConfigCommand;
@@ -41,6 +42,7 @@ class CommandRunner extends Runner
         $this->commandContainer()->set(new PhpUnit());
         $this->commandContainer()->set(new ConfigCommand());
         $this->commandContainer()->set(new Help());
+        $this->commandContainer()->set(new Task());
     }
 
     private $beforeCommand;

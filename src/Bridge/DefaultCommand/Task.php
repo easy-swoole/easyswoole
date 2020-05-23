@@ -5,6 +5,9 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
 use EasySwoole\Bridge\CommandInterface;
+use EasySwoole\Bridge\Package;
+use EasySwoole\EasySwoole\Task\TaskManager;
+use Swoole\Coroutine\Socket;
 
 class Task implements CommandInterface
 {
@@ -13,9 +16,9 @@ class Task implements CommandInterface
         return 'task';
     }
 
-    public function exec(...$arg)
+    public function exec(Package $package,Package $responsePackage,Socket $socket)
     {
-        // TODO: Implement exec() method.
+        $responsePackage->setArgs(TaskManager::getInstance()->status());
     }
 
 }

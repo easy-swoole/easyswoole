@@ -55,11 +55,11 @@ class Config implements CommandInterface
         $package->setCommand(BridgeCommand::CONFIG_INFO);
         $package->setArgs(['key' => $key]);
         $package = Bridge::getInstance()->send($package);
-        if($package->getStatus() == Package::STATUS_SUCCESS){
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             return new ArrayToTextTable($data);
-        }else{
+        } else {
             return $package->getArgs();
         }
     }
@@ -70,11 +70,11 @@ class Config implements CommandInterface
         $package->setCommand(BridgeCommand::CONFIG_SET);
         $package->setArgs(['key' => $key, 'value' => $value]);
         $package = Bridge::getInstance()->send($package);
-        if($package->getStatus() == Package::STATUS_SUCCESS){
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             return new ArrayToTextTable($data);
-        }else{
+        } else {
             return $package->getArgs();
         }
     }
@@ -108,12 +108,12 @@ class Config implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = Utility::easySwooleLog().<<<HELP_START
+        $msg = Utility::easySwooleLog() . <<<HELP_START
 php easyswoole config show [key][.key]
 php easyswoole config set key value
 HELP_START;
         $result->setMsg($msg);
-        return  $result;
+        return $result;
     }
 
 }

@@ -18,5 +18,6 @@ class Bridge extends BridgeServer
     {
         parent::__construct($container);
         $this->getCommandContainer()->set(new Task());
+        $this->setSocketFile(EASYSWOOLE_TEMP_DIR.'/bridge.sock');
     }
 }
