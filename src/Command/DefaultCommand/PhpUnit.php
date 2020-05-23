@@ -7,6 +7,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\CommandInterface;
+use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Phpunit\Runner;
 
 
@@ -52,7 +53,7 @@ class PhpUnit implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = <<<HELP_START
+        $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole phpunit testDir  
 php easyswoole restart testDir --no-coroutine
 php easyswoole restart testDir produce

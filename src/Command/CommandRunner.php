@@ -14,6 +14,7 @@ use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Container;
 use EasySwoole\Command\Runner;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Help;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\PhpUnit;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Reload;
@@ -22,6 +23,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Start;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Stop;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Config as ConfigCommand;
 
 
 class CommandRunner extends Runner
@@ -37,6 +39,8 @@ class CommandRunner extends Runner
         $this->commandContainer()->set(new Reload());
         $this->commandContainer()->set(new Restart());
         $this->commandContainer()->set(new PhpUnit());
+        $this->commandContainer()->set(new ConfigCommand());
+        $this->commandContainer()->set(new Help());
     }
 
     private $beforeCommand;

@@ -45,7 +45,7 @@ class Reload implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = <<<HELP_START
+        $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole reload  
 php easyswoole reload produce
 HELP_START;

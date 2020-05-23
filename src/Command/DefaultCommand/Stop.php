@@ -12,6 +12,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\CommandInterface;
+use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 
 class Stop implements CommandInterface
@@ -69,7 +70,7 @@ class Stop implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = <<<HELP_START
+        $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole stop
 php easyswoole stop produce
 php easyswoole stop force

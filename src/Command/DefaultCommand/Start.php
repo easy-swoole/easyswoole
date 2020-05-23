@@ -82,7 +82,7 @@ class Start implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = <<<HELP_START
+        $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole start  
 php easyswoole start d
 php easyswoole start produce
