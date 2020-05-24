@@ -40,7 +40,7 @@ class Crontab
         try {
             $ref = new \ReflectionClass($cronTaskClass);
             if (!$ref->isSubclassOf(AbstractCronTask::class)) {
-                throw new \InvalidArgumentException("the cron task class {$cronTaskClass} is invalid");
+                throw new CronTaskNotExist("the cron task class {$cronTaskClass} is invalid");
             }
 
             /**
@@ -49,12 +49,10 @@ class Crontab
             $taskName = $cronTaskClass::getTaskName();
             $taskRule = $cronTaskClass::getRule();
             if (!CronExpression::isValidExpression($taskRule)) {
-                Trigger::getInstance()->error("{$cronTaskClass} not a valid cron task");
-                return $this;
+                throw new CronTaskRuleInvalid("{$cronTaskClass} not a valid cron task");
             }
             if (isset($this->tasks[$taskName])) {
-                Trigger::getInstance()->error("crontab name:{$taskName} is already exist.");
-                return $this;
+                throw new CronTaskRuleInvalid("crontab name:{$taskName} is already exist.");
             }
             $this->tasks[$taskName] = $cronTaskClass;
         } catch (\Throwable $throwable) {
