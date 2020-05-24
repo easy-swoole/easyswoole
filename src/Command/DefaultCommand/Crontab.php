@@ -43,6 +43,7 @@ class Crontab implements CommandInterface
                     break;
             }
         });
+        $run->start();
         return $result;
     }
 
@@ -51,10 +52,10 @@ class Crontab implements CommandInterface
         $result = new Result();
         $taskName = array_shift($args);
 
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => __METHOD__, 'taskName' => $taskName], 3);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'stop', 'taskName' => $taskName], 3);
         if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
-            $data = $package->getArgs();
-            $result->setMsg($data . $this->show()->getMsg());
+            $data = $package->getMsg();
+            $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
             $result->setMsg($package->getMsg());
         }
@@ -67,10 +68,10 @@ class Crontab implements CommandInterface
         $result = new Result();
         $taskName = array_shift($args);
 
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => __METHOD__, 'taskName' => $taskName], 3);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'resume', 'taskName' => $taskName], 3);
         if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
-            $data = $package->getArgs();
-            $result->setMsg($data . $this->show()->getMsg());
+            $data = $package->getMsg();
+            $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
             $result->setMsg($package->getMsg());
         }
@@ -82,10 +83,10 @@ class Crontab implements CommandInterface
         $result = new Result();
         $taskName = array_shift($args);
 
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => __METHOD__, 'taskName' => $taskName], 3);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'run', 'taskName' => $taskName], 3);
         if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
-            $data = $package->getArgs();
-            $result->setMsg($data . $this->show()->getMsg());
+            $data = $package->getMsg();
+            $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
             $result->setMsg($package->getMsg());
         }
@@ -95,7 +96,7 @@ class Crontab implements CommandInterface
     protected function show()
     {
         $result = new Result();
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => __METHOD__], 3);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'show'], 3);
         if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
             $data = $package->getArgs();
             foreach ($data as $k => $v) {
