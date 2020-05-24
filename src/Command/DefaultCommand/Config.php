@@ -23,9 +23,9 @@ class Config implements CommandInterface
 
     public function exec($args): ResultInterface
     {
-        $ret = '';
+        $result = new Result();
         $run = new Scheduler();
-        $run->add(function () use (&$ret, $args) {
+        $run->add(function () use (&$result, $args) {
             $action = array_shift($args);
             switch ($action) {
                 case 'show':
@@ -41,42 +41,38 @@ class Config implements CommandInterface
                     $result = $this->help($args);
                     break;
             }
-            $ret = $result;
         });
         $run->start();
-        $result = new Result();
-
         return $result;
     }
 
     protected function show($key)
     {
-        $package = new Package();
-        $package->setCommand(BridgeCommand::CONFIG_INFO);
-        $package->setArgs(['key' => $key]);
-        $package = Bridge::getInstance()->send($package);
-        if($package->getStatus() == Package::STATUS_SUCCESS){
+        $result = new Result();
+        $package = Bridge::getInstance()->call('config',['action'=>'info','key'=>$key]);
+
+        if ($package->getStatus()==\EasySwoole\Bridge\Package::STATUS_SUCCESS){
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
-            return new ArrayToTextTable($data);
+            $result->setMsg(new ArrayToTextTable($data));
         }else{
-            return $package->getArgs();
+            $result->setMsg($package->getMsg());
         }
+        return $result;
     }
 
     protected function set($key, $value)
     {
-        $package = new Package();
-        $package->setCommand(BridgeCommand::CONFIG_SET);
-        $package->setArgs(['key' => $key, 'value' => $value]);
-        $package = Bridge::getInstance()->send($package);
-        if($package->getStatus() == Package::STATUS_SUCCESS){
+        $result = new Result();
+        $package =  Bridge::getInstance()->call('config',['action'=>'set','key' => $key, 'value' => $value]);
+        if ($package->getStatus() == $package::STATUS_SUCCESS) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
-            return new ArrayToTextTable($data);
-        }else{
-            return $package->getArgs();
+            $result->setMsg(new ArrayToTextTable($data));
+        } else {
+            $result->setMsg($package->getMsg());
         }
+        return $result;
     }
 
     protected function handelArray($array)
@@ -108,12 +104,12 @@ class Config implements CommandInterface
     public function help($args): ResultInterface
     {
         $result = new Result();
-        $msg = Utility::easySwooleLog().<<<HELP_START
+        $msg = Utility::easySwooleLog() . <<<HELP_START
 php easyswoole config show [key][.key]
 php easyswoole config set key value
 HELP_START;
         $result->setMsg($msg);
-        return  $result;
+        return $result;
     }
 
 }
