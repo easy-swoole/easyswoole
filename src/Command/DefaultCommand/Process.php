@@ -6,11 +6,8 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Bridge\BridgeCommand;
-use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
-use EasySwoole\Socket\Tools\Protocol;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -131,15 +128,11 @@ php easyswoole process kill PID [-p] [-d]
 php easyswoole process kill PID [-f] [-p] [-d]
 php easyswoole process kill GroupName [-f] [-d]
 php easyswoole process killAll [-d]
-php easyswoole process killAll -f [-d]
+php easyswoole process killAll [-f] [-d]
 php easyswoole process show
-php easyswoole process show -d
+php easyswoole process show [-d]
 ";
         $result->setMsg($msg);
         return $result;
-    }
-
-    public function help2(array $args): ?string
-    {
     }
 }

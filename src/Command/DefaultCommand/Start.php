@@ -84,9 +84,9 @@ class Start implements CommandInterface
         $result = new Result();
         $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole start  
-php easyswoole start d
-php easyswoole start produce
-php easyswoole start produce d
+php easyswoole start [d]
+php easyswoole start [produce]
+php easyswoole start [produce] [d]
 HELP_START;
         $result->setMsg($msg);
         return  $result;

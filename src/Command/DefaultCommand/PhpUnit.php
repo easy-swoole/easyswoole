@@ -55,9 +55,9 @@ class PhpUnit implements CommandInterface
         $result = new Result();
         $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole phpunit testDir  
-php easyswoole restart testDir --no-coroutine
-php easyswoole restart testDir produce
-php easyswoole restart testDir produce --no-coroutine
+php easyswoole restart testDir [--no-coroutine]
+php easyswoole restart testDir [produce]
+php easyswoole restart testDir [produce] [--no-coroutine]
 HELP_START;
         $result->setMsg($msg);
         return  $result;

@@ -4,11 +4,10 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Bridge\BridgeCommand;
-use EasySwoole\EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Command\CommandInterface;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -51,7 +50,7 @@ class Config implements CommandInterface
         $result = new Result();
         $package = Bridge::getInstance()->call('config',['action'=>'info','key'=>$key]);
 
-        if ($package->getStatus()==\EasySwoole\Bridge\Package::STATUS_SUCCESS){
+        if ($package->getStatus() == Package::STATUS_SUCCESS){
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             $result->setMsg(new ArrayToTextTable($data));

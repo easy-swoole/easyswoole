@@ -72,9 +72,9 @@ class Stop implements CommandInterface
         $result = new Result();
         $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole stop
-php easyswoole stop produce
-php easyswoole stop force
-php easyswoole stop produce force
+php easyswoole stop [produce]
+php easyswoole stop [force]
+php easyswoole stop [produce] [force]
 HELP_START;
         $result->setMsg($msg);
         return $result;

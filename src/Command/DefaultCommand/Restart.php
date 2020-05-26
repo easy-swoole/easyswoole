@@ -33,9 +33,9 @@ class Restart implements CommandInterface
         $result = new Result();
         $msg = Utility::easySwooleLog().<<<HELP_START
 php easyswoole restart  
-php easyswoole restart d
-php easyswoole restart produce
-php easyswoole restart produce d
+php easyswoole restart [d]
+php easyswoole restart [produce]
+php easyswoole restart [produce] [d]
 HELP_START;
         $result->setMsg($msg);
         return  $result;

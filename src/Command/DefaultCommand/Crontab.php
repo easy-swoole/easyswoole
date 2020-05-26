@@ -4,6 +4,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use Swoole\Coroutine\Scheduler;
@@ -53,7 +54,7 @@ class Crontab implements CommandInterface
         $taskName = array_shift($args);
 
         $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'stop', 'taskName' => $taskName], 3);
-        if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $package->getMsg();
             $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
@@ -69,7 +70,7 @@ class Crontab implements CommandInterface
         $taskName = array_shift($args);
 
         $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'resume', 'taskName' => $taskName], 3);
-        if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $package->getMsg();
             $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
@@ -84,7 +85,7 @@ class Crontab implements CommandInterface
         $taskName = array_shift($args);
 
         $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'run', 'taskName' => $taskName], 3);
-        if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $package->getMsg();
             $result->setMsg($data.PHP_EOL . $this->show()->getMsg());
         } else {
@@ -97,7 +98,7 @@ class Crontab implements CommandInterface
     {
         $result = new Result();
         $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'show'], 3);
-        if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $package->getArgs();
             foreach ($data as $k => $v) {
                 $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);

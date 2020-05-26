@@ -7,6 +7,7 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 use EasySwoole\Bridge\CommandInterface;
 use EasySwoole\Bridge\Package;
 use Swoole\Coroutine\Socket;
+use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
 
 class Crontab implements CommandInterface
 {
@@ -29,7 +30,7 @@ class Crontab implements CommandInterface
 
     function show(Package $package, Package $response)
     {
-        $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
+        $info = EasySwooleCron::getInstance()->infoTable();
         $data = [];
         foreach ($info as $k => $v) {
             $data[$k] = $v;
@@ -40,7 +41,7 @@ class Crontab implements CommandInterface
     function stop(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
-        $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
+        $info = EasySwooleCron::getInstance()->infoTable();
         $crontab = $info->get($contabName);
         if (empty($crontab)) {
             $response->setMsg("crontab:{$contabName} is not found.");
@@ -61,7 +62,7 @@ class Crontab implements CommandInterface
     function resume(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
-        $info = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->infoTable();
+        $info = EasySwooleCron::getInstance()->infoTable();
         $crontab = $info->get($contabName);
         if (empty($crontab)) {
             $response->setMsg("crontab:{$contabName} is not found.");
@@ -81,7 +82,7 @@ class Crontab implements CommandInterface
     function run(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
-        $result = \EasySwoole\EasySwoole\Crontab\Crontab::getInstance()->rightNow($contabName);
+        $result = EasySwooleCron::getInstance()->rightNow($contabName);
         if ($result === false) {
             $response->setMsg("crontab:{$contabName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
