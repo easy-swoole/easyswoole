@@ -15,10 +15,10 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Crontab\Crontab;
+use EasySwoole\EasySwoole\Http\Dispatcher;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Task\TaskManager;
-use EasySwoole\Http\Dispatcher;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
@@ -250,7 +250,7 @@ class Core
             if($waitTime == 0){
                 $waitTime = 5;
             }
-            $dispatcher = new Dispatcher($namespace,$depth,$max);
+            $dispatcher = Dispatcher::getInstance($namespace,$depth,$max);
             $dispatcher->setControllerPoolWaitTime($waitTime);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             if(!is_callable($httpExceptionHandler)){
