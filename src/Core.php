@@ -230,7 +230,7 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function registerDefaultCallBack(\swoole_server $server,int $serverType)
+    private function registerDefaultCallBack(\Swoole\Server $server,int $serverType)
     {
         /*
          * 注册默认回调
