@@ -28,10 +28,10 @@ class Reload implements CommandInterface
         if (file_exists($pidFile)) {
             Utility::opCacheClear();
             $pid = file_get_contents($pidFile);
-            if (!\swoole_process::kill($pid, 0)) {
+            if (!\Swoole\Process::kill($pid, 0)) {
                 $msg =  "pid :{$pid} not exist ";
             }else{
-                \swoole_process::kill($pid, SIGUSR1);
+                \Swoole\Process::kill($pid, SIGUSR1);
                 $msg =  "send server reload command to pid:{$pid} at " . date("Y-m-d H:i:s");
             }
         } else {

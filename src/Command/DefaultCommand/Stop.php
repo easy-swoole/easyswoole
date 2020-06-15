@@ -28,7 +28,7 @@ class Stop implements CommandInterface
         $msg = '';
         if (file_exists($pidFile)) {
             $pid = intval(file_get_contents($pidFile));
-            if (!\swoole_process::kill($pid, 0)) {
+            if (!\Swoole\Process::kill($pid, 0)) {
                 $msg = "pid :{$pid} not exist ";
                 unlink($pidFile);
             }else{
@@ -37,15 +37,15 @@ class Stop implements CommandInterface
                     $force = true;
                 }
                 if ($force) {
-                    \swoole_process::kill($pid, SIGKILL);
+                    \Swoole\Process::kill($pid, SIGKILL);
                 } else {
-                    \swoole_process::kill($pid);
+                    \Swoole\Process::kill($pid);
                 }
                 //等待5秒
                 $time = time();
                 while (true) {
                     usleep(1000);
-                    if (!\swoole_process::kill($pid, 0)) {
+                    if (!\Swoole\Process::kill($pid, 0)) {
                         if (is_file($pidFile)) {
                             unlink($pidFile);
                         }

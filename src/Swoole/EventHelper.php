@@ -21,7 +21,7 @@ class EventHelper
         $register->add($event,$callback);
     }
 
-    public static function on(\swoole_server $server,string $event,callable $callback)
+    public static function on(\Swoole\Server $server,string $event,callable $callback)
     {
         $server->on($event,$callback);
     }
