@@ -6,7 +6,7 @@ use EasySwoole\Command\Caller;
 
 defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
 defined('RUNNING_ROOT') or define('RUNNING_ROOT', realpath(getcwd()));
-defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', IN_PHAR ? \Phar::running() : realpath(getcwd()));
+defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', IN_PHAR ? \Phar::running() : __DIR__);
 
 $file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
 if (file_exists($file)) {
