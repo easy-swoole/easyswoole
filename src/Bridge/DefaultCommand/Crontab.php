@@ -27,60 +27,60 @@ class Crontab extends AbstractCommand
 
     protected function stop(Package $package, Package $response)
     {
-        $contabName = $package->getArgs()['taskName'];
+        $crontabName = $package->getArgs()['taskName'];
         $info = EasySwooleCron::getInstance()->infoTable();
-        $crontab = $info->get($contabName);
+        $crontab = $info->get($crontabName);
         if (empty($crontab)) {
-            $response->setMsg("crontab:{$contabName} is not found.");
+            $response->setMsg("crontab:{$crontabName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         if ($crontab['isStop'] == 1) {
-            $response->setMsg("crontab:{$contabName} is already stop.");
+            $response->setMsg("crontab:{$crontabName} is already stop.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
 
-        $info->set($contabName, ['isStop' => 1]);
-        $response->setMsg("crontab:{$contabName} is stop suceess.");
+        $info->set($crontabName, ['isStop' => 1]);
+        $response->setMsg("crontab:{$crontabName} is stop suceess.");
         return true;
     }
 
     protected function resume(Package $package, Package $response)
     {
-        $contabName = $package->getArgs()['taskName'];
+        $crontabName = $package->getArgs()['taskName'];
         $info = EasySwooleCron::getInstance()->infoTable();
-        $crontab = $info->get($contabName);
+        $crontab = $info->get($crontabName);
         if (empty($crontab)) {
-            $response->setMsg("crontab:{$contabName} is not found.");
+            $response->setMsg("crontab:{$crontabName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         if ($crontab['isStop'] == 0) {
-            $response->setMsg("crontab:{$contabName} is running.");
+            $response->setMsg("crontab:{$crontabName} is running.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
-        $info->set($contabName, ['isStop' => 0]);
-        $response->setMsg("crontab:{$contabName} resume suceess.");
+        $info->set($crontabName, ['isStop' => 0]);
+        $response->setMsg("crontab:{$crontabName} resume suceess.");
         return true;
     }
 
     protected function run(Package $package, Package $response)
     {
-        $contabName = $package->getArgs()['taskName'];
-        $result = EasySwooleCron::getInstance()->rightNow($contabName);
+        $crontabName = $package->getArgs()['taskName'];
+        $result = EasySwooleCron::getInstance()->rightNow($crontabName);
         if ($result === false) {
-            $response->setMsg("crontab:{$contabName} is not found.");
+            $response->setMsg("crontab:{$crontabName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         if ($result <= 0) {
-            $response->setMsg("crontab:{$contabName} run error.");
+            $response->setMsg("crontab:{$crontabName} run error.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
-        $response->setMsg("crontab:{$contabName} run success");
+        $response->setMsg("crontab:{$crontabName} run success");
         return true;
     }
 
