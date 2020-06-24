@@ -26,7 +26,7 @@ class Config extends AbstractCommand
     {
         $key = array_shift($args);
         $result = new Result();
-        $package = Bridge::getInstance()->call('config', ['action' => 'info', 'key' => $key]);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info', 'key' => $key]);
 
         if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $data = $this->arrayConversion('', $package->getArgs());
@@ -43,7 +43,7 @@ class Config extends AbstractCommand
         $key = array_shift($args);
         $value = array_shift($args);
         $result = new Result();
-        $package = Bridge::getInstance()->call('config', ['action' => 'set', 'key' => $key, 'value' => $value]);
+        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'set', 'key' => $key, 'value' => $value]);
         if ($package->getStatus() == $package::STATUS_SUCCESS) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
