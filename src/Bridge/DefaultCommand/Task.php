@@ -4,21 +4,21 @@
 namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
-use EasySwoole\Bridge\CommandInterface;
 use EasySwoole\Bridge\Package;
+use EasySwoole\EasySwoole\Bridge\AbstractCommand;
 use EasySwoole\EasySwoole\Task\TaskManager;
-use Swoole\Coroutine\Socket;
 
-class Task implements CommandInterface
+class Task extends AbstractCommand
 {
     public function commandName(): string
     {
         return 'task';
     }
 
-    public function exec(Package $package,Package $responsePackage,Socket $socket)
+    protected function info(Package $package, Package $responsePackage)
     {
         $responsePackage->setArgs(TaskManager::getInstance()->status());
+        return true;
     }
 
 }

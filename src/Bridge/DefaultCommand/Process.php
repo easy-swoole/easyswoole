@@ -4,19 +4,18 @@
 namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
-use EasySwoole\Bridge\CommandInterface;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Component\Process\Manager;
-use Swoole\Coroutine\Socket;
+use EasySwoole\EasySwoole\Bridge\AbstractCommand;
 
-class Process implements CommandInterface
+class Process extends AbstractCommand
 {
     public function commandName(): string
     {
         return 'process';
     }
 
-    public function exec(Package $package, Package $responsePackage, Socket $socket)
+    protected function info(Package $package, Package $responsePackage)
     {
         $responsePackage->setArgs(Manager::getInstance()->info());
         return true;

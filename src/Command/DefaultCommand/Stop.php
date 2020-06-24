@@ -11,12 +11,18 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
-use EasySwoole\EasySwoole\Command\CommandInterface;
-use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\EasySwoole\Config;
 
-class Stop implements CommandInterface
+class Stop extends AbstractCommand
 {
+    protected $helps = [
+        'stop',
+        'stop [produce]',
+        'stop [force]',
+        'stop [produce] [force]'
+    ];
+
     public function commandName(): string
     {
         return 'stop';
@@ -31,9 +37,9 @@ class Stop implements CommandInterface
             if (!\Swoole\Process::kill($pid, 0)) {
                 $msg = "pid :{$pid} not exist ";
                 unlink($pidFile);
-            }else{
+            } else {
                 $force = false;
-                if(in_array('force',$args)){
+                if (in_array('force', $args)) {
                     $force = true;
                 }
                 if ($force) {
@@ -49,7 +55,7 @@ class Stop implements CommandInterface
                         if (is_file($pidFile)) {
                             unlink($pidFile);
                         }
-                        $msg =  "server stop for pid {$pid} at " . date("Y-m-d H:i:s") ;
+                        $msg = "server stop for pid {$pid} at " . date("Y-m-d H:i:s");
                         break;
                     } else {
                         if (time() - $time > 15) {
@@ -66,18 +72,4 @@ class Stop implements CommandInterface
         $result->setMsg($msg);
         return $result;
     }
-
-    public function help($args): ResultInterface
-    {
-        $result = new Result();
-        $msg = Utility::easySwooleLog().<<<HELP_START
-php easyswoole stop
-php easyswoole stop [produce]
-php easyswoole stop [force]
-php easyswoole stop [produce] [force]
-HELP_START;
-        $result->setMsg($msg);
-        return $result;
-    }
-
 }
