@@ -8,7 +8,6 @@ namespace EasySwoole\EasySwoole\Command;
 
 
 use EasySwoole\Bridge\Package;
-use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
