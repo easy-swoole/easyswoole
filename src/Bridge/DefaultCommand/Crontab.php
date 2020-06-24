@@ -4,31 +4,18 @@
 namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 
-use EasySwoole\Bridge\CommandInterface;
 use EasySwoole\Bridge\Package;
-use Swoole\Coroutine\Socket;
+use EasySwoole\EasySwoole\Bridge\AbstractCommand;
 use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
 
-class Crontab implements CommandInterface
+class Crontab extends AbstractCommand
 {
     public function commandName(): string
     {
         return 'crontab';
     }
 
-    public function exec(Package $package, Package $responsePackage, Socket $socket)
-    {
-        $action = $package->getArgs()['action'] ?? '';
-        if (!method_exists($this, $action)) {
-            $responsePackage->setStatus($responsePackage::STATUS_COMMAND_NOT_EXIST);
-            $responsePackage->setMsg("command action:{$action} not empty");
-            return $responsePackage;
-        }
-        $this->$action($package, $responsePackage);
-    }
-
-
-    function show(Package $package, Package $response)
+    protected function show(Package $package, Package $response)
     {
         $info = EasySwooleCron::getInstance()->infoTable();
         $data = [];
@@ -38,7 +25,7 @@ class Crontab implements CommandInterface
         $response->setArgs($data);
     }
 
-    function stop(Package $package, Package $response)
+    protected function stop(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
         $info = EasySwooleCron::getInstance()->infoTable();
@@ -59,7 +46,7 @@ class Crontab implements CommandInterface
         return true;
     }
 
-    function resume(Package $package, Package $response)
+    protected function resume(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
         $info = EasySwooleCron::getInstance()->infoTable();
@@ -79,7 +66,7 @@ class Crontab implements CommandInterface
         return true;
     }
 
-    function run(Package $package, Package $response)
+    protected function run(Package $package, Package $response)
     {
         $contabName = $package->getArgs()['taskName'];
         $result = EasySwooleCron::getInstance()->rightNow($contabName);

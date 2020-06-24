@@ -33,7 +33,7 @@ class Process extends AbstractCommand
         $run = new Scheduler();
         $run->add(function () use (&$result, $args) {
             $result = new Result();
-            $package = Bridge::getInstance()->call('process');
+            $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
             if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
                 $data = $package->getArgs();
             } else {

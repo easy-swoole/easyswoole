@@ -28,7 +28,7 @@ class Status extends AbstractCommand
         $result = new Result();
         $run = new Scheduler();
         $run->add(function () use (&$result, $args) {
-            $package = Bridge::getInstance()->call('status');
+            $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
             if ($package->getStatus() == Package::STATUS_SUCCESS) {
                 $data = $package->getArgs();
                 $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
