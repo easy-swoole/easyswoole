@@ -6,7 +6,6 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Bridge\Package;
 use EasySwoole\Command\Result;
-use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
 
@@ -25,33 +24,22 @@ class Config extends AbstractCommand
     protected function show($args)
     {
         $key = array_shift($args);
-        $result = new Result();
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info', 'key' => $key]);
-
-        if ($package->getStatus() == Package::STATUS_SUCCESS) {
+        return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             $result->setMsg(new ArrayToTextTable($data));
-        } else {
-            $result->setMsg($package->getMsg());
-        }
-        return $result;
+        }, 'info', ['key' => $key]);
     }
 
     protected function set($args)
     {
         $key = array_shift($args);
         $value = array_shift($args);
-        $result = new Result();
-        $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'set', 'key' => $key, 'value' => $value]);
-        if ($package->getStatus() == $package::STATUS_SUCCESS) {
+        return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             $result->setMsg(new ArrayToTextTable($data));
-        } else {
-            $result->setMsg($package->getMsg());
-        }
-        return $result;
+        }, 'set', ['key' => $key, 'value' => $value]);
     }
 
     protected function handelArray($array)

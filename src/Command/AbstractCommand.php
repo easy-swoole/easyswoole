@@ -7,9 +7,11 @@
 namespace EasySwoole\EasySwoole\Command;
 
 
+use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
+use EasySwoole\EasySwoole\Bridge\Bridge;
 use Swoole\Coroutine\Scheduler;
 
 abstract class AbstractCommand implements CommandInterface
@@ -41,6 +43,20 @@ abstract class AbstractCommand implements CommandInterface
         $result = new Result();
         $msg = Utility::easySwooleLog() . implode(PHP_EOL, $helps);
         $result->setMsg($msg);
+        return $result;
+    }
+
+
+    final protected function bridgeCall(callable $function, $action, $params = [], $timeout = 3)
+    {
+        $result = new Result();
+        $arg = ['action' => $action] + $params;
+        $package = Bridge::getInstance()->call($this->commandName(), $arg, $timeout);
+        if ($package->getStatus() == Package::STATUS_SUCCESS) {
+            call_user_func($function, $package, $result);
+        } else {
+            $result->setMsg($package->getMsg());
+        }
         return $result;
     }
 }
