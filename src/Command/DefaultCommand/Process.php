@@ -6,13 +6,21 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Command\CommandInterface;
-use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
-class Process implements CommandInterface
+class Process extends AbstractCommand
 {
+    protected $helps = [
+        'process kill PID [-p] [-d]',
+        'process kill PID [-f] [-p] [-d]',
+        'process kill GroupName [-f] [-d]',
+        'process killAll [-d]',
+        'process killAll [-f] [-d]',
+        'process show',
+        'process show [-d]'
+    ];
 
     public function commandName(): string
     {
@@ -117,22 +125,5 @@ class Process implements CommandInterface
         }
 
         return $json;
-    }
-
-    function help($args): ResultInterface
-    {
-        $result = new Result();
-        $logo = Utility::easySwooleLog();
-        $msg = $logo . "
-php easyswoole process kill PID [-p] [-d]
-php easyswoole process kill PID [-f] [-p] [-d]
-php easyswoole process kill GroupName [-f] [-d]
-php easyswoole process killAll [-d]
-php easyswoole process killAll [-f] [-d]
-php easyswoole process show
-php easyswoole process show [-d]
-";
-        $result->setMsg($msg);
-        return $result;
     }
 }
