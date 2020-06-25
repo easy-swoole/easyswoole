@@ -56,7 +56,7 @@ class Crontab extends AbstractCommand
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $package->getArgs();
             foreach ($data as $k => $v) {
-                $v['taskNextRunTime'] = date('Y - m - d H:i:s', $v['taskNextRunTime']);
+                $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);
                 $data[$k] = array_merge(['taskName' => $k], $v);
             }
             $result->setMsg(new ArrayToTextTable($data));
