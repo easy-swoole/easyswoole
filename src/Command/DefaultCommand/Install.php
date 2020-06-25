@@ -28,7 +28,7 @@ class Install extends AbstractCommand
         if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
         }
-        file_put_contents(__DIR__ . '/../../Resource/easyswoole',file_get_contents(EASYSWOOLE_ROOT.'/easyswoole'));
+        file_put_contents(EASYSWOOLE_ROOT . '/easyswoole', file_get_contents(__DIR__ . '/../../Resource/easyswoole'));
         Utility::releaseResource(__DIR__ . '/../../Resource/EasySwooleEvent._php', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
         Utility::releaseResource(__DIR__ . '/../../Resource/Http/Index._php', EASYSWOOLE_ROOT . '/App/HttpController/Index.php');
         Utility::releaseResource(__DIR__ . '/../../Resource/Http/Router._php', EASYSWOOLE_ROOT . '/App/HttpController/Router.php');
