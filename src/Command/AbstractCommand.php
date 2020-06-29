@@ -45,7 +45,7 @@ abstract class AbstractCommand implements CommandInterface
     }
 
 
-    final protected function bridgeCall(callable $function, $action, $params = [], $timeout = 3)
+    final protected function bridgeCall(callable $function, $action, $params = [], $timeout = 3): ResultInterface
     {
         $result = new Result();
         $arg = ['action' => $action] + $params;
