@@ -19,7 +19,6 @@ abstract class AbstractCommand implements CommandInterface
 
     public function exec($args): ResultInterface
     {
-        $result = new Result();
         $run = new Scheduler();
         $run->add(function () use (&$result, $args) {
             $action = array_shift($args);
