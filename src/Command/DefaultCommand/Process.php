@@ -29,7 +29,6 @@ class Process extends AbstractCommand
 
     function exec($args): ResultInterface
     {
-        $result = new Result();
         $run = new Scheduler();
         $run->add(function () use (&$result, $args) {
             $result = new Result();
