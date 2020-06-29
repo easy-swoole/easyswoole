@@ -25,8 +25,8 @@ class Status extends AbstractCommand
     public function exec($args): ResultInterface
     {
         $run = new Scheduler();
-        $run->add(function () use (&$responseResult, $args) {
-            $this->bridgeCall(function (Package $package, Result $result) use (&$responseResult) {
+        $run->add(function () use (&$result, $args) {
+            $result = $this->bridgeCall(function (Package $package, Result $result) {
                 $data = $package->getArgs();
                 $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
                 $msg = '';
@@ -34,10 +34,9 @@ class Status extends AbstractCommand
                     $msg .= Utility::displayItem($key, $val) . "\n";
                 }
                 $result->setMsg($msg);
-                $responseResult = $result;
             }, 'info');
         });
         $run->start();
-        return $responseResult;
+        return $result;
     }
 }

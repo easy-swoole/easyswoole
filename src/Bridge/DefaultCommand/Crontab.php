@@ -22,6 +22,11 @@ class Crontab extends AbstractCommand
         foreach ($info as $k => $v) {
             $data[$k] = $v;
         }
+        if (empty($data)) {
+            $response->setMsg("crontab info is abnormal.");
+            $response->setStatus($response::STATUS_COMMAND_ERROR);
+            return false;
+        }
         $response->setArgs($data);
     }
 
