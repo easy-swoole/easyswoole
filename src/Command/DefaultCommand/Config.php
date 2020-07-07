@@ -5,6 +5,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\Bridge\Package;
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -21,9 +22,9 @@ class Config extends AbstractCommand
         return 'config';
     }
 
-    protected function show($args)
+    protected function show(CallerInterface $caller)
     {
-        $key = array_shift($args);
+        $key = key($caller->getOneParam());
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
@@ -31,10 +32,11 @@ class Config extends AbstractCommand
         }, 'info', ['key' => $key]);
     }
 
-    protected function set($args)
+    protected function set(CallerInterface $caller)
     {
-        $key = array_shift($args);
-        $value = array_shift($args);
+        $param = $caller->getOneParam();
+        $key   = key($param);
+        $value = current($param);
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);

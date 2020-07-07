@@ -5,6 +5,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\Bridge\Package;
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -23,9 +24,9 @@ class Crontab extends AbstractCommand
         return 'crontab';
     }
 
-    protected function stop($args)
+    protected function stop(CallerInterface $caller)
     {
-        $taskName = array_shift($args);
+        $taskName = key($caller->getOneParam());
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $package->getMsg();
             $result->setMsg($data . PHP_EOL . $this->show()->getMsg());
@@ -33,18 +34,18 @@ class Crontab extends AbstractCommand
     }
 
 
-    protected function resume($args)
+    protected function resume(CallerInterface $caller)
     {
-        $taskName = array_shift($args);
+        $taskName = key($caller->getOneParam());
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $package->getMsg();
             $result->setMsg($data . PHP_EOL . $this->show()->getMsg());
         }, 'resume', ['taskName' => $taskName]);
     }
 
-    protected function run($args)
+    protected function run(CallerInterface $caller)
     {
-        $taskName = array_shift($args);
+        $taskName = key($caller->getOneParam());
         return $this->bridgeCall(function (Package $package, Result $result) {
             $data = $package->getMsg();
             $result->setMsg($data . PHP_EOL . $this->show()->getMsg());

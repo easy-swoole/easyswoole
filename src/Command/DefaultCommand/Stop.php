@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -28,7 +29,7 @@ class Stop extends AbstractCommand
         return 'stop';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(CallerInterface $caller): ResultInterface
     {
         $pidFile = Config::getInstance()->getConf("MAIN_SERVER.SETTING.pid_file");
         $msg = '';
@@ -38,11 +39,7 @@ class Stop extends AbstractCommand
                 $msg = "pid :{$pid} not exist ";
                 unlink($pidFile);
             } else {
-                $force = false;
-                if (in_array('force', $args)) {
-                    $force = true;
-                }
-                if ($force) {
+                if ($caller->getParams('force',false)) {
                     \Swoole\Process::kill($pid, SIGKILL);
                 } else {
                     \Swoole\Process::kill($pid);

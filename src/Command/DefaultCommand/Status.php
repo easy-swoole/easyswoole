@@ -5,6 +5,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\Bridge\Package;
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -22,10 +23,10 @@ class Status extends AbstractCommand
         return "status";
     }
 
-    public function exec($args): ResultInterface
+    public function exec(CallerInterface $caller): ResultInterface
     {
         $run = new Scheduler();
-        $run->add(function () use (&$result, $args) {
+        $run->add(function () use (&$result, $caller) {
             $result = $this->bridgeCall(function (Package $package, Result $result) {
                 $data = $package->getArgs();
                 $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);

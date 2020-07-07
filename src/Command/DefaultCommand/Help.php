@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
@@ -23,14 +24,12 @@ class Help extends AbstractCommand
         return 'help';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(CallerInterface $caller): ResultInterface
     {
-        if (!isset($args[0])) {
-            return $this->help($args);
+        if (!$caller->getParams()) {
+            return $this->help($caller);
         }
-
-        $actionName = $args[0];
-        array_shift($args);
+        $actionName = key($caller->getOneParam());
         $call = CommandRunner::getInstance()->commandContainer()->get($actionName);
 
         if (!$call instanceof CommandInterface) {
@@ -39,10 +38,10 @@ class Help extends AbstractCommand
             return $ret;
         }
 
-        return $call->help($args);
+        return $call->help($caller);
     }
 
-    public function help($args): ResultInterface
+    public function help(CallerInterface $caller): ResultInterface
     {
         $allCommand = implode(PHP_EOL, array_keys(CommandRunner::getInstance()->commandContainer()->all()));
         $msg = Utility::easySwooleLog() . <<<HELP

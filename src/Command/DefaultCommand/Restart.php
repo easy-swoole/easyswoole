@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -27,10 +28,10 @@ class Restart extends AbstractCommand
         return 'restart';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(CallerInterface $caller): ResultInterface
     {
-        echo (new Stop())->exec($args)->getMsg() . "\n";
-        (new Start())->exec($args);
+        echo (new Stop())->exec($caller)->getMsg() . "\n";
+        (new Start())->exec($caller);
         return new Result();
     }
 }

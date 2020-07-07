@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -22,7 +23,7 @@ class Install extends AbstractCommand
         return 'install';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(CallerInterface $caller): ResultInterface
     {
         $msg = Utility::easySwooleLog();
         if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
@@ -43,7 +44,7 @@ class Install extends AbstractCommand
         return $result;
     }
 
-    public function help($args): ResultInterface
+    public function help(CallerInterface $caller): ResultInterface
     {
         $result = new Result();
         $result->setMsg(Utility::easySwooleLog() . "\nrun [php easyswoole install] to install easyswoole !!!");
