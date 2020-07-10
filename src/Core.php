@@ -12,7 +12,6 @@ namespace EasySwoole\EasySwoole;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Http\Dispatcher;
@@ -61,7 +60,7 @@ class Core
 {
     use Singleton;
 
-    private $isDev = true;
+    protected $runMode = 'dev';
 
     function __construct()
     {
@@ -72,15 +71,12 @@ class Core
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER',3);
     }
 
-    function setIsDev(bool $isDev)
+    function runMode(?string $mode = null):string
     {
-        $this->isDev = $isDev;
-        return $this;
-    }
-
-    function isDev():bool
-    {
-        return $this->isDev;
+        if(!empty($mode)){
+            $this->runMode = $mode;
+        }
+        return $this->runMode;
     }
 
     function initialize()
@@ -96,24 +92,6 @@ class Core
 
     function globalInitialize():Core
     {
-        //检查全局文件是否存在.
-        $file = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
-        if(file_exists($file)){
-            require_once $file;
-            try{
-                $ref = new \ReflectionClass('EasySwoole\EasySwoole\EasySwooleEvent');
-                if(!$ref->implementsInterface(Event::class)){
-                    die('global file for EasySwooleEvent is not compatible for EasySwoole\EasySwoole\AbstractInterface\Event');
-                }
-                unset($ref);
-            }catch (\Throwable $throwable){
-                die($throwable->getMessage());
-            }
-        }else{
-            die('global event file missing');
-        }
-        //执行全局初始化事件
-        EasySwooleEvent::initialize();
         return $this;
     }
 
@@ -123,8 +101,11 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
         );
-        //hook 全局的mainServerCreate事件
-        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        $hook = Di::getInstance()->get(SysConst::EVENT_SERVER_CREATE);
+        $ret = null;
+        if(is_callable($hook)){
+            $ret = call_user_func($hook,ServerManager::getInstance()->getMainEventRegister());
+        }
         //如果返回false,说明用户希望接管全部事件
         if($ret !== false){
             $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
@@ -262,19 +243,26 @@ class Core
                 Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER,$httpExceptionHandler);
             }
             $dispatcher->setHttpExceptionHandler($httpExceptionHandler);
-
-            EventHelper::on($server,EventRegister::onRequest,function (SwooleRequest $request,SwooleResponse $response)use($dispatcher){
+            $requestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
+            $afterRequestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
+            EventHelper::on($server,EventRegister::onRequest,function (SwooleRequest $request,SwooleResponse $response)use($dispatcher,$requestHook,$afterRequestHook){
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
                 try{
-                    if(EasySwooleEvent::onRequest($request_psr,$response_psr)){
+                    $ret = null;
+                    if(is_callable($requestHook)){
+                        $ret = call_user_func($requestHook,$request_psr,$response_psr);
+                    }
+                    if($ret !== false){
                         $dispatcher->dispatch($request_psr,$response_psr);
                     }
                 }catch (\Throwable $throwable){
                     call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
                 }finally{
                     try{
-                        EasySwooleEvent::afterRequest($request_psr,$response_psr);
+                        if(is_callable($afterRequestHook)){
+                            call_user_func($afterRequestHook,$request_psr,$response_psr);
+                        }
                     }catch (\Throwable $throwable){
                         call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
                     }
@@ -329,11 +317,9 @@ class Core
 
     public function loadEnv()
     {
-        //加载之前，先清空原来的
-        if($this->isDev){
-            $file  = EASYSWOOLE_ROOT.'/dev.php';
-        }else{
-            $file  = EASYSWOOLE_ROOT.'/produce.php';
+        $file = EASYSWOOLE_ROOT."/{$this->runMode}.php";
+        if(!file_exists($file)){
+            die("can not load config file {$this->runMode}.php");
         }
         Config::getInstance()->loadFile($file);
     }
