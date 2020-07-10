@@ -54,11 +54,6 @@ class Start extends AbstractCommand
                 $serverType = 'SWOOLE_WEB_SOCKET';
                 break;
             }
-            case EASYSWOOLE_REDIS_SERVER:
-            {
-                $serverType = 'SWOOLE_REDIS';
-                break;
-            }
             default:
             {
                 $serverType = 'UNKNOWN';
