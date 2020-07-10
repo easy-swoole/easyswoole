@@ -23,25 +23,29 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
     require_once EASYSWOOLE_ROOT.'/bootstrap.php';
 }
 
-$args = $argv;
-//trim first command
-array_shift($args);
 $caller = new Caller();
-$action = array_shift($args);
-if(empty($action)){
-    $action = 'help';
-}
-$caller->setCommand($action);
-$temp = [];
+$args = [];
+$actions = [];
 foreach ($argv as $value){
     if(substr($value,0,1) == '-'){
         $value = ltrim($value,'-');
         $value = explode("=",$value);
         $key = array_shift($value);
-        $temp[$key] = array_shift($value);
+        $args[$key] = array_shift($value);
+    }else{
+        $actions[] = $value;
     }
 }
-$caller->setParams($temp);
+$caller->setParams($args);
+
+//trim first command
+array_shift($actions);
+$action = array_shift($actions);
+if(empty($action)){
+    $action = 'help';
+}
+$caller->setCommand($action);
+
 $ret = CommandRunner::getInstance()->run($caller);
 if($ret && !empty($ret->getMsg())){
     echo $ret->getMsg()."\n";
