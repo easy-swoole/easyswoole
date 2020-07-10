@@ -32,7 +32,16 @@ if(empty($action)){
     $action = 'help';
 }
 $caller->setCommand($action);
-$caller->setParams($args);
+$temp = [];
+foreach ($argv as $value){
+    if(substr($value,0,1) == '-'){
+        $value = ltrim($value,'-');
+        $value = explode("=",$value);
+        $key = array_shift($value);
+        $temp[$key] = array_shift($value);
+    }
+}
+$caller->setParams($temp);
 $ret = CommandRunner::getInstance()->run($caller);
 if($ret && !empty($ret->getMsg())){
     echo $ret->getMsg()."\n";
