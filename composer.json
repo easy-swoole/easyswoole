@@ -29,7 +29,7 @@
         "easyswoole/config": "^1.0",
         "easyswoole/socket": "^1.1",
         "easyswoole/task": "^1.1",
-        "easyswoole/command": "^1.0",
+        "easyswoole/command": "^1.1",
         "easyswoole/bridge": "^1.0"
     },
     "autoload": {

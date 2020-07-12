@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -19,19 +20,24 @@ use EasySwoole\EasySwoole\SysConst;
 
 class Start extends AbstractCommand
 {
-    protected $helps = [
-        'start',
-        'start [d]',
-        'start [produce]',
-        'start [produce] [d]'
-    ];
 
     public function commandName(): string
     {
         return 'start';
     }
 
-    public function exec($args): ResultInterface
+    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
+    {
+        $commandHelp->addOpt('-d', '停止easywoole,并以守护进程模式启动');
+        return $commandHelp;
+    }
+
+    public function desc(): string
+    {
+        return '启动EasySwoole';
+    }
+
+    public function exec(): string
     {
         $result = new Result();
         $msg = '';
@@ -70,7 +76,7 @@ class Start extends AbstractCommand
         $displayItem['swoole version'] = phpversion('swoole');
         $displayItem['php version'] = phpversion();
         $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
-        $displayItem['develop/produce'] = Core::getInstance()->isDev() ? 'dev' : 'produce';
+        $displayItem['develop/produce'] = Core::getInstance()->runMode() ? 'dev' : 'produce';
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
         foreach ($displayItem as $key => $value) {
@@ -78,6 +84,5 @@ class Start extends AbstractCommand
         }
         echo $msg;
         Core::getInstance()->initialize()->globalInitialize()->createServer()->start();
-        return $result;
     }
 }
