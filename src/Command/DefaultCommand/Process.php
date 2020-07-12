@@ -3,7 +3,9 @@
 
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
+use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
+use EasySwoole\Command\CommandManager;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -12,32 +14,32 @@ use Swoole\Coroutine\Scheduler;
 
 class Process extends AbstractCommand
 {
-    protected $helps = [
-        'process kill PID [-p] [-d]',
-        'process kill PID [-f] [-p] [-d]',
-        'process kill GroupName [-f] [-d]',
-        'process killAll [-d]',
-        'process killAll [-f] [-d]',
-        'process show',
-        'process show [-d]'
-    ];
-
     public function commandName(): string
     {
         return 'process';
     }
 
-    function exec($args): ResultInterface
+    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
+    {
+        $commandHelp->addCommand('kill','kill process');
+        $commandHelp->addCommand('killAll','killAll process');
+        $commandHelp->addCommand('show','kill process');
+        $commandHelp->addOpt('-p','kill process');
+        $commandHelp->addOpt('-f','kill process');
+        $commandHelp->addOpt('-d','kill process');
+        return $commandHelp;
+    }
+
+    function exec(): string
     {
         $run = new Scheduler();
+        $args = CommandManager::getInstance()->getArgs();
         $run->add(function () use (&$result, $args) {
-            $result = new Result();
             $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
             if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
                 $data = $package->getArgs();
             } else {
-                $result->setMsg($package->getMsg());
-                return $result;
+                $result = $package->getMsg();
             }
             $data = $this->processInfoHandel($data, $args);
             $action = array_shift($args);
@@ -51,9 +53,6 @@ class Process extends AbstractCommand
                 case 'show';
                     $result = $this->show($data, $args);
                     break;
-                default:
-                    $result = $this->help($args);
-                    break;
             }
         });
         $run->start();
@@ -62,10 +61,8 @@ class Process extends AbstractCommand
 
     protected function killProcess(array $list, $args = null)
     {
-        $result = new Result();
         if (empty($list)) {
-            $result->setMsg('not process was kill');
-            return $result;
+            return 'not process was kill';
         }
         if (in_array('-f', $args)) {
             $sig = SIGKILL;
@@ -78,8 +75,7 @@ class Process extends AbstractCommand
             \Swoole\Process::kill($pid, $sig);
             $list[$pid]['option'] = $option;
         }
-        $result->setMsg(new ArrayToTextTable($list));
-        return $result;
+        return new ArrayToTextTable($list);
     }
 
     protected function kill($json, $args)
@@ -108,9 +104,7 @@ class Process extends AbstractCommand
 
     protected function show($json, $args)
     {
-        $result = new Result();
-        $result->setMsg(new ArrayToTextTable($json));
-        return $result;
+        return new ArrayToTextTable($json);
     }
 
     protected function processInfoHandel($json, $args)

@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -16,19 +17,18 @@ use EasySwoole\EasySwoole\Config;
 
 class Stop extends AbstractCommand
 {
-    protected $helps = [
-        'stop',
-        'stop [produce]',
-        'stop [force]',
-        'stop [produce] [force]'
-    ];
-
     public function commandName(): string
     {
         return 'stop';
     }
 
-    public function exec($args): ResultInterface
+    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
+    {
+        $commandHelp->addOpt('--force','强制停止');
+        return $commandHelp;
+    }
+
+    public function exec(): string
     {
         $pidFile = Config::getInstance()->getConf("MAIN_SERVER.SETTING.pid_file");
         $msg = '';
@@ -68,8 +68,6 @@ class Stop extends AbstractCommand
         } else {
             $msg = "pid file does not exist, please check whether to run in the daemon mode!";
         }
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return $msg;
     }
 }

@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
+use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
@@ -22,9 +23,8 @@ class Install extends AbstractCommand
         return 'install';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(): string
     {
-        $msg = Utility::easySwooleLog();
         if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
         }
@@ -37,16 +37,12 @@ class Install extends AbstractCommand
         $this->updateComposerJson();
         $this->execComposerDumpAutoload();
         $msg .= "install success,enjoy!!!\ndont forget run composer dump-autoload !!!";
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return $msg;
     }
 
-    public function help($args): ResultInterface
+    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $result = new Result();
-        $result->setMsg(Utility::easySwooleLog() . "\nrun [php easyswoole install] to install easyswoole !!!");
-        return $result;
+        return $commandHelp;
     }
 
     protected function updateComposerJson()
