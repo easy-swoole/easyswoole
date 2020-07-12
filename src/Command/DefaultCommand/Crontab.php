@@ -11,24 +11,27 @@ use EasySwoole\Utility\ArrayToTextTable;
 
 class Crontab extends AbstractCommand
 {
-    protected $helps = [
-        'crontab show',
-        'stop taskName',
-        'resume taskName',
-        'run taskName'
-    ];
-
     public function commandName(): string
     {
         return 'crontab';
     }
 
+    public function help(): array
+    {
+        return [
+            'show',
+            'stop taskName',
+            'resume taskName',
+            'run taskName'
+        ];
+    }
+
     protected function stop($args)
     {
         $taskName = array_shift($args);
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $package->getMsg();
-            $result->setMsg($data . PHP_EOL . $this->show()->getMsg());
+            return $data . PHP_EOL . $this->show()->getMsg();
         }, 'stop', ['taskName' => $taskName]);
     }
 
@@ -36,30 +39,30 @@ class Crontab extends AbstractCommand
     protected function resume($args)
     {
         $taskName = array_shift($args);
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $package->getMsg();
-            $result->setMsg($data . PHP_EOL . $this->show()->getMsg());
+            return $data . PHP_EOL . $this->show()->getMsg();
         }, 'resume', ['taskName' => $taskName]);
     }
 
     protected function run($args)
     {
         $taskName = array_shift($args);
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $package->getMsg();
-            $result->setMsg($data . PHP_EOL . $this->show()->getMsg());
+            return $data . PHP_EOL . $this->show()->getMsg();
         }, 'run', ['taskName' => $taskName]);
     }
 
     protected function show()
     {
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $package->getArgs();
             foreach ($data as $k => $v) {
                 $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);
                 $data[$k] = array_merge(['taskName' => $k], $v);
             }
-            $result->setMsg(new ArrayToTextTable($data));
+            return new ArrayToTextTable($data);
         }, 'show');
     }
 

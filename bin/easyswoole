@@ -3,6 +3,7 @@
 
 use EasySwoole\EasySwoole\Command\CommandRunner;
 use EasySwoole\Command\Caller;
+
 $file = null;
 foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php' ] as $file) {
     if (file_exists($file)) {
@@ -24,28 +25,7 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
 }
 
 $caller = new Caller();
-$args = [];
-$actions = [];
-foreach ($argv as $value){
-    if(substr($value,0,1) == '-'){
-        $value = ltrim($value,'-');
-        $value = explode("=",$value);
-        $key = array_shift($value);
-        $args[$key] = array_shift($value);
-    }else{
-        $actions[] = $value;
-    }
-}
-$caller->setParams($args);
-
-//trim first command
-array_shift($actions);
-$action = array_shift($actions);
-if(empty($action)){
-    $action = 'help';
-}
-$caller->setCommand($action);
-
+$caller->setParams($argv);
 $ret = CommandRunner::getInstance()->run($caller);
 if($ret && !empty($ret->getMsg())){
     echo $ret->getMsg()."\n";

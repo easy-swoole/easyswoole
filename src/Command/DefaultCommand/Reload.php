@@ -17,17 +17,20 @@ use EasySwoole\EasySwoole\Config;
 
 class Reload extends AbstractCommand
 {
-    protected $helps = [
-        'reload',
-        'reload [produce]'
-    ];
-
     public function commandName(): string
     {
         return 'reload';
     }
 
-    public function exec($args): ResultInterface
+    public function help(): array
+    {
+        return [
+            '',
+            '[produce]'
+        ];
+    }
+
+    public function exec(): string
     {
         $pidFile = Config::getInstance()->getConf("MAIN_SERVER.SETTING.pid_file");
         if (file_exists($pidFile)) {
@@ -42,8 +45,6 @@ class Reload extends AbstractCommand
         } else {
             $msg = "pid file does not exist, please check whether to run in the daemon mode!";
         }
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return $msg;
     }
 }

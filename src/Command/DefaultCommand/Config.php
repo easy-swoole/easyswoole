@@ -11,23 +11,26 @@ use EasySwoole\Utility\ArrayToTextTable;
 
 class Config extends AbstractCommand
 {
-    protected $helps = [
-        'config show [key][.key]',
-        'config set key value'
-    ];
-
     public function commandName(): string
     {
         return 'config';
     }
 
+    public function help(): array
+    {
+        return [
+            'show [key][.key]',
+            'set key value'
+        ];
+    }
+
     protected function show($args)
     {
         $key = array_shift($args);
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
-            $result->setMsg(new ArrayToTextTable($data));
+            return new ArrayToTextTable($data);
         }, 'info', ['key' => $key]);
     }
 
@@ -35,10 +38,10 @@ class Config extends AbstractCommand
     {
         $key = array_shift($args);
         $value = array_shift($args);
-        return $this->bridgeCall(function (Package $package, Result $result) {
+        return $this->bridgeCall(function (Package $package) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
-            $result->setMsg(new ArrayToTextTable($data));
+            return new ArrayToTextTable($data);
         }, 'set', ['key' => $key, 'value' => $value]);
     }
 

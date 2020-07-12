@@ -22,9 +22,8 @@ class Install extends AbstractCommand
         return 'install';
     }
 
-    public function exec($args): ResultInterface
+    public function exec(): string
     {
-        $msg = Utility::easySwooleLog();
         if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
         }
@@ -37,18 +36,22 @@ class Install extends AbstractCommand
         $this->updateComposerJson();
         $this->execComposerDumpAutoload();
         $msg .= "install success,enjoy!!!\ndont forget run composer dump-autoload !!!";
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return $msg;
     }
 
-    public function help($args): ResultInterface
+    /*public function help($args): ResultInterface
     {
         $result = new Result();
         $result->setMsg(Utility::easySwooleLog() . "\nrun [php easyswoole install] to install easyswoole !!!");
         return $result;
-    }
+    }*/
 
+    public function help(): array
+    {
+        return [
+            ''
+        ];
+    }
     protected function updateComposerJson()
     {
         $arr = json_decode(file_get_contents(EASYSWOOLE_ROOT . '/composer.json'), true);

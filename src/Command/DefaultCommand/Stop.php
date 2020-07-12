@@ -16,19 +16,22 @@ use EasySwoole\EasySwoole\Config;
 
 class Stop extends AbstractCommand
 {
-    protected $helps = [
-        'stop',
-        'stop [produce]',
-        'stop [force]',
-        'stop [produce] [force]'
-    ];
-
     public function commandName(): string
     {
         return 'stop';
     }
 
-    public function exec($args): ResultInterface
+    public function help(): array
+    {
+        return [
+            '',
+            '[produce]',
+            '[force]',
+            '[produce] [force]'
+        ];
+    }
+
+    public function exec(): string
     {
         $pidFile = Config::getInstance()->getConf("MAIN_SERVER.SETTING.pid_file");
         $msg = '';
@@ -68,8 +71,6 @@ class Stop extends AbstractCommand
         } else {
             $msg = "pid file does not exist, please check whether to run in the daemon mode!";
         }
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return $msg;
     }
 }

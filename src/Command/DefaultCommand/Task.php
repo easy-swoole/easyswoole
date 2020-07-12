@@ -11,19 +11,22 @@ use EasySwoole\Utility\ArrayToTextTable;
 
 class Task extends AbstractCommand
 {
-    protected $helps = [
-        'task status'
-    ];
-
     public function commandName(): string
     {
         return 'task';
     }
 
+    public function help(): array
+    {
+        return [
+            'status'
+        ];
+    }
+
     protected function status()
     {
         return $this->bridgeCall(function (Package $package, Result $result) {
-            $result->setMsg(new ArrayToTextTable($package->getArgs()));
+            return new ArrayToTextTable($package->getArgs());
         }, 'info');
     }
 }
