@@ -38,7 +38,7 @@ class Server implements CommandInterface
         $commandHelp->addAction('restart', '重启EasySwoole');
         $commandHelp->addAction('status', '查看EasySwoole状态');
         $commandHelp->addActionOpt('-d', '守护进程方式启动');
-        $commandHelp->addActionOpt('--force', '强行停止');
+        $commandHelp->addActionOpt('-force', '强行停止');
         return $commandHelp;
     }
 
