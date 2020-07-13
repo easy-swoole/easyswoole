@@ -5,11 +5,8 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
-use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\CommandManager;
-use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -28,12 +25,12 @@ class Process implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('kill', 'kill process');
-        $commandHelp->addCommand('killAll', 'killAll process');
-        $commandHelp->addCommand('show', 'kill process');
-        $commandHelp->addOpt('-p', 'kill process');
-        $commandHelp->addOpt('-f', 'kill process');
-        $commandHelp->addOpt('-d', 'kill process');
+        $commandHelp->addAction('kill', 'kill process');
+        $commandHelp->addAction('killAll', 'killAll process');
+        $commandHelp->addAction('show', 'kill process');
+        $commandHelp->addActionOpt('-p', 'kill process');
+        $commandHelp->addActionOpt('-f', 'kill process');
+        $commandHelp->addActionOpt('-d', 'kill process');
         return $commandHelp;
     }
 

@@ -26,8 +26,8 @@ class Config implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('show', 'show all configs');
-        $commandHelp->addCommand('set', 'set config');
+        $commandHelp->addAction('show', 'show all configs');
+        $commandHelp->addAction('set', 'set config');
         return $commandHelp;
     }
 

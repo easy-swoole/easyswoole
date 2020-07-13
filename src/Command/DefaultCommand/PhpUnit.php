@@ -6,10 +6,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
-use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\CommandManager;
-use EasySwoole\Command\Result;
-use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Phpunit\Runner;
 
 
@@ -22,8 +19,8 @@ class PhpUnit implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addOpt('--no-coroutine','不开启协程测试');
-        $commandHelp->addOpt('--no-','不开启协程测试');
+        $commandHelp->addActionOpt('--no-coroutine','不开启协程测试');
+        $commandHelp->addActionOpt('--no-','不开启协程测试');
         return $commandHelp;
     }
 

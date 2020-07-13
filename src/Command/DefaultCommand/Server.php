@@ -32,13 +32,13 @@ class Server implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('start', '启动');
-        $commandHelp->addCommand('stop', '停止');
-        $commandHelp->addCommand('reload', '重启worker');
-        $commandHelp->addCommand('restart', '重启EasySwoole');
-        $commandHelp->addCommand('status', '查看EasySwoole状态');
-        $commandHelp->addOpt('-d', '守护进程方式启动');
-        $commandHelp->addOpt('--force', '强行停止');
+        $commandHelp->addAction('start', '启动');
+        $commandHelp->addAction('stop', '停止');
+        $commandHelp->addAction('reload', '重启worker');
+        $commandHelp->addAction('restart', '重启EasySwoole');
+        $commandHelp->addAction('status', '查看EasySwoole状态');
+        $commandHelp->addActionOpt('-d', '守护进程方式启动');
+        $commandHelp->addActionOpt('--force', '强行停止');
         return $commandHelp;
     }
 
@@ -48,7 +48,11 @@ class Server implements CommandInterface
         if (method_exists($this, $action)) {
             return $this->$action();
         } else {
-            return Color::warning("The command '{$action}' is not exists!");
+            if (!empty($action)) {
+                return Color::warning("The command '{$action}' is not exists!");
+            } else {
+                return '';
+            }
         }
 
     }
@@ -58,10 +62,9 @@ class Server implements CommandInterface
         $conf = Config::getInstance();
         $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
 
-
         // php easyswoole start -d
         $daemonize = CommandManager::getInstance()->issetOpt('d');
-        $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
+        $conf->setConf("MAIN_SERVER.SETTING.daemonize", $daemonize);
 
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         $displayItem = [];

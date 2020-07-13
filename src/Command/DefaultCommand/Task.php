@@ -27,7 +27,7 @@ class Task implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('status', 'task status');
+        $commandHelp->addAction('status', 'task status');
         return $commandHelp;
     }
 
