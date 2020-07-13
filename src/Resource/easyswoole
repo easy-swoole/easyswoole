@@ -1,3 +1,8 @@
 #!/usr/bin/env php
 <?php
-require "./vendor/bin/easyswoole";
+foreach (["./vendor/bin/easyswoole", "./bin/easyswoole" ] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
