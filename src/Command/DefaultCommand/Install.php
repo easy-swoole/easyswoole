@@ -11,9 +11,6 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
-use EasySwoole\Command\AbstractInterface\ResultInterface;
-use EasySwoole\Command\Result;
-use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\File;
 
