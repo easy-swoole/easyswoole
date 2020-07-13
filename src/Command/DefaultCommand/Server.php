@@ -46,6 +46,7 @@ class Server implements CommandInterface
     {
         $action = CommandManager::getInstance()->getArg(0);
         if (method_exists($this, $action)) {
+            Core::getInstance()->initialize();
             return $this->$action();
         } else {
             if (!empty($action)) {
