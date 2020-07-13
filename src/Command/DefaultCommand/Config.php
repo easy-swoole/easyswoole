@@ -6,28 +6,51 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
-use EasySwoole\Command\Result;
-use EasySwoole\EasySwoole\Command\AbstractCommand;
+use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\ArrayToTextTable;
+use Swoole\Coroutine\Scheduler;
 
-class Config extends AbstractCommand
+class Config implements CommandInterface
 {
     public function commandName(): string
     {
         return 'config';
     }
 
+    public function desc(): string
+    {
+        return 'config manager';
+    }
+
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('show','show all configs');
-        $commandHelp->addCommand('set','set config');
+        $commandHelp->addCommand('show', 'show all configs');
+        $commandHelp->addCommand('set', 'set config');
         return $commandHelp;
+    }
+
+    public function exec(): string
+    {
+        $args = CommandManager::getInstance()->getArgs();
+        $run = new Scheduler();
+        $run->add(function () use (&$result, $args) {
+            $action = array_shift($args);
+            if (method_exists($this, $action)) {
+                $result = $this->{$action}($args);
+            } else {
+                $result = '';
+            }
+        });
+        $run->start();
+        return $result;
     }
 
     protected function show($args)
     {
         $key = array_shift($args);
-        return $this->bridgeCall(function (Package $package) {
+        return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             return new ArrayToTextTable($data);
@@ -38,7 +61,7 @@ class Config extends AbstractCommand
     {
         $key = array_shift($args);
         $value = array_shift($args);
-        return $this->bridgeCall(function (Package $package) {
+        return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
             return new ArrayToTextTable($data);

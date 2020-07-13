@@ -10,17 +10,23 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
+use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\File;
 
-class Install extends AbstractCommand
+class Install implements CommandInterface
 {
     public function commandName(): string
     {
         return 'install';
+    }
+
+    public function desc(): string
+    {
+        return 'easyswoole install';
     }
 
     public function exec(): string
@@ -36,7 +42,7 @@ class Install extends AbstractCommand
         Utility::releaseResource(__DIR__ . '/../../Resource/bootstrap._php', EASYSWOOLE_ROOT . '/bootstrap.php');
         $this->updateComposerJson();
         $this->execComposerDumpAutoload();
-        $msg .= "install success,enjoy!!!\ndont forget run composer dump-autoload !!!";
+        $msg = "install success,enjoy!!!\ndont forget run composer dump-autoload !!!";
         return $msg;
     }
 
