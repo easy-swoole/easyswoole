@@ -4,6 +4,7 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
+use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\Command\Result;
@@ -12,21 +13,27 @@ use EasySwoole\EasySwoole\Command\AbstractCommand;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
-class Process extends AbstractCommand
+class Process implements CommandInterface
 {
     public function commandName(): string
     {
         return 'process';
     }
 
+
+    public function desc(): string
+    {
+        return 'process manager';
+    }
+
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('kill','kill process');
-        $commandHelp->addCommand('killAll','killAll process');
-        $commandHelp->addCommand('show','kill process');
-        $commandHelp->addOpt('-p','kill process');
-        $commandHelp->addOpt('-f','kill process');
-        $commandHelp->addOpt('-d','kill process');
+        $commandHelp->addCommand('kill', 'kill process');
+        $commandHelp->addCommand('killAll', 'killAll process');
+        $commandHelp->addCommand('show', 'kill process');
+        $commandHelp->addOpt('-p', 'kill process');
+        $commandHelp->addOpt('-f', 'kill process');
+        $commandHelp->addOpt('-d', 'kill process');
         return $commandHelp;
     }
 
