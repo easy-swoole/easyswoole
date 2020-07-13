@@ -19,8 +19,8 @@ class PhpUnit implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addOpt('--no-coroutine','不开启协程测试');
-        $commandHelp->addOpt('--no-','不开启协程测试');
+        $commandHelp->addActionOpt('--no-coroutine','不开启协程测试');
+        $commandHelp->addActionOpt('--no-','不开启协程测试');
         return $commandHelp;
     }
 

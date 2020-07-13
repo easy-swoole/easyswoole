@@ -25,12 +25,12 @@ class Process implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addCommand('kill', 'kill process');
-        $commandHelp->addCommand('killAll', 'killAll process');
-        $commandHelp->addCommand('show', 'kill process');
-        $commandHelp->addOpt('-p', 'kill process');
-        $commandHelp->addOpt('-f', 'kill process');
-        $commandHelp->addOpt('-d', 'kill process');
+        $commandHelp->addAction('kill', 'kill process');
+        $commandHelp->addAction('killAll', 'killAll process');
+        $commandHelp->addAction('show', 'kill process');
+        $commandHelp->addActionOpt('-p', 'kill process');
+        $commandHelp->addActionOpt('-f', 'kill process');
+        $commandHelp->addActionOpt('-d', 'kill process');
         return $commandHelp;
     }
 
