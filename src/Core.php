@@ -87,11 +87,10 @@ class Core
         $this->sysDirectoryInit();
         //注册错误回调
         $this->registerErrorHandler();
-        return $this;
-    }
-
-    function globalInitialize():Core
-    {
+        $hook = Di::getInstance()->get(SysConst::EVENT_INITIALIZE);
+        if(is_callable($hook)){
+            call_user_func($hook);
+        }
         return $this;
     }
 

@@ -110,7 +110,7 @@ class Server implements CommandInterface
             $msg .= Utility::displayItem($key, $value) . "\n";
         }
         echo $msg;
-        Core::getInstance()->initialize()->globalInitialize()->createServer()->start();
+        Core::getInstance()->createServer()->start();
         return 'success';
     }
 
