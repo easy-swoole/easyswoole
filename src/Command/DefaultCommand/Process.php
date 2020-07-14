@@ -30,8 +30,8 @@ class Process implements CommandInterface
         $commandHelp->addAction('kill', 'kill process');
         $commandHelp->addAction('killAll', 'kill all processes');
         $commandHelp->addAction('show', 'show all process information');
-        $commandHelp->addActionOpt('--pid=xxx', 'kill the specified pid');
-        $commandHelp->addActionOpt('--group=xxx', 'kill the specified process group');
+        $commandHelp->addActionOpt('--pid=PID', 'kill the specified pid');
+        $commandHelp->addActionOpt('--group=GROUP_NAME', 'kill the specified process group');
         $commandHelp->addActionOpt('-f', 'force kill process');
         $commandHelp->addActionOpt('-d', 'display in mb format');
         return $commandHelp;
