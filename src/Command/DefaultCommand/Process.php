@@ -5,8 +5,10 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -20,61 +22,58 @@ class Process implements CommandInterface
 
     public function desc(): string
     {
-        return 'process manager';
+        return 'Process manager';
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
         $commandHelp->addAction('kill', 'kill process');
-        $commandHelp->addAction('killAll', 'killAll process');
-        $commandHelp->addAction('show', 'kill process');
-        $commandHelp->addActionOpt('-p', 'kill process');
-        $commandHelp->addActionOpt('-f', 'kill process');
-        $commandHelp->addActionOpt('-d', 'kill process');
+        $commandHelp->addAction('killAll', 'kill all processes');
+        $commandHelp->addAction('show', 'show all process information');
+        $commandHelp->addActionOpt('--pid=xxx', 'kill the specified pid');
+        $commandHelp->addActionOpt('--group=xxx', 'kill the specified process group');
+        $commandHelp->addActionOpt('-f', 'force kill process');
+        $commandHelp->addActionOpt('-d', 'display in mb format');
         return $commandHelp;
     }
 
-    function exec(): string
+    public function exec(): string
     {
         $run = new Scheduler();
-        $args = CommandManager::getInstance()->getArgs();
-        $run->add(function () use (&$result, $args) {
+        $action = CommandManager::getInstance()->getArg(0);
+        $run->add(function () use (&$result, $action) {
+            Core::getInstance()->initialize();
+
             $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
-            if ($package->getStatus() == \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
-                $data = $package->getArgs();
-            } else {
-                $result = $package->getMsg();
+
+            if ($package->getStatus() != \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+                return Color::error($package->getMsg());
             }
-            $data = $this->processInfoHandel($data, $args);
-            $action = array_shift($args);
-            switch ($action) {
-                case 'kill';
-                    $result = $this->kill($data, $args);
-                    break;
-                case 'killAll';
-                    $result = $this->killAll($data, $args);
-                    break;
-                case 'show';
-                    $result = $this->show($data, $args);
-                    break;
+
+            $data = $this->processInfoHandel($package->getArgs());
+
+            if (method_exists($this, $action)) {
+                $result = $this->$action($data);
             }
         });
         $run->start();
-        return $result;
+        return $result ?? '';
     }
 
-    protected function killProcess(array $list, $args = null)
+    protected function killProcess(array $list)
     {
         if (empty($list)) {
-            return 'not process was kill';
+            return Color::error('not process was kill');
         }
-        if (in_array('-f', $args)) {
+
+        if (CommandManager::getInstance()->issetOpt('f')) {
             $sig = SIGKILL;
             $option = 'SIGKILL';
         } else {
             $sig = SIGTERM;
             $option = 'SIGTERM';
         }
+
         foreach ($list as $pid => $value) {
             \Swoole\Process::kill($pid, $sig);
             $list[$pid]['option'] = $option;
@@ -82,39 +81,38 @@ class Process implements CommandInterface
         return new ArrayToTextTable($list);
     }
 
-    protected function kill($json, $args)
+    protected function kill($json)
     {
-        $pidOrGroupName = array_shift($args);
         $list = [];
-        foreach ($json as $pid => $value) {
-            if (in_array('-p', $args)) {
-                if ($value['pid'] == $pidOrGroupName) {
-                    $list[$pid] = $value;
-                }
-            } else {
-                if ($value['group'] == $pidOrGroupName) {
-                    $list[$pid] = $value;
-                }
+        $pid = CommandManager::getInstance()->getOpt('pid');
+        $groupName = CommandManager::getInstance()->getOpt('group');
+        foreach ($json as $key => $value) {
+            if ($value['pid'] == $pid) {
+                $list[$key] = $value;
+            }
+
+            if ($value['group'] == $groupName) {
+                $list[$key] = $value;
             }
         }
-        return $this->killProcess($list, $args);
+        return $this->killProcess($list);
     }
 
-    protected function killAll($json, $args)
+    protected function killAll($json)
     {
-        $list = $json;
-        return $this->killProcess($list, $args);
+        return $this->killProcess($json);
     }
 
-    protected function show($json, $args)
+    protected function show($json)
     {
         return new ArrayToTextTable($json);
     }
 
-    protected function processInfoHandel($json, $args)
+    protected function processInfoHandel($json)
     {
         $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
-        if (in_array('-d', $args)) {
+
+        if (CommandManager::getInstance()->issetOpt('d')) {
             foreach ($json as $key => $value) {
                 $json[$key]['memoryUsage'] = round($value['memoryUsage'] / pow(1024, ($i = floor(log($value['memoryUsage'], 1024)))), 2) . ' ' . $unit[$i];
                 $json[$key]['memoryPeakUsage'] = round($value['memoryPeakUsage'] / pow(1024, ($i = floor(log($value['memoryPeakUsage'], 1024)))), 2) . ' ' . $unit[$i];

@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\Utility\File;
 
@@ -23,7 +24,7 @@ class Install implements CommandInterface
 
     public function desc(): string
     {
-        return 'easyswoole install';
+        return 'Easyswoole framework installation';
     }
 
     public function exec(): string
@@ -39,8 +40,7 @@ class Install implements CommandInterface
         Utility::releaseResource(__DIR__ . '/../../Resource/bootstrap._php', EASYSWOOLE_ROOT . '/bootstrap.php');
         $this->updateComposerJson();
         $this->execComposerDumpAutoload();
-        $msg = "install success,enjoy!!!\ndont forget run composer dump-autoload !!!";
-        return $msg;
+        return Color::success("install success,enjoy!!!\ndont forget run composer dump-autoload !!!");
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface

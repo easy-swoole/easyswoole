@@ -27,46 +27,51 @@ class Server implements CommandInterface
 
     public function desc(): string
     {
-        return 'easyswoole server';
+        return 'Easyswoole server';
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addAction('start', '启动');
-        $commandHelp->addAction('stop', '停止');
-        $commandHelp->addAction('reload', '重启worker');
-        $commandHelp->addAction('restart', '重启EasySwoole');
-        $commandHelp->addAction('status', '查看EasySwoole状态');
-        $commandHelp->addActionOpt('-d', '守护进程方式启动');
-        $commandHelp->addActionOpt('-force', '强行停止');
-        $commandHelp->addActionOpt('-mode', '运行模式,默认dev模式');
+        $commandHelp->addAction('start', 'start-up');
+        $commandHelp->addAction('stop', 'stop it');
+        $commandHelp->addAction('reload', 'reload worker process');
+        $commandHelp->addAction('restart', 'restart EasySwoole server');
+        $commandHelp->addAction('status', 'view EasySwoole status');
+        $commandHelp->addActionOpt('-d', 'start as a daemon');
+        $commandHelp->addActionOpt('-force', 'stop by force');
+        $commandHelp->addActionOpt('-mode', 'run mode, default dev mode');
         return $commandHelp;
     }
 
     public function exec(): string
     {
         $action = CommandManager::getInstance()->getArg(0);
+
         if (method_exists($this, $action)) {
-            Core::getInstance()->initialize();
-            return $this->$action();
-        } else {
-            if (!empty($action)) {
-                return Color::warning("The command '{$action}' is not exists!");
-            } else {
-                return '';
+
+            //判定运行模式，运行模式会影响加载的配置项
+            $mode = CommandManager::getInstance()->getOpt('mode');
+            if(!empty($mode)){
+                Core::getInstance()->runMode($mode);
             }
+
+            Core::getInstance()->initialize();
+            $result = $this->$action();
         }
 
+        return $result ?? '';
     }
 
     protected function start()
     {
         $conf = Config::getInstance();
-        $conf->setConf("MAIN_SERVER.SETTING.daemonize", true);
 
-        // php easyswoole start -d
+        // php easyswoole server start -d
         $daemonize = CommandManager::getInstance()->issetOpt('d');
-        $conf->setConf("MAIN_SERVER.SETTING.daemonize", $daemonize);
+
+        if ($daemonize) {
+            $conf->setConf("MAIN_SERVER.SETTING.daemonize", $daemonize);
+        }
 
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         $displayItem = [];
@@ -102,7 +107,7 @@ class Server implements CommandInterface
         $displayItem['swoole version'] = phpversion('swoole');
         $displayItem['php version'] = phpversion();
         $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
-        $displayItem['develop/produce'] = Core::getInstance()->runMode() ? 'dev' : 'produce';
+        $displayItem['run mode'] = Core::getInstance()->runMode();
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
 
@@ -112,7 +117,7 @@ class Server implements CommandInterface
         }
         echo $msg;
         Core::getInstance()->createServer()->start();
-        return 'success';
+        return 'The service stopped running';
     }
 
     protected function stop()
@@ -122,7 +127,7 @@ class Server implements CommandInterface
         if (file_exists($pidFile)) {
             $pid = intval(file_get_contents($pidFile));
             if (!\Swoole\Process::kill($pid, 0)) {
-                $msg = "pid :{$pid} not exist ";
+                $msg = Color::danger("pid :{$pid} not exist ");
                 unlink($pidFile);
             } else {
                 $force = CommandManager::getInstance()->issetOpt('force');
@@ -140,17 +145,18 @@ class Server implements CommandInterface
                             unlink($pidFile);
                         }
                         $msg = "server stop for pid {$pid} at " . date("Y-m-d H:i:s");
+                        $msg = Color::success($msg);
                         break;
                     } else {
                         if (time() - $time > 15) {
-                            $msg = "stop server fail for pid:{$pid} , try [php easyswoole stop force] again";
+                            $msg = Color::danger("stop server fail for pid:{$pid} , try [php easyswoole server stop -force] again");
                             break;
                         }
                     }
                 }
             }
         } else {
-            $msg = "pid file does not exist, please check whether to run in the daemon mode!";
+            $msg = Color::danger("pid file does not exist, please check whether to run in the daemon mode!");
         }
         return $msg;
     }
@@ -162,13 +168,14 @@ class Server implements CommandInterface
             Utility::opCacheClear();
             $pid = file_get_contents($pidFile);
             if (!\Swoole\Process::kill($pid, 0)) {
-                $msg = "pid :{$pid} not exist ";
+                $msg = Color::danger("pid :{$pid} not exist ");
             } else {
                 \Swoole\Process::kill($pid, SIGUSR1);
                 $msg = "send server reload command to pid:{$pid} at " . date("Y-m-d H:i:s");
+                $msg = Color::success($msg);
             }
         } else {
-            $msg = "pid file does not exist, please check whether to run in the daemon mode!";
+            $msg = Color::danger("pid file does not exist, please check whether to run in the daemon mode!");
         }
         return $msg;
     }
@@ -182,10 +189,9 @@ class Server implements CommandInterface
 
     protected function status()
     {
-        $args = CommandManager::getInstance()->getArgs();
         $run = new Scheduler();
-        $run->add(function () use (&$result, $args) {
-            $result = Utility::bridgeCall($this->commandName(), function (Package $package) {
+        $run->add(function () use (&$result) {
+            $result = Utility::bridgeCall('status', function (Package $package) {
                 $data = $package->getArgs();
                 $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
                 $msg = '';
