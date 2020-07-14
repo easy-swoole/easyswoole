@@ -70,6 +70,12 @@ class Core
         defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER', 1);
         defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER', 2);
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER', 3);
+        $eventFile = EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
+        if(!file_exists($eventFile)){
+            die(Color::red('EasySwooleEvent.php file miss ,check again'));
+        }else{
+            require_once $eventFile;
+        }
     }
 
     function runMode(?string $mode = null): string
@@ -88,10 +94,7 @@ class Core
         $this->sysDirectoryInit();
         //注册错误回调
         $this->registerErrorHandler();
-        $hook = Di::getInstance()->get(SysConst::EVENT_INITIALIZE);
-        if (is_callable($hook)) {
-            call_user_func($hook);
-        }
+        EasySwooleEvent::initialize();
         return $this;
     }
 
@@ -101,11 +104,7 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'], $conf['SERVER_TYPE'], $conf['LISTEN_ADDRESS'], $conf['SETTING'], $conf['RUN_MODEL'], $conf['SOCK_TYPE']
         );
-        $hook = Di::getInstance()->get(SysConst::EVENT_SERVER_CREATE);
-        $ret = null;
-        if (is_callable($hook)) {
-            $ret = call_user_func($hook, ServerManager::getInstance()->getMainEventRegister());
-        }
+        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
         //如果返回false,说明用户希望接管全部事件
         if ($ret !== false) {
             $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(), $conf['SERVER_TYPE']);
