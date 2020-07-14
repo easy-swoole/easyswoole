@@ -39,7 +39,7 @@ class Server implements CommandInterface
         $commandHelp->addAction('status', 'view EasySwoole status');
         $commandHelp->addActionOpt('-d', 'start as a daemon');
         $commandHelp->addActionOpt('-force', 'stop by force');
-        $commandHelp->addActionOpt('-mode', 'run mode, default dev mode');
+        $commandHelp->addActionOpt('-mode=dev', 'run mode,dev is default mode');
         return $commandHelp;
     }
 
