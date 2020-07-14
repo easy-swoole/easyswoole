@@ -21,7 +21,7 @@ class Config extends AbstractCommand
         $data = $package->getArgs();
         if (empty($data['key'])) {
             $configArray = GlobalConfig::getInstance()->toArray();
-            $configArray['mode'] = Core::getInstance()->isDev() ? 'develop' : 'produce';
+            $configArray['run_mode'] = Core::getInstance()->runMode();
         } else {
             $configArray = GlobalConfig::getInstance()->getConf($data['key']);
             $configArray = [$data['key'] => $configArray];

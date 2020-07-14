@@ -1,14 +1,14 @@
 <?php
 
-
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
-
 
 use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -21,7 +21,7 @@ class Crontab implements CommandInterface
 
     public function desc(): string
     {
-        return 'crontab manager';
+        return 'Crontab manager';
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
@@ -30,50 +30,49 @@ class Crontab implements CommandInterface
         $commandHelp->addAction('stop', 'stop crontab');
         $commandHelp->addAction('resume', 'resume crontab');
         $commandHelp->addAction('run', 'run crontab');
+        $commandHelp->addActionOpt('--name', 'the taskname to be operated on');
         return $commandHelp;
     }
 
     public function exec(): string
     {
-        $args = CommandManager::getInstance()->getArgs();
+        $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
-        $run->add(function () use (&$result, $args) {
-            $action = array_shift($args);
+        $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action)) {
-                $result = $this->{$action}($args);
-            } else {
-                $result = '';
+                Core::getInstance()->initialize();
+                $result = $this->{$action}();
             }
         });
         $run->start();
-        return $result;
+        return $result ?? '';
     }
 
-    protected function stop($args)
+    protected function stop()
     {
-        $taskName = array_shift($args);
+        $taskName = CommandManager::getInstance()->getOpt('name');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
-            return $data . PHP_EOL . $this->show()->getMsg();
+            return Color::success($data) . PHP_EOL . $this->show();
         }, 'stop', ['taskName' => $taskName]);
     }
 
 
-    protected function resume($args)
+    protected function resume()
     {
-        $taskName = array_shift($args);
+        $taskName = CommandManager::getInstance()->getOpt('name');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
-            return $data . PHP_EOL . $this->show()->getMsg();
+            return Color::success($data) . PHP_EOL . $this->show();
         }, 'resume', ['taskName' => $taskName]);
     }
 
-    protected function run($args)
+    protected function run()
     {
-        $taskName = array_shift($args);
+        $taskName = CommandManager::getInstance()->getOpt('name');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
-            return $data . PHP_EOL . $this->show()->getMsg();
+            return Color::success($data) . PHP_EOL . $this->show();
         }, 'run', ['taskName' => $taskName]);
     }
 

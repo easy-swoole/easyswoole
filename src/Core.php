@@ -9,6 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\Command\Color;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
@@ -31,7 +32,7 @@ use EasySwoole\Task\Config as TaskConfig;
 use Swoole\Server;
 use Swoole\Timer;
 use Swoole\Http\Request as SwooleRequest;
-use Swoole\Http\Response  as SwooleResponse;
+use Swoole\Http\Response as SwooleResponse;
 use Swoole\Event as SwooleEvent;
 
 ////////////////////////////////////////////////////////////////////
@@ -64,16 +65,16 @@ class Core
 
     function __construct()
     {
-        defined('SWOOLE_VERSION') or define('SWOOLE_VERSION',intval(phpversion('swoole')));
+        defined('SWOOLE_VERSION') or define('SWOOLE_VERSION', intval(phpversion('swoole')));
         defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', realpath(getcwd()));
-        defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER',1);
-        defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER',2);
-        defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER',3);
+        defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER', 1);
+        defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER', 2);
+        defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER', 3);
     }
 
-    function runMode(?string $mode = null):string
+    function runMode(?string $mode = null): string
     {
-        if(!empty($mode)){
+        if (!empty($mode)) {
             $this->runMode = $mode;
         }
         return $this->runMode;
@@ -88,7 +89,7 @@ class Core
         //注册错误回调
         $this->registerErrorHandler();
         $hook = Di::getInstance()->get(SysConst::EVENT_INITIALIZE);
-        if(is_callable($hook)){
+        if (is_callable($hook)) {
             call_user_func($hook);
         }
         return $this;
@@ -98,16 +99,16 @@ class Core
     {
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
         ServerManager::getInstance()->createSwooleServer(
-            $conf['PORT'],$conf['SERVER_TYPE'],$conf['LISTEN_ADDRESS'],$conf['SETTING'],$conf['RUN_MODEL'],$conf['SOCK_TYPE']
+            $conf['PORT'], $conf['SERVER_TYPE'], $conf['LISTEN_ADDRESS'], $conf['SETTING'], $conf['RUN_MODEL'], $conf['SOCK_TYPE']
         );
         $hook = Di::getInstance()->get(SysConst::EVENT_SERVER_CREATE);
         $ret = null;
-        if(is_callable($hook)){
-            $ret = call_user_func($hook,ServerManager::getInstance()->getMainEventRegister());
+        if (is_callable($hook)) {
+            $ret = call_user_func($hook, ServerManager::getInstance()->getMainEventRegister());
         }
         //如果返回false,说明用户希望接管全部事件
-        if($ret !== false){
-            $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(),$conf['SERVER_TYPE']);
+        if ($ret !== false) {
+            $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(), $conf['SERVER_TYPE']);
         }
         $this->extraHandler();
         return $this;
@@ -117,36 +118,36 @@ class Core
     {
         //给主进程也命名
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
-        if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
+        if (!in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
             cli_set_process_title($serverName);
         }
         //启动
         ServerManager::getInstance()->start();
     }
 
-    private function sysDirectoryInit():void
+    private function sysDirectoryInit(): void
     {
         //创建临时目录    请以绝对路径，不然守护模式运行会有问题
         $tempDir = Config::getInstance()->getConf('TEMP_DIR');
-        if(empty($tempDir)){
-            $tempDir = EASYSWOOLE_ROOT.'/Temp';
-            Config::getInstance()->setConf('TEMP_DIR',$tempDir);
-        }else{
-            $tempDir = rtrim($tempDir,'/');
+        if (empty($tempDir)) {
+            $tempDir = EASYSWOOLE_ROOT . '/Temp';
+            Config::getInstance()->setConf('TEMP_DIR', $tempDir);
+        } else {
+            $tempDir = rtrim($tempDir, '/');
         }
-        if(!is_dir($tempDir)){
+        if (!is_dir($tempDir)) {
             File::createDirectory($tempDir);
         }
-        defined('EASYSWOOLE_TEMP_DIR') or define('EASYSWOOLE_TEMP_DIR',$tempDir);
+        defined('EASYSWOOLE_TEMP_DIR') or define('EASYSWOOLE_TEMP_DIR', $tempDir);
 
         $logDir = Config::getInstance()->getConf('LOG_DIR');
-        if(empty($logDir)){
-            $logDir = EASYSWOOLE_ROOT.'/Log';
-            Config::getInstance()->setConf('LOG_DIR',$logDir);
-        }else{
-            $logDir = rtrim($logDir,'/');
+        if (empty($logDir)) {
+            $logDir = EASYSWOOLE_ROOT . '/Log';
+            Config::getInstance()->setConf('LOG_DIR', $logDir);
+        } else {
+            $logDir = rtrim($logDir, '/');
         }
-        if(!is_dir($logDir)){
+        if (!is_dir($logDir)) {
             File::createDirectory($logDir);
         }
         defined('EASYSWOOLE_LOG_DIR') or define('EASYSWOOLE_LOG_DIR', $logDir);
@@ -164,106 +165,106 @@ class Core
     {
         ini_set("display_errors", "On");
         $level = Di::getInstance()->get(SysConst::ERROR_REPORT_LEVEL);
-        if($level === null){
+        if ($level === null) {
             $level = E_ALL;
         }
         error_reporting($level);
 
         //初始化配置Logger
         $logger = Di::getInstance()->get(SysConst::LOGGER_HANDLER);
-        if(!$logger instanceof LoggerInterface){
+        if (!$logger instanceof LoggerInterface) {
             $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR);
         }
         Logger::getInstance($logger);
 
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
-        if(!$trigger instanceof TriggerInterface){
+        if (!$trigger instanceof TriggerInterface) {
             $trigger = new DefaultTrigger(Logger::getInstance());
         }
         Trigger::getInstance($trigger);
 
         //在没有配置自定义错误处理器的情况下，转化为trigger处理
         $errorHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
-        if(!is_callable($errorHandler)){
-            $errorHandler = function($errorCode, $description, $file = null, $line = null){
+        if (!is_callable($errorHandler)) {
+            $errorHandler = function ($errorCode, $description, $file = null, $line = null) {
                 $l = new Location();
                 $l->setFile($file);
                 $l->setLine($line);
-                Trigger::getInstance()->error($description,$errorCode,$l);
+                Trigger::getInstance()->error($description, $errorCode, $l);
             };
         }
         set_error_handler($errorHandler);
 
         $func = Di::getInstance()->get(SysConst::SHUTDOWN_FUNCTION);
-        if(!is_callable($func)){
-            $func = function (){
+        if (!is_callable($func)) {
+            $func = function () {
                 $error = error_get_last();
-                if(!empty($error)){
+                if (!empty($error)) {
                     $l = new Location();
                     $l->setFile($error['file']);
                     $l->setLine($error['line']);
-                    Trigger::getInstance()->error($error['message'],$error['type'],$l);
+                    Trigger::getInstance()->error($error['message'], $error['type'], $l);
                 }
             };
         }
         register_shutdown_function($func);
     }
 
-    private function registerDefaultCallBack(\Swoole\Server $server,int $serverType)
+    private function registerDefaultCallBack(\Swoole\Server $server, int $serverType)
     {
         /*
          * 注册默认回调
          */
-        if(in_array($serverType,[EASYSWOOLE_WEB_SERVER,EASYSWOOLE_WEB_SOCKET_SERVER],true)){
+        if (in_array($serverType, [EASYSWOOLE_WEB_SERVER, EASYSWOOLE_WEB_SOCKET_SERVER], true)) {
             $namespace = Di::getInstance()->get(SysConst::HTTP_CONTROLLER_NAMESPACE);
-            if(empty($namespace)){
+            if (empty($namespace)) {
                 $namespace = 'App\\HttpController\\';
             }
             $depth = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_MAX_DEPTH));
             $depth = $depth > 5 ? $depth : 5;
             $max = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM));
-            if($max == 0){
+            if ($max == 0) {
                 $max = 500;
             }
             $waitTime = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_WAIT_TIME));
-            if($waitTime == 0){
+            if ($waitTime == 0) {
                 $waitTime = 5;
             }
-            $dispatcher = Dispatcher::getInstance($namespace,$depth,$max);
+            $dispatcher = Dispatcher::getInstance($namespace, $depth, $max);
             $dispatcher->setControllerPoolWaitTime($waitTime);
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
-            if(!is_callable($httpExceptionHandler)){
-                $httpExceptionHandler = function ($throwable,$request,$response){
+            if (!is_callable($httpExceptionHandler)) {
+                $httpExceptionHandler = function ($throwable, $request, $response) {
                     $response->withStatus(Status::CODE_INTERNAL_SERVER_ERROR);
-                    $response->write(nl2br($throwable->getMessage()."\n".$throwable->getTraceAsString()));
+                    $response->write(nl2br($throwable->getMessage() . "\n" . $throwable->getTraceAsString()));
                     Trigger::getInstance()->throwable($throwable);
                 };
-                Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER,$httpExceptionHandler);
+                Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER, $httpExceptionHandler);
             }
             $dispatcher->setHttpExceptionHandler($httpExceptionHandler);
             $requestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
             $afterRequestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
-            EventHelper::on($server,EventRegister::onRequest,function (SwooleRequest $request,SwooleResponse $response)use($dispatcher,$requestHook,$afterRequestHook){
+            EventHelper::on($server, EventRegister::onRequest, function (SwooleRequest $request, SwooleResponse $response) use ($dispatcher, $requestHook, $afterRequestHook) {
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
-                try{
+                try {
                     $ret = null;
-                    if(is_callable($requestHook)){
-                        $ret = call_user_func($requestHook,$request_psr,$response_psr);
+                    if (is_callable($requestHook)) {
+                        $ret = call_user_func($requestHook, $request_psr, $response_psr);
                     }
-                    if($ret !== false){
-                        $dispatcher->dispatch($request_psr,$response_psr);
+                    if ($ret !== false) {
+                        $dispatcher->dispatch($request_psr, $response_psr);
                     }
-                }catch (\Throwable $throwable){
-                    call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
-                }finally{
-                    try{
-                        if(is_callable($afterRequestHook)){
-                            call_user_func($afterRequestHook,$request_psr,$response_psr);
+                } catch (\Throwable $throwable) {
+                    call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER), $throwable, $request_psr, $response_psr);
+                } finally {
+                    try {
+                        if (is_callable($afterRequestHook)) {
+                            call_user_func($afterRequestHook, $request_psr, $response_psr);
                         }
-                    }catch (\Throwable $throwable){
-                        call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER),$throwable,$request_psr,$response_psr);
+                    } catch (\Throwable $throwable) {
+                        call_user_func(Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER), $throwable, $request_psr, $response_psr);
                     }
                 }
                 $response_psr->__response();
@@ -272,32 +273,32 @@ class Core
 
         $register = ServerManager::getInstance()->getMainEventRegister();
         //注册默认的worker start
-        EventHelper::registerWithAdd($register,EventRegister::onWorkerStart,function (Server $server,$workerId){
+        EventHelper::registerWithAdd($register, EventRegister::onWorkerStart, function (Server $server, $workerId) {
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
             $type = 'Unknown';
-            if(($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0){
+            if (($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0) {
                 $type = 'Worker';
             }
             $processName = "{$serverName}.{$type}.{$workerId}";
-            if(!in_array(PHP_OS,['Darwin','CYGWIN','WINNT'])){
+            if (!in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
                 cli_set_process_title($processName);
             }
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
-            $table->set($pid,[
-                'pid'=>$pid,
-                'name'=>$processName,
-                'group'=>"{$serverName}.Worker"
+            $table->set($pid, [
+                'pid' => $pid,
+                'name' => $processName,
+                'group' => "{$serverName}.Worker"
             ]);
-            Timer::tick(1*1000,function ()use($table,$pid){
-                $table->set($pid,[
-                    'memoryUsage'=>memory_get_usage(),
-                    'memoryPeakUsage'=>memory_get_peak_usage(true)
+            Timer::tick(1 * 1000, function () use ($table, $pid) {
+                $table->set($pid, [
+                    'memoryUsage' => memory_get_usage(),
+                    'memoryPeakUsage' => memory_get_peak_usage(true)
                 ]);
             });
         });
 
-        EventHelper::registerWithAdd($register,$register::onWorkerStop,function (){
+        EventHelper::registerWithAdd($register, $register::onWorkerStop, function () {
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->del($pid);
@@ -308,7 +309,7 @@ class Core
         /*
          * 开启reload async的时候，清理事件
          */
-        EventHelper::registerWithAdd($register,$register::onWorkerExit,function (){
+        EventHelper::registerWithAdd($register, $register::onWorkerExit, function () {
             Timer::clearAll();
             SwooleEvent::exit();
         });
@@ -316,9 +317,9 @@ class Core
 
     public function loadEnv()
     {
-        $file = EASYSWOOLE_ROOT."/{$this->runMode}.php";
-        if(!file_exists($file)){
-            die("can not load config file {$this->runMode}.php");
+        $file = EASYSWOOLE_ROOT . "/{$this->runMode}.php";
+        if (!file_exists($file)) {
+            die(Color::error("can not load config file {$this->runMode}.php") . "\n");
         }
         Config::getInstance()->loadFile($file);
     }
@@ -333,7 +334,7 @@ class Core
         $config = new TaskConfig($config);
         $config->setTempDir(EASYSWOOLE_TEMP_DIR);
         $config->setServerName($serverName);
-        $config->setOnException(function (\Throwable $throwable){
+        $config->setOnException(function (\Throwable $throwable) {
             Trigger::getInstance()->throwable($throwable);
         });
         $server = ServerManager::getInstance()->getSwooleServer();
@@ -341,6 +342,6 @@ class Core
         //初始化进程管理器
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
-        Bridge::getInstance()->attachServer($server,$serverName);
+        Bridge::getInstance()->attachServer($server, $serverName);
     }
 }

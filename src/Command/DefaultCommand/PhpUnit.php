@@ -19,14 +19,13 @@ class PhpUnit implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addActionOpt('--no-coroutine','不开启协程测试');
-        $commandHelp->addActionOpt('--no-','不开启协程测试');
+        $commandHelp->addActionOpt('--no-coroutine', 'close coroutine');
         return $commandHelp;
     }
 
     public function desc(): string
     {
-        return '单元测试';
+        return 'Unit testing';
     }
 
     public function exec(): string
@@ -39,18 +38,19 @@ class PhpUnit implements CommandInterface
         }
 
         $argv = CommandManager::getInstance()->getOriginArgv();
+
+        // remove phpunit
         array_shift($argv);
-        $key = array_search('produce', $argv);
-        if ($key) {
-            unset($argv[$key]);
-        }
+
         $key = array_search('--no-coroutine', $argv);
-        if ($key) {
+
+        if ($key !== false) {
             $noCoroutine = true;
             unset($argv[$key]);
         } else {
             $noCoroutine = false;
         }
+
         $_SERVER['argv'] = $argv;
         if (!class_exists(Runner::class)) {
             echo "please require easyswoole/phpunit at first \n";

@@ -10,6 +10,7 @@ use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -22,34 +23,32 @@ class Task implements CommandInterface
 
     public function desc(): string
     {
-        return 'task manager';
+        return 'Task manager';
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addAction('status', 'task status');
+        $commandHelp->addAction('status', 'status of the task');
         return $commandHelp;
     }
 
     public function exec(): string
     {
-        $args = CommandManager::getInstance()->getArgs();
+        $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
-        $run->add(function () use (&$result, $args) {
-            $action = array_shift($args);
+        $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action)) {
-                $result = $this->{$action}($args);
-            } else {
-                $result = '';
+                Core::getInstance()->initialize();
+                $result = $this->{$action}();
             }
         });
         $run->start();
-        return $result;
+        return $result ?? '';
     }
 
     protected function status()
     {
-        return Utility::bridgeCall($this->commandName(), function (Package $package, Result $result) {
+        return Utility::bridgeCall($this->commandName(), function (Package $package) {
             return new ArrayToTextTable($package->getArgs());
         }, 'info');
     }
