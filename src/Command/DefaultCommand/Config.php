@@ -29,8 +29,8 @@ class Config implements CommandInterface
     {
         $commandHelp->addAction('show', 'show all configs');
         $commandHelp->addAction('set', 'set config');
-        $commandHelp->addActionOpt('--appoint=xxx', 'display the specified key, example --appoint=SERVER_NAME');
-        $commandHelp->addActionOpt('--key=value', 'key value pair[...key=value]');
+        $commandHelp->addActionOpt('--appoint=CONFIG_KEY', 'display the specified key, example --appoint=LOG_DIR');
+        $commandHelp->addActionOpt('--CONFIG_KEY=CONFIG_VALUE', 'key value pair[...key=value] example --title=easywoole');
         return $commandHelp;
     }
 

@@ -26,11 +26,11 @@ class Crontab implements CommandInterface
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
-        $commandHelp->addAction('show', 'show crontab');
-        $commandHelp->addAction('stop', 'stop crontab');
-        $commandHelp->addAction('resume', 'resume crontab');
-        $commandHelp->addAction('run', 'run crontab');
-        $commandHelp->addActionOpt('--name', 'the taskname to be operated on');
+        $commandHelp->addAction('show', 'show all crontab');
+        $commandHelp->addAction('stop', 'stops the specified crontab');
+        $commandHelp->addAction('resume', 'restores the specified crontab');
+        $commandHelp->addAction('run', 'run the specified crontab once immediately');
+        $commandHelp->addActionOpt('--name=TASK_NAME', 'the taskname to be operated on');
         return $commandHelp;
     }
 
