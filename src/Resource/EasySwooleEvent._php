@@ -4,9 +4,10 @@
 namespace EasySwoole\EasySwoole;
 
 
+use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 
-class EasySwooleEvent
+class EasySwooleEvent implements Event
 {
     public static function initialize()
     {
