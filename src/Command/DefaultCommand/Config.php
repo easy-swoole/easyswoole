@@ -9,6 +9,7 @@ use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Command\Utility;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -21,35 +22,35 @@ class Config implements CommandInterface
 
     public function desc(): string
     {
-        return 'config manager';
+        return 'Config manager';
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
         $commandHelp->addAction('show', 'show all configs');
         $commandHelp->addAction('set', 'set config');
+        $commandHelp->addActionOpt('--appoint=CONFIG_KEY', 'display the specified key, example --appoint=LOG_DIR');
+        $commandHelp->addActionOpt('--CONFIG_KEY=CONFIG_VALUE', 'key value pair[...key=value] example --title=easywoole');
         return $commandHelp;
     }
 
     public function exec(): string
     {
-        $args = CommandManager::getInstance()->getArgs();
+        $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
-        $run->add(function () use (&$result, $args) {
-            $action = array_shift($args);
+        $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action)) {
-                $result = $this->{$action}($args);
-            } else {
-                $result = '';
+                Core::getInstance()->initialize();
+                $result = $this->{$action}();
             }
         });
         $run->start();
-        return $result;
+        return $result ?? '';
     }
 
-    protected function show($args)
+    protected function show()
     {
-        $key = array_shift($args);
+        $key = CommandManager::getInstance()->getOpt('appoint');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $this->arrayConversion('', $package->getArgs());
             $data = $this->handelArray($data);
@@ -57,15 +58,20 @@ class Config implements CommandInterface
         }, 'info', ['key' => $key]);
     }
 
-    protected function set($args)
+    protected function set()
     {
-        $key = array_shift($args);
-        $value = array_shift($args);
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $this->arrayConversion('', $package->getArgs());
-            $data = $this->handelArray($data);
-            return new ArrayToTextTable($data);
-        }, 'set', ['key' => $key, 'value' => $value]);
+        $data = CommandManager::getInstance()->getOpts();
+
+        $result = '';
+
+        foreach ($data as $key => $value) {
+            $result .= Utility::bridgeCall($this->commandName(), function (Package $package) {
+                $data = $this->arrayConversion('', $package->getArgs());
+                $data = $this->handelArray($data);
+                return new ArrayToTextTable($data);
+            }, 'set', ['key' => $key, 'value' => $value]);
+        }
+        return $result;
     }
 
     protected function handelArray($array)

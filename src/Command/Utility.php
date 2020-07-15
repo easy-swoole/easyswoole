@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole\Command;
 
 
 use EasySwoole\Bridge\Package;
+use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\Utility\File;
 
@@ -48,7 +49,7 @@ LOGO;
         $replace = true;
         if (is_file($destination)) {
             $filename = basename($destination);
-            echo "{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ";
+            echo Color::danger("{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ");
             $answer = strtolower(trim(strtoupper(fgets(STDIN))));
             if (!in_array($answer, ['y', 'yes'])) {
                 $replace = false;
@@ -76,7 +77,7 @@ LOGO;
         if ($package->getStatus() == Package::STATUS_SUCCESS) {
             $result = call_user_func($function, $package);
         } else {
-            $result = $package->getMsg();
+            $result = Color::error($package->getMsg());
         }
         return $result;
     }

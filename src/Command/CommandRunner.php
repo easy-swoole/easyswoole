@@ -53,13 +53,10 @@ class CommandRunner
             call_user_func($this->beforeCommand, $caller);
         }
         Utility::opCacheClear();
-        //判定运行模式，运行模式会影响加载的配置项
-        $mode = CommandManager::getInstance()->getOpt('mode');
-        if(!empty($mode)){
-            Core::getInstance()->runMode($mode);
-        }
-        $result = new Result();
+
         $msg = CommandManager::getInstance()->run($caller->getParams());
+
+        $result = new Result();
         $result->setMsg(Color::green(Utility::easySwooleLog()) . $msg);
         return $result;
     }
