@@ -42,17 +42,16 @@ class Process implements CommandInterface
         $run = new Scheduler();
         $action = CommandManager::getInstance()->getArg(0);
         $run->add(function () use (&$result, $action) {
-            Core::getInstance()->initialize();
-
-            $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
-
-            if ($package->getStatus() != \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
-                return Color::error($package->getMsg());
-            }
-
-            $data = $this->processInfoHandel($package->getArgs());
-
             if (method_exists($this, $action)) {
+                Core::getInstance()->initialize();
+
+                $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
+                if ($package->getStatus() != \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+                    $result = Color::error($package->getMsg());
+                    return;
+                }
+
+                $data = $this->processInfoHandel($package->getArgs());
                 $result = $this->$action($data);
             }
         });
