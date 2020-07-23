@@ -59,7 +59,9 @@ class Server implements CommandInterface
             $result = $this->$action();
         }
 
-        return $result ?? '';
+        Color::green(Utility::easySwooleLog()) ;
+
+        return Color::green(Utility::easySwooleLog()) . ($result ?? '');
     }
 
     protected function start()

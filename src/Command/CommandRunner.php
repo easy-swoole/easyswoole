@@ -11,7 +11,6 @@ namespace EasySwoole\EasySwoole\Command;
 
 use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
-use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\Command\Result;
 use EasySwoole\Component\Singleton;
@@ -22,7 +21,6 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Config as ConfigCommand;
-use EasySwoole\EasySwoole\Core;
 
 
 class CommandRunner
@@ -57,7 +55,7 @@ class CommandRunner
         $msg = CommandManager::getInstance()->run($caller->getParams());
 
         $result = new Result();
-        $result->setMsg(Color::green(Utility::easySwooleLog()) . $msg);
+        $result->setMsg($msg);
         return $result;
     }
 }
