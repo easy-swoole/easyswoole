@@ -92,14 +92,20 @@ class ServerManager
         return $eventRegister;
     }
 
-    function getMainEventRegister():EventRegister
+    function getEventRegister(string $serverName = null):?EventRegister
     {
-        return $this->mainServerEventRegister;
+        if($serverName === null){
+            return $this->mainServerEventRegister;
+        }else if(isset($this->subServerRegister[$serverName])){
+            return $this->subServerRegister[$serverName];
+        }
+        return null;
     }
 
     function start()
     {
-        $events = $this->getMainEventRegister()->all();
+        //注册主服务事件回调
+        $events = $this->getEventRegister()->all();
         foreach ($events as $event => $callback){
             $this->getSwooleServer()->on($event, function (...$args) use ($callback) {
                 foreach ($callback as $item) {
@@ -107,18 +113,7 @@ class ServerManager
                 }
             });
         }
-        $this->registerSubPortCallback();
-        $this->isStart = true;
-        $this->getSwooleServer()->start();
-    }
-
-    function isStart():bool
-    {
-        return $this->isStart;
-    }
-
-    private function registerSubPortCallback():void
-    {
+        //注册子服务的事件回调
         foreach ($this->subServer as $serverName => $subPort ){
             $events = $this->subServerRegister[$serverName]['eventRegister']->all();
             foreach ($events as $event => $callback){
@@ -129,10 +124,12 @@ class ServerManager
                 });
             }
         }
+        $this->isStart = true;
+        $this->getSwooleServer()->start();
     }
 
-    function getSubServerRegister():array
+    function isStart():bool
     {
-        return $this->subServerRegister;
+        return $this->isStart;
     }
 }

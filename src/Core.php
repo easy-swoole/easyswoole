@@ -104,7 +104,7 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'], $conf['SERVER_TYPE'], $conf['LISTEN_ADDRESS'], $conf['SETTING'], $conf['RUN_MODEL'], $conf['SOCK_TYPE']
         );
-        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getMainEventRegister());
+        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getEventRegister());
         //如果返回false,说明用户希望接管全部事件
         if ($ret !== false) {
             $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(), $conf['SERVER_TYPE']);
@@ -270,7 +270,7 @@ class Core
             });
         }
 
-        $register = ServerManager::getInstance()->getMainEventRegister();
+        $register = ServerManager::getInstance()->getEventRegister();
         //注册默认的worker start
         EventHelper::registerWithAdd($register, EventRegister::onWorkerStart, function (Server $server, $workerId) {
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
