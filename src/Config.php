@@ -79,7 +79,7 @@ class Config
     public function loadFile($filePath,bool $merge = true):bool
     {
         if (file_exists($filePath)) {
-            $confData = require_once $filePath;
+            $confData = include $filePath;
             if(is_array($confData)){
                 if($merge){
                     $this->conf->merge($confData);
