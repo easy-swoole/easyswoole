@@ -8,7 +8,6 @@ use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\CommandManager;
-use EasySwoole\Command\Result;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
@@ -32,7 +31,7 @@ class Task implements CommandInterface
         return $commandHelp;
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
@@ -40,10 +39,13 @@ class Task implements CommandInterface
             if (method_exists($this, $action)) {
                 Core::getInstance()->initialize();
                 $result = $this->{$action}();
+                return;
             }
+
+            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
         $run->start();
-        return $result ?? '';
+        return $result;
     }
 
     protected function status()

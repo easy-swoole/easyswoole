@@ -34,7 +34,7 @@ class Crontab implements CommandInterface
         return $commandHelp;
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
@@ -42,10 +42,13 @@ class Crontab implements CommandInterface
             if (method_exists($this, $action)) {
                 Core::getInstance()->initialize();
                 $result = $this->{$action}();
+                return;
             }
+
+            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
         $run->start();
-        return $result ?? '';
+        return $result;
     }
 
     protected function stop()

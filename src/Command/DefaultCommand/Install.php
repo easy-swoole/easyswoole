@@ -27,7 +27,7 @@ class Install implements CommandInterface
         return 'Easyswoole framework installation';
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
             unlink(EASYSWOOLE_ROOT . '/easyswoole');
