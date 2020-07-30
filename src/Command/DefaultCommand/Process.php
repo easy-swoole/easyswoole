@@ -8,6 +8,7 @@ use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
@@ -37,7 +38,7 @@ class Process implements CommandInterface
         return $commandHelp;
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         $run = new Scheduler();
         $action = CommandManager::getInstance()->getArg(0);
@@ -46,17 +47,20 @@ class Process implements CommandInterface
                 Core::getInstance()->initialize();
 
                 $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
-                if ($package->getStatus() != \EasySwoole\Bridge\Package::STATUS_SUCCESS) {
+                if ($package->getStatus() != Package::STATUS_SUCCESS) {
                     $result = Color::error($package->getMsg());
                     return;
                 }
 
                 $data = $this->processInfoHandel($package->getArgs());
                 $result = $this->$action($data);
+                return;
             }
+
+            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
         $run->start();
-        return $result ?? '';
+        return $result;
     }
 
     protected function killProcess(array $list)

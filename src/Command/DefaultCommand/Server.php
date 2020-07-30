@@ -43,7 +43,7 @@ class Server implements CommandInterface
         return $commandHelp;
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
 
@@ -51,17 +51,16 @@ class Server implements CommandInterface
 
             //判定运行模式，运行模式会影响加载的配置项
             $mode = CommandManager::getInstance()->getOpt('mode');
-            if(!empty($mode)){
+            if (!empty($mode)) {
                 Core::getInstance()->runMode($mode);
             }
 
             Core::getInstance()->initialize();
-            $result = $this->$action();
+
+            return $this->$action();
         }
 
-        Color::green(Utility::easySwooleLog()) ;
-
-        return Color::green(Utility::easySwooleLog()) . ($result ?? '');
+        return CommandManager::getInstance()->displayCommandHelp($this->commandName());
     }
 
     protected function start()
@@ -113,13 +112,12 @@ class Server implements CommandInterface
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
 
-        $msg = '';
+        $msg = Color::green(Utility::easySwooleLog()) . "\n";
         foreach ($displayItem as $key => $value) {
             $msg .= Utility::displayItem($key, $value) . "\n";
         }
         echo $msg;
         Core::getInstance()->createServer()->start();
-        return 'The service stopped running';
     }
 
     protected function stop()

@@ -25,7 +25,11 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
 }
 
 $caller = new Caller();
+$caller->setScript(current($argv));
+$caller->setCommand(next($argv));
 $caller->setParams($argv);
+reset($argv);
+
 $ret = CommandRunner::getInstance()->run($caller);
 if($ret && !empty($ret->getMsg())){
     echo $ret->getMsg()."\n";

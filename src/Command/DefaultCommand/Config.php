@@ -7,6 +7,7 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
@@ -34,7 +35,7 @@ class Config implements CommandInterface
         return $commandHelp;
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
@@ -42,10 +43,13 @@ class Config implements CommandInterface
             if (method_exists($this, $action)) {
                 Core::getInstance()->initialize();
                 $result = $this->{$action}();
+                return;
             }
+
+            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
         $run->start();
-        return $result ?? '';
+        return $result;
     }
 
     protected function show()

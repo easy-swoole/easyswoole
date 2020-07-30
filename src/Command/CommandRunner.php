@@ -52,7 +52,7 @@ class CommandRunner
         }
         Utility::opCacheClear();
 
-        $msg = CommandManager::getInstance()->run($caller->getParams());
+        $msg = CommandManager::getInstance()->run($caller);
 
         $result = new Result();
         $result->setMsg($msg);

@@ -28,7 +28,7 @@ class PhpUnit implements CommandInterface
         return 'Unit testing';
     }
 
-    public function exec(): string
+    public function exec(): ?string
     {
         /*
          * 允许自动的执行一些初始化操作，只初始化一次
