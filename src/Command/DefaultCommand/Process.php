@@ -43,7 +43,7 @@ class Process implements CommandInterface
         $run = new Scheduler();
         $action = CommandManager::getInstance()->getArg(0);
         $run->add(function () use (&$result, $action) {
-            if (method_exists($this, $action)) {
+            if (method_exists($this, $action) && $action != 'help') {
                 Core::getInstance()->initialize();
 
                 $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);

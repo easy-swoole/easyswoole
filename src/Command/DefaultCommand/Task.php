@@ -36,7 +36,7 @@ class Task implements CommandInterface
         $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
-            if (method_exists($this, $action)) {
+            if (method_exists($this, $action) && $action != 'help') {
                 Core::getInstance()->initialize();
                 $result = $this->{$action}();
                 return;

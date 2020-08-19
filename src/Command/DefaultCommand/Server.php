@@ -47,7 +47,7 @@ class Server implements CommandInterface
     {
         $action = CommandManager::getInstance()->getArg(0);
 
-        if (method_exists($this, $action)) {
+        if (method_exists($this, $action) && $action != 'help') {
 
             //判定运行模式，运行模式会影响加载的配置项
             $mode = CommandManager::getInstance()->getOpt('mode');
