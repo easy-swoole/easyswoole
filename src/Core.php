@@ -92,9 +92,10 @@ class Core
         $this->loadEnv();
         //临时文件和Log目录初始化
         $this->sysDirectoryInit();
+        // 初始化initialize
+        EasySwooleEvent::initialize();
         //注册错误回调
         $this->registerErrorHandler();
-        EasySwooleEvent::initialize();
         return $this;
     }
 
