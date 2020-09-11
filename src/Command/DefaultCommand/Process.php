@@ -40,11 +40,11 @@ class Process implements CommandInterface
 
     public function exec(): ?string
     {
-        $run = new Scheduler();
+        Core::getInstance()->initialize();
         $action = CommandManager::getInstance()->getArg(0);
+        $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action) && $action != 'help') {
-                Core::getInstance()->initialize();
 
                 $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
                 if ($package->getStatus() != Package::STATUS_SUCCESS) {
