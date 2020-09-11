@@ -21,6 +21,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Config as ConfigCommand;
+use EasySwoole\EasySwoole\Core;
 
 
 class CommandRunner
@@ -51,7 +52,10 @@ class CommandRunner
             call_user_func($this->beforeCommand, $caller);
         }
         Utility::opCacheClear();
-
+        $mode = CommandManager::getInstance()->getOpt('mode');
+        if (!empty($mode)) {
+            Core::getInstance()->runMode($mode);
+        }
         $msg = CommandManager::getInstance()->run($caller);
 
         $result = new Result();

@@ -49,12 +49,6 @@ class Server implements CommandInterface
 
         if (method_exists($this, $action) && $action != 'help') {
 
-            //判定运行模式，运行模式会影响加载的配置项
-            $mode = CommandManager::getInstance()->getOpt('mode');
-            if (!empty($mode)) {
-                Core::getInstance()->runMode($mode);
-            }
-
             Core::getInstance()->initialize();
 
             return $this->$action();
