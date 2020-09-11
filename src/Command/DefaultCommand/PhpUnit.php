@@ -56,7 +56,7 @@ class PhpUnit implements CommandInterface
             echo "please require easyswoole/phpunit at first \n";
         }
         Runner::run($noCoroutine);
-        exit();
+        return null;
     }
 
 }

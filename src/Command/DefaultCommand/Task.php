@@ -33,11 +33,11 @@ class Task implements CommandInterface
 
     public function exec(): ?string
     {
+        Core::getInstance()->initialize();
         $action = CommandManager::getInstance()->getArg(0);
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action) && $action != 'help') {
-                Core::getInstance()->initialize();
                 $result = $this->{$action}();
                 return;
             }
