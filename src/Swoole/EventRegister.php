@@ -35,6 +35,8 @@ class EventRegister extends MultiContainer
     const onHandShake = 'handShake';
     const onMessage = 'message';
     const onOpen = 'open';
+    const onBeforeReload = 'beforeReload';
+    const onAfterReload = 'afterReload';
 
     function __construct(array $allowKeys = null)
     {
@@ -42,7 +44,7 @@ class EventRegister extends MultiContainer
             'start','shutdown','workerStart','workerStop','workerExit','timer',
             'connect','receive','packet','close','bufferFull','bufferEmpty','task',
             'finish','pipeMessage','workerError','managerStart','managerStop',
-            'request','handShake','message','open'
+            'request','handShake','message','open','beforeReload','afterReload'
         ]);
     }
 }
