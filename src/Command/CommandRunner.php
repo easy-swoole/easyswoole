@@ -52,10 +52,7 @@ class CommandRunner
             call_user_func($this->beforeCommand, $caller);
         }
         Utility::opCacheClear();
-        $mode = CommandManager::getInstance()->getOpt('mode');
-        if (!empty($mode)) {
-            Core::getInstance()->runMode($mode);
-        }
+
         $msg = CommandManager::getInstance()->run($caller);
 
         $result = new Result();

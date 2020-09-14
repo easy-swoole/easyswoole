@@ -10,6 +10,7 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Command\Color;
+use EasySwoole\Command\CommandManager;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
@@ -317,6 +318,11 @@ class Core
 
     public function loadEnv()
     {
+        $mode = CommandManager::getInstance()->getOpt('mode');
+        if (!empty($mode)) {
+            $this->runMode($mode);
+        }
+
         $file = EASYSWOOLE_ROOT . "/{$this->runMode}.php";
         if (!file_exists($file)) {
             die(Color::error("can not load config file {$this->runMode}.php") . "\n");
