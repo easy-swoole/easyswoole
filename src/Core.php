@@ -234,6 +234,7 @@ class Core
             }
             $dispatcher = Dispatcher::getInstance($namespace, $depth, $max);
             $dispatcher->setControllerPoolWaitTime($waitTime);
+            //补充HTTP_EXCEPTION_HANDLER默认回调
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
             if (!is_callable($httpExceptionHandler)) {
                 $httpExceptionHandler = function ($throwable, $request, $response) {
@@ -245,7 +246,7 @@ class Core
             }
             $dispatcher->setHttpExceptionHandler($httpExceptionHandler);
             $requestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
-            $afterRequestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_ON_REQUEST);
+            $afterRequestHook = Di::getInstance()->get(SysConst::HTTP_GLOBAL_AFTER_REQUEST);
             EventHelper::on($server, EventRegister::onRequest, function (SwooleRequest $request, SwooleResponse $response) use ($dispatcher, $requestHook, $afterRequestHook) {
                 $request_psr = new Request($request);
                 $response_psr = new Response($response);
