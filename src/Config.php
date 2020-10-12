@@ -95,13 +95,13 @@ class Config
 
     /**
      * 载入自定义配置文件夹里的所有配置文件
-     * @param string $DirPath 配置文件夹
+     * @param string $dirPath 配置文件夹
      * @param bool $merge 是否将内容合并入主配置
      */
-    public function loadDir (string $DirPath, bool $merge = true):bool
+    public function loadDir (string $dirPath, bool $merge = true):bool
     {
-        if(is_dir($DirPath)){
-            $fileList = File::scanDirectory($DirPath);
+        if(is_dir($dirPath)){
+            $fileList = File::scanDirectory($dirPath);
             foreach ($fileList['files'] as $filePath){
                 $this->loadFile($filePath,$merge);
             }
