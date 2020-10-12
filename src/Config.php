@@ -11,7 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Singleton;
 use EasySwoole\Config\AbstractConfig;
-use EasySwoole\Config\TableConfig;
+use EasySwoole\Config\SplArrayConfig;
 
 class Config
 {
@@ -22,7 +22,7 @@ class Config
     public function __construct(?AbstractConfig $config = null)
     {
         if($config == null){
-            $config = new TableConfig();
+            $config = new SplArrayConfig();
         }
         $this->conf = $config;
     }
