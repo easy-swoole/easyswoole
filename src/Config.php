@@ -103,9 +103,11 @@ class Config
         if(is_dir($dirPath)){
             $fileList = File::scanDirectory($dirPath);
             foreach ($fileList['files'] as $filePath){
-                $this->loadFile($filePath,$merge);
+                 $this->loadFile($filePath,$merge);
             }
+            return true;
         }
+        return false;
     }
 
     public function loadEnv(string $file,bool $merge = true):bool
