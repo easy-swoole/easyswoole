@@ -20,8 +20,6 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\PhpUnit;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Config as ConfigCommand;
-use EasySwoole\EasySwoole\Core;
 
 
 class CommandRunner
@@ -32,7 +30,6 @@ class CommandRunner
     {
         CommandManager::getInstance()->addCommand(new Install());
         CommandManager::getInstance()->addCommand(new PhpUnit());
-        CommandManager::getInstance()->addCommand(new ConfigCommand());
         CommandManager::getInstance()->addCommand(new Task());
         CommandManager::getInstance()->addCommand(new Crontab());
         CommandManager::getInstance()->addCommand(new Process());
