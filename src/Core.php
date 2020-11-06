@@ -301,9 +301,6 @@ class Core
         });
 
         EventHelper::registerWithAdd($register, $register::onWorkerStop, function () {
-            $table = Manager::getInstance()->getProcessTable();
-            $pid = getmypid();
-            $table->del($pid);
             Timer::clearAll();
             SwooleEvent::exit();
         });
@@ -312,6 +309,10 @@ class Core
          * 开启reload async的时候，清理事件
          */
         EventHelper::registerWithAdd($register, $register::onWorkerExit, function () {
+            //当worker非正常退出的时候，不会走worker stop事件，因此移动到exit事件清除
+            $table = Manager::getInstance()->getProcessTable();
+            $pid = getmypid();
+            $table->del($pid);
             Timer::clearAll();
             SwooleEvent::exit();
         });
