@@ -59,6 +59,7 @@ class Server implements CommandInterface
 
     protected function start()
     {
+        defined('EASYSWOOLE_START') or define('EASYSWOOLE_START', true);
         $conf = Config::getInstance();
 
         // php easyswoole server start -d
