@@ -41,12 +41,20 @@ class Install implements CommandInterface
         Utility::releaseResource(__DIR__ . '/../../Resource/EasySwooleEvent._php', EASYSWOOLE_ROOT . '/EasySwooleEvent.php');
         $this->updateComposerJson();
         $this->execComposerDumpAutoload();
+        $this->checkFunctionsOpen();
         return Color::success("install success,enjoy!!!\ndont forget run composer dump-autoload !!!");
     }
 
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
         return $commandHelp;
+    }
+
+    protected function checkFunctionsOpen()
+    {
+        if (!function_exists('symlink') || !function_exists('readlink')) {
+            echo Color::warning('Please at php.ini Open the symlink and readlink functions') . PHP_EOL;
+        }
     }
 
     protected function updateComposerJson()
