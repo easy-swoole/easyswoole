@@ -7,9 +7,11 @@ use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
+use EasySwoole\Component\Di;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\SysConst;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -42,6 +44,8 @@ class Process implements CommandInterface
     {
         Core::getInstance()->initialize();
         $action = CommandManager::getInstance()->getArg(0);
+        $exe = "{$this->commandName()}.{$action}";
+        Di::getInstance()->set(SysConst::EXECUTE_COMMAND,$exe);
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action) && $action != 'help') {
