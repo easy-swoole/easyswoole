@@ -344,14 +344,14 @@ class Core
         Crontab::getInstance()->__run();
         //注册Task进程
         $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
-        $config = new TaskConfig($config);
+        $config = TaskManager::getInstance()->getConfig()->merge($config);
         $config->setTempDir(EASYSWOOLE_TEMP_DIR);
         $config->setServerName($serverName);
         $config->setOnException(function (\Throwable $throwable) {
             Trigger::getInstance()->throwable($throwable);
         });
         $server = ServerManager::getInstance()->getSwooleServer();
-        TaskManager::getInstance($config)->attachToServer($server);
+        TaskManager::getInstance()->attachToServer($server);
         //初始化进程管理器
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
