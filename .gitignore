@@ -11,6 +11,6 @@ composer.lock
 /Config.php
 /easyswoole
 easyswoole.install
-src/swoole_log.txt
 /EasySwooleEvent.php
+/App/
 
