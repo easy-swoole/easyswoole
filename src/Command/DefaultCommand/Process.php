@@ -36,7 +36,7 @@ class Process implements CommandInterface
         $commandHelp->addActionOpt('--pid=PID', 'kill the specified pid');
         $commandHelp->addActionOpt('--group=GROUP_NAME', 'kill the specified process group');
         $commandHelp->addActionOpt('-f', 'force kill process');
-        $commandHelp->addActionOpt('-d', 'display in mb format');
+        $commandHelp->addActionOpt('-d', 'display data in format');
         return $commandHelp;
     }
 
@@ -123,6 +123,7 @@ class Process implements CommandInterface
             foreach ($json as $key => $value) {
                 $json[$key]['memoryUsage'] = round($value['memoryUsage'] / pow(1024, ($i = floor(log($value['memoryUsage'], 1024)))), 2) . ' ' . $unit[$i];
                 $json[$key]['memoryPeakUsage'] = round($value['memoryPeakUsage'] / pow(1024, ($i = floor(log($value['memoryPeakUsage'], 1024)))), 2) . ' ' . $unit[$i];
+                $json[$key]['startUpTime'] = date('Ymd h:i:s',$json[$key]['startUpTime']);
             }
         }
 

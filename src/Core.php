@@ -290,7 +290,8 @@ class Core
             $table->set($pid, [
                 'pid' => $pid,
                 'name' => $processName,
-                'group' => "{$serverName}.Worker"
+                'group' => "{$serverName}.{$type}",
+                'startUpTime'=>time()
             ]);
             Timer::tick(1 * 1000, function () use ($table, $pid) {
                 $table->set($pid, [
