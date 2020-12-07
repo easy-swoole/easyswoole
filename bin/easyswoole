@@ -5,7 +5,7 @@ use EasySwoole\EasySwoole\Command\CommandRunner;
 use EasySwoole\Command\Caller;
 
 $file = null;
-foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php' ] as $file) {
+foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../../vendor/autoload.php' ] as $file) {
     if (file_exists($file)) {
         require $file;
         break;
