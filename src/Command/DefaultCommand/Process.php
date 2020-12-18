@@ -42,10 +42,10 @@ class Process implements CommandInterface
 
     public function exec(): ?string
     {
-        Core::getInstance()->initialize();
         $action = CommandManager::getInstance()->getArg(0);
         $exe = "{$this->commandName()}.{$action}";
         Di::getInstance()->set(SysConst::EXECUTE_COMMAND,$exe);
+        Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
             if (method_exists($this, $action) && $action != 'help') {
