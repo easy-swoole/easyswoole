@@ -23,32 +23,28 @@ class CronRunner extends AbstractProcess
         $tasks = $arg;
         /** @var Table $table */
         $table = Crontab::getInstance()->infoTable();
-        /*
-         * 先清空一遍规则
-         */
+        //先清空一遍规则,禁止循环的时候删除key
+        $keys = [];
         foreach ($table as $key => $value) {
+            $keys[] = $key;
+        }
+        foreach ($keys as $key){
             $table->del($key);
         }
         //这部分的解析，迁移到Crontab.php做
         foreach ($tasks as $taskName => $cronTaskClass) {
-            /**
-             * @var $cronTaskClass AbstractCronTask
-             */
+            /** @ @var $cronTaskClass AbstractCronTask */
             $taskName = $cronTaskClass::getTaskName();
             $taskRule = $cronTaskClass::getRule();
             $nextTime = CronExpression::factory($taskRule)->getNextRunDate()->getTimestamp();
-            $table->set($taskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime, 'isStop' => 0]);
+            $table->set($taskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime, 'currentRunTime'=>0,'isStop' => 0]);
             $this->tasks[$taskName] = $cronTaskClass;
         }
         $this->cronProcess();
-        Timer::getInstance()->loop(29 * 1000, function () {
+        //60无法被8整除。
+        Timer::getInstance()->loop(8 * 1000, function () {
             $this->cronProcess();
         });
-    }
-
-    public function onShutDown()
-    {
-        // TODO: Implement onShutDown() method.
     }
 
     private function cronProcess()
@@ -58,18 +54,21 @@ class CronRunner extends AbstractProcess
             if ($task['isStop']) {
                 continue;
             }
-            $taskRule = $task['taskRule'];
-            $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate();
-            $distanceTime = $nextRunTime->getTimestamp() - time();
-            if ($distanceTime < 30) {
-                Timer::getInstance()->after($distanceTime * 1000, function () use ($taskName, $taskRule) {
-                    $table = Crontab::getInstance()->infoTable();
-                    $nextRunTime = CronExpression::factory($taskRule)->getNextRunDate();
-                    $table->incr($taskName, 'taskRunTimes', 1);
-                    $table->set($taskName, ['taskNextRunTime' => $nextRunTime->getTimestamp()]);
-                    TaskManager::getInstance()->async($this->tasks[$taskName]);
-                });
+            $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate()->getTimestamp();
+            if($task['taskNextRunTime'] != $nextRunTime){
+                $table->set($taskName,['taskNextRunTime'=>$nextRunTime]);
             }
+            if(($nextRunTime == $task['taskNextRunTime']) && $nextRunTime == $task['currentRunTime']){
+                //本轮已经创建过任务
+                continue;
+            }
+            $table->set($taskName,['currentRunTime'=>$nextRunTime]);
+            $distanceTime = $nextRunTime- time();
+            Timer::getInstance()->after($distanceTime * 1000, function () use ($taskName) {
+                $table = Crontab::getInstance()->infoTable();
+                $table->incr($taskName, 'taskRunTimes', 1);
+                TaskManager::getInstance()->async($this->tasks[$taskName]);
+            });
         }
     }
 }
