@@ -89,6 +89,7 @@ class Crontab implements CommandInterface
             $data = $package->getArgs();
             foreach ($data as $k => $v) {
                 $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);
+                $v['currentRunTime'] = date('Y-m-d H:i:s', $v['currentRunTime']);
                 $data[$k] = array_merge(['taskName' => $k], $v);
             }
             return new ArrayToTextTable($data);
