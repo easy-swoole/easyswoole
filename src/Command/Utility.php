@@ -43,12 +43,12 @@ LOGO;
         return "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m";
     }
 
-    public static function releaseResource($source, $destination)
+    public static function releaseResource($source, $destination,$confirm = false)
     {
+        $filename = basename($destination);
         clearstatcache();
         $replace = true;
         if (is_file($destination)) {
-            $filename = basename($destination);
             echo Color::danger("{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ");
             $answer = strtolower(trim(strtoupper(fgets(STDIN))));
             if (!in_array($answer, ['y', 'yes'])) {
@@ -56,6 +56,13 @@ LOGO;
             }
         }
         if ($replace) {
+            if($confirm){
+                echo Color::danger("do you want to release {$filename}? [ Y / N (default) ] : ");
+                $answer = strtolower(trim(strtoupper(fgets(STDIN))));
+                if (!in_array($answer, ['y', 'yes'])) {
+                    return;
+                }
+            }
             File::copyFile($source, $destination);
         }
     }
