@@ -29,7 +29,6 @@ use EasySwoole\Trigger\TriggerInterface;
 use EasySwoole\Utility\File;
 use EasySwoole\Log\Logger as DefaultLogger;
 use EasySwoole\Trigger\Trigger as DefaultTrigger;
-use EasySwoole\Task\Config as TaskConfig;
 use Swoole\Server;
 use Swoole\Timer;
 use Swoole\Http\Request as SwooleRequest;
@@ -212,7 +211,7 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function registerDefaultCallBack(\Swoole\Server $server, int $serverType)
+    private function registerDefaultCallBack(Server $server, int $serverType)
     {
         /*
          * 注册默认回调
