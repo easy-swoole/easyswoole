@@ -119,7 +119,7 @@ class Process implements CommandInterface
             foreach ($json as $key => $value) {
                 $json[$key]['memoryUsage'] = round($value['memoryUsage'] / pow(1024, ($i = floor(log($value['memoryUsage'], 1024)))), 2) . ' ' . $unit[$i];
                 $json[$key]['memoryPeakUsage'] = round($value['memoryPeakUsage'] / pow(1024, ($i = floor(log($value['memoryPeakUsage'], 1024)))), 2) . ' ' . $unit[$i];
-                $json[$key]['startUpTime'] = date('Ymd h:i:s',$json[$key]['startUpTime']);
+                $json[$key]['startUpTime'] = date('Y-m-d H:i:s',$json[$key]['startUpTime']);
             }
         }
 

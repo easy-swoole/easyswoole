@@ -6,7 +6,9 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 
 use EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Bridge\AbstractCommand;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Task\TaskManager;
 
 class Status extends AbstractCommand
 {
@@ -15,9 +17,17 @@ class Status extends AbstractCommand
         return 'status';
     }
 
-    protected function info(Package $package, Package $responsePackage)
+    protected function server(Package $package, Package $responsePackage)
     {
-        $responsePackage->setArgs(ServerManager::getInstance()->getSwooleServer()->stats());
+        $data = ServerManager::getInstance()->getSwooleServer()->stats();
+        $data['runMode'] = Core::getInstance()->runMode();
+        $responsePackage->setArgs($data);
+        return true;
+    }
+
+    protected function task(Package $package, Package $responsePackage)
+    {
+        $responsePackage->setArgs(TaskManager::getInstance()->status());
         return true;
     }
 }

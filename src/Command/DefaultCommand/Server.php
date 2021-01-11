@@ -16,6 +16,7 @@ use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\SysConst;
+use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
 class Server implements CommandInterface
@@ -185,12 +186,17 @@ class Server implements CommandInterface
             $result = Utility::bridgeCall('status', function (Package $package) {
                 $data = $package->getArgs();
                 $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
-                $msg = '';
-                foreach ($data as $key => $val) {
-                    $msg .= Utility::displayItem($key, $val) . "\n";
+
+                $final = [];
+
+                foreach ($data as $key => $val){
+                    $final[] = [
+                        'item'=>$key,
+                        'value'=>$val
+                    ];
                 }
-                return $msg;
-            }, 'info');
+                return new ArrayToTextTable($final);
+            }, 'server');
         });
         $run->start();
         return $result;

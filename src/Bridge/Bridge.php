@@ -10,7 +10,6 @@ use EasySwoole\Bridge\Bridge as BridgeServer;
 use EasySwoole\EasySwoole\Bridge\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Bridge\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Bridge\DefaultCommand\Status;
-use EasySwoole\EasySwoole\Bridge\DefaultCommand\Task;
 
 class Bridge extends BridgeServer
 {
@@ -19,7 +18,6 @@ class Bridge extends BridgeServer
     function __construct(Container $container = null)
     {
         parent::__construct($container);
-        $this->getCommandContainer()->set(new Task());
         $this->getCommandContainer()->set(new Crontab());
         $this->getCommandContainer()->set(new Process());
         $this->getCommandContainer()->set(new Status());

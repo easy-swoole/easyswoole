@@ -50,9 +50,14 @@ class Task implements CommandInterface
 
     protected function status()
     {
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            return new ArrayToTextTable($package->getArgs());
-        }, 'info');
+        return Utility::bridgeCall('status', function (Package $package) {
+            $data = $package->getArgs();
+            foreach ($data as $key => &$datum){
+                $datum['workerIndex'] = $key;
+                $datum['startUpTime'] = date('Y-m-d H:i:s',$datum['startUpTime']);
+            }
+            return new ArrayToTextTable($data);
+        }, 'task');
     }
 }
 
