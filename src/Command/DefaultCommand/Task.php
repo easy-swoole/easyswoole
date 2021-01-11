@@ -52,6 +52,9 @@ class Task implements CommandInterface
     {
         return Utility::bridgeCall('status', function (Package $package) {
             $data = $package->getArgs();
+            if(empty($data)){
+                return 'pelase check config item for task worker num';
+            }
             foreach ($data as $key => &$datum){
                 $datum['workerIndex'] = $key;
                 $datum['startUpTime'] = date('Y-m-d H:i:s',$datum['startUpTime']);
