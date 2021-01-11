@@ -12,7 +12,6 @@ use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
-use EasySwoole\Component\Di;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
@@ -47,8 +46,6 @@ class Server implements CommandInterface
     public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
-        $exe = "{$this->commandName()}.{$action}";
-        Di::getInstance()->set(SysConst::EXECUTE_COMMAND,$exe);
         if (method_exists($this, $action) && $action != 'help') {
             Core::getInstance()->initialize();
             return $this->$action();

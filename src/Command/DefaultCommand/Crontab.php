@@ -7,10 +7,8 @@ use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
 use EasySwoole\Command\CommandManager;
-use EasySwoole\Component\Di;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
-use EasySwoole\EasySwoole\SysConst;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
@@ -39,8 +37,6 @@ class Crontab implements CommandInterface
     public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
-        $exe = "{$this->commandName()}.{$action}";
-        Di::getInstance()->set(SysConst::EXECUTE_COMMAND,$exe);
         Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
@@ -48,7 +44,6 @@ class Crontab implements CommandInterface
                 $result = $this->{$action}();
                 return;
             }
-
             $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
         $run->start();
