@@ -140,10 +140,10 @@ class Core
         }
         defined('EASYSWOOLE_TEMP_DIR') or define('EASYSWOOLE_TEMP_DIR', $tempDir);
 
-        $logDir = Config::getInstance()->getConf('LOG_DIR');
+        $logDir = Config::getInstance()->getConf('LOG.dir');
         if (empty($logDir)) {
             $logDir = EASYSWOOLE_ROOT . '/Log';
-            Config::getInstance()->setConf('LOG_DIR', $logDir);
+            Config::getInstance()->setConf('LOG.dir', $logDir);
         } else {
             $logDir = rtrim($logDir, '/');
         }
@@ -175,7 +175,8 @@ class Core
         if (!$logger instanceof LoggerInterface) {
             $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR);
         }
-        Logger::getInstance($logger);
+        $level = intval(Config::getInstance()->getConf('LOG.level'));
+        Logger::getInstance($logger)->logLevel($level);
 
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);

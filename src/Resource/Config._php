@@ -18,6 +18,9 @@ return [
             'timeout'=>15
         ]
     ],
-    'TEMP_DIR' => null,
-    'LOG_DIR' => null
+    "LOG"=>[
+        'dir'=>null,
+        'level'=>0
+    ],
+    'TEMP_DIR' => null
 ];
