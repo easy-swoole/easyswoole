@@ -20,7 +20,8 @@ return [
     ],
     "LOG"=>[
         'dir'=>null,
-        'level'=>0
+        'level'=>0,
+        'handler'=>null
     ],
     'TEMP_DIR' => null
 ];

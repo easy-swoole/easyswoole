@@ -173,6 +173,9 @@ class Core
         //初始化配置Logger
         $logger = Di::getInstance()->get(SysConst::LOGGER_HANDLER);
         if (!$logger instanceof LoggerInterface) {
+            $logger = Config::getInstance()->getConf('LOG.handler');
+        }
+        if (!$logger instanceof LoggerInterface) {
             $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR);
         }
         $level = intval(Config::getInstance()->getConf('LOG.level'));
