@@ -118,9 +118,8 @@ class Core
     {
         //给主进程也命名
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
-        if (!in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
-            cli_set_process_title($serverName);
-        }
+        $this->setProcessName($serverName);
+
         //启动
         ServerManager::getInstance()->start();
     }
@@ -284,9 +283,7 @@ class Core
                 $type = 'Worker';
             }
             $processName = "{$serverName}.{$type}.{$workerId}";
-            if (!in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
-                cli_set_process_title($processName);
-            }
+            $this->setProcessName($processName);
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->set($pid, [
@@ -323,6 +320,11 @@ class Core
             Timer::clearAll();
             SwooleEvent::exit();
         });
+
+        EventHelper::registerWithAdd($register, EventRegister::onManagerStart, function (Server $server) {
+            $serverName = Config::getInstance()->getConf('SERVER_NAME');
+            $this->setProcessName($serverName . '.manager');
+        });
     }
 
     public function loadEnv()
@@ -358,5 +360,21 @@ class Core
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
         Bridge::getInstance()->attachServer($server, $serverName);
+    }
+
+    /**
+     * 设置进程名
+     * @param string $processName
+     */
+    protected function setProcessName(string $processName = ''): void
+    {
+        if (empty($processName) || in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
+            return;
+        }
+        if (function_exists('cli_set_process_title')) {
+            cli_set_process_title($processName);
+        } else if (function_exists('swoole_set_process_name')) {
+            swoole_set_process_name($processName);
+        }
     }
 }
