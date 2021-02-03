@@ -13,7 +13,7 @@ use EasySwoole\Component\Event;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Log\LoggerInterface;
 
-class Logger implements LoggerInterface
+class Logger
 {
     private $logger;
 
@@ -45,7 +45,7 @@ class Logger implements LoggerInterface
         return $this;
     }
 
-    public function log(?string $msg,int $logLevel = self::LOG_LEVEL_DEBUG,string $category = 'debug')
+    public function log(?string $msg,int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG,string $category = 'debug')
     {
         if($logLevel >= $this->logLevel){
             $this->logger->log($msg,$logLevel,$category);
@@ -56,7 +56,7 @@ class Logger implements LoggerInterface
         }
     }
 
-    public function console(?string $msg,int $logLevel = self::LOG_LEVEL_DEBUG,string $category = 'debug')
+    public function console(?string $msg,int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG,string $category = 'debug')
     {
         if($logLevel >= $this->logLevel){
             $this->logger->console($msg,$logLevel,$category);
@@ -68,27 +68,27 @@ class Logger implements LoggerInterface
 
     public function debug(?string $msg,string $category = 'debug')
     {
-        $this->console($msg,self::LOG_LEVEL_DEBUG,$category);
+        $this->console($msg,LoggerInterface::LOG_LEVEL_DEBUG,$category);
     }
 
     public function info(?string $msg,string $category = 'info')
     {
-        $this->console($msg,self::LOG_LEVEL_INFO,$category);
+        $this->console($msg,LoggerInterface::LOG_LEVEL_INFO,$category);
     }
 
     public function notice(?string $msg,string $category = 'notice')
     {
-        $this->console($msg,self::LOG_LEVEL_NOTICE,$category);
+        $this->console($msg,LoggerInterface::LOG_LEVEL_NOTICE,$category);
     }
 
     public function waring(?string $msg,string $category = 'waring')
     {
-        $this->console($msg,self::LOG_LEVEL_WARNING,$category);
+        $this->console($msg,LoggerInterface::LOG_LEVEL_WARNING,$category);
     }
 
     public function error(?string $msg,string $category = 'error')
     {
-        $this->console($msg,self::LOG_LEVEL_ERROR,$category);
+        $this->console($msg,LoggerInterface::LOG_LEVEL_ERROR,$category);
     }
 
     public function onLog():Event

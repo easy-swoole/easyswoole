@@ -14,7 +14,7 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\Trigger\Location;
 use EasySwoole\Trigger\TriggerInterface;
 
-class Trigger implements TriggerInterface
+class Trigger
 {
     use Singleton;
 

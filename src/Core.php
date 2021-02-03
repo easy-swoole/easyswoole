@@ -184,7 +184,7 @@ class Core
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
         if (!$trigger instanceof TriggerInterface) {
-            $trigger = new DefaultTrigger(Logger::getInstance());
+            $trigger = new DefaultTrigger($logger);
         }
         Trigger::getInstance($trigger);
 
