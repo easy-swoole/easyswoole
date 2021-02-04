@@ -323,7 +323,7 @@ class Core
 
         EventHelper::registerWithAdd($register, EventRegister::onManagerStart, function (Server $server) {
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
-            $this->setProcessName($serverName . '.manager');
+            $this->setProcessName($serverName . '.Manager');
         });
     }
 
