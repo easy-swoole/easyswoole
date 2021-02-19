@@ -9,5 +9,5 @@ foreach ([__DIR__ . '/./vendor/bin/easyswoole', __DIR__ . '/./bin/easyswoole'] a
     }
 }
 if(!file_exists($file)){
-    die("include /vendor/bin/easyswoole fail\n");
+    die("include vendor/bin/easyswoole fail\n");
 }
