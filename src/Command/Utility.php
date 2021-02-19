@@ -39,6 +39,8 @@ LOGO;
             $value = 'false';
         } else if ($value === null) {
             $value = 'null';
+        } else if (is_array($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
         }
         return "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m";
     }
