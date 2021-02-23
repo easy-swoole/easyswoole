@@ -1,4 +1,7 @@
 <?php
+
+use EasySwoole\Log\LoggerInterface;
+
 return [
     'SERVER_NAME' => "EasySwoole",
     'MAIN_SERVER' => [
@@ -20,7 +23,7 @@ return [
     ],
     "LOG" => [
         'dir' => null,
-        'level' => \EasySwoole\Log\LoggerInterface::LOG_LEVEL_DEBUG,
+        'level' => LoggerInterface::LOG_LEVEL_DEBUG,
         'handler' => null
     ],
     'TEMP_DIR' => null
