@@ -18,6 +18,8 @@ class CronRunner extends AbstractProcess
 {
     protected $tasks;
 
+    protected $timerIds;
+
     public function run($arg)
     {
         $tasks = $arg;
@@ -28,7 +30,7 @@ class CronRunner extends AbstractProcess
         foreach ($table as $key => $value) {
             $keys[] = $key;
         }
-        foreach ($keys as $key){
+        foreach ($keys as $key) {
             $table->del($key);
         }
         //这部分的解析，迁移到Crontab.php做
@@ -37,7 +39,7 @@ class CronRunner extends AbstractProcess
             $taskName = $cronTaskClass::getTaskName();
             $taskRule = $cronTaskClass::getRule();
             $nextTime = CronExpression::factory($taskRule)->getNextRunDate()->getTimestamp();
-            $table->set($taskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime, 'currentRunTime'=>0,'isStop' => 0]);
+            $table->set($taskName, ['taskRule' => $taskRule, 'taskRunTimes' => 0, 'taskNextRunTime' => $nextTime, 'taskCurrentRunTime' => 0, 'isStop' => 0]);
             $this->tasks[$taskName] = $cronTaskClass;
         }
         $this->cronProcess();
@@ -55,20 +57,24 @@ class CronRunner extends AbstractProcess
                 continue;
             }
             $nextRunTime = CronExpression::factory($task['taskRule'])->getNextRunDate()->getTimestamp();
-            if($task['taskNextRunTime'] != $nextRunTime){
-                $table->set($taskName,['taskNextRunTime'=>$nextRunTime]);
+            if ($task['taskNextRunTime'] != $nextRunTime) {
+                $table->set($taskName, ['taskNextRunTime' => $nextRunTime]);
             }
-            if(($nextRunTime == $task['taskNextRunTime']) && $nextRunTime == $task['currentRunTime']){
+            if (($nextRunTime == $task['taskNextRunTime']) && isset($this->timerIds[$taskName])) {
                 //本轮已经创建过任务
                 continue;
             }
-            $table->set($taskName,['currentRunTime'=>$nextRunTime]);
-            $distanceTime = $nextRunTime- time();
-            Timer::getInstance()->after($distanceTime * 1000, function () use ($taskName) {
+            $distanceTime = $nextRunTime - time();
+            $timerId = Timer::getInstance()->after($distanceTime * 1000, function () use ($taskName) {
                 $table = Crontab::getInstance()->infoTable();
                 $table->incr($taskName, 'taskRunTimes', 1);
+                $table->set($taskName, ['taskCurrentRunTime' => time()]);
+                unset($this->timerIds[$taskName]);
                 TaskManager::getInstance()->async($this->tasks[$taskName]);
             });
+            if ($timerId) {
+                $this->timerIds[$taskName] = $timerId;
+            }
         }
     }
 }
