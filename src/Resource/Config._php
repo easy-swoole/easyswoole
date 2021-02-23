@@ -10,18 +10,18 @@ return [
         'SETTING' => [
             'worker_num' => 8,
             'reload_async' => true,
-            'max_wait_time'=>3
+            'max_wait_time' => 3
         ],
-        'TASK'=>[
-            'workerNum'=>4,
-            'maxRunningNum'=>128,
-            'timeout'=>15
+        'TASK' => [
+            'workerNum' => 4,
+            'maxRunningNum' => 128,
+            'timeout' => 15
         ]
     ],
-    "LOG"=>[
-        'dir'=>null,
-        'level'=>0,
-        'handler'=>null
+    "LOG" => [
+        'dir' => null,
+        'level' => \EasySwoole\Log\LoggerInterface::LOG_LEVEL_DEBUG,
+        'handler' => null
     ],
     'TEMP_DIR' => null
 ];
