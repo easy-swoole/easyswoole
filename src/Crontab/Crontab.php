@@ -28,7 +28,7 @@ class Crontab
         $this->table->column('taskRule', Table::TYPE_STRING, 35);
         $this->table->column('taskRunTimes', Table::TYPE_INT, 8);
         $this->table->column('taskNextRunTime', Table::TYPE_INT, 10);
-        $this->table->column('currentRunTime', Table::TYPE_INT, 10);
+        $this->table->column('taskCurrentRunTime', Table::TYPE_INT, 10);
         $this->table->column('isStop', Table::TYPE_INT, 1);
         $this->table->create();
     }
