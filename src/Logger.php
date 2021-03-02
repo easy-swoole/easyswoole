@@ -21,6 +21,8 @@ class Logger
 
     private $logConsole = true;
 
+    private $ignoreCategory = [];
+
     private $logLevel = LoggerInterface::LOG_LEVEL_INFO;
 
     use Singleton;
@@ -31,25 +33,41 @@ class Logger
         $this->callback = new Event();
     }
 
-    public function logLevel(?int $level = null):int
+    public function logLevel(?int $level = null)
     {
         if($level !== null){
             $this->logLevel = $level;
+            return $this;
         }
         return $this->logLevel;
     }
 
-    public function setLogConsole(bool $is)
+    public function logConsole(?bool $is = null)
     {
-        $this->logConsole = $is;
-        return $this;
+        if($is === null){
+            return $this->logConsole;
+        }else{
+            $this->logConsole = $is;
+            return $this;
+        }
+    }
+
+    public function ignoreCategory(?array $arr = null)
+    {
+        if($arr === null){
+            return $this->ignoreCategory;
+        }else{
+            $this->ignoreCategory = $arr;
+            return $this;
+        }
     }
 
     public function log(?string $msg,int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG,string $category = 'debug')
     {
-        if($logLevel >= $this->logLevel){
-            $this->logger->log($msg,$logLevel,$category);
+        if($logLevel < $this->logLevel){
+            return;
         }
+        $this->logger->log($msg,$logLevel,$category);
         $calls = $this->callback->all();
         foreach ($calls as $call){
             call_user_func($call,$msg,$logLevel,$category);
@@ -58,9 +76,10 @@ class Logger
 
     public function console(?string $msg,int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG,string $category = 'debug')
     {
-        if($logLevel >= $this->logLevel){
-            $this->logger->console($msg,$logLevel,$category);
+        if($logLevel < $this->logLevel){
+            return;
         }
+        $this->logger->console($msg,$logLevel,$category);
         if($this->logConsole){
             $this->log($msg,$logLevel,$category);
         }

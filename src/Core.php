@@ -180,6 +180,12 @@ class Core
         $level = intval(Config::getInstance()->getConf('LOG.level'));
         Logger::getInstance($logger)->logLevel($level);
 
+        $logConsole = Config::getInstance()->getConf('LOG.logConsole');
+        Logger::getInstance()->logConsole($logConsole);
+
+        $ignoreCategory = Config::getInstance()->getConf('LOG.ignoreCategory');
+        Logger::getInstance()->ignoreCategory($ignoreCategory);
+
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
         if (!$trigger instanceof TriggerInterface) {
