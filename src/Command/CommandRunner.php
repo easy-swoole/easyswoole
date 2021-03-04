@@ -20,6 +20,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\PhpUnit;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
+use EasySwoole\HttpAnnotation\Utility\DocCommand;
 
 
 class CommandRunner
@@ -34,6 +35,7 @@ class CommandRunner
         CommandManager::getInstance()->addCommand(new Crontab());
         CommandManager::getInstance()->addCommand(new Process());
         CommandManager::getInstance()->addCommand(new Server());
+        CommandManager::getInstance()->addCommand(new DocCommand());
     }
 
     private $beforeCommand;
