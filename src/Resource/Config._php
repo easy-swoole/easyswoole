@@ -25,8 +25,8 @@ return [
         'dir' => null,
         'level' => LoggerInterface::LOG_LEVEL_DEBUG,
         'handler' => null,
-        'logConsole'=>true,
-        'ignoreCategory'=>[]
+        'logConsole' => true,
+        'ignoreCategory' => []
     ],
     'TEMP_DIR' => null
 ];
