@@ -186,6 +186,9 @@ class Core
         $ignoreCategory = Config::getInstance()->getConf('LOG.ignoreCategory');
         Logger::getInstance()->ignoreCategory($ignoreCategory);
 
+        $displayConsole = Config::getInstance()->getConf('LOG.displayConsole');
+        Logger::getInstance()->displayConsole($displayConsole);
+
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
         if (!$trigger instanceof TriggerInterface) {

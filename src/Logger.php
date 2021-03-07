@@ -21,6 +21,8 @@ class Logger
 
     private $logConsole = true;
 
+    private $displayConsole = true;
+
     private $ignoreCategory = [];
 
     private $logLevel = LoggerInterface::LOG_LEVEL_INFO;
@@ -33,6 +35,11 @@ class Logger
         $this->callback = new Event();
     }
 
+    public function onLog(): Event
+    {
+        return $this->callback;
+    }
+
     public function logLevel(?int $level = null)
     {
         if ($level !== null) {
@@ -40,6 +47,16 @@ class Logger
             return $this;
         }
         return $this->logLevel;
+    }
+
+    public function displayConsole(?bool $is = null)
+    {
+        if($is === null){
+            return $this->displayConsole;
+        }else{
+            $this->displayConsole = $is;
+            return $this;
+        }
     }
 
     public function logConsole(?bool $is = null)
@@ -72,6 +89,10 @@ class Logger
             return;
         }
 
+        if ($this->logConsole) {
+            $this->console($msg, $logLevel, $category);
+        }
+
         $this->logger->log($msg, $logLevel, $category);
         $calls = $this->callback->all();
         foreach ($calls as $call) {
@@ -81,47 +102,35 @@ class Logger
 
     public function console(?string $msg, int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG, string $category = 'debug')
     {
-        if ($logLevel < $this->logLevel) {
-            return;
-        }
-
-        if (in_array($category, $this->ignoreCategory)) {
-            return;
-        }
-
-        $this->logger->console($msg, $logLevel, $category);
-        if ($this->logConsole) {
-            $this->log($msg, $logLevel, $category);
+        if($this->displayConsole){
+            $this->logger->console($msg, $logLevel, $category);
         }
     }
 
     public function debug(?string $msg, string $category = 'debug')
     {
-        $this->console($msg, LoggerInterface::LOG_LEVEL_DEBUG, $category);
+        $this->log($msg, LoggerInterface::LOG_LEVEL_DEBUG, $category);
     }
 
     public function info(?string $msg, string $category = 'info')
     {
-        $this->console($msg, LoggerInterface::LOG_LEVEL_INFO, $category);
+        $this->log($msg, LoggerInterface::LOG_LEVEL_INFO, $category);
     }
 
     public function notice(?string $msg, string $category = 'notice')
     {
-        $this->console($msg, LoggerInterface::LOG_LEVEL_NOTICE, $category);
+        $this->log($msg, LoggerInterface::LOG_LEVEL_NOTICE, $category);
     }
 
     public function waring(?string $msg, string $category = 'waring')
     {
-        $this->console($msg, LoggerInterface::LOG_LEVEL_WARNING, $category);
+        $this->log($msg, LoggerInterface::LOG_LEVEL_WARNING, $category);
     }
 
     public function error(?string $msg, string $category = 'error')
     {
-        $this->console($msg, LoggerInterface::LOG_LEVEL_ERROR, $category);
+        $this->log($msg, LoggerInterface::LOG_LEVEL_ERROR, $category);
     }
 
-    public function onLog(): Event
-    {
-        return $this->callback;
-    }
+
 }
