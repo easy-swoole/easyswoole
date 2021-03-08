@@ -51,9 +51,9 @@ class Logger
 
     public function displayConsole(?bool $is = null)
     {
-        if($is === null){
+        if ($is === null) {
             return $this->displayConsole;
-        }else{
+        } else {
             $this->displayConsole = $is;
             return $this;
         }
@@ -81,6 +81,8 @@ class Logger
 
     public function log(?string $msg, int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG, string $category = 'debug')
     {
+        $this->console($msg, $logLevel, $category);
+
         if ($logLevel < $this->logLevel) {
             return;
         }
@@ -90,10 +92,9 @@ class Logger
         }
 
         if ($this->logConsole) {
-            $this->console($msg, $logLevel, $category);
+            $this->logger->log($msg, $logLevel, $category);
         }
 
-        $this->logger->log($msg, $logLevel, $category);
         $calls = $this->callback->all();
         foreach ($calls as $call) {
             call_user_func($call, $msg, $logLevel, $category);
@@ -102,7 +103,7 @@ class Logger
 
     public function console(?string $msg, int $logLevel = LoggerInterface::LOG_LEVEL_DEBUG, string $category = 'debug')
     {
-        if($this->displayConsole){
+        if ($this->displayConsole) {
             $this->logger->console($msg, $logLevel, $category);
         }
     }
