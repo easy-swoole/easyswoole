@@ -307,10 +307,13 @@ class Core
                     'memoryPeakUsage' => memory_get_peak_usage(true)
                 ]);
             });
+            register_shutdown_function(function ()use($pid){
+                $table = Manager::getInstance()->getProcessTable();
+                $table->del($pid);
+            });
         });
-
+        //onWorkerStop,onWorkerExit,register_shutdown_function冗余清理
         EventHelper::registerWithAdd($register, $register::onWorkerStop, function () {
-            //onWorkerStop与onWorkerExit冗余清理
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->del($pid);
@@ -322,7 +325,6 @@ class Core
          * 开启reload async的时候，清理事件
          */
         EventHelper::registerWithAdd($register, $register::onWorkerExit, function () {
-            //onWorkerStop与onWorkerExit冗余清理
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->del($pid);
