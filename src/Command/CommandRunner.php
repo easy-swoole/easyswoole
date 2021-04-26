@@ -34,6 +34,7 @@ class CommandRunner
         CommandManager::getInstance()->addCommand(new Crontab());
         CommandManager::getInstance()->addCommand(new Process());
         CommandManager::getInstance()->addCommand(new Server());
+        CommandManager::getInstance()->addCommand(new PhpunitCommand());
         //预防日后注解库DocCommand有变动影响到主库
         if (class_exists(DocCommand::class)) {
             CommandManager::getInstance()->addCommand(new DocCommand());
