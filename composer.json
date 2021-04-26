@@ -30,7 +30,8 @@
         "easyswoole/socket": "^1.1",
         "easyswoole/task": "^1.1",
         "easyswoole/command": "^1.1",
-        "easyswoole/bridge": "^1.0"
+        "easyswoole/bridge": "^1.0",
+        "easyswoole/phpunit": "^1.1"
     },
     "autoload": {
         "psr-4": {
@@ -45,7 +46,6 @@
         }
     },
     "require-dev": {
-        "easyswoole/phpunit": "^1.0",
         "easyswoole/swoole-ide-helper": "^1.2"
     },
     "bin": [
