@@ -11,6 +11,7 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Event;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\Utility\DefaultTrigger;
 use EasySwoole\Trigger\Location;
 use EasySwoole\Trigger\TriggerInterface;
 
@@ -23,8 +24,11 @@ class Trigger
     private $onError;
     private $onException;
 
-    function __construct(TriggerInterface $trigger)
+    function __construct(?TriggerInterface $trigger = null)
     {
+        if($trigger == null){
+            $trigger = new DefaultTrigger();
+        }
         $this->trigger = $trigger;
         $this->onError = new Event();
         $this->onException = new Event();
@@ -32,7 +36,6 @@ class Trigger
 
     public function error($msg,int $errorCode = E_USER_ERROR,Location $location = null)
     {
-        // TODO: Implement error() method.
         if($location == null){
             $location = $this->getLocation();
         }
@@ -45,7 +48,6 @@ class Trigger
 
     public function throwable(\Throwable $throwable)
     {
-        // TODO: Implement throwable() method.
         $this->trigger->throwable($throwable);
         $all = $this->onException->all();
         foreach ($all as $call){

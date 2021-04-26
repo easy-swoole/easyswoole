@@ -25,10 +25,8 @@ use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Log\LoggerInterface;
 use EasySwoole\Trigger\Location;
-use EasySwoole\Trigger\TriggerInterface;
 use EasySwoole\Utility\File;
 use EasySwoole\Log\Logger as DefaultLogger;
-use EasySwoole\Trigger\Trigger as DefaultTrigger;
 use Swoole\Server;
 use Swoole\Timer;
 use Swoole\Http\Request as SwooleRequest;
@@ -191,9 +189,6 @@ class Core
 
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
-        if (!$trigger instanceof TriggerInterface) {
-            $trigger = new DefaultTrigger($logger);
-        }
         Trigger::getInstance($trigger);
 
         //在没有配置自定义错误处理器的情况下，转化为trigger处理
