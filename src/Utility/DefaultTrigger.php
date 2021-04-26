@@ -22,13 +22,13 @@ class DefaultTrigger implements TriggerInterface
             $location->setFile($caller['file']);
         }
 
-        Logger::getInstance()->log("{$msg} at file:{$location->getFile()} line:{$location->getLine()}", $this->errorMapLogLevel($errorCode));
+        Logger::getInstance()->log("{$msg} at file:{$location->getFile()} line:{$location->getLine()}", $this->errorMapLogLevel($errorCode), 'trigger');
     }
 
     public function throwable(\Throwable $throwable)
     {
         $msg = "{$throwable->getMessage()} at file:{$throwable->getFile()} line:{$throwable->getLine()}";
-        Logger::getInstance()->log($msg, LoggerInterface::LOG_LEVEL_ERROR,'');
+        Logger::getInstance()->log($msg, LoggerInterface::LOG_LEVEL_ERROR, 'trigger');
     }
 
     private function errorMapLogLevel(int $errorCode)
@@ -47,9 +47,7 @@ class DefaultTrigger implements TriggerInterface
                 return LoggerInterface::LOG_LEVEL_WARNING;
             case E_NOTICE:
             case E_USER_NOTICE:
-                return LoggerInterface::LOG_LEVEL_NOTICE;
             case E_STRICT:
-                return LoggerInterface::LOG_LEVEL_NOTICE;
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
                 return LoggerInterface::LOG_LEVEL_NOTICE;
