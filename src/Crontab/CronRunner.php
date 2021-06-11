@@ -60,7 +60,7 @@ class CronRunner extends AbstractProcess
             if ($task['taskNextRunTime'] != $nextRunTime) {
                 $table->set($taskName, ['taskNextRunTime' => $nextRunTime]);
             }
-            if (($nextRunTime == $task['taskNextRunTime']) && isset($this->timerIds[$taskName])) {
+            if (isset($this->timerIds[$taskName])) {
                 //本轮已经创建过任务
                 continue;
             }
