@@ -91,4 +91,14 @@ class Crontab implements CommandInterface
         }, 'show');
     }
 
+    protected function reset()
+    {
+        $taskName = CommandManager::getInstance()->getOpt('name');
+        $taskRule = CommandManager::getInstance()->getOpt('rule');
+        return Utility::bridgeCall($this->commandName(), function (Package $package) {
+            $data = $package->getMsg();
+            return Color::success($data) . PHP_EOL . $this->show();
+        }, 'reset', ['taskName' => $taskName, 'taskRule' => $taskRule]);
+    }
+
 }

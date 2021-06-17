@@ -68,10 +68,10 @@ class Core
         defined('EASYSWOOLE_SERVER') or define('EASYSWOOLE_SERVER', 1);
         defined('EASYSWOOLE_WEB_SERVER') or define('EASYSWOOLE_WEB_SERVER', 2);
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER', 3);
-        $eventFile = EASYSWOOLE_ROOT.'/EasySwooleEvent.php';
-        if(!file_exists($eventFile)){
+        $eventFile = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
+        if (!file_exists($eventFile)) {
             die(Color::red("EasySwooleEvent.php file miss ,check again or run php easyswoole install again \n"));
-        }else{
+        } else {
             require_once $eventFile;
         }
     }
@@ -294,7 +294,7 @@ class Core
                 'pid' => $pid,
                 'name' => $processName,
                 'group' => "{$serverName}.{$type}",
-                'startUpTime'=>time()
+                'startUpTime' => time()
             ]);
             Timer::tick(1 * 1000, function () use ($table, $pid) {
                 $table->set($pid, [
@@ -302,7 +302,7 @@ class Core
                     'memoryPeakUsage' => memory_get_peak_usage(true)
                 ]);
             });
-            register_shutdown_function(function ()use($pid){
+            register_shutdown_function(function () use ($pid) {
                 $table = Manager::getInstance()->getProcessTable();
                 $table->del($pid);
             });
@@ -350,8 +350,6 @@ class Core
     private function extraHandler()
     {
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
-        //注册crontab进程
-        Crontab::getInstance()->__run();
         //注册Task进程
         $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
         $config = TaskManager::getInstance()->getConfig()->merge($config);
