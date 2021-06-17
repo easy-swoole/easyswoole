@@ -25,7 +25,6 @@
         "easyswoole/http-annotation": "^2.0",
         "easyswoole/utility": "^1.0",
         "easyswoole/trigger": "^1.0",
-        "dragonmantank/cron-expression": "^2.2",
         "easyswoole/config": "^1.0",
         "easyswoole/socket": "^1.1",
         "easyswoole/task": "^1.1",
