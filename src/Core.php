@@ -15,7 +15,6 @@ use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Http\Dispatcher;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;

@@ -30,7 +30,8 @@
         "easyswoole/task": "^1.1",
         "easyswoole/command": "^1.1",
         "easyswoole/bridge": "^1.0",
-        "easyswoole/phpunit": "^1.1"
+        "easyswoole/phpunit": "^1.1",
+        "easyswoole/crontab": "^1.0"
     },
     "autoload": {
         "psr-4": {
