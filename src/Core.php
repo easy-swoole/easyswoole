@@ -15,6 +15,7 @@ use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Http\Dispatcher;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -31,6 +32,7 @@ use Swoole\Timer;
 use Swoole\Http\Request as SwooleRequest;
 use Swoole\Http\Response as SwooleResponse;
 use Swoole\Event as SwooleEvent;
+use EasySwoole\Crontab\Config as CrontabConfig;
 
 ////////////////////////////////////////////////////////////////////
 //                          _ooOoo_                               //
@@ -363,6 +365,13 @@ class Core
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
         Bridge::getInstance()->attachServer($server, $serverName);
+        //注册Crontab
+        Crontab::getInstance()->getConfig()->setTempDir(EASYSWOOLE_TEMP_DIR);
+        Crontab::getInstance()->getConfig()->setServerName($serverName);
+        Crontab::getInstance()->getConfig()->setOnException(function (\Throwable $throwable){
+            Trigger::getInstance()->throwable($throwable);
+        });
+        Crontab::getInstance()->attachToServer($server);
     }
 
     /**
