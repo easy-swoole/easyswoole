@@ -30,6 +30,7 @@ class Crontab implements CommandInterface
         $commandHelp->addAction('stop', 'stops the specified crontab');
         $commandHelp->addAction('resume', 'restores the specified crontab');
         $commandHelp->addAction('run', 'run the specified crontab once immediately');
+        $commandHelp->addAction('reset', 'rewrite scheduled task rules');
         $commandHelp->addActionOpt('--name=TASK_NAME', 'the taskname to be operated on');
         return $commandHelp;
     }
