@@ -7,7 +7,7 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Crontab\Protocol\Response;
 use EasySwoole\EasySwoole\Bridge\AbstractCommand;
-use EasySwoole\Crontab\Crontab as EasySwooleCron;
+use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
 
 class Crontab extends AbstractCommand
 {
@@ -42,18 +42,18 @@ class Crontab extends AbstractCommand
         $info = EasySwooleCron::getInstance()->schedulerTable();
         $crontab = $info->get($taskName);
         if (empty($crontab)) {
-            $response->setMsg("crontab:{$taskName} is not found.");
+            $response->setMsg("crontab: {$taskName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         if ($crontab['isStop'] == 1) {
-            $response->setMsg("crontab:{$taskName} is already stop.");
+            $response->setMsg("crontab: {$taskName} is already stop.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
 
         $info->set($taskName, ['isStop' => 1]);
-        $response->setMsg("crontab:{$taskName} is stop suceess.");
+        $response->setMsg("crontab: {$taskName} is stop suceess.");
         return true;
     }
 
@@ -68,17 +68,17 @@ class Crontab extends AbstractCommand
         $info = EasySwooleCron::getInstance()->schedulerTable();
         $crontab = $info->get($taskName);
         if (empty($crontab)) {
-            $response->setMsg("crontab:{$taskName} is not found.");
+            $response->setMsg("crontab: {$taskName} is not found.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         if ($crontab['isStop'] == 0) {
-            $response->setMsg("crontab:{$taskName} is running.");
+            $response->setMsg("crontab: {$taskName} is running.");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
         $info->set($taskName, ['isStop' => 0]);
-        $response->setMsg("crontab:{$taskName} resume suceess.");
+        $response->setMsg("crontab: {$taskName} resume suceess.");
         return true;
     }
 
@@ -117,9 +117,13 @@ class Crontab extends AbstractCommand
             return false;
         }
 
-        if ($taskRule) {
-            EasySwooleCron::getInstance()->resetJobRule($taskName, $taskRule);
+        if (!$taskRule) {
+            $response->setMsg("The rule of the operation plan task must be filled in");
+            $response->setStatus($response::STATUS_COMMAND_ERROR);
+            return false;
         }
+
+        EasySwooleCron::getInstance()->resetJobRule($taskName, $taskRule);
 
         $response->setMsg("crontab: {$taskName} reset success");
         return true;
