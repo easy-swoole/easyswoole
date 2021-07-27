@@ -15,7 +15,7 @@ class CoreTest extends TestCase
 
     function testTempDir()
     {
-        $this->assertEquals(EASYSWOOLE_ROOT.'/Temp',EASYSWOOLE_TEMP_DIR);
+        $this->assertEquals(EASYSWOOLE_ROOT . '/Temp', EASYSWOOLE_TEMP_DIR);
     }
 
 }
