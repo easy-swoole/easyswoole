@@ -49,6 +49,6 @@
         "easyswoole/swoole-ide-helper": "^1.2"
     },
     "bin": [
-        "bin/easyswoole"
+        "bin/easyswoole.php"
     ]
 }
