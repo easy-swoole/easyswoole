@@ -5,7 +5,7 @@ use EasySwoole\Command\Caller;
 
 $file = __DIR__ . '/vendor/autoload.php';
 if (file_exists($file)) {
-   require $file;
+    require $file;
 } else {
     die("include composer autoload.php fail\n");
 }
