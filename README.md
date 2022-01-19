@@ -110,7 +110,7 @@ Transfer rate:          2265.40 [Kbytes/sec] received
 
 ## Quick Start
 ```
-composer require easyswoole/easyswoole=3.4.x
+composer require easyswoole/easyswoole=3.5.x
 php vendor/bin/easyswoole install
 php easyswoole server start
 ```
@@ -136,7 +136,8 @@ docker run -ti -p 9501:9501 easyswoole/easyswoole3
     - EasySwoole官方二群 709134628(已满)
     - EasySwoole官方三群 932625047(已满)
     - EasySwoole官方四群 779897753(已满)
-    - EasySwoole官方五群 853946743
+    - EasySwoole官方五群 853946743(已满)
+    - EasySwoole官方六群 524475224
     
 - 商业支持：
     - QQ 291323003
