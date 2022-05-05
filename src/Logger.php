@@ -122,7 +122,13 @@ class Logger
         $this->log($msg, LoggerInterface::LOG_LEVEL_NOTICE, $category);
     }
 
+    /** 保留，为了兼容已经在低版本中使用了这个方法的程序 */
     public function waring(?string $msg, string $category = 'waring')
+    {
+        $this->log($msg, LoggerInterface::LOG_LEVEL_WARNING, $category);
+    }
+    
+    public function warning(?string $msg, string $category = 'warning')
     {
         $this->log($msg, LoggerInterface::LOG_LEVEL_WARNING, $category);
     }
