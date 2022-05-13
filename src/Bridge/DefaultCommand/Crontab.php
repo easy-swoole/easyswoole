@@ -7,7 +7,7 @@ namespace EasySwoole\EasySwoole\Bridge\DefaultCommand;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Crontab\Protocol\Response;
 use EasySwoole\EasySwoole\Bridge\AbstractCommand;
-use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
+use EasySwoole\Crontab\Crontab as EasySwooleCron;
 
 class Crontab extends AbstractCommand
 {
