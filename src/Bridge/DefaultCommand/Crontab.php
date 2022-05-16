@@ -24,7 +24,7 @@ class Crontab extends AbstractCommand
             $data[$k] = $v;
         }
         if (empty($data)) {
-            $response->setMsg("crontab info is abnormal.");
+            $response->setMsg("crontab info is abnormal or empty Crontab register .");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
