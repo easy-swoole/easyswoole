@@ -150,12 +150,14 @@ class Core
         }
         defined('EASYSWOOLE_LOG_DIR') or define('EASYSWOOLE_LOG_DIR', $logDir);
 
+        $mode = $this->runMode();
+
         // 设置默认文件目录值(如果自行指定了目录则优先使用指定的)
         if (!Config::getInstance()->getConf('MAIN_SERVER.SETTING.pid_file')) {
-            Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file', $tempDir . '/pid.pid');
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.pid_file', $tempDir . "/{$mode}.pid");
         }
         if (!Config::getInstance()->getConf('MAIN_SERVER.SETTING.log_file')) {
-            Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file', $logDir . '/swoole.log');
+            Config::getInstance()->setConf('MAIN_SERVER.SETTING.log_file', $logDir . "/{$mode}.swoole.log");
         }
     }
 
@@ -350,7 +352,8 @@ class Core
 
     private function extraHandler()
     {
-        $serverName = Config::getInstance()->getConf('SERVER_NAME');
+        $mode = $this->runMode();
+        $serverName = Config::getInstance()->getConf('SERVER_NAME').".{$mode}";
         //注册Task进程
         $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
         $config = TaskManager::getInstance()->getConfig()->merge($config);
