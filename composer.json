@@ -26,7 +26,7 @@
         "easyswoole/utility": "^1.0",
         "easyswoole/trigger": "^1.0",
         "easyswoole/config": "^1.0",
-        "easyswoole/socket": "^1.1",
+        "easyswoole/socket": "^1.2",
         "easyswoole/task": "^1.1",
         "easyswoole/command": "^1.1",
         "easyswoole/bridge": "^1.0",
