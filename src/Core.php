@@ -71,7 +71,7 @@ class Core
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER', 3);
         $eventFile = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
         if (!file_exists($eventFile)) {
-            die(Color::red("EasySwooleEvent.php file miss ,check again or run php easyswoole install again \n"));
+            die(Color::red("EasySwooleEvent.php file miss ,check again or run php easyswoole.php install again \n"));
         } else {
             require_once $eventFile;
         }

@@ -29,10 +29,10 @@ class Install implements CommandInterface
 
     public function exec(): ?string
     {
-        if (is_file(EASYSWOOLE_ROOT . '/easyswoole')) {
-            unlink(EASYSWOOLE_ROOT . '/easyswoole');
+        if (is_file(EASYSWOOLE_ROOT . '/easyswoole.php')) {
+            unlink(EASYSWOOLE_ROOT . '/easyswoole.php');
         }
-        file_put_contents(EASYSWOOLE_ROOT . '/easyswoole', file_get_contents(__DIR__ . '/../../Resource/easyswoole'));
+        file_put_contents(EASYSWOOLE_ROOT . '/easyswoole.php', file_get_contents(__DIR__ . '/../../Resource/easyswoole'));
         Utility::releaseResource(__DIR__ . '/../../Resource/Http/Index._php', EASYSWOOLE_ROOT . '/App/HttpController/Index.php',true);
         Utility::releaseResource(__DIR__ . '/../../Resource/Http/Router._php', EASYSWOOLE_ROOT . '/App/HttpController/Router.php',true);
         Utility::releaseResource(__DIR__ . '/../../Resource/Config._php', EASYSWOOLE_ROOT . '/dev.php');

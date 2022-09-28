@@ -28,27 +28,27 @@ class ConfigTest extends TestCase
 
     public function testSetConf()
     {
-        $bool = Config::getInstance()->setConf('test', 'easyswoole');
+        $bool = Config::getInstance()->setConf('test', 'easyswoole.php');
         $this->assertTrue($bool);
-        $this->assertEquals('easyswoole', Config::getInstance()->getConf('test'));
+        $this->assertEquals('easyswoole.php', Config::getInstance()->getConf('test'));
     }
 
     public function testLoad()
     {
-        $bool = Config::getInstance()->load(['test' => 'easyswoole']);
+        $bool = Config::getInstance()->load(['test' => 'easyswoole.php']);
         $this->assertTrue($bool);
 
         $conf = Config::getInstance()->getConf();
-        $this->assertEquals(['test' => 'easyswoole'], $conf);
+        $this->assertEquals(['test' => 'easyswoole.php'], $conf);
     }
 
     public function testMerge()
     {
-        $bool = Config::getInstance()->merge(['test' => 'easyswoole']);
+        $bool = Config::getInstance()->merge(['test' => 'easyswoole.php']);
         $this->assertTrue($bool);
 
         $conf = Config::getInstance()->getConf();
-        $this->assertEquals(['test' => 'easyswoole'], $conf);
+        $this->assertEquals(['test' => 'easyswoole.php'], $conf);
     }
 
     public function testClear()
