@@ -22,7 +22,7 @@
         "ext-json": "*",
         "easyswoole/component": "^2.0",
         "easyswoole/spl": "^1.0",
-        "easyswoole/http-annotation": "3.x-dev",
+        "easyswoole/http-annotation": "3.x",
         "easyswoole/utility": "^1.0",
         "easyswoole/trigger": "^1.0",
         "easyswoole/config": "^1.0",
