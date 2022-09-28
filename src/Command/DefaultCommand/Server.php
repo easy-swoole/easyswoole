@@ -99,7 +99,7 @@ class Server implements CommandInterface
         $displayItem = $displayItem + $data;
         $displayItem['swoole version'] = phpversion('swoole');
         $displayItem['php version'] = phpversion();
-        $displayItem['easyswoole.php version'] = SysConst::EASYSWOOLE_VERSION;
+        $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
         $displayItem['run mode'] = Core::getInstance()->runMode();
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
