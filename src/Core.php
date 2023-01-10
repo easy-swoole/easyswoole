@@ -383,9 +383,16 @@ class Core
      */
     protected function setProcessName(string $processName = ''): void
     {
-        if (empty($processName) || in_array(PHP_OS, ['Darwin', 'CYGWIN', 'WINNT'])) {
+        if (empty($processName)) {
             return;
         }
+        $banOS = ['Darwin','CYGWIN','WINNT'];
+        foreach ($banOS as $os){
+            if (strpos(PHP_OS, $os) !== false) {
+                return ;
+            }
+        }
+        
         if (function_exists('cli_set_process_title')) {
             cli_set_process_title($processName);
         } else if (function_exists('swoole_set_process_name')) {
