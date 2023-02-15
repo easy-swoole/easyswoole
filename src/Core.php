@@ -176,7 +176,7 @@ class Core
             $logger = Config::getInstance()->getConf('LOG.handler');
         }
         if (!$logger instanceof LoggerInterface) {
-            $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR);
+            $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR,$this->runMode);
         }
         $level = intval(Config::getInstance()->getConf('LOG.level'));
         Logger::getInstance($logger)->logLevel($level);
@@ -289,14 +289,14 @@ class Core
             if (($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0) {
                 $type = 'Worker';
             }
-            $processName = "{$serverName}.{$type}.{$workerId}";
+            $processName = "{$serverName}.{$this->runMode}.{$type}.{$workerId}";
             $this->setProcessName($processName);
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->set($pid, [
                 'pid' => $pid,
                 'name' => $processName,
-                'group' => "{$serverName}.{$type}",
+                'group' => "{$serverName}.{$this->runMode}.{$type}",
                 'startUpTime' => time()
             ]);
             Timer::tick(1 * 1000, function () use ($table, $pid) {
