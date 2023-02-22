@@ -12,6 +12,9 @@ namespace EasySwoole\EasySwoole\Command;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\SysConst;
 use EasySwoole\Utility\File;
 
 class Utility
@@ -43,6 +46,45 @@ LOGO;
             $value = json_encode($value, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
         }
         return "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m";
+    }
+
+    static function createServerDisplayItem(Config $conf)
+    {
+        $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
+        $displayItem = [];
+        switch ($serverType) {
+            case EASYSWOOLE_SERVER:
+            {
+                $serverType = 'SWOOLE_SERVER';
+                break;
+            }
+            case EASYSWOOLE_WEB_SERVER:
+            {
+                $serverType = 'SWOOLE_WEB';
+                break;
+            }
+            case EASYSWOOLE_WEB_SOCKET_SERVER:
+            {
+                $serverType = 'SWOOLE_WEB_SOCKET';
+                break;
+            }
+            default:
+            {
+                $serverType = 'UNKNOWN';
+            }
+        }
+        $displayItem['main server'] = $serverType;
+        $displayItem['listen address'] = $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS');
+        $displayItem['listen port'] = $conf->getConf('MAIN_SERVER.PORT');
+        $data = $conf->getConf('MAIN_SERVER.SETTING');
+        $displayItem = $displayItem + $data;
+        $displayItem['swoole version'] = phpversion('swoole');
+        $displayItem['php version'] = phpversion();
+        $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
+        $displayItem['run mode'] = Core::getInstance()->runMode();
+        $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
+        $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
+        return $displayItem;
     }
 
     public static function releaseResource($source, $destination,$confirm = false)

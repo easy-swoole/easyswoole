@@ -61,49 +61,15 @@ class Server implements CommandInterface
         $conf = Config::getInstance();
         // php easyswoole.php server start -d
         $daemonize = CommandManager::getInstance()->issetOpt('d');
-
         if ($daemonize) {
             $conf->setConf("MAIN_SERVER.SETTING.daemonize", $daemonize);
         }
 
-        $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
-        $displayItem = [];
-        switch ($serverType) {
-            case EASYSWOOLE_SERVER:
-            {
-                $serverType = 'SWOOLE_SERVER';
-                break;
-            }
-            case EASYSWOOLE_WEB_SERVER:
-            {
-                $serverType = 'SWOOLE_WEB';
-                break;
-            }
-            case EASYSWOOLE_WEB_SOCKET_SERVER:
-            {
-                $serverType = 'SWOOLE_WEB_SOCKET';
-                break;
-            }
-            default:
-            {
-                $serverType = 'UNKNOWN';
-            }
+        if (empty($conf->getConf('MAIN_SERVER.SETTING.user'))) {
+            $conf->setConf('MAIN_SERVER.SETTING.user',get_current_user());
         }
-        $displayItem['main server'] = $serverType;
-        $displayItem['listen address'] = $conf->getConf('MAIN_SERVER.LISTEN_ADDRESS');
-        $displayItem['listen port'] = $conf->getConf('MAIN_SERVER.PORT');
-        $data = $conf->getConf('MAIN_SERVER.SETTING');
-        if (empty($data['user'])) {
-            $data['user'] = get_current_user();
-        }
-        $displayItem = $displayItem + $data;
-        $displayItem['swoole version'] = phpversion('swoole');
-        $displayItem['php version'] = phpversion();
-        $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
-        $displayItem['run mode'] = Core::getInstance()->runMode();
-        $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
-        $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
 
+        $displayItem = Utility::createServerDisplayItem(Config::getInstance());
         $msg = Color::green(Utility::easySwooleLog()) . "\n";
         foreach ($displayItem as $key => $value) {
             $msg .= Utility::displayItem($key, $value) . "\n";
@@ -184,19 +150,13 @@ class Server implements CommandInterface
         $run = new Scheduler();
         $run->add(function () use (&$result) {
             $result = Utility::bridgeCall('status', function (Package $package) {
-                $data = $package->getArgs();
-                $data['start_time'] = date('Y-m-d H:i:s', $data['start_time']);
-
-                $final = [];
-
-                foreach ($data as $key => $val){
-                    $final[] = [
-                        'item'=>$key,
-                        'value'=>$val
-                    ];
+                $displayItem = $package->getArgs();
+                $msg = Color::green(Utility::easySwooleLog()) . "\n";
+                foreach ($displayItem as $key => $value) {
+                    $msg .= Utility::displayItem($key, $value) . "\n";
                 }
-                return new ArrayToTextTable($final);
-            }, 'server');
+                return $msg;
+            }, 'call');
         });
         $run->start();
         return $result;
