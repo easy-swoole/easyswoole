@@ -17,7 +17,11 @@ class Process extends AbstractCommand
 
     protected function info(Package $package, Package $responsePackage)
     {
-        $responsePackage->setArgs(Manager::getInstance()->info());
+        $array = Manager::getInstance()->info();
+        foreach ($array as &$value){
+            unset($value['hash']);
+        }
+        $responsePackage->setArgs($array);
         return true;
     }
 }
