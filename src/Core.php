@@ -356,7 +356,7 @@ class Core
         $serverName = Config::getInstance()->getConf('SERVER_NAME').".{$mode}";
         //注册Task进程
         $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
-        $config = TaskManager::getInstance()->getConfig()->merge($config);
+        $config = TaskManager::getInstance()->getConfig()->restore($config);
         $config->setTempDir(EASYSWOOLE_TEMP_DIR);
         $config->setServerName($serverName);
         $config->setOnException(function (\Throwable $throwable) {
