@@ -19,7 +19,6 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
-use EasySwoole\HttpAnnotation\Utility\DocCommand;
 use EasySwoole\Phpunit\PhpunitCommand;
 
 
@@ -35,10 +34,6 @@ class CommandRunner
         CommandManager::getInstance()->addCommand(new Process());
         CommandManager::getInstance()->addCommand(new Server());
         CommandManager::getInstance()->addCommand(new PhpunitCommand());
-        //预防日后注解库DocCommand有变动影响到主库
-        if (class_exists(DocCommand::class)) {
-            CommandManager::getInstance()->addCommand(new DocCommand());
-        }
 
         if (class_exists(PhpunitCommand::class)) {
             CommandManager::getInstance()->addCommand(new PhpunitCommand());
