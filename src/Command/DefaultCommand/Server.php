@@ -47,7 +47,7 @@ class Server implements CommandInterface
     public function exec(): ?string
     {
         $action = CommandManager::getInstance()->getArg(0);
-        if (method_exists($this, $action) && $action != 'help') {
+        if (!is_null($action) && method_exists($this, $action) && $action != 'help') {
             Core::getInstance()->initialize();
             return $this->$action();
         }

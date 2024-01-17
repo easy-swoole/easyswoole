@@ -40,7 +40,7 @@ class Task implements CommandInterface
         Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
-            if (method_exists($this, $action) && $action != 'help') {
+            if (!is_null($action) && method_exists($this, $action) && $action != 'help') {
                 $result = $this->{$action}();
                 return;
             }
