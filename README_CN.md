@@ -1,4 +1,4 @@
-English | [中文](./README_CN.md)
+中文 | [English](./README.md)
 
 ![](easyswoole.png)
 
@@ -9,35 +9,35 @@ English | [中文](./README_CN.md)
 [![Monthly Downloads](https://poser.pugx.org/easyswoole/easyswoole/d/monthly)](https://packagist.org/packages/easyswoole/easyswoole)
 
 
-# EasySwoole - A High Performance Swoole Framework
+# EasySwoole - 一款高性能 Swoole 框架
 
-[EasySwoole](http://www.easyswoole.com/) is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
+[EasySwoole](http://www.easyswoole.com/) 是一款基于 Swoole Server 开发的常驻内存型的分布式 PHP 框架，专为 API 而生，摆脱传统 PHP 运行模式在进程唤起和文件加载上带来的性能损失。EasySwoole 高度封装了 Swoole Server 而依旧维持 Swoole Server 原有特性，支持同时混合监听 HTTP、自定义 TCP、UDP 协议，让开发者以最低的学习成本和精力编写出多进程、可异步、高可用的应用服务。
           
-- Base on Swoole extension
-- Built-in HTTP, TCP, WebSocket,Udp Coroutine Server
-- Global dependency injection container
-- PSR-7 based HTTP message implementation
-- HTTP,TCP, WebSocket, Udp middleware support
-- Scalable high performance RPC
-- Database ORM
-- Mysql, Redis, RPC, HTTP Coroutine Clients
-- Coroutine and asynchronous task delivery
-- Custom user processes
-- RESTful supported
-- High performance router
-- Fast and flexible parameter validator
-- Powerful log component
-- Universal connection pools
-- Remote Console support
-- Crontab Rule Timer support
+- 基于 Swoole 扩展
+- 内置HTTP、TCP、WebSocket、UD P协程服务器
+- 全局依赖注入容器
+- 基于 PSR-7 的 HTTP 消息实现
+- HTTP、TCP、WebSocket、UDP 中间件支持
+- 可扩展的高性能 RPC
+- 数据库 ORM
+- MYSQL、Redis、RPC、HTTP 协程客户端
+- 协程和异步任务
+- 用户自定义进程
+- 支持 RESTful
+- 高性能路由
+- 快速灵活的参数验证器
+- 强大的日志组件
+- 通用连接池
+- 远程控制台支持
+- Crontab及定时器支持
 
-## Doc 
+## 文档 
 
-- [Doc](http://www.easyswoole.com)
+- [英文文档](http://www.easyswoole.com)
 - [中文文档](http://www.easyswoole.com)
-- [Git For Doc](https://github.com/easy-swoole/doc-3.7)
+- [文档 Git 仓库](https://github.com/easy-swoole/doc-3.7)
 
-## ab Test
+## ab 压力测试
 
 ```php
 <?php
@@ -110,7 +110,7 @@ Time per request:       0.015 [ms] (mean, across all concurrent requests)
 Transfer rate:          2265.40 [Kbytes/sec] received
 ```
 
-## Quick Start
+## 快速开始使用
 ```
 composer require easyswoole/easyswoole=3.7.x
 php vendor/bin/easyswoole.php install
@@ -118,13 +118,13 @@ php easyswoole.php server start
 ```
 
 ## Docker
-### Get Docker Image
+### 获取 Docker 镜像
 ```
 docker pull easyswoolexuesi2021/easyswoole:php8.1.22-alpine3.16-swoole4.8.13
 ```
-> More Docker images can be viewed：[Docker Hub](https://hub.docker.com/r/easyswoolexuesi2021/easyswoole) or [Git for Dockerfile](https://github.com/XueSiLf/easyswoole-docker)
+> 更多 Docker 镜像可查看：[Docker Hub](https://hub.docker.com/r/easyswoolexuesi2021/easyswoole) 或 [Dockerfile 仓库](https://github.com/XueSiLf/easyswoole-docker)
 
-### Run
+### 运行容器
 
 ```
 docker run --name easyswoole \
@@ -134,15 +134,15 @@ docker run --name easyswoole \
 --entrypoint /bin/sh \
 easyswoolexuesi2021/easyswoole:php8.1.22-alpine3.16-swoole4.8.13
 ```
-- WorkerDir: ***/var/www***
-- Run Easyswoole : 
+- 工作目录: ***/var/www/project***
+- 运行 Easyswoole : 
 ```bash
 composer require easyswoole/easyswoole=3.7.x
 php vendor/bin/easyswoole.php install
 php easyswoole.php server start
 ```
 
-## Others 
+## 其他 
 - [Git For Demo](https://github.com/easy-swoole/demo)
 - QQ交流群
     - VIP群 579434607 （本群需要付费599元）
