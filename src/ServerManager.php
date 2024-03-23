@@ -97,7 +97,7 @@ class ServerManager
         if($serverName === null){
             return $this->mainServerEventRegister;
         }else if(isset($this->subServerRegister[$serverName])){
-            return $this->subServerRegister[$serverName];
+            return $this->subServerRegister[$serverName]['eventRegister'];
         }
         return null;
     }
