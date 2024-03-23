@@ -92,7 +92,7 @@ class ServerManager
         return $eventRegister;
     }
 
-    function getEventRegister(string $serverName = null):?EventRegister
+    function getEventRegister(string $serverName = null):?EventRegister|array
     {
         if($serverName === null){
             return $this->mainServerEventRegister;
