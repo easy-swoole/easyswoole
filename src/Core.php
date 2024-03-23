@@ -104,11 +104,8 @@ class Core
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'], $conf['SERVER_TYPE'], $conf['LISTEN_ADDRESS'], $conf['SETTING'], $conf['RUN_MODEL'], $conf['SOCK_TYPE']
         );
-        $ret = EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getEventRegister());
-        //如果返回false,说明用户希望接管全部事件
-        if ($ret !== false) {
-            $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(), $conf['SERVER_TYPE']);
-        }
+        EasySwooleEvent::mainServerCreate(ServerManager::getInstance()->getEventRegister());
+        $this->registerDefaultCallBack(ServerManager::getInstance()->getSwooleServer(), $conf['SERVER_TYPE']);
         $this->extraHandler();
         return $this;
     }
