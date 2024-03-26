@@ -66,6 +66,10 @@ class Install implements CommandInterface
 
     protected function execComposerDumpAutoload()
     {
-        @exec('composer dump-autoload');
+        if(function_exists('exec')){
+            @exec('composer dump-autoload');
+        }else{
+            echo Color::warning('exec() is forbid,you may run composer dump-autoload by manual') . PHP_EOL;
+        }
     }
 }
