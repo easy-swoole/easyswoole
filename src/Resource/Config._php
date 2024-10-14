@@ -13,7 +13,8 @@ return [
         'SETTING' => [
             'worker_num' => 8,
             'reload_async' => true,
-            'max_wait_time' => 3
+            'max_wait_time' => 3,
+            'enable_deadlock_check'=>false
         ],
         'TASK' => [
             'workerNum' => 4,
