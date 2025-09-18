@@ -29,7 +29,6 @@ class Process implements CommandInterface
     public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
     {
         $commandHelp->addAction('kill', 'kill process');
-        $commandHelp->addAction('killAll', 'kill all processes');
         $commandHelp->addAction('show', 'show all process information');
         $commandHelp->addActionOpt('--pid=PID', 'kill the specified pid');
         $commandHelp->addActionOpt('--group=GROUP_NAME', 'kill the specified process group');
@@ -48,7 +47,7 @@ class Process implements CommandInterface
             }
             if (method_exists($this, $action) && $action != 'help') {
 
-                $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
+                $package = Bridge::getInstance()->call('process', ['action' => 'info']);
                 if ($package->getStatus() != Package::STATUS_SUCCESS) {
                     $result = Color::error($package->getMsg());
                     return;
@@ -86,12 +85,12 @@ class Process implements CommandInterface
         return new ArrayToTextTable($list);
     }
 
-    protected function kill($json)
+    protected function kill($allProcess)
     {
         $list = [];
         $pid = CommandManager::getInstance()->getOpt('pid');
         $groupName = CommandManager::getInstance()->getOpt('group');
-        foreach ($json as $key => $value) {
+        foreach ($allProcess as $key => $value) {
             if ($value['pid'] == $pid) {
                 $list[$key] = $value;
             }
@@ -101,11 +100,6 @@ class Process implements CommandInterface
             }
         }
         return $this->killProcess($list);
-    }
-
-    protected function killAll($json)
-    {
-        return $this->killProcess($json);
     }
 
     protected function show($json)
