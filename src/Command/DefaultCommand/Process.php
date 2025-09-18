@@ -43,6 +43,9 @@ class Process implements CommandInterface
         Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
+            if(empty($action)){
+                $action = 'help';
+            }
             if (method_exists($this, $action) && $action != 'help') {
 
                 $package = Bridge::getInstance()->call($this->commandName(), ['action' => 'info']);
@@ -118,6 +121,7 @@ class Process implements CommandInterface
             $json[$key]['memoryUsage'] = round($value['memoryUsage'] / pow(1024, ($i = floor(log($value['memoryUsage'], 1024)))), 2) . ' ' . $unit[$i];
             $json[$key]['memoryPeakUsage'] = round($value['memoryPeakUsage'] / pow(1024, ($i = floor(log($value['memoryPeakUsage'], 1024)))), 2) . ' ' . $unit[$i];
             $json[$key]['startUpTime'] = date('Y-m-d H:i:s',$json[$key]['startUpTime']);
+            $json[$key]['lastHeartBeat'] = date('Y-m-d H:i:s',$json[$key]['lastHeartBeat']);
         }
 
         return $json;

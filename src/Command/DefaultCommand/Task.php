@@ -40,7 +40,10 @@ class Task implements CommandInterface
         Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
-            if (!is_null($action) && method_exists($this, $action) && $action != 'help') {
+            if(empty($action)){
+                $action = 'help';
+            }
+            if (method_exists($this, $action) && $action != 'help') {
                 $result = $this->{$action}();
                 return;
             }
@@ -53,70 +56,70 @@ class Task implements CommandInterface
 
     private function reboot()
     {
-        $list = Utility::bridgeCall('status', function (Package $package) {
-            $data = $package->getArgs();
-            if(empty($data)){
-                return 'please check config item for task worker num';
-            }
-            return $data;
-        }, 'task');
-
-        if(is_array($list)){
-            if (CommandManager::getInstance()->issetOpt('f')) {
-                $sig = SIGKILL;
-                $option = 'SIGKILL';
-            } else {
-                $sig = SIGTERM;
-                $option = 'SIGTERM';
-            }
-
-            $ret = [];
-
-            foreach ($list as $item){
-                \Swoole\Process::kill($item['pid'], $sig);
-                $ret[$item['pid']] = [
-                    "pid"=>$item['pid'],
-                    "startUpTime"=>date('Y-m-d H:i:s',$item['startUpTime']),
-                    "signalTime"=>date('Y-m-d H:i:s'),
-                    "signalType"=>$option,
-                    "3s-Status"=>"alive"
-                ];
-            }
-
-            //检测检测
-
-            $wait = new WaitGroup();
-            foreach ($ret as $pid =>$item){
-                $wait->add();
-                Coroutine::create(function ()use($pid,$wait,&$ret){
-                    $start = time();
-                    while (1){
-                        if(time() - $start > 3){
-                            $wait->done();
-                            break;
-                        }else{
-                            if(!\Swoole\Process::kill($pid, 0)){
-                                $ret[$pid]['3s-Status'] = "exit";
-                                $wait->done();
-                                break;
-                            }
-                        }
-                        Coroutine::sleep(0.01);
-                    }
-                });
-            }
-
-            $wait->wait(3);
-
-            return new ArrayToTextTable($ret);
-        }else{
-            return $list;
-        }
+//        $list = Utility::bridgeCall('status', function (Package $package) {
+//            $data = $package->getArgs();
+//            if(empty($data)){
+//                return 'please check config item for task worker num';
+//            }
+//            return $data;
+//        }, 'task');
+//
+//        if(is_array($list)){
+//            if (CommandManager::getInstance()->issetOpt('f')) {
+//                $sig = SIGKILL;
+//                $option = 'SIGKILL';
+//            } else {
+//                $sig = SIGTERM;
+//                $option = 'SIGTERM';
+//            }
+//
+//            $ret = [];
+//
+//            foreach ($list as $item){
+//                \Swoole\Process::kill($item['pid'], $sig);
+//                $ret[$item['pid']] = [
+//                    "pid"=>$item['pid'],
+//                    "startUpTime"=>date('Y-m-d H:i:s',$item['startUpTime']),
+//                    "signalTime"=>date('Y-m-d H:i:s'),
+//                    "signalType"=>$option,
+//                    "3s-Status"=>"alive"
+//                ];
+//            }
+//
+//            //检测检测
+//
+//            $wait = new WaitGroup();
+//            foreach ($ret as $pid =>$item){
+//                $wait->add();
+//                Coroutine::create(function ()use($pid,$wait,&$ret){
+//                    $start = time();
+//                    while (1){
+//                        if(time() - $start > 3){
+//                            $wait->done();
+//                            break;
+//                        }else{
+//                            if(!\Swoole\Process::kill($pid, 0)){
+//                                $ret[$pid]['3s-Status'] = "exit";
+//                                $wait->done();
+//                                break;
+//                            }
+//                        }
+//                        Coroutine::sleep(0.01);
+//                    }
+//                });
+//            }
+//
+//            $wait->wait(3);
+//
+//            return new ArrayToTextTable($ret);
+//        }else{
+//            return $list;
+//        }
     }
 
     protected function status()
     {
-        return Utility::bridgeCall('status', function (Package $package) {
+        return Utility::bridgeCall('task', function (Package $package) {
             $data = $package->getArgs();
             if(empty($data)){
                 return 'please check config item for task worker num';
@@ -126,7 +129,7 @@ class Task implements CommandInterface
                 $datum['startUpTime'] = date('Y-m-d H:i:s',$datum['startUpTime']);
             }
             return new ArrayToTextTable($data);
-        }, 'task');
+        }, 'status');
     }
 }
 

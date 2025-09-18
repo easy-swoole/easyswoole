@@ -31,7 +31,8 @@ class Crontab implements CommandInterface
         $commandHelp->addAction('resume', 'restores the specified crontab');
         $commandHelp->addAction('run', 'run the specified crontab once immediately');
         $commandHelp->addAction('reset', 'rewrite scheduled task rules');
-        $commandHelp->addActionOpt('--name=TASK_NAME', 'the taskname to be operated on');
+        $commandHelp->addActionOpt('--taskName=TASK_NAME', 'the task name to be operated on');
+        $commandHelp->addActionOpt('--taskRule=TASK_RULE', 'the task crontab rule');
         return $commandHelp;
     }
 
@@ -41,7 +42,10 @@ class Crontab implements CommandInterface
         Core::getInstance()->initialize();
         $run = new Scheduler();
         $run->add(function () use (&$result, $action) {
-            if (!is_null($action) && method_exists($this, $action) && $action != 'help') {
+            if(empty($action)){
+                $action = 'help';
+            }
+            if (method_exists($this, $action) && $action != 'help') {
                 $result = $this->{$action}();
                 return;
             }
@@ -53,7 +57,7 @@ class Crontab implements CommandInterface
 
     protected function stop()
     {
-        $taskName = CommandManager::getInstance()->getOpt('name');
+        $taskName = CommandManager::getInstance()->getOpt('taskName');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
             return Color::success($data) . PHP_EOL . $this->show();
@@ -63,7 +67,7 @@ class Crontab implements CommandInterface
 
     protected function resume()
     {
-        $taskName = CommandManager::getInstance()->getOpt('name');
+        $taskName = CommandManager::getInstance()->getOpt('taskName');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
             return Color::success($data) . PHP_EOL . $this->show();
@@ -72,7 +76,7 @@ class Crontab implements CommandInterface
 
     protected function run()
     {
-        $taskName = CommandManager::getInstance()->getOpt('name');
+        $taskName = CommandManager::getInstance()->getOpt('taskName');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
             return Color::success($data) . PHP_EOL . $this->show();
@@ -94,8 +98,8 @@ class Crontab implements CommandInterface
 
     protected function reset()
     {
-        $taskName = CommandManager::getInstance()->getOpt('name');
-        $taskRule = CommandManager::getInstance()->getOpt('rule');
+        $taskName = CommandManager::getInstance()->getOpt('taskName');
+        $taskRule = CommandManager::getInstance()->getOpt('taskRule');
         return Utility::bridgeCall($this->commandName(), function (Package $package) {
             $data = $package->getMsg();
             return Color::success($data) . PHP_EOL . $this->show();

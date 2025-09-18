@@ -26,7 +26,7 @@ class Crontab extends AbstractCommand
         if (empty($data)) {
             $response->setMsg("crontab info is abnormal or empty Crontab register .");
             $response->setStatus($response::STATUS_COMMAND_ERROR);
-            return false;
+            return;
         }
         $response->setArgs($data);
     }
@@ -122,10 +122,12 @@ class Crontab extends AbstractCommand
             $response->setStatus($response::STATUS_COMMAND_ERROR);
             return false;
         }
-
-        EasySwooleCron::getInstance()->resetJobRule($taskName, $taskRule);
-
-        $response->setMsg("crontab: {$taskName} reset success");
+        try{
+            EasySwooleCron::getInstance()->resetJobRule($taskName, $taskRule);
+            $response->setMsg("crontab: {$taskName} reset success");
+        }catch (\Throwable $e){
+            $response->setMsg($e->getMessage());
+        }
         return true;
     }
 }
