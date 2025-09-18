@@ -282,10 +282,14 @@ class Core
         //注册默认的worker start
         EventHelper::registerWithAdd($register, EventRegister::onWorkerStart, function (Server $server, $workerId) {
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
-            $type = 'Unknown';
-            if (($workerId < Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num')) && $workerId >= 0) {
+
+            if (!$server->taskworker) {
                 $type = 'Worker';
+            }else{
+                $type = 'SwTaskWorker';
+                $workerId = $workerId - Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
             }
+
             $processName = "{$serverName}.{$this->runMode}.{$type}.{$workerId}";
             $this->setProcessName($processName);
             $table = Manager::getInstance()->getProcessTable();
@@ -299,7 +303,8 @@ class Core
             Timer::tick(1 * 1000, function () use ($table, $pid) {
                 $table->set($pid, [
                     'memoryUsage' => memory_get_usage(),
-                    'memoryPeakUsage' => memory_get_peak_usage(true)
+                    'memoryPeakUsage' => memory_get_peak_usage(true),
+                    'lastHeartBeat'=>time()
                 ]);
             });
             register_shutdown_function(function () use ($pid) {
