@@ -18,7 +18,7 @@ abstract class AbstractCommand implements CommandInterface
         $action = $package->getArgs()['action'] ?? '';
         if (!method_exists($this, $action)) {
             $responsePackage->setStatus($responsePackage::STATUS_COMMAND_NOT_EXIST);
-            $responsePackage->setMsg("command action:{$action} not empty");
+            $responsePackage->setMsg("bridge command {{$action}} not exists");
             return $responsePackage;
         }
         $this->{$action}($package, $responsePackage);
