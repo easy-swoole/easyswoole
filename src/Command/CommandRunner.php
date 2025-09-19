@@ -18,7 +18,6 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\Phpunit\PhpunitCommand;
 
 
@@ -29,7 +28,6 @@ class CommandRunner
     public function __construct()
     {
         CommandManager::getInstance()->addCommand(new Install());
-        CommandManager::getInstance()->addCommand(new Task());
         CommandManager::getInstance()->addCommand(new Crontab());
         CommandManager::getInstance()->addCommand(new Process());
         CommandManager::getInstance()->addCommand(new Server());

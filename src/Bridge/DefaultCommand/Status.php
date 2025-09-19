@@ -8,9 +8,7 @@ use EasySwoole\Bridge\Package;
 use EasySwoole\EasySwoole\Bridge\AbstractCommand;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\ServerManager;
-use EasySwoole\EasySwoole\Task\TaskManager;
 
 class Status extends AbstractCommand
 {
