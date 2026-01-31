@@ -17,7 +17,7 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-swoole": ">=4.4.4",
         "ext-json": "*",
         "easyswoole/component": "^2.0",
