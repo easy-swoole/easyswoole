@@ -47,7 +47,6 @@ class DefaultTrigger implements TriggerInterface
                 return LoggerInterface::LOG_LEVEL_WARNING;
             case E_NOTICE:
             case E_USER_NOTICE:
-            case E_STRICT:
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
                 return LoggerInterface::LOG_LEVEL_NOTICE;
