@@ -17,7 +17,7 @@ class Bridge extends BridgeServer
 {
     use Singleton;
 
-    function __construct(Container $container = null)
+    function __construct(Container|null $container = null)
     {
         parent::__construct($container);
         $this->getCommandContainer()->set(new Crontab());

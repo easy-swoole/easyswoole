@@ -36,7 +36,7 @@ class EventRegister extends MultiContainer
     const onMessage = 'message';
     const onOpen = 'open';
 
-    function __construct(array $allowKeys = null)
+    function __construct(array|null $allowKeys = null)
     {
         $Ref = new \ReflectionClass(self::class);
         $constants = $Ref->getConstants();

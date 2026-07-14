@@ -35,7 +35,7 @@ class ServerManager
      * @param string $serverName
      * @return null|Server|Server\Port|WebSocketServer|HttpServer
      */
-    function getSwooleServer(string $serverName = null)
+    function getSwooleServer(string|null $serverName = null)
     {
         if($serverName === null){
             return $this->swooleServer;
@@ -92,7 +92,7 @@ class ServerManager
         return $eventRegister;
     }
 
-    function getEventRegister(string $serverName = null):?EventRegister
+    function getEventRegister(string|null $serverName = null):?EventRegister
     {
         if($serverName === null){
             return $this->mainServerEventRegister;
