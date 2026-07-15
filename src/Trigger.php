@@ -24,7 +24,7 @@ class Trigger
     private $onError;
     private $onException;
 
-    function __construct(?TriggerInterface $trigger = null)
+    function __construct(TriggerInterface|null $trigger = null)
     {
         if($trigger == null){
             $trigger = new DefaultTrigger();
@@ -34,7 +34,7 @@ class Trigger
         $this->onException = new Event();
     }
 
-    public function error($msg,int $errorCode = E_USER_ERROR,Location $location = null)
+    public function error($msg,int $errorCode = E_USER_ERROR,Location|null $location = null)
     {
         if($location == null){
             $location = $this->getLocation();

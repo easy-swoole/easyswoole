@@ -77,7 +77,7 @@ class Core
         }
     }
 
-    function runMode(?string $mode = null): string
+    function runMode(string|null $mode = null): string
     {
         if (!empty($mode)) {
             $this->runMode = $mode;

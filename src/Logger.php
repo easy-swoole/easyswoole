@@ -40,7 +40,7 @@ class Logger
         return $this->callback;
     }
 
-    public function logLevel(?int $level = null)
+    public function logLevel(int|null $level = null)
     {
         if ($level !== null) {
             $this->logLevel = $level;
@@ -49,7 +49,7 @@ class Logger
         return $this->logLevel;
     }
 
-    public function displayConsole(?bool $is = null)
+    public function displayConsole(bool|null $is = null)
     {
         if($is === null){
             return $this->displayConsole;
@@ -59,7 +59,7 @@ class Logger
         }
     }
 
-    public function logConsole(?bool $is = null)
+    public function logConsole(bool|null $is = null)
     {
         if ($is === null) {
             return $this->logConsole;
@@ -69,7 +69,7 @@ class Logger
         }
     }
 
-    public function ignoreCategory(?array $arr = null)
+    public function ignoreCategory(array|null $arr = null)
     {
         if ($arr === null) {
             return $this->ignoreCategory;

@@ -12,7 +12,7 @@ use EasySwoole\Trigger\TriggerInterface;
 class DefaultTrigger implements TriggerInterface
 {
 
-    public function error($msg, int $errorCode = E_USER_ERROR, Location $location = null)
+    public function error($msg, int $errorCode = E_USER_ERROR, Location|null $location = null)
     {
         if ($location == null) {
             $location = new Location();

@@ -20,7 +20,7 @@ class Config
 
     use Singleton;
 
-    public function __construct(?AbstractConfig $config = null)
+    public function __construct(AbstractConfig|null $config = null)
     {
         if($config == null){
             $config = new SplArrayConfig();
@@ -28,7 +28,7 @@ class Config
         $this->conf = $config;
     }
 
-    function storageHandler(AbstractConfig $config = null):AbstractConfig
+    function storageHandler(AbstractConfig|null $config = null):AbstractConfig
     {
         if($config){
             $this->conf = $config;
