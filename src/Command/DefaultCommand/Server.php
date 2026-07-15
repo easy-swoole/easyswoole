@@ -11,12 +11,10 @@ use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
-use EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
-use EasySwoole\EasySwoole\SysConst;
-use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
 class Server implements CommandInterface

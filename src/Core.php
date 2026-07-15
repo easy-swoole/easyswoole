@@ -10,23 +10,23 @@ namespace EasySwoole\EasySwoole;
 
 
 use EasySwoole\Command\Color;
-use EasySwoole\Command\CommandManager;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\AbstractInterface\Log\LoggerInterface;
+use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerLocation;
 use EasySwoole\EasySwoole\Bridge\Bridge;
+use EasySwoole\EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Http\Dispatcher;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Task\TaskManager;
+use EasySwoole\EasySwoole\Utility\DefaultLogger;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
-use EasySwoole\Log\LoggerInterface;
-use EasySwoole\Trigger\Location;
 use EasySwoole\Utility\File;
-use EasySwoole\Log\Logger as DefaultLogger;
 use Swoole\Server;
 use Swoole\Timer;
 use Swoole\Http\Request as SwooleRequest;
@@ -175,11 +175,9 @@ class Core
         if (!$logger instanceof LoggerInterface) {
             $logger = new DefaultLogger(EASYSWOOLE_LOG_DIR,$this->runMode);
         }
-        $level = intval(Config::getInstance()->getConf('LOG.level'));
-        Logger::getInstance($logger)->logLevel($level);
-
-        $logConsole = Config::getInstance()->getConf('LOG.logConsole');
-        Logger::getInstance()->logConsole($logConsole);
+        Logger::getInstance($logger);
+        $levels = Config::getInstance()->getConf('LOG.logLevels');
+        Logger::getInstance()->logLevels($levels);
 
         $ignoreCategory = Config::getInstance()->getConf('LOG.ignoreCategory');
         Logger::getInstance()->ignoreCategory($ignoreCategory);
@@ -195,7 +193,7 @@ class Core
         $errorHandler = Di::getInstance()->get(SysConst::ERROR_HANDLER);
         if (!is_callable($errorHandler)) {
             $errorHandler = function ($errorCode, $description, $file = null, $line = null) {
-                $l = new Location();
+                $l = new TriggerLocation();
                 $l->setFile($file);
                 $l->setLine($line);
                 Trigger::getInstance()->error($description, $errorCode, $l);
@@ -208,7 +206,7 @@ class Core
             $func = function () {
                 $error = error_get_last();
                 if (!empty($error)) {
-                    $l = new Location();
+                    $l = new TriggerLocation();
                     $l->setFile($error['file']);
                     $l->setLine($error['line']);
                     Trigger::getInstance()->error($error['message'], $error['type'], $l);

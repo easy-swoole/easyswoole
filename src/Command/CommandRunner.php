@@ -11,14 +11,14 @@ namespace EasySwoole\EasySwoole\Command;
 
 use EasySwoole\Command\AbstractInterface\CallerInterface;
 use EasySwoole\Command\AbstractInterface\ResultInterface;
-use EasySwoole\Command\CommandManager;
+
 use EasySwoole\Command\Result;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Phpunit;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
-use EasySwoole\Phpunit\PhpunitCommand;
 
 
 class CommandRunner
@@ -31,11 +31,7 @@ class CommandRunner
         CommandManager::getInstance()->addCommand(new Crontab());
         CommandManager::getInstance()->addCommand(new Process());
         CommandManager::getInstance()->addCommand(new Server());
-        CommandManager::getInstance()->addCommand(new PhpunitCommand());
-
-        if (class_exists(PhpunitCommand::class)) {
-            CommandManager::getInstance()->addCommand(new PhpunitCommand());
-        }
+        CommandManager::getInstance()->addCommand(new Phpunit());
     }
 
     private $beforeCommand;

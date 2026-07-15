@@ -4,18 +4,19 @@
 namespace EasySwoole\EasySwoole\Utility;
 
 
+use EasySwoole\EasySwoole\AbstractInterface\Log\LogLevelEnum;
+use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerInterface;
+use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerLocation;
 use EasySwoole\EasySwoole\Logger;
-use EasySwoole\Log\LoggerInterface;
-use EasySwoole\Trigger\Location;
-use EasySwoole\Trigger\TriggerInterface;
+
 
 class DefaultTrigger implements TriggerInterface
 {
 
-    public function error($msg, int $errorCode = E_USER_ERROR, Location|null $location = null)
+    public function error($msg, int $errorCode = E_USER_ERROR, TriggerLocation|null $location = null)
     {
         if ($location == null) {
-            $location = new Location();
+            $location = new TriggerLocation();
             $debugTrace = debug_backtrace();
             $caller = array_shift($debugTrace);
             $location->setLine($caller['line']);
@@ -25,10 +26,13 @@ class DefaultTrigger implements TriggerInterface
         Logger::getInstance()->log("{$msg} at file:{$location->getFile()} line:{$location->getLine()}", $this->errorMapLogLevel($errorCode), 'trigger');
     }
 
-    public function throwable(\Throwable $throwable)
+    public function throwable(\Throwable $throwable,string|null $category = null)
     {
+        if(empty($category)){
+            $category = 'trigger';
+        }
         $msg = "{$throwable->getMessage()} at file:{$throwable->getFile()} line:{$throwable->getLine()}";
-        Logger::getInstance()->log($msg, LoggerInterface::LOG_LEVEL_ERROR, 'trigger');
+        Logger::getInstance()->log($msg, LogLevelEnum::ERROR, $category);
     }
 
     private function errorMapLogLevel(int $errorCode)
@@ -39,19 +43,19 @@ class DefaultTrigger implements TriggerInterface
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
             case E_USER_ERROR:
-                return LoggerInterface::LOG_LEVEL_ERROR;
+                return LogLevelEnum::ERROR;
             case E_WARNING:
             case E_USER_WARNING:
             case E_COMPILE_WARNING:
             case E_RECOVERABLE_ERROR:
-                return LoggerInterface::LOG_LEVEL_WARNING;
+                return LogLevelEnum::WARNING;
             case E_NOTICE:
             case E_USER_NOTICE:
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
-                return LoggerInterface::LOG_LEVEL_NOTICE;
+                return LogLevelEnum::NOTICE;
             default :
-                return LoggerInterface::LOG_LEVEL_INFO;
+                return LogLevelEnum::INFO;
         }
     }
 }

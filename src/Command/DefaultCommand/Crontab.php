@@ -6,7 +6,7 @@ use EasySwoole\Bridge\Package;
 use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
 use EasySwoole\Command\AbstractInterface\CommandInterface;
 use EasySwoole\Command\Color;
-use EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;

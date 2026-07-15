@@ -11,18 +11,16 @@ namespace EasySwoole\EasySwoole;
 
 use EasySwoole\Component\Event;
 use EasySwoole\Component\Singleton;
+use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerInterface;
+use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerLocation;
 use EasySwoole\EasySwoole\Utility\DefaultTrigger;
-use EasySwoole\Trigger\Location;
-use EasySwoole\Trigger\TriggerInterface;
 
 class Trigger
 {
     use Singleton;
 
-    private $trigger;
+    private TriggerInterface $trigger;
 
-    private $onError;
-    private $onException;
 
     function __construct(TriggerInterface|null $trigger = null)
     {
@@ -30,44 +28,24 @@ class Trigger
             $trigger = new DefaultTrigger();
         }
         $this->trigger = $trigger;
-        $this->onError = new Event();
-        $this->onException = new Event();
     }
 
-    public function error($msg,int $errorCode = E_USER_ERROR,Location|null $location = null)
+    public function error($msg,int $errorCode = E_USER_ERROR,TriggerLocation|null $location = null)
     {
         if($location == null){
             $location = $this->getLocation();
         }
         $this->trigger->error($msg,$errorCode,$location);
-        $all = $this->onError->all();
-        foreach ($all as $call){
-            call_user_func($call,$msg,$errorCode,$location);
-        }
     }
 
     public function throwable(\Throwable $throwable)
     {
         $this->trigger->throwable($throwable);
-        $all = $this->onException->all();
-        foreach ($all as $call){
-            call_user_func($call,$throwable);
-        }
     }
 
-    public function onError():Event
+    private function getLocation():TriggerLocation
     {
-        return $this->onError;
-    }
-
-    public function onException():Event
-    {
-        return $this->onException;
-    }
-
-    private function getLocation():Location
-    {
-        $location = new Location();
+        $location = new TriggerLocation();
         $debugTrace = debug_backtrace();
         array_shift($debugTrace);
         $caller = array_shift($debugTrace);
