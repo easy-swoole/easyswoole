@@ -79,7 +79,7 @@ class Logger
             return false;
         }
 
-
+        $this->console($msg, $logLevel, $category);
 
         return $this->logger->log($msg, $logLevel, $category);
     }
