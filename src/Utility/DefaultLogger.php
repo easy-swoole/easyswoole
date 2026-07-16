@@ -5,6 +5,9 @@ namespace EasySwoole\EasySwoole\Utility;
 use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\AbstractInterface\Log\LoggerInterface;
 use EasySwoole\EasySwoole\AbstractInterface\Log\LogLevelEnum;
+use EasySwoole\EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\ServerManager;
 
 class DefaultLogger implements LoggerInterface
 {
@@ -38,23 +41,29 @@ class DefaultLogger implements LoggerInterface
             $category = 'debug';
         }
         $str = "[{$time}][{$levelStr}][{$category}]:{$msg}";
-
-        switch($logLevel){
-            case LogLevelEnum::INFO:{
-                $str = Color::info($str);
-                break;
-            }
-            case LogLevelEnum::NOTICE:{
-                $str = Color::notice($str);
-                break;
-            }
-            case LogLevelEnum::WARNING:{
-                $str = Color::warning($str);
-                break;
-            }
-            case LogLevelEnum::ERROR:{
-                $str = Color::error($str);
-                break;
+        /**
+         * 守护模式下不能输出色彩控制
+         */
+        $is = ServerManager::getInstance()->isStart();
+        $isD = ServerManager::getInstance()->isDaemonize();
+        if((!$is) || (!$isD)){
+            switch($logLevel){
+                case LogLevelEnum::INFO:{
+                    $str = Color::info($str);
+                    break;
+                }
+                case LogLevelEnum::NOTICE:{
+                    $str = Color::notice($str);
+                    break;
+                }
+                case LogLevelEnum::WARNING:{
+                    $str = Color::warning($str);
+                    break;
+                }
+                case LogLevelEnum::ERROR:{
+                    $str = Color::error($str);
+                    break;
+                }
             }
         }
 

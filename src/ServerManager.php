@@ -21,11 +21,13 @@ class ServerManager
     /**
      * @var Server $swooleServer
      */
-    private $swooleServer;
-    private $mainServerEventRegister;
-    private $subServer = [];
-    private $subServerRegister = [];
-    private $isStart = false;
+    private Server $swooleServer;
+    private EventRegister $mainServerEventRegister;
+    private array $subServer = [];
+    private array $subServerRegister = [];
+    private bool $isStart = false;
+
+    private bool $daemonize = false;
 
     function __construct()
     {
@@ -124,12 +126,22 @@ class ServerManager
                 });
             }
         }
+
         $this->isStart = true;
+        if(isset($this->getSwooleServer()->setting['daemonize']) && $this->getSwooleServer()->setting['daemonize']){
+            $this->daemonize = true;
+        }
+
         $this->getSwooleServer()->start();
     }
 
     function isStart():bool
     {
         return $this->isStart;
+    }
+
+    function isDaemonize():bool
+    {
+        return $this->daemonize;
     }
 }
