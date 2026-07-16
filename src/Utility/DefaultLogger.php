@@ -37,7 +37,7 @@ class DefaultLogger implements LoggerInterface
         if(empty($category)){
             $category = 'debug';
         }
-        $str = "[{$time}][{$levelStr}][{$category}]:{$msg}\n";
+        $str = "[{$time}][{$levelStr}][{$category}]:{$msg}";
 
         switch($logLevel){
             case LogLevelEnum::INFO:{
@@ -58,7 +58,7 @@ class DefaultLogger implements LoggerInterface
             }
         }
 
-        printf($str);
+        printf($str."\n");
         return true;
     }
 }
