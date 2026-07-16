@@ -79,16 +79,18 @@ class Logger
             return false;
         }
 
-        if($this->displayConsole){
-            $this->console($msg,$logLevel,$category);
-        }
+
 
         return $this->logger->log($msg, $logLevel, $category);
     }
 
     public function console(string $msg, LogLevelEnum $logLevel = LogLevelEnum::INFO, string|null $category = null):bool
     {
-        return $this->logger->console($msg, $logLevel, $category);
+        if($this->displayConsole){
+            return $this->logger->console($msg, $logLevel, $category);
+        }else{
+            return false;
+        }
     }
 
     public function info(string $msg, string|null $category = null):bool
