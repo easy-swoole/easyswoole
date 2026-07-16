@@ -23,14 +23,12 @@
         "easyswoole/component": "^2.0",
         "easyswoole/spl": "^2.0",
         "easyswoole/http-annotation": "3.x",
-        "easyswoole/utility": "^1.0",
         "easyswoole/config": "^1.0",
         "easyswoole/socket": "^1.2",
         "easyswoole/task": "^2.0",
         "easyswoole/command": "^2.0",
         "easyswoole/bridge": "^1.0",
-        "easyswoole/crontab": "^1.0",
-        "phpunit/phpunit": "^10.5"
+        "easyswoole/crontab": "^1.2"
     },
     "autoload": {
         "psr-4": {
