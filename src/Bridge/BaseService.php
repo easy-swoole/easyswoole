@@ -8,6 +8,7 @@ use EasySwoole\Component\Process\Manager;
 use EasySwoole\Crontab\Protocol\Response;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
 use EasySwoole\EasySwoole\ServerManager;
 
@@ -22,7 +23,10 @@ class BaseService extends AbstractCommand
     function serverStatus(Package $request,Package $responsePackage):void
     {
         $data = ServerManager::getInstance()->getSwooleServer()->stats();
-        $data = Utility::createServerDisplayItem(Config::getInstance()) + $data;
+        $data = [
+            'env'=>Utility::generateEnv(Config::getInstance(),Core::getInstance()->runMode()),
+            'runtime'=>$data
+        ];
         $responsePackage->setArgs($data);
     }
 

@@ -19,6 +19,7 @@ use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
 class Server extends AbstractCommand
@@ -57,7 +58,7 @@ class Server extends AbstractCommand
                 $conf->setConf('MAIN_SERVER.SETTING.user',get_current_user());
             }
 
-            $displayItem = Utility::createServerDisplayItem(Config::getInstance());
+            $displayItem = Utility::generateEnv(Config::getInstance(),Core::getInstance()->runMode());
             $msg = Color::green(Utility::easySwooleLog()) . "\n";
             foreach ($displayItem as $key => $value) {
                 $msg .= Utility::displayItem($key, $value) . "\n";
@@ -141,11 +142,54 @@ class Server extends AbstractCommand
             $run->add(function () use (&$msg) {
                 $package = Bridge::bridgeCall( 'serverStatus');
                 if($package->getStatus() == StatusEnum::SUCCESS){
-                    $displayItem = $package->getArgs();
+                    $args = $package->getArgs();
                     $msg = Color::green(Utility::easySwooleLog()) . "\n";
-                    foreach ($displayItem as $key => $value) {
+                    foreach ($args['env'] as $key => $value) {
                         $msg .= Utility::displayItem($key, $value) . "\n";
                     }
+                    $runtimes = $args['runtime'];
+                    $runtimes['start_time'] = date("Y-m-d H:i:s",$runtimes['start_time']);
+
+                    $temp = [];
+                    //构造表头
+                    foreach ($runtimes as $key => $value) {
+                        $temp[$key] = $value;
+                        unset($runtimes[$key]);
+                        if(count($temp) == 5){
+                           $temp = [$temp];
+                           break;
+                        }
+                    }
+                    //拼接 ，一行表头一行值
+                    $headers = [];
+                    $values = [];
+                    foreach ($runtimes as $key => $value) {
+                        $values[] = $value;
+                        $headers[] = $key;
+                        if(count($headers) == 5){
+                            $t2 = [];
+                            $t3 = [];
+                            foreach ($temp[0] as $header => $t) {
+                                $t2[$header] = array_pop($headers);
+                                $t3[$header] = array_pop($values);
+                            }
+                            $temp[] = $t2;
+                            $temp[] = $t3;
+                            $headers = [];
+                            $values = [];
+                        }
+                    }
+                    if(!empty($headers)){
+                        $t2 = [];
+                        $t3 = [];
+                        foreach ($temp[0] as $header => $t) {
+                            $t2[$header] = array_pop($headers);
+                            $t3[$header] = array_pop($values);
+                        }
+                        $temp[] = $t2;
+                        $temp[] = $t3;
+                    }
+                    $msg .= new ArrayToTextTable($temp);
                 }else{
                     $msg = Color::error($package->getMsg());
                 }

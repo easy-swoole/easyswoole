@@ -9,9 +9,7 @@
 namespace EasySwoole\EasySwoole\Command;
 
 
-use EasySwoole\Bridge\Package;
 use EasySwoole\Command\Color;
-use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\SysConst;
@@ -48,7 +46,7 @@ LOGO;
         return "\e[32m" . str_pad($name, 30, ' ', STR_PAD_RIGHT) . "\e[34m" . $value . "\e[0m";
     }
 
-    static function createServerDisplayItem(Config $conf)
+    static function generateEnv(Config $conf,string $runMode)
     {
         $serverType = $conf->getConf('MAIN_SERVER.SERVER_TYPE');
         $displayItem = [];
@@ -81,7 +79,7 @@ LOGO;
         $displayItem['swoole version'] = phpversion('swoole');
         $displayItem['php version'] = phpversion();
         $displayItem['easyswoole version'] = SysConst::EASYSWOOLE_VERSION;
-        $displayItem['run mode'] = Core::getInstance()->runMode();
+        $displayItem['run mode'] = $runMode;
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
         return $displayItem;
