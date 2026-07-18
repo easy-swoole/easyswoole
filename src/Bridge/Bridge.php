@@ -8,9 +8,6 @@ use EasySwoole\Bridge\Container;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Component\Singleton;
 use EasySwoole\Bridge\Bridge as BridgeServer;
-use EasySwoole\EasySwoole\Bridge\DefaultCommand\Crontab;
-use EasySwoole\EasySwoole\Bridge\DefaultCommand\Process;
-use EasySwoole\EasySwoole\Bridge\DefaultCommand\Status;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 

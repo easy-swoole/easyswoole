@@ -57,7 +57,59 @@ class Process extends AbstractCommand
                 $result->msg = new ArrayToTextTable($this->processInfoHandel($result->result));
             }
         });
+        $this->registerAction($action);
 
+        $action = new Action('kill','kill EasySwoole process');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->addOption(new Option('pid','kill specified pid，such as --pid=9501'));
+        $action->addOption(new Option('group','kill the specified group process，such as --group=Crontab'));
+        $action->addOption(new Option('force','kill process with SIG_KILL'));
+        $action->setCallback(function (Caller $caller,Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result){
+                $package = Bridge::bridgeCall( 'processInfo');
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getArgs();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                }
+            });
+            $scheduler->start();
+            if($result->status == ExecStatusEnum::OK){
+                $force = $caller->commandLine->hasOption('force');
+                $sig = SIGTERM;
+                if($force){
+                    $sig = SIGKILL;
+                }
+                $pid = $caller->commandLine->getOption('pid');
+                $group = $caller->commandLine->getOption('group');
+                $list = [];
+                $allProcess = $result->result;
+                foreach ($allProcess as $key => $value) {
+                    if ($value['pid'] == $pid) {
+                        $list[$key] = $value;
+                    }
+
+                    if ($value['group'] == $group) {
+                        $list[$key] = $value;
+                    }
+                }
+                foreach ($list as $pid => $value) {
+                    \Swoole\Process::kill($pid, $sig);
+                    if($sig == SIGKILL){
+                        $list[$pid]['option'] = 'SIGKILL';
+                    }else{
+                        $list[$pid]['option'] = 'SIGTERM';
+                    }
+                    $list[$pid]['startUpTime'] = date('Y-m-d H:i:s', $value['startUpTime']);
+                    unset($list[$pid]['memoryUsage']);
+                    unset($list[$pid]['memoryPeakUsage']);
+                    unset($list[$pid]['lastHeartBeat']);
+                }
+                $result->msg = new ArrayToTextTable($list);
+            }
+        });
         $this->registerAction($action);
     }
 
