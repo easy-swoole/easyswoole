@@ -1,18 +1,17 @@
 <?php
 
+use EasySwoole\Command\Bean\Caller;
+use EasySwoole\Command\Bean\ExecStatusEnum;
+use EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Command\CommandRunner;
-use EasySwoole\Command\Caller;
 
-$file = null;
-foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../../vendor/autoload.php',__DIR__ . '/../vendor/autoload.php' ] as $file) {
-    if (file_exists($file)) {
-        require $file;
-        break;
-    }
-}
-if(!file_exists($file)){
+$file = __DIR__ . '/vendor/autoload.php';
+if (file_exists($file)) {
+    require $file;
+} else {
     die("include composer autoload.php fail\n");
 }
+
 $realCwd = substr(realpath($file),0,-strlen("/vendor/autoload.php"));
 
 defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
@@ -23,13 +22,23 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
     require_once EASYSWOOLE_ROOT.'/bootstrap.php';
 }
 
-$caller = new Caller();
-$caller->setScript(current($argv));
-$caller->setCommand(next($argv));
-$caller->setParams($argv);
-reset($argv);
 
-$ret = CommandRunner::getInstance()->run($caller);
-if($ret && !empty($ret->getMsg())){
-    echo $ret->getMsg()."\n";
+$commandLine = Utility::parseArgv($argv);
+array_shift($commandLine->unknows);
+$command = array_shift($commandLine->unknows);
+$action = array_shift($commandLine->unknows);
+$caller = new Caller($command,$action,$commandLine);
+$caller->extraArg = [
+    'scriptFile'=>__FILE__,
+];
+
+$ret = CommandRunner::getInstance()->exec($caller);
+
+if($ret->status == ExecStatusEnum::OK){
+    if(!empty($ret->msg)){
+        echo "{$ret->msg}\n";
+    }
+}else{
+    $ret = CommandRunner::getInstance()->result2HelpMsg($caller,$ret);
+    echo $ret;
 }
