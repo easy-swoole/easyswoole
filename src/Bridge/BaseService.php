@@ -5,6 +5,7 @@ namespace EasySwoole\EasySwoole\Bridge;
 use EasySwoole\Bridge\Package;
 use EasySwoole\Bridge\StatusEnum;
 use EasySwoole\Component\Process\Manager;
+use EasySwoole\Crontab\Protocol\Response;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
@@ -75,5 +76,30 @@ class BaseService extends AbstractCommand
         }
         $info->set($taskName, ['isStop' => 0]);
         $responsePackage->setMsg("crontab job [{$taskName}] is resume success");
+    }
+
+    function runCrontabJobNow(Package $request,Package $responsePackage):void
+    {
+        $taskName = $request->getArgs()['taskName'];
+        $info = EasySwooleCron::getInstance()->schedulerTable();
+        $crontab = $info->get($taskName);
+        if (empty($crontab)) {
+            $responsePackage->setMsg("crontab job [{$taskName}] is not found");
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+            return;
+        }
+        $result = EasySwooleCron::getInstance()->rightNow($taskName);
+        if (!$result instanceof Response) {
+            $responsePackage->setMsg("crontab server connect fail");
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+            return;
+        }
+
+        if ($result->getStatus() != Response::STATUS_OK) {
+            $responsePackage->setMsg($result->getMsg() ?? Response::getReasonPhrase($result->getStatus()));
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+            return;
+        }
+        $responsePackage->setMsg("crontab job [{$taskName}] run success now");
     }
 }

@@ -127,6 +127,36 @@ class Crontab extends AbstractCommand
             $scheduler->start();
         });
         $this->registerAction($action);
+
+
+        $action = new Action('runJobNow','run an crontab task right now');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->addOption(new class('taskName','crontab task name,such as --taskName=checkAlive') extends Option {
+            public static function validate(mixed $value, Caller $caller): bool|string
+            {
+                if(empty($value)){
+                    return 'taskName must be set';
+                }
+                return true;
+            }
+        });
+        $action->setCallback(function (Caller $caller, Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result,$caller){
+                $package = Bridge::bridgeCall( 'runCrontabJobNow',[
+                    'taskName'=>$caller->commandLine->getOption('taskName'),
+                ]);
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getMsg();
+                    $result->msg = $package->getMsg();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                }
+            });
+            $scheduler->start();
+        });
+        $this->registerAction($action);
     }
 
 }
