@@ -17,7 +17,7 @@ class Status extends AbstractCommand
         return 'status';
     }
 
-    protected function call(Package $package, Package $responsePackage)
+    protected function info(Package $package, Package $responsePackage)
     {
         $data = ServerManager::getInstance()->getSwooleServer()->stats();
         $data = Utility::createServerDisplayItem(Config::getInstance()) + $data;

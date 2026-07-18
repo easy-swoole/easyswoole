@@ -1,7 +1,4 @@
 <?php
-/**
- * @author gaobinzhan <gaobinzhan@gmail.com>
- */
 
 
 namespace EasySwoole\EasySwoole\Bridge;
@@ -9,18 +6,19 @@ namespace EasySwoole\EasySwoole\Bridge;
 
 use EasySwoole\Bridge\CommandInterface;
 use EasySwoole\Bridge\Package;
-use Swoole\Coroutine\Socket;
+use EasySwoole\Bridge\StatusEnum;
+
 
 abstract class AbstractCommand implements CommandInterface
 {
-    public function exec(Package $package, Package $responsePackage, Socket $socket)
+    public function exec(Package $request, Package $responsePackage)
     {
-        $action = $package->getArgs()['action'] ?? '';
+        $action = $request->getArgs()['action'] ?? '';
         if (!method_exists($this, $action)) {
-            $responsePackage->setStatus($responsePackage::STATUS_COMMAND_NOT_EXIST);
-            $responsePackage->setMsg("bridge command {{$action}} not exists");
-            return $responsePackage;
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+            $responsePackage->setMsg("baseService bridge command [{$action}] not exists");
+            return;
         }
-        $this->{$action}($package, $responsePackage);
+        $this->{$action}($request, $responsePackage);
     }
 }

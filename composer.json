@@ -27,7 +27,7 @@
         "easyswoole/socket": "^1.2",
         "easyswoole/task": "^2.0",
         "easyswoole/command": "2.x-dev",
-        "easyswoole/bridge": "^1.0",
+        "easyswoole/bridge": "^2.0",
         "easyswoole/crontab": "^1.2"
     },
     "autoload": {

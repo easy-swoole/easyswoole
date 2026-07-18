@@ -3,108 +3,62 @@
 
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
-use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
-use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Bridge\StatusEnum;
+use EasySwoole\Command\AbstractInterface\AbstractCommand;
+use EasySwoole\Command\Bean\Action;
+use EasySwoole\Command\Bean\Caller;
+use EasySwoole\Command\Bean\ExecStatusEnum;
+use EasySwoole\Command\Bean\Option;
+use EasySwoole\Command\Bean\Result;
 use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\Bridge\Package;
-use EasySwoole\EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
-class Process implements CommandInterface
+class Process extends AbstractCommand
 {
-    public function commandName(): string
+    function name(): string
     {
         return 'process';
     }
 
-
-    public function desc(): string
+    function description(): string
     {
-        return 'Process manager';
+        return 'EasySwoole process manager';
     }
 
-    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
+    public function beforeExecute(Caller $caller, Result $result): bool
     {
-        $commandHelp->addAction('kill', 'kill process');
-        $commandHelp->addAction('show', 'show all process information');
-        $commandHelp->addActionOpt('--pid=PID', 'kill the specified pid');
-        $commandHelp->addActionOpt('--group=GROUP_NAME', 'kill the specified process group');
-        $commandHelp->addActionOpt('-f', 'force kill process');
-        return $commandHelp;
+        $mode = $caller->commandLine->getOption('mode');
+        Core::getInstance()->initialize($mode);
+        return true;
     }
 
-    public function exec(): ?string
+    protected function init(): void
     {
-        $action = CommandManager::getInstance()->getArg(0);
-        Core::getInstance()->initialize();
-        $run = new Scheduler();
-        $run->add(function () use (&$result, $action) {
-            if(empty($action)){
-                $action = 'help';
-            }
-            if (method_exists($this, $action) && $action != 'help') {
-
-                $package = Bridge::getInstance()->call('process', ['action' => 'info']);
-                if ($package->getStatus() != Package::STATUS_SUCCESS) {
-                    $result = Color::error($package->getMsg());
-                    return;
+        $action = new Action('show','show EasySwoole process list');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->setCallback(function (Caller $caller,Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result){
+                $package = Bridge::bridgeCall( 'processInfo');
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getArgs();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
                 }
-
-                $data = $this->processInfoHandel($package->getArgs());
-                $result = $this->$action($data);
-                return;
+            });
+            $scheduler->start();
+            if($result->status == ExecStatusEnum::OK){
+                $result->msg = new ArrayToTextTable($this->processInfoHandel($result->result));
             }
-
-            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
-        $run->start();
-        return $result;
-    }
 
-    protected function killProcess(array $list)
-    {
-        if (empty($list)) {
-            return Color::error('not process was kill');
-        }
-
-        if (CommandManager::getInstance()->issetOpt('f')) {
-            $sig = SIGKILL;
-            $option = 'SIGKILL';
-        } else {
-            $sig = SIGTERM;
-            $option = 'SIGTERM';
-        }
-
-        foreach ($list as $pid => $value) {
-            \Swoole\Process::kill($pid, $sig);
-            $list[$pid]['option'] = $option;
-        }
-        return new ArrayToTextTable($list);
-    }
-
-    protected function kill($allProcess)
-    {
-        $list = [];
-        $pid = CommandManager::getInstance()->getOpt('pid');
-        $groupName = CommandManager::getInstance()->getOpt('group');
-        foreach ($allProcess as $key => $value) {
-            if ($value['pid'] == $pid) {
-                $list[$key] = $value;
-            }
-
-            if ($value['group'] == $groupName) {
-                $list[$key] = $value;
-            }
-        }
-        return $this->killProcess($list);
-    }
-
-    protected function show($json)
-    {
-        return new ArrayToTextTable($json);
+        $this->registerAction($action);
     }
 
     protected function processInfoHandel($json)
@@ -120,4 +74,5 @@ class Process implements CommandInterface
 
         return $json;
     }
+
 }

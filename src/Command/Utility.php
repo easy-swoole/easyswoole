@@ -121,16 +121,4 @@ LOGO;
         }
     }
 
-    public static function bridgeCall(string $commandName, callable $function, $action, $params = [], $timeout = 3)
-    {
-        $arg = ['action' => $action] + $params;
-        $package = Bridge::getInstance()->call($commandName, $arg, $timeout);
-        if ($package->getStatus() == Package::STATUS_SUCCESS) {
-            $result = call_user_func($function, $package);
-        } else {
-            $result = Color::error($package->getMsg());
-        }
-        return $result;
-    }
-
 }

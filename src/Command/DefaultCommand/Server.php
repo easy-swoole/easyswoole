@@ -8,12 +8,14 @@ namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 
 use EasySwoole\Bridge\Package;
+use EasySwoole\Bridge\StatusEnum;
 use EasySwoole\Command\AbstractInterface\AbstractCommand;
 use EasySwoole\Command\Bean\Action;
 use EasySwoole\Command\Bean\Caller;
 use EasySwoole\Command\Bean\Option;
 use EasySwoole\Command\Bean\Result;
 use EasySwoole\Command\Color;
+use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
@@ -137,15 +139,16 @@ class Server extends AbstractCommand
         $action->setCallback(function (Caller $caller,Result $result) {
             $run = new Scheduler();
             $run->add(function () use (&$msg) {
-                $result = Utility::bridgeCall('status', function (Package $package) {
+                $package = Bridge::bridgeCall( 'serverStatus');
+                if($package->getStatus() == StatusEnum::SUCCESS){
                     $displayItem = $package->getArgs();
                     $msg = Color::green(Utility::easySwooleLog()) . "\n";
                     foreach ($displayItem as $key => $value) {
                         $msg .= Utility::displayItem($key, $value) . "\n";
                     }
-                    return $msg;
-                }, 'call');
-                $msg = $result;
+                }else{
+                    $msg = Color::error($package->getMsg());
+                }
             });
             $run->start();
             $result->msg = $msg;
