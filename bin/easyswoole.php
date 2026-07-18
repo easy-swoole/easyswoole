@@ -6,12 +6,19 @@ use EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Command\CommandRunner;
 
 $file = null;
-foreach ([ __DIR__ . '/../../../autoload.php', __DIR__ . '/../../vendor/autoload.php',__DIR__ . '/../vendor/autoload.php' ] as $file) {
+$trys = [
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../../vendor/autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php'
+];
+foreach ($trys as $file) {
     if (file_exists($file)) {
         require $file;
         break;
     }
 }
+
 if(!file_exists($file)){
     die("include composer autoload.php fail\n");
 }
