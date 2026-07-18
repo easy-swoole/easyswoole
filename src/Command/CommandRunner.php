@@ -30,6 +30,7 @@ class CommandRunner extends Manager
         $this->addCommand(new Install());
         $this->addCommand(new Server());
         $this->addCommand(new Process());
+        $this->addCommand(new Crontab());
     }
 
 

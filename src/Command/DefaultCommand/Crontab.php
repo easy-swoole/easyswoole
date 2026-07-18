@@ -3,107 +3,130 @@
 namespace EasySwoole\EasySwoole\Command\DefaultCommand;
 
 use EasySwoole\Bridge\Package;
-use EasySwoole\Command\AbstractInterface\CommandHelpInterface;
-use EasySwoole\Command\AbstractInterface\CommandInterface;
+use EasySwoole\Bridge\StatusEnum;
+use EasySwoole\Command\AbstractInterface\AbstractCommand;
+use EasySwoole\Command\Bean\Action;
+use EasySwoole\Command\Bean\Caller;
+use EasySwoole\Command\Bean\ExecStatusEnum;
+use EasySwoole\Command\Bean\Option;
+use EasySwoole\Command\Bean\Result;
 use EasySwoole\Command\Color;
-use EasySwoole\EasySwoole\Command\CommandManager;
+use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
-class Crontab implements CommandInterface
+class Crontab extends AbstractCommand
 {
-    public function commandName(): string
+    function name(): string
     {
         return 'crontab';
     }
 
-    public function desc(): string
+    function description(): string
     {
-        return 'Crontab manager';
+        return 'EasySwoole crontab manager';
     }
 
-    public function help(CommandHelpInterface $commandHelp): CommandHelpInterface
+    public function beforeExecute(Caller $caller, Result $result): bool
     {
-        $commandHelp->addAction('show', 'show all crontab');
-        $commandHelp->addAction('stop', 'stops the specified crontab');
-        $commandHelp->addAction('resume', 'restores the specified crontab');
-        $commandHelp->addAction('run', 'run the specified crontab once immediately');
-        $commandHelp->addAction('reset', 'rewrite scheduled task rules');
-        $commandHelp->addActionOpt('--taskName=TASK_NAME', 'the task name to be operated on');
-        $commandHelp->addActionOpt('--taskRule=TASK_RULE', 'the task crontab rule');
-        return $commandHelp;
+        $mode = $caller->commandLine->getOption('mode');
+        Core::getInstance()->initialize($mode);
+        return true;
     }
 
-    public function exec(): ?string
+    protected function init():void
     {
-        $action = CommandManager::getInstance()->getArg(0);
-        Core::getInstance()->initialize();
-        $run = new Scheduler();
-        $run->add(function () use (&$result, $action) {
-            if(empty($action)){
-                $action = 'help';
+        $action = new Action('show','show crontab task info');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->setCallback(function (Caller $caller, Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result){
+                $package = Bridge::bridgeCall( 'crontabInfo');
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getArgs();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                }
+            });
+            $scheduler->start();
+            if($result->status == ExecStatusEnum::OK){
+                $data = $result->result;
+                foreach ($data as $k => $v) {
+                    $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);
+                    if($v['taskCurrentRunTime'] < 1024){
+                        $v['taskCurrentRunTime'] = '-';
+                    }else{
+                        $v['taskCurrentRunTime'] = date('Y-m-d H:i:s', $v['taskCurrentRunTime']);
+                    }
+                    $data[$k] = array_merge(['taskName' => $k], $v);
+                }
+                $result->msg = new ArrayToTextTable($data);
             }
-            if (method_exists($this, $action) && $action != 'help') {
-                $result = $this->{$action}();
-                return;
-            }
-            $result = CommandManager::getInstance()->displayCommandHelp($this->commandName());
         });
-        $run->start();
-        return $result;
-    }
-
-    protected function stop()
-    {
-        $taskName = CommandManager::getInstance()->getOpt('taskName');
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $package->getMsg();
-            return Color::success($data) . PHP_EOL . $this->show();
-        }, 'stop', ['taskName' => $taskName]);
-    }
+        $this->registerAction($action);
 
 
-    protected function resume()
-    {
-        $taskName = CommandManager::getInstance()->getOpt('taskName');
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $package->getMsg();
-            return Color::success($data) . PHP_EOL . $this->show();
-        }, 'resume', ['taskName' => $taskName]);
-    }
-
-    protected function run()
-    {
-        $taskName = CommandManager::getInstance()->getOpt('taskName');
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $package->getMsg();
-            return Color::success($data) . PHP_EOL . $this->show();
-        }, 'run', ['taskName' => $taskName]);
-    }
-
-    protected function show()
-    {
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $package->getArgs();
-            foreach ($data as $k => $v) {
-                $v['taskNextRunTime'] = date('Y-m-d H:i:s', $v['taskNextRunTime']);
-                $v['taskCurrentRunTime'] = date('Y-m-d H:i:s', $v['taskCurrentRunTime']);
-                $data[$k] = array_merge(['taskName' => $k], $v);
+        $action = new Action('stop','stop an crontab task');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->addOption(new class('taskName','crontab task name,such as --taskName=checkAlive') extends Option {
+            public static function validate(mixed $value, Caller $caller): bool|string
+            {
+                if(empty($value)){
+                    return 'taskName must be set';
+                }
+                return true;
             }
-            return new ArrayToTextTable($data);
-        }, 'show');
-    }
+        });
+        $action->setCallback(function (Caller $caller, Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result,$caller){
+                $package = Bridge::bridgeCall( 'stopCrontabRule',[
+                    'taskName'=>$caller->commandLine->getOption('taskName'),
+                ]);
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getMsg();
+                    $result->msg = $package->getMsg();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                }
+            });
+            $scheduler->start();
+        });
+        $this->registerAction($action);
 
-    protected function reset()
-    {
-        $taskName = CommandManager::getInstance()->getOpt('taskName');
-        $taskRule = CommandManager::getInstance()->getOpt('taskRule');
-        return Utility::bridgeCall($this->commandName(), function (Package $package) {
-            $data = $package->getMsg();
-            return Color::success($data) . PHP_EOL . $this->show();
-        }, 'reset', ['taskName' => $taskName, 'taskRule' => $taskRule]);
+
+        $action = new Action('resume','resume an crontab task');
+        $action->addOption(new Option('mode','run mode,such as --mode=dev'));
+        $action->addOption(new class('taskName','crontab task name,such as --taskName=checkAlive') extends Option {
+            public static function validate(mixed $value, Caller $caller): bool|string
+            {
+                if(empty($value)){
+                    return 'taskName must be set';
+                }
+                return true;
+            }
+        });
+        $action->setCallback(function (Caller $caller, Result $result) {
+            $scheduler = new Scheduler();
+            $scheduler->add(function ()use(&$result,$caller){
+                $package = Bridge::bridgeCall( 'resumeCrontabRule',[
+                    'taskName'=>$caller->commandLine->getOption('taskName'),
+                ]);
+                if($package->getStatus() == StatusEnum::SUCCESS){
+                    $result->result = $package->getMsg();
+                    $result->msg = $package->getMsg();
+                }else{
+                    $result->msg = Color::error($package->getMsg());
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                }
+            });
+            $scheduler->start();
+        });
+        $this->registerAction($action);
     }
 
 }
