@@ -40,6 +40,7 @@ class BaseService extends AbstractCommand
         $info = EasySwooleCron::getInstance()->schedulerTable();
         $data = [];
         foreach ($info as $k => $v) {
+            unset($v['needRestJobTimer']);
             $data[$k] = $v;
         }
         if (empty($data)) {
@@ -64,6 +65,12 @@ class BaseService extends AbstractCommand
         $responsePackage->setMsg("crontab job [{$taskName}] is stop success");
     }
 
+    function stopAllCrontabRule(Package $request,Package $responsePackage):void
+    {
+        EasySwooleCron::getInstance()->stopAll();
+        $responsePackage->setMsg("all crontab job is stop success");
+    }
+
     function resumeCrontabRule(Package $request,Package $responsePackage):void
     {
         $taskName = $request->getArgs()['taskName'];
@@ -76,6 +83,12 @@ class BaseService extends AbstractCommand
         }
         $info->set($taskName, ['isStop' => 0]);
         $responsePackage->setMsg("crontab job [{$taskName}] is resume success");
+    }
+
+    function resumeAllCrontabRule(Package $request,Package $responsePackage):void
+    {
+        EasySwooleCron::getInstance()->resumeAll();
+        $responsePackage->setMsg("all crontab job is resume success");
     }
 
     function runCrontabJobNow(Package $request,Package $responsePackage):void
@@ -101,5 +114,25 @@ class BaseService extends AbstractCommand
             return;
         }
         $responsePackage->setMsg("crontab job [{$taskName}] run success now");
+    }
+
+    function setCrontabRule(Package $request,Package $responsePackage):void
+    {
+        $taskName = $request->getArgs()['taskName'];
+        $taskRule = $request->getArgs()['taskRule'];
+        $info = EasySwooleCron::getInstance()->schedulerTable();
+        $crontab = $info->get($taskName);
+        if (empty($crontab)) {
+            $responsePackage->setMsg("crontab job [{$taskName}] is not found");
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+            return;
+        }
+        try{
+            EasySwooleCron::getInstance()->resetJobRule($taskName, $taskRule);
+            $responsePackage->setMsg("crontab [{$taskName}] reset rule success");
+        }catch (\Throwable $e){
+            $responsePackage->setMsg($e->getMessage());
+            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
+        }
     }
 }
