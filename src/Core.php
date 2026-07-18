@@ -16,7 +16,6 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\AbstractInterface\Log\LoggerInterface;
 use EasySwoole\EasySwoole\AbstractInterface\Log\TriggerLocation;
 use EasySwoole\EasySwoole\Bridge\Bridge;
-use EasySwoole\EasySwoole\Command\CommandManager;
 use EasySwoole\EasySwoole\Crontab\Crontab;
 use EasySwoole\EasySwoole\Http\Dispatcher;
 use EasySwoole\EasySwoole\Swoole\EventHelper;
@@ -85,8 +84,12 @@ class Core
         return $this->runMode;
     }
 
-    function initialize()
+    function initialize(string|null $mode = null)
     {
+        if($mode == null) {
+            $mode = 'dev';
+        }
+        $this->runMode($mode);
         //先加载配置文件
         $this->loadEnv();
         //临时文件和Log目录初始化
@@ -338,11 +341,6 @@ class Core
 
     public function loadEnv()
     {
-        $mode = CommandManager::getInstance()->getOpt('mode');
-        if (!empty($mode)) {
-            $this->runMode($mode);
-        }
-
         $file = EASYSWOOLE_ROOT . "/{$this->runMode}.php";
         if (!file_exists($file)) {
             die(Color::error("can not load config file {$this->runMode}.php") . "\n");

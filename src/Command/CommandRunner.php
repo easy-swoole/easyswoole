@@ -9,10 +9,11 @@
 namespace EasySwoole\EasySwoole\Command;
 
 
-use EasySwoole\Command\AbstractInterface\CallerInterface;
-use EasySwoole\Command\AbstractInterface\ResultInterface;
 
-use EasySwoole\Command\Result;
+
+use EasySwoole\Command\Bean\Caller;
+use EasySwoole\Command\Bean\Result;
+use EasySwoole\Command\Manager;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
@@ -20,36 +21,20 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 
 
-class CommandRunner
+class CommandRunner extends Manager
 {
     use Singleton;
 
     public function __construct()
     {
-        CommandManager::getInstance()->addCommand(new Install());
-        CommandManager::getInstance()->addCommand(new Crontab());
-        CommandManager::getInstance()->addCommand(new Process());
-        CommandManager::getInstance()->addCommand(new Server());
+        $this->addCommand(new Install());
+        $this->addCommand(new Server());
     }
 
-    private $beforeCommand;
 
-    public function setBeforeCommand(callable $before)
+    public function exec(Caller $caller): Result
     {
-        $this->beforeCommand = $before;
-    }
-
-    public function run(CallerInterface $caller): ResultInterface
-    {
-        if (is_callable($this->beforeCommand)) {
-            call_user_func($this->beforeCommand, $caller);
-        }
         Utility::opCacheClear();
-
-        $msg = CommandManager::getInstance()->run($caller);
-
-        $result = new Result();
-        $result->setMsg($msg);
-        return $result;
+        return parent::exec($caller);
     }
 }
