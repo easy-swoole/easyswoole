@@ -25,6 +25,8 @@ class CommandRunner extends Manager
 {
     use Singleton;
 
+    protected Caller|null $caller = null;
+
     public function __construct()
     {
         $this->addCommand(new Install());
@@ -37,6 +39,12 @@ class CommandRunner extends Manager
     public function exec(Caller $caller): Result
     {
         Utility::opCacheClear();
+        $this->caller = $caller;
         return parent::exec($caller);
+    }
+
+    public function getCaller(): Caller|null
+    {
+        return $this->caller;
     }
 }
