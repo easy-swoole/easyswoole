@@ -82,32 +82,37 @@ class Process extends AbstractCommand
                 if($force){
                     $sig = SIGKILL;
                 }
-                $pid = $caller->commandLine->getOption('pid');
+                $pid = intval($caller->commandLine->getOption('pid'));
                 $group = $caller->commandLine->getOption('group');
                 $list = [];
                 $allProcess = $result->result;
                 foreach ($allProcess as $key => $value) {
                     if ($value['pid'] == $pid) {
                         $list[$key] = $value;
+                        continue;
                     }
 
-                    if ($value['group'] == $group) {
+                    if ($value['group'] === $group) {
                         $list[$key] = $value;
                     }
                 }
-                foreach ($list as $pid => $value) {
-                    \Swoole\Process::kill($pid, $sig);
-                    if($sig == SIGKILL){
-                        $list[$pid]['option'] = 'SIGKILL';
-                    }else{
-                        $list[$pid]['option'] = 'SIGTERM';
+                if(!empty($list)){
+                    foreach ($list as $pid => $value) {
+                        \Swoole\Process::kill($pid, $sig);
+                        if($sig == SIGKILL){
+                            $list[$pid]['option'] = 'SIGKILL';
+                        }else{
+                            $list[$pid]['option'] = 'SIGTERM';
+                        }
+                        $list[$pid]['startUpTime'] = date('Y-m-d H:i:s', $value['startUpTime']);
+                        unset($list[$pid]['memoryUsage']);
+                        unset($list[$pid]['memoryPeakUsage']);
+                        unset($list[$pid]['lastHeartBeat']);
                     }
-                    $list[$pid]['startUpTime'] = date('Y-m-d H:i:s', $value['startUpTime']);
-                    unset($list[$pid]['memoryUsage']);
-                    unset($list[$pid]['memoryPeakUsage']);
-                    unset($list[$pid]['lastHeartBeat']);
+                    $result->msg = new ArrayToTextTable($list);
+                }else{
+                    $result->msg = 'not any process match';
                 }
-                $result->msg = new ArrayToTextTable($list);
             }
         });
         $this->registerAction($action);
