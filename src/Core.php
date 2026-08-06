@@ -86,9 +86,10 @@ class Core
 
     function initialize(string|null $mode = null)
     {
-        if($mode == null) {
+        if(empty($mode) && empty($this->runMode)) {
             $mode = 'dev';
         }
+
         $this->runMode($mode);
         //先加载配置文件
         $this->loadEnv();
