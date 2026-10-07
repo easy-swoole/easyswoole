@@ -21,13 +21,24 @@ class Trigger
 
     private TriggerInterface $trigger;
 
+    private mixed $onError = null;
 
-    function __construct(TriggerInterface|null $trigger = null)
+    private mixed $onThrowable = null;
+
+
+    function __construct(TriggerInterface $trigger)
     {
-        if($trigger == null){
-            $trigger = new DefaultTrigger();
-        }
         $this->trigger = $trigger;
+    }
+
+    function setOnError(callable $callback): void
+    {
+        $this->onError = $callback;
+    }
+
+    function setOnThrowable(callable $callback): void
+    {
+        $this->onThrowable = $callback;
     }
 
     public function error($msg,int $errorCode = E_USER_ERROR,TriggerLocation|null $location = null)
@@ -35,11 +46,23 @@ class Trigger
         if($location == null){
             $location = $this->getLocation();
         }
+        if($this->onError){
+            $ret = call_user_func($this->onError,$msg,$errorCode,$location);
+            if($ret === false){
+                return;
+            }
+        }
         $this->trigger->error($msg,$errorCode,$location);
     }
 
     public function throwable(\Throwable $throwable)
     {
+        if($this->onThrowable){
+            $ret = call_user_func($this->onThrowable,$throwable);
+            if($ret === false){
+                return;
+            }
+        }
         $this->trigger->throwable($throwable);
     }
 

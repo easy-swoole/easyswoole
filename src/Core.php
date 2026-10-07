@@ -22,6 +22,7 @@ use EasySwoole\EasySwoole\Swoole\EventHelper;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\Task\TaskManager;
 use EasySwoole\EasySwoole\Utility\DefaultLogger;
+use EasySwoole\EasySwoole\Utility\DefaultTrigger;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
@@ -191,6 +192,9 @@ class Core
 
         //初始化追追踪器
         $trigger = Di::getInstance()->get(SysConst::TRIGGER_HANDLER);
+        if(empty($trigger)){
+            $trigger = new DefaultTrigger();
+        }
         Trigger::getInstance($trigger);
 
         //在没有配置自定义错误处理器的情况下，转化为trigger处理
