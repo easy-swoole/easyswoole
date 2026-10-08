@@ -14,3 +14,6 @@ easyswoole.install
 /EasySwooleEvent.php
 /App/
 
+
+# PHPUnit
+/.phpunit.cache/

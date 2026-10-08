@@ -67,7 +67,7 @@ class DefaultLogger implements LoggerInterface
             }
         }
 
-        printf($str."\n");
+        printf("%s\n", $str);
         return true;
     }
 }

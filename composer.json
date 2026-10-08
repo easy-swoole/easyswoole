@@ -43,7 +43,8 @@
         }
     },
     "require-dev": {
-        "easyswoole/swoole-ide-helper": "^1.2"
+        "easyswoole/swoole-ide-helper": "^1.2",
+        "phpunit/phpunit": "^13.4"
     },
     "bin": [
         "bin/easyswoole.php"
