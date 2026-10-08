@@ -68,22 +68,26 @@ class Config
         return $this->conf->load($conf);
     }
 
+    /**
+     * Recursively overwrite matching keys, preserving unspecified keys.
+     * Numeric array keys are merged by index as well.
+     */
     public function merge(array $conf):bool
     {
-        return $this->conf->merge($conf);
+        return $this->conf->load(array_replace_recursive($this->toArray(), $conf));
     }
 
     /**
      * 载入一个文件的配置项
      * @param string $filePath 配置文件路径
      */
-    public function loadFile($filePath,bool $merge = true):bool
+    public function loadFile(string $filePath, bool $merge = true):bool
     {
         if (file_exists($filePath)) {
             $confData = require_once $filePath;
             if(is_array($confData)){
                 if($merge){
-                    $this->conf->merge($confData);
+                    $this->merge($confData);
                 }else{
                     $this->conf->load($confData);
                 }
@@ -116,7 +120,7 @@ class Config
             $data = parse_ini_file($file,true);
             if(is_array($data)){
                 if($merge){
-                    $this->conf->merge($data);
+                    $this->merge($data);
                 }else{
                     $this->conf->load($data);
                 }

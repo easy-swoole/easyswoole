@@ -25,7 +25,7 @@ final class ConfigTest extends FilesystemTestCase
         $config = new Config();
         $config->load(['server' => ['port' => 9501, 'host' => 'localhost'], 'keep' => true]);
         self::assertTrue($config->merge(['server' => ['port' => 9502]]));
-        self::assertSame(['port' => 9502], $config->getConf('server'));
+        self::assertSame(['port' => 9502, 'host' => 'localhost'], $config->getConf('server'));
         self::assertTrue($config->getConf('keep'));
         self::assertTrue($config->load(['fresh' => true]));
         self::assertNull($config->getConf('server'));
@@ -87,6 +87,67 @@ final class ConfigTest extends FilesystemTestCase
         self::assertTrue($config->getConf('keep'));
         self::assertTrue($config->loadEnv($path, false));
         self::assertNull($config->getConf('keep'));
+    }
+
+    public function testMergeRecursesAndReplacesValuesWithoutConvertingThemToArrays(): void
+    {
+        $config = new Config();
+        $config->load([
+            'server' => ['setting' => ['workers' => 4, 'daemonize' => true]],
+            'scalar' => 'old',
+            'array' => ['old' => true],
+            'nullable' => 'old',
+            'list' => ['first', 'second'],
+        ]);
+        self::assertTrue($config->merge([
+            'server' => ['setting' => ['workers' => 8, 'daemonize' => false, 'port' => 9501]],
+            'scalar' => ['new' => true],
+            'array' => 'new',
+            'nullable' => null,
+            'list' => ['replacement'],
+        ]));
+        self::assertSame([
+            'server' => ['setting' => ['workers' => 8, 'daemonize' => false, 'port' => 9501]],
+            'scalar' => ['new' => true],
+            'array' => 'new',
+            'nullable' => null,
+            'list' => ['replacement', 'second'],
+        ], $config->toArray());
+        $before = $config->toArray();
+        self::assertTrue($config->merge([]));
+        self::assertSame($before, $config->toArray());
+    }
+
+    public function testPhpFileMergePreservesSiblingKeys(): void
+    {
+        $config = new Config();
+        $config->load(['server' => ['host' => 'localhost', 'setting' => ['workers' => 4, 'daemonize' => true]]]);
+        $path = $this->fixture('nested.php', '<?php return ["server" => ["setting" => ["workers" => 8]]];');
+        self::assertTrue($config->loadFile($path));
+        self::assertSame(['host' => 'localhost', 'setting' => ['workers' => 8, 'daemonize' => true]], $config->getConf('server'));
+    }
+
+    public function testDirectoryMergePreservesSharedConfigurationSection(): void
+    {
+        $this->fixture('host.php', '<?php return ["server" => ["host" => "localhost"]];');
+        $this->fixture('port.php', '<?php return ["server" => ["port" => 9501]];');
+        $config = new Config();
+        $config->load(['server' => ['setting' => ['workers' => 4]]]);
+        self::assertTrue($config->loadDir($this->directory));
+        self::assertSame('localhost', $config->getConf('server.host'));
+        self::assertSame(9501, $config->getConf('server.port'));
+        self::assertSame(4, $config->getConf('server.setting.workers'));
+    }
+
+    public function testIniMergePreservesSectionKeysAndReplacementRemovesThem(): void
+    {
+        $config = new Config();
+        $config->load(['database' => ['host' => 'localhost', 'port' => '3306']]);
+        $path = $this->fixture('override.ini', "[database]\nport=3307\n");
+        self::assertTrue($config->loadEnv($path));
+        self::assertSame(['host' => 'localhost', 'port' => '3307'], $config->getConf('database'));
+        self::assertTrue($config->loadEnv($path, false));
+        self::assertSame(['port' => '3307'], $config->getConf('database'));
     }
 
     public function testRepeatedFileLoadCurrentlyReturnsFalse(): void
