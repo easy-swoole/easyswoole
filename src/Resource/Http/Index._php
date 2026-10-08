@@ -4,9 +4,19 @@
 namespace App\HttpController;
 
 
-use EasySwoole\Http\AbstractInterface\Controller;
+use EasySwoole\EasySwoole\Trigger;
+use EasySwoole\HttpAnnotation\AnnotationController;
+use EasySwoole\HttpAnnotation\Attributes\Api;
+use EasySwoole\HttpAnnotation\Attributes\ApiGroup;
+use EasySwoole\HttpAnnotation\Attributes\Param;
+use EasySwoole\HttpAnnotation\Document\Document;
+use EasySwoole\HttpAnnotation\Exception\ParamValidateFail;
+use EasySwoole\HttpAnnotation\Validator\NotEmpty;
 
-class Index extends Controller
+#[ApiGroup(
+    groupName: 'Index'
+)]
+class Index extends AnnotationController
 {
 
     public function index()
@@ -18,9 +28,25 @@ class Index extends Controller
         $this->response()->write(file_get_contents($file));
     }
 
-    function test()
+    #[Api(
+        requestParam: [
+            new Param(
+                name: 'who',
+                validate: [
+                    new NotEmpty()
+                ]
+            )
+        ]
+    )]
+    function test(string $who)
     {
-        $this->response()->write('this is test');
+        $this->response()->write("hello $who, this is a test!");
+    }
+
+    function doc()
+    {
+        $doc = new Document(EASYSWOOLE_ROOT."/App/HttpController");
+        $this->response()->write($doc->scan2html());
     }
 
     protected function actionNotFound(?string $action)
@@ -31,5 +57,16 @@ class Index extends Controller
             $file = EASYSWOOLE_ROOT.'/src/Resource/Http/404.html';
         }
         $this->response()->write(file_get_contents($file));
+    }
+
+    function onException(\Throwable $throwable): void
+    {
+        if($throwable instanceof ParamValidateFail){
+            $msg = $throwable->getFailRule()->errorMsg($throwable->getParamName());
+            $this->response()->write("param validate fail: $msg");
+        }else{
+            Trigger::getInstance()->throwable($throwable);
+            $this->response()->write("系统出现异常，请联系管理员");
+        }
     }
 }
