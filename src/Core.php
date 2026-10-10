@@ -235,15 +235,7 @@ class Core
                 $namespace = 'App\\HttpController\\';
             }
             $depth = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_MAX_DEPTH));
-            $depth = $depth > 5 ? $depth : 5;
-            $max = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM));
-            if ($max == 0) {
-                $max = 500;
-            }
-            $waitTime = intval(Di::getInstance()->get(SysConst::HTTP_CONTROLLER_POOL_WAIT_TIME));
-            if ($waitTime == 0) {
-                $waitTime = 5;
-            }
+            $depth = max($depth, 5);
             $dispatcher = Dispatcher::getInstance()->setNamespacePrefix($namespace)->setMaxDepth($depth);
             //补充HTTP_EXCEPTION_HANDLER默认回调
             $httpExceptionHandler = Di::getInstance()->get(SysConst::HTTP_EXCEPTION_HANDLER);
