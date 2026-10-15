@@ -14,6 +14,7 @@ namespace EasySwoole\EasySwoole\Command;
 use EasySwoole\Command\Bean\Caller;
 use EasySwoole\Command\Bean\Result;
 use EasySwoole\Command\Manager;
+use EasySwoole\Command\Color;
 use EasySwoole\Component\Singleton;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
@@ -43,6 +44,15 @@ class CommandRunner extends Manager
         Utility::opCacheClear();
         $this->caller = $caller;
         return parent::exec($caller);
+    }
+
+    public function result2HelpMsg(Caller $caller, Result $result): string
+    {
+        $help = parent::result2HelpMsg($caller, $result);
+        if ($caller->command === null || $caller->command === '') {
+            return Color::green(Utility::easySwooleLog()) . "\n" . $help;
+        }
+        return $help;
     }
 
     public function getCaller(): Caller|null
