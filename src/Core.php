@@ -346,28 +346,14 @@ class Core
 
     private function extraHandler(): void
     {
-        $mode = $this->runMode();
-        $serverName = Config::getInstance()->getConf('SERVER_NAME').".{$mode}";
         //注册Task进程
-        $config = Config::getInstance()->getConf('MAIN_SERVER.TASK');
-        $config = TaskManager::getInstance()->getConfig()->restore($config);
-        $config->setTempDir(EASYSWOOLE_TEMP_DIR);
-        $config->setServerName($serverName);
-        $config->setOnException(function (\Throwable $throwable) {
-            Trigger::getInstance()->throwable($throwable);
-        });
         $server = ServerManager::getInstance()->getSwooleServer();
         TaskManager::getInstance()->attachToServer($server);
         //初始化进程管理器
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
-        Bridge::getInstance()->getConfig()->setServerName($serverName);
+        Bridge::getInstance()->attachServer($server);
         //注册Crontab
-        Crontab::getInstance()->getConfig()->setTempDir(EASYSWOOLE_TEMP_DIR);
-        Crontab::getInstance()->getConfig()->setServerName($serverName);
-        Crontab::getInstance()->getConfig()->setOnException(function (\Throwable $throwable){
-            Trigger::getInstance()->throwable($throwable);
-        });
         Crontab::getInstance()->attachToServer($server);
     }
 
