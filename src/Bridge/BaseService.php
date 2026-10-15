@@ -11,6 +11,7 @@ use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\Crontab\Crontab as EasySwooleCron;
 use EasySwoole\EasySwoole\ServerManager;
+use EasySwoole\EasySwoole\Task\TaskManager;
 
 class BaseService extends AbstractCommand
 {
@@ -37,6 +38,11 @@ class BaseService extends AbstractCommand
             unset($value['hash']);
         }
         $responsePackage->setArgs($array);
+    }
+
+    public function taskWorkerPidList(Package $request, Package $responsePackage): void
+    {
+        $responsePackage->setArgs(array_column(TaskManager::getInstance()->status(), 'pid'));
     }
 
     function crontabInfo(Package $request,Package $responsePackage):void

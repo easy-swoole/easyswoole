@@ -15,7 +15,7 @@ final class DefaultCommandTest extends TestCase
 {
     public static function commands(): iterable
     {
-        yield [Server::class, 'server', ['start', 'stop', 'reload', 'status']];
+        yield [Server::class, 'server', ['start', 'stop', 'reload', 'reloadTask', 'status']];
         yield [Process::class, 'process', ['show', 'kill']];
         yield [Crontab::class, 'crontab', ['show', 'stop', 'stopAll', 'resume', 'resumeAll', 'runJobNow', 'setCrontabRule']];
     }
