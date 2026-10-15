@@ -10,6 +10,7 @@ use EasySwoole\Component\Singleton;
 use EasySwoole\Bridge\Bridge as BridgeServer;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Trigger;
 
 class Bridge extends BridgeServer
 {
@@ -21,6 +22,10 @@ class Bridge extends BridgeServer
         $this->getCommandContainer()->set(new BaseService());
         $mode = Core::getInstance()->runMode();
         $serverName = Config::getInstance()->getConf('SERVER_NAME').".{$mode}";
+        $this->getConfig()->setServerName($serverName);
+        $this->setOnException(static function (\Throwable $throwable): void {
+            Trigger::getInstance()->throwable($throwable);
+        });
         $this->setSocketFile(EASYSWOOLE_TEMP_DIR . "/{$serverName}.bridge.sock");
     }
 

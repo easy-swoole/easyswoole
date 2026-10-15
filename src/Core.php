@@ -361,7 +361,7 @@ class Core
         //初始化进程管理器
         Manager::getInstance()->attachToServer($server);
         //初始化Bridge
-        Bridge::getInstance()->attachServer($server, $serverName);
+        Bridge::getInstance()->getConfig()->setServerName($serverName);
         //注册Crontab
         Crontab::getInstance()->getConfig()->setTempDir(EASYSWOOLE_TEMP_DIR);
         Crontab::getInstance()->getConfig()->setServerName($serverName);
