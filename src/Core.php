@@ -60,7 +60,7 @@ class Core
 {
     use Singleton;
 
-    protected $runMode = 'dev';
+    protected string $runMode = 'dev';
 
     function __construct()
     {
@@ -85,7 +85,7 @@ class Core
         return $this->runMode;
     }
 
-    function initialize(string|null $mode = null)
+    function initialize(string|null $mode = null): static
     {
         if(empty($mode) && empty($this->runMode)) {
             $mode = 'dev';
@@ -103,9 +103,15 @@ class Core
         return $this;
     }
 
-    function createServer()
+    function createServer(): static
     {
         $conf = Config::getInstance()->getConf('MAIN_SERVER');
+        if (array_key_exists('task_worker_num', $conf['SETTING'])) {
+            throw new \InvalidArgumentException(
+                'MAIN_SERVER.SETTING.task_worker_num is not supported. '
+                . 'use MAIN_SERVER.TASK.workerNum to configure EasySwoole task processes instead.'
+            );
+        }
         ServerManager::getInstance()->createSwooleServer(
             $conf['PORT'], $conf['SERVER_TYPE'], $conf['LISTEN_ADDRESS'], $conf['SETTING'], $conf['RUN_MODEL'], $conf['SOCK_TYPE']
         );
@@ -115,7 +121,7 @@ class Core
         return $this;
     }
 
-    function start()
+    function start(): void
     {
         //给主进程也命名
         $serverName = Config::getInstance()->getConf('SERVER_NAME');
@@ -163,7 +169,7 @@ class Core
         }
     }
 
-    private function registerErrorHandler()
+    private function registerErrorHandler(): void
     {
         ini_set("display_errors", "On");
         $level = Di::getInstance()->get(SysConst::ERROR_REPORT_LEVEL);
@@ -224,7 +230,7 @@ class Core
         register_shutdown_function($func);
     }
 
-    private function registerDefaultCallBack(Server $server, int $serverType)
+    private function registerDefaultCallBack(Server $server, int $serverType): void
     {
         /*
          * 注册默认回调
@@ -281,21 +287,14 @@ class Core
         EventHelper::registerWithAdd($register, EventRegister::onWorkerStart, function (Server $server, $workerId) {
             $serverName = Config::getInstance()->getConf('SERVER_NAME');
 
-            if (!$server->taskworker) {
-                $type = 'Worker';
-            }else{
-                $type = 'SwTaskWorker';
-                $workerId = $workerId - Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
-            }
-
-            $processName = "{$serverName}.{$this->runMode}.{$type}.{$workerId}";
+            $processName = "{$serverName}.{$this->runMode}.Worker.{$workerId}";
             $this->setProcessName($processName);
             $table = Manager::getInstance()->getProcessTable();
             $pid = getmypid();
             $table->set($pid, [
                 'pid' => $pid,
                 'name' => $processName,
-                'group' => "{$serverName}.{$this->runMode}.{$type}",
+                'group' => "{$serverName}.{$this->runMode}.Worker",
                 'startUpTime' => time()
             ]);
             Timer::tick(1 * 1000, function () use ($table, $pid) {
@@ -336,7 +335,7 @@ class Core
         });
     }
 
-    public function loadEnv()
+    public function loadEnv(): void
     {
         $file = EASYSWOOLE_ROOT . "/{$this->runMode}.php";
         if (!file_exists($file)) {
@@ -345,7 +344,7 @@ class Core
         Config::getInstance()->loadFile($file);
     }
 
-    private function extraHandler()
+    private function extraHandler(): void
     {
         $mode = $this->runMode();
         $serverName = Config::getInstance()->getConf('SERVER_NAME').".{$mode}";
@@ -383,7 +382,7 @@ class Core
         }
         $banOS = ['Darwin','CYGWIN','WINNT'];
         foreach ($banOS as $os){
-            if (strpos(PHP_OS, $os) !== false) {
+            if (str_contains(PHP_OS, $os)) {
                 return ;
             }
         }
