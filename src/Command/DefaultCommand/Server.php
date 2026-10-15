@@ -20,7 +20,6 @@ use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
-use EasySwoole\Utility\ArrayToTextTable;
 use Swoole\Coroutine\Scheduler;
 
 class Server extends AbstractCommand
@@ -60,10 +59,8 @@ class Server extends AbstractCommand
             }
 
             $displayItem = Utility::generateEnv(Config::getInstance(),Core::getInstance()->runMode());
-            $msg = Color::green(Utility::easySwooleLog()) . "\n";
-            foreach ($displayItem as $key => $value) {
-                $msg .= Utility::displayItem($key, $value) . "\n";
-            }
+            $msg = Color::green(Utility::easySwooleLog()) . "\nEnvironment\n";
+            $msg .= $this->formatStatusSection($displayItem, true) . "\n";
             echo $msg;
             Core::getInstance()->createServer()->start();
         });
@@ -198,68 +195,101 @@ class Server extends AbstractCommand
         $action = new Action('status','get EasySwoole server status');
         $action->addOption(new Option('mode','run mode,such as --mode=dev'));
 
-        $action->setCallback(function (Caller $caller,Result $result) {
-            $run = new Scheduler();
-            $run->add(function () use (&$msg) {
-                $package = Bridge::bridgeCall( 'serverStatus');
-                if($package->getStatus() == StatusEnum::SUCCESS){
-                    $args = $package->getArgs();
-                    $msg = Color::green(Utility::easySwooleLog()) . "\n";
-                    foreach ($args['env'] as $key => $value) {
-                        $msg .= Utility::displayItem($key, $value) . "\n";
-                    }
-                    $runtimes = $args['runtime'];
-                    $runtimes['start_time'] = date("Y-m-d H:i:s",$runtimes['start_time']);
-
-                    $temp = [];
-                    //构造表头
-                    foreach ($runtimes as $key => $value) {
-                        $temp[$key] = $value;
-                        unset($runtimes[$key]);
-                        if(count($temp) == 5){
-                           $temp = [$temp];
-                           break;
-                        }
-                    }
-                    //拼接 ，一行表头一行值
-                    $headers = [];
-                    $values = [];
-                    foreach ($runtimes as $key => $value) {
-                        $values[] = $value;
-                        $headers[] = $key;
-                        if(count($headers) == 5){
-                            $t2 = [];
-                            $t3 = [];
-                            foreach ($temp[0] as $header => $t) {
-                                $t2[$header] = array_pop($headers);
-                                $t3[$header] = array_pop($values);
-                            }
-                            $temp[] = $t2;
-                            $temp[] = $t3;
-                            $headers = [];
-                            $values = [];
-                        }
-                    }
-                    if(!empty($headers)){
-                        $t2 = [];
-                        $t3 = [];
-                        foreach ($temp[0] as $header => $t) {
-                            $t2[$header] = array_pop($headers);
-                            $t3[$header] = array_pop($values);
-                        }
-                        $temp[] = $t2;
-                        $temp[] = $t3;
-                    }
-                    $msg .= new ArrayToTextTable($temp);
-                }else{
-                    $msg = Color::error($package->getMsg());
+        $action->setCallback(function (Caller $caller, Result $result): void {
+            try {
+                $package = $this->requestServerStatus();
+                if ($package->getStatus() !== StatusEnum::SUCCESS) {
+                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                    $result->msg = $package->getMsg();
+                    return;
                 }
-            });
-            $run->start();
-            $result->msg = $msg;
+                $data = $package->getArgs();
+                if (!is_array($data) || !isset($data['env'], $data['runtime'])
+                    || !is_array($data['env']) || !is_array($data['runtime'])) {
+                    throw new \UnexpectedValueException('invalid server status returned by Bridge');
+                }
+                $result->result = $data;
+                $result->msg = $this->formatServerStatus($data);
+            } catch (\Throwable $throwable) {
+                $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
+                $result->msg = $throwable->getMessage();
+            }
         });
 
         $this->registerAction($action);
+    }
+
+    protected function requestServerStatus(): Package
+    {
+        $package = null;
+        $error = null;
+        $scheduler = new Scheduler();
+        $scheduler->add(static function () use (&$package, &$error): void {
+            try {
+                $package = Bridge::bridgeCall('serverStatus');
+            } catch (\Throwable $throwable) {
+                $error = $throwable;
+            }
+        });
+        $scheduler->start();
+        if ($error !== null) {
+            throw $error;
+        }
+        return $package;
+    }
+
+    protected function formatServerStatus(array $data): string
+    {
+        $lines = ['Server status'];
+        foreach (['Environment' => 'env', 'Runtime' => 'runtime'] as $title => $section) {
+            $lines[] = '';
+            $lines[] = $title;
+            $lines[] = $this->formatStatusSection($data[$section], $section === 'env');
+        }
+        return implode(PHP_EOL, $lines);
+    }
+
+    protected function formatStatusSection(array $values, bool $environment): string
+    {
+        $lines = [];
+        if (!$values) {
+            $lines[] = '  No data available.';
+        }
+        $items = [];
+        $paths = [];
+        $keyWidth = $values
+            ? max(array_map(static fn ($key) => strlen((string)$key), array_keys($values))) : 28;
+        foreach ($values as $key => $value) {
+            if (!$environment && $key === 'start_time') {
+                $value = is_int($value) && $value > 0 ? date('Y-m-d H:i:s', $value) : '-';
+            }
+            if (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            } elseif ($value === null) {
+                $value = '-';
+            } elseif (is_array($value) || is_object($value)) {
+                $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            }
+            $key = preg_replace('/[\x00-\x1f\x7f]/', '?', (string)$key);
+            $value = preg_replace('/[\x00-\x1f\x7f]/', '?', (string)$value);
+            $item = str_pad($key, $keyWidth) . ' : ' . $value;
+            if ($environment && in_array($key, ['pid_file', 'log_file', 'temp dir', 'log dir'], true)) {
+                $paths[] = $item;
+            } else {
+                $items[] = $item;
+            }
+        }
+        if ($items) {
+            $rows = array_chunk($items, 2);
+            $leftWidth = max(array_map(static fn (array $row) => strlen($row[0]), $rows)) + 4;
+            foreach ($rows as $row) {
+                $lines[] = '  ' . (isset($row[1]) ? str_pad($row[0], $leftWidth) . $row[1] : $row[0]);
+            }
+        }
+        foreach ($paths as $path) {
+            $lines[] = '  ' . $path;
+        }
+        return implode(PHP_EOL, $lines);
     }
 
     protected function signalTaskWorker(int $pid, int $signal): bool
