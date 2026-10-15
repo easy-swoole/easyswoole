@@ -18,7 +18,8 @@ return [
         'TASK' => [
             'workerNum' => 4,
             'maxRunningNum' => 128,
-            'timeout' => 15
+            'pushTimeOut' => 15,
+            'maxPackageSize'=>1024 * 1024 * 2
         ]
     ],
     "LOG" => [
