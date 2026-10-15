@@ -239,9 +239,9 @@ final class CrontabCommandTest extends TestCase
     {
         $tasks = $this->tasks();
         $tasks['Heartbeat']['taskRunTimes'] = 12;
-        $tasks['Heartbeat']['taskCurrentRunTime'] = 1700000000;
+        $tasks['Heartbeat']['taskLastRunTime'] = 1700000000;
         $tasks['Cleanup']['taskRunTimes'] = 0;
-        $tasks['Cleanup']['taskCurrentRunTime'] = 0;
+        $tasks['Cleanup']['taskLastRunTime'] = 0;
         $command = $this->command();
         $command->responses = [$this->package($tasks)];
         [$result, $output] = $this->execute($command, 'show');
@@ -258,8 +258,36 @@ final class CrontabCommandTest extends TestCase
         self::assertStringContainsString('Next ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
         self::assertStringContainsString('Runs 12   Last run ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
         self::assertStringContainsString('Runs 0   Last run -', $result->msg);
+        self::assertStringNotContainsString('Last error', $result->msg);
         self::assertStringNotContainsString('┌', $result->msg);
         self::assertStringNotContainsString('│', $result->msg);
+    }
+
+    public function testShowDisplaysLastErrorAndPreservesRawData(): void
+    {
+        $tasks = $this->tasks();
+        $tasks['Heartbeat'] += ['taskLastRunTime' => 1700000100,
+            'lastError' => "Failed at 50%\n\e[31m", 'lastErrorTime' => 1700000000];
+        $tasks['Cleanup'] += ['lastError' => '', 'lastErrorTime' => 0];
+        $command = $this->command();
+        $command->responses = [$this->package($tasks)];
+        [$result] = $this->execute($command, 'show');
+        self::assertSame(ExecStatusEnum::OK, $result->status);
+        self::assertSame($tasks, $result->result);
+        self::assertStringContainsString('Last run ' . date('Y-m-d H:i:s', 1700000100), $result->msg);
+        self::assertStringContainsString('Last error Failed at 50%??[31m', $result->msg);
+        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
+        self::assertSame(1, substr_count($result->msg, 'Last error time'));
+        self::assertStringNotContainsString("\e", $result->msg);
+    }
+
+    public function testShowDisplaysErrorTimeEvenWhenExceptionMessageIsEmpty(): void
+    {
+        $command = $this->command();
+        $command->responses = [$this->package(['Heartbeat' => ['lastError' => '', 'lastErrorTime' => 1700000000]])];
+        [$result] = $this->execute($command, 'show');
+        self::assertStringContainsString('Last error -', $result->msg);
+        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
     }
 
     public function testShowEmptyList(): void
@@ -278,6 +306,7 @@ final class CrontabCommandTest extends TestCase
         [$result] = $this->execute($command, 'show');
         self::assertStringContainsString('Rule -   State running   Next -', $result->msg);
         self::assertStringContainsString('Runs 0   Last run -', $result->msg);
+        self::assertStringNotContainsString('Last error', $result->msg);
     }
 
     public function testShowPreservesBridgeError(): void

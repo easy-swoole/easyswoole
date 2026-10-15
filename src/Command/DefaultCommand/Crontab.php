@@ -157,8 +157,15 @@ class Crontab extends AbstractCommand
             $lines[] = '[' . (++$index) . '] ' . CrontabSelector::label($task);
             $lines[] = '    ' . CrontabSelector::details($task);
             $runs = $task['taskRunTimes'] ?? 0;
-            $lastRun = Utility::formatTime($task['taskCurrentRunTime'] ?? null);
+            $lastRun = Utility::formatTime($task['taskLastRunTime'] ?? null);
             $lines[] = "    Runs {$runs}   Last run {$lastRun}";
+            $error = $task['lastError'] ?? '';
+            $errorTime = Utility::formatTime($task['lastErrorTime'] ?? null);
+            if ($error !== '' || $errorTime !== '-') {
+                $error = preg_replace('/[\x00-\x1f\x7f]/', '?', $error);
+                $lines[] = '    Last error ' . ($error === '' ? '-' : $error);
+                $lines[] = '    Last error time ' . $errorTime;
+            }
         }
         return implode(PHP_EOL, $lines);
     }
