@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EasySwoole\EasySwoole\Test\Unit;
 
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
@@ -15,7 +16,8 @@ final class DefaultCommandTest extends TestCase
 {
     public static function commands(): iterable
     {
-        yield [Server::class, 'server', ['start', 'stop', 'reload', 'reloadTask', 'status']];
+        yield [Server::class, 'server', ['start', 'stop', 'reload', 'status']];
+        yield [Task::class, 'task', ['show', 'reload']];
         yield [Process::class, 'process', ['show', 'kill']];
         yield [Crontab::class, 'crontab', ['show', 'stop', 'stopAll', 'resume', 'resumeAll', 'runJobNow', 'setCrontabRule']];
     }

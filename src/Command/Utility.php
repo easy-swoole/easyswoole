@@ -119,4 +119,23 @@ LOGO;
         }
     }
 
+    public static function formatMemory(mixed $bytes): string
+    {
+        if ((!is_int($bytes) && !is_float($bytes)) || !is_finite((float)$bytes) || $bytes < 0) {
+            return '-';
+        }
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $unit = 0;
+        while ($bytes >= 1024 && $unit < count($units) - 1) {
+            $bytes /= 1024;
+            ++$unit;
+        }
+        return rtrim(rtrim(number_format($bytes, 2, '.', ''), '0'), '.') . ' ' . $units[$unit];
+    }
+
+    public static function formatTime(mixed $timestamp): string
+    {
+        return is_int($timestamp) && $timestamp > 0 ? date('Y-m-d H:i:s', $timestamp) : '-';
+    }
+
 }

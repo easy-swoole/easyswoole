@@ -14,7 +14,10 @@ use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Selector\CrontabSelector;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Command\Utility;
 use Swoole\Coroutine\Scheduler;
+use EasySwoole\EasySwoole\Command\Console\Watch;
+use EasySwoole\EasySwoole\Command\Console\Terminal;
 
 class Crontab extends AbstractCommand
 {
@@ -51,6 +54,7 @@ class Crontab extends AbstractCommand
                 $result->msg = $throwable->getMessage();
             }
         });
+        Watch::attach($action);
         $this->registerAction($action);
 
 
@@ -153,7 +157,7 @@ class Crontab extends AbstractCommand
             $lines[] = '[' . (++$index) . '] ' . CrontabSelector::label($task);
             $lines[] = '    ' . CrontabSelector::details($task);
             $runs = $task['taskRunTimes'] ?? 0;
-            $lastRun = CrontabSelector::formatTime($task['taskCurrentRunTime'] ?? null);
+            $lastRun = Utility::formatTime($task['taskCurrentRunTime'] ?? null);
             $lines[] = "    Runs {$runs}   Last run {$lastRun}";
         }
         return implode(PHP_EOL, $lines);
@@ -281,34 +285,7 @@ class Crontab extends AbstractCommand
 
     protected function selectTasks(array $choices, string $verb): array
     {
-        $selected = (new CrontabSelector($verb))->select($choices);
-        if ($selected !== null) {
-            return $selected;
-        }
-        echo "Select crontab tasks to {$verb}:\n";
-        foreach ($choices as $index => $task) {
-            echo '[' . ($index + 1) . '] ' . CrontabSelector::label($task) . "\n";
-            echo '    ' . CrontabSelector::details($task) . "\n";
-        }
-        echo "[0] Cancel\n";
-        while (true) {
-            $input = trim($this->readInput('Enter indexes (comma-separated) [0]: ') ?? '');
-            if ($input === '' || $input === '0' || strtolower($input) === 'q') {
-                return [];
-            }
-            $selected = [];
-            foreach (preg_split('/[\s,，]+/u', $input) as $index) {
-                if (!ctype_digit($index) || (int)$index < 1 || (int)$index > count($choices)) {
-                    $selected = [];
-                    break;
-                }
-                $selected[(int)$index - 1] = $choices[(int)$index - 1];
-            }
-            if ($selected) {
-                return $selected;
-            }
-            echo "Invalid selection; enter listed indexes or 0 to cancel.\n";
-        }
+        return (new CrontabSelector($verb))->choose($choices, fn (string $prompt) => $this->readInput($prompt));
     }
 
     protected function isInteractive(): bool
@@ -318,9 +295,7 @@ class Crontab extends AbstractCommand
 
     protected function readInput(string $prompt): ?string
     {
-        echo $prompt;
-        $line = fgets(STDIN);
-        return $line === false ? null : $line;
+        return Terminal::readLine($prompt);
     }
 
 }

@@ -19,6 +19,7 @@ use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
 use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
+use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
 
 
 class CommandRunner extends Manager
@@ -33,6 +34,7 @@ class CommandRunner extends Manager
         $this->addCommand(new Server());
         $this->addCommand(new Process());
         $this->addCommand(new Crontab());
+        $this->addCommand(new Task());
     }
 
 

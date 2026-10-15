@@ -15,7 +15,7 @@ final class BaseServiceTest extends TestCase
 {
     public static function managementActions(): iterable
     {
-        foreach (['serverStatus', 'processInfo', 'taskWorkerPidList', 'crontabInfo', 'stopCrontabRule', 'stopAllCrontabRule',
+        foreach (['serverStatus', 'processInfo', 'taskStatus', 'taskWorkerPidList', 'crontabInfo', 'stopCrontabRule', 'stopAllCrontabRule',
             'resumeCrontabRule', 'resumeAllCrontabRule', 'runCrontabJobNow', 'setCrontabRule'] as $action) {
             yield $action => [$action];
         }
@@ -29,6 +29,7 @@ final class BaseServiceTest extends TestCase
             public array $calls = [];
             public function serverStatus(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
             public function processInfo(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
+            public function taskStatus(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
             public function taskWorkerPidList(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
             public function crontabInfo(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
             public function stopCrontabRule(Package $request, Package $responsePackage): void { $this->calls[] = [__FUNCTION__, $request, $responsePackage]; }
@@ -79,6 +80,22 @@ final class BaseServiceTest extends TestCase
         } finally {
             $property->setValue(null, $previous);
         }
+    }
+
+    public function testTaskStatusReturnsSharedWorkerRows(): void
+    {
+        $property = new \ReflectionProperty(TaskManager::class, 'instance');
+        $previous = $property->getValue();
+        $rows = [0 => ['pid' => 123, 'accepting' => 0, 'running' => 1, 'success' => 4, 'fail' => 2]];
+        $manager = $this->createMock(TaskManager::class);
+        $manager->expects(self::once())->method('status')->willReturn($rows);
+        $property->setValue(null, $manager);
+        try {
+            $request = new Package(); $request->setArgs(['action' => 'taskStatus']);
+            $response = new Package(); $response->setStatus(StatusEnum::SUCCESS);
+            (new BaseService())->exec($request, $response);
+            self::assertSame($rows, $response->getArgs());
+        } finally { $property->setValue(null, $previous); }
     }
 
 }

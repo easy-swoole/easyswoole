@@ -13,7 +13,10 @@ use EasySwoole\Command\Bean\Result;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Selector\ProcessSelector;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Command\Utility;
 use Swoole\Coroutine\Scheduler;
+use EasySwoole\EasySwoole\Command\Console\Watch;
+use EasySwoole\EasySwoole\Command\Console\Terminal;
 
 class Process extends AbstractCommand
 {
@@ -45,6 +48,7 @@ class Process extends AbstractCommand
                 $result->msg = $this->formatProcessList($processes);
             }
         });
+        Watch::attach($action);
         $this->registerAction($action);
 
         $action = new Action('kill', 'kill EasySwoole process');
@@ -166,35 +170,7 @@ class Process extends AbstractCommand
 
     protected function selectProcesses(array $choices): array
     {
-        $selection = (new ProcessSelector())->select($choices);
-        if ($selection !== null) {
-            return $selection;
-        }
-        echo "Select processes to terminate:\n";
-        foreach ($choices as $index => $process) {
-            echo '[' . ($index + 1) . '] ' . ProcessSelector::label($process) . "\n";
-            echo '    ' . ProcessSelector::details($process) . "\n";
-        }
-        echo "[0] Cancel\n";
-        while (true) {
-            $input = trim($this->readInput('Enter indexes (comma-separated) [0]: ') ?? '');
-            if ($input === '' || $input === '0' || strtolower($input) === 'q') {
-                return [];
-            }
-            $indexes = preg_split('/[\s,，]+/u', $input);
-            $selected = [];
-            foreach ($indexes as $index) {
-                if (!ctype_digit($index) || (int)$index < 1 || (int)$index > count($choices)) {
-                    $selected = [];
-                    break;
-                }
-                $selected[(int)$index - 1] = $choices[(int)$index - 1];
-            }
-            if ($selected) {
-                return $selected;
-            }
-            echo "Invalid selection; enter listed indexes or 0 to cancel.\n";
-        }
+        return (new ProcessSelector())->choose($choices, fn (string $prompt) => $this->readInput($prompt));
     }
 
     protected function fetchProcessList(Result $result): ?array
@@ -229,9 +205,7 @@ class Process extends AbstractCommand
 
     protected function readInput(string $prompt): ?string
     {
-        echo $prompt;
-        $line = fgets(STDIN);
-        return $line === false ? null : $line;
+        return Terminal::readLine($prompt);
     }
 
     protected function signalProcess(int $pid, int $signal): bool
@@ -257,8 +231,8 @@ class Process extends AbstractCommand
             foreach ($members as $process) {
                 $lines[] = '  [' . (++$index) . '] ' . ProcessSelector::label($process);
                 $lines[] = '      ' . ProcessSelector::details($process);
-                $peak = ProcessSelector::formatMemory($process['memoryPeakUsage'] ?? null);
-                $heartbeat = ProcessSelector::formatTime($process['lastHeartBeat'] ?? null);
+                $peak = Utility::formatMemory($process['memoryPeakUsage'] ?? null);
+                $heartbeat = Utility::formatTime($process['lastHeartBeat'] ?? null);
                 $type = empty($process['customProcess']) ? 'Worker process' : 'Custom process';
                 $lines[] = "      Peak {$peak}   lastHeartBeat {$heartbeat}   {$type}";
             }

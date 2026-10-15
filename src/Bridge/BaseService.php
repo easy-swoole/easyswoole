@@ -40,6 +40,11 @@ class BaseService extends AbstractCommand
         $responsePackage->setArgs($array);
     }
 
+    public function taskStatus(Package $request, Package $responsePackage): void
+    {
+        $responsePackage->setArgs(TaskManager::getInstance()->status());
+    }
+
     public function taskWorkerPidList(Package $request, Package $responsePackage): void
     {
         $responsePackage->setArgs(array_column(TaskManager::getInstance()->status(), 'pid'));

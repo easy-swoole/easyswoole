@@ -21,6 +21,7 @@ use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use Swoole\Coroutine\Scheduler;
+use EasySwoole\EasySwoole\Command\Console\Watch;
 
 class Server extends AbstractCommand
 {
@@ -132,66 +133,6 @@ class Server extends AbstractCommand
         });
         $this->registerAction($action);
 
-        $action = new Action('reloadTask', 'reload EasySwoole custom Task workers');
-        $action->addOption(new Option('mode', 'run mode, such as --mode=dev'));
-        $action->addOption(new class('force', 'use SIGKILL with --force=true; default SIGTERM') extends Option {
-            public static function validate(mixed $value, Caller $caller): bool|string
-            {
-                return $value === null || filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== null
-                    ? true : 'force must be a boolean, such as --force=true or --force=false';
-            }
-        });
-        $action->setCallback(function (Caller $caller, Result $result): void {
-            $force = $caller->commandLine->hasOption('force')
-                && ($caller->commandLine->getOption('force') === null
-                    || filter_var($caller->commandLine->getOption('force'), FILTER_VALIDATE_BOOLEAN));
-            $signal = $force ? SIGKILL : SIGTERM;
-            $scheduler = new Scheduler();
-            $scheduler->add(function () use ($result, $signal): void {
-                try {
-                    $package = Bridge::bridgeCall('taskWorkerPidList');
-                    if ($package->getStatus() !== StatusEnum::SUCCESS) {
-                        $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
-                        $result->msg = $package->getMsg();
-                        return;
-                    }
-                    $pids = $package->getArgs();
-                    if (!is_array($pids)) {
-                        throw new \UnexpectedValueException('invalid Task worker PID list');
-                    }
-                    foreach ($pids as $pid) {
-                        if (!is_int($pid) || $pid <= 0) {
-                            throw new \UnexpectedValueException('invalid Task worker PID');
-                        }
-                    }
-                    $sent = [];
-                    $failed = [];
-                    foreach (array_unique($pids) as $pid) {
-                        if ($this->signalTaskWorker($pid, $signal)) {
-                            $sent[] = $pid;
-                        } else {
-                            $failed[] = $pid;
-                        }
-                    }
-                    $result->result = ['signal' => $signal, 'sent' => $sent, 'failed' => $failed];
-                    if ($failed) {
-                        $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
-                        $result->msg = 'failed to signal Task worker PIDs: ' . implode(', ', $failed);
-                    } else {
-                        $signalName = $signal === SIGKILL ? 'SIGKILL' : 'SIGTERM';
-                        $result->msg = $sent
-                            ? "sent {$signalName} to Task worker PIDs: " . implode(', ', $sent)
-                            : 'no Task workers available to reload';
-                    }
-                } catch (\Throwable $throwable) {
-                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
-                    $result->msg = $throwable->getMessage();
-                }
-            });
-            $scheduler->start();
-        });
-        $this->registerAction($action);
-
         $action = new Action('status','get EasySwoole server status');
         $action->addOption(new Option('mode','run mode,such as --mode=dev'));
 
@@ -216,6 +157,7 @@ class Server extends AbstractCommand
             }
         });
 
+        Watch::attach($action);
         $this->registerAction($action);
     }
 
@@ -292,9 +234,5 @@ class Server extends AbstractCommand
         return implode(PHP_EOL, $lines);
     }
 
-    protected function signalTaskWorker(int $pid, int $signal): bool
-    {
-        return \Swoole\Process::kill($pid, $signal);
-    }
 
 }

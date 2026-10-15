@@ -6,31 +6,16 @@ namespace EasySwoole\EasySwoole\Test\Unit;
 
 use EasySwoole\EasySwoole\Command\Selector\ProcessSelector;
 use PHPUnit\Framework\Attributes\DataProvider;
+use EasySwoole\EasySwoole\Test\Support\FakeTerminal;
 use PHPUnit\Framework\TestCase;
 
 final class ProcessSelectorTest extends TestCase
 {
     private function selector(): ProcessSelector
     {
-        return new class extends ProcessSelector {
-            public array $keys = [];
-            public array $modes = [];
+        return new class(new FakeTerminal()) extends ProcessSelector {
             public array $frames = [];
-            public bool $supported = true;
-            public bool $failRawMode = false;
-            public bool $throwOnRead = false;
-            protected function supportsTerminal(): bool { return $this->supported; }
-            protected function terminalMode(array $arguments): ?string
-            {
-                $this->modes[] = $arguments;
-                if ($arguments === ['-g']) { return 'saved-mode'; }
-                return $this->failRawMode && $arguments[0] === '-icanon' ? null : '';
-            }
-            protected function readKey(): ?string
-            {
-                if ($this->throwOnRead) { throw new \RuntimeException('Read failed'); }
-                return array_shift($this->keys);
-            }
+            public function __construct(public FakeTerminal $input) { parent::__construct($input); }
             protected function render(array $choices, int $cursor, array $selected, int $previousLines): int
             {
                 $this->frames[] = [$cursor, array_keys($selected)];
@@ -63,7 +48,7 @@ final class ProcessSelectorTest extends TestCase
     public function testSelectionAndTerminalRestoration(array $keys, array $expected): void
     {
         $selector = $this->selector();
-        $selector->keys = $keys;
+        $selector->input->keys = $keys;
         ob_start();
         try {
             $result = $selector->select($this->rows());
@@ -72,14 +57,14 @@ final class ProcessSelectorTest extends TestCase
             ob_end_clean();
         }
         self::assertSame($expected, array_keys($result));
-        self::assertSame(['saved-mode'], end($selector->modes));
+        self::assertSame(['saved-mode'], end($selector->input->modes));
         self::assertStringContainsString("\033[?25h", $output);
     }
 
     public function testReadFailureStillRestoresTerminal(): void
     {
         $selector = $this->selector();
-        $selector->throwOnRead = true;
+        $selector->input->throwOnRead = true;
         ob_start();
         try {
             try {
@@ -88,7 +73,7 @@ final class ProcessSelectorTest extends TestCase
             } catch (\RuntimeException $error) {
                 self::assertSame('Read failed', $error->getMessage());
             }
-            self::assertSame(['saved-mode'], end($selector->modes));
+            self::assertSame(['saved-mode'], end($selector->input->modes));
             self::assertStringContainsString("\033[?25h", ob_get_contents());
         } finally {
             ob_end_clean();
@@ -98,17 +83,17 @@ final class ProcessSelectorTest extends TestCase
     public function testUnsupportedTerminalRequestsNumberedFallback(): void
     {
         $selector = $this->selector();
-        $selector->supported = false;
+        $selector->input->supported = false;
         self::assertNull($selector->select($this->rows()));
-        self::assertSame([], $selector->modes);
+        self::assertSame([], $selector->input->modes);
     }
 
     public function testRawModeFailureRestoresAndRequestsFallback(): void
     {
         $selector = $this->selector();
-        $selector->failRawMode = true;
+        $selector->input->failRawMode = true;
         self::assertNull($selector->select($this->rows()));
-        self::assertSame(['saved-mode'], end($selector->modes));
+        self::assertSame(['saved-mode'], end($selector->input->modes));
     }
 
     public function testLabelDoesNotInterpretTerminalControlCharacters(): void
