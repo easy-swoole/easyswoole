@@ -7,6 +7,7 @@ use EasySwoole\Bridge\StatusEnum;
 use EasySwoole\Command\AbstractInterface\AbstractCommand;
 use EasySwoole\Command\Bean\Action;
 use EasySwoole\Command\Bean\Caller;
+use EasySwoole\Command\Bean\CommandLine;
 use EasySwoole\Command\Bean\ExecStatusEnum;
 use EasySwoole\Command\Bean\Option;
 use EasySwoole\Command\Bean\Result;
@@ -14,6 +15,7 @@ use EasySwoole\Command\Color;
 use EasySwoole\EasySwoole\Bridge\Bridge;
 use EasySwoole\EasySwoole\Command\Selector\CrontabSelector;
 use EasySwoole\EasySwoole\Core;
+use EasySwoole\EasySwoole\Crontab\Crontab as CrontabManager;
 use EasySwoole\EasySwoole\Command\Utility;
 use Swoole\Coroutine\Scheduler;
 use EasySwoole\EasySwoole\Command\Console\Watch;
@@ -140,6 +142,37 @@ class Crontab extends AbstractCommand
             $scheduler->start();
         });
         $this->registerAction($action);
+
+        $process = $this->processCommand();
+        $kill = $process->getActions()['kill'];
+        $action = new Action('reload', 'reload crontab processes; default SIGTERM');
+        foreach (['mode', 'force'] as $option) {
+            $action->addOption($kill->getOptions()[$option]);
+        }
+        $action->setCallback(function (Caller $caller, Result $result) use ($kill): void {
+            $line = new CommandLine();
+            $line->options = ['group' => $this->crontabProcessGroup()];
+            foreach (['mode', 'force'] as $option) {
+                if ($caller->commandLine->hasOption($option)) {
+                    $line->options[$option] = $caller->commandLine->getOption($option);
+                }
+            }
+            $processCaller = new Caller('process', 'kill', $line);
+            if ($kill->__preCallCallback($processCaller, $result)) {
+                ($kill->getCallback())($processCaller, $result);
+            }
+        });
+        $this->registerAction($action);
+    }
+
+    protected function processCommand(): Process
+    {
+        return new Process();
+    }
+
+    protected function crontabProcessGroup(): string
+    {
+        return CrontabManager::getInstance()->getConfig()->getServerName() . '.Crontab';
     }
 
     protected function formatTaskList(array $tasks): string

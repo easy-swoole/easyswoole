@@ -19,7 +19,7 @@ final class DefaultCommandTest extends TestCase
         yield [Server::class, 'server', ['start', 'stop', 'reload', 'status']];
         yield [Task::class, 'task', ['show', 'reload']];
         yield [Process::class, 'process', ['show', 'kill']];
-        yield [Crontab::class, 'crontab', ['show', 'stop', 'stopAll', 'resume', 'resumeAll', 'runJobNow', 'setCrontabRule']];
+        yield [Crontab::class, 'crontab', ['show', 'stop', 'stopAll', 'resume', 'resumeAll', 'runJobNow', 'setCrontabRule', 'reload']];
     }
 
     #[DataProvider('commands')]
