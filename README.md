@@ -34,8 +34,7 @@ English | [中文](./README_CN.md)
 ## Doc 
 
 - [Doc](http://www.easyswoole.com)
-- [中文文档](http://www.easyswoole.com)
-- [Git For Doc](https://github.com/easy-swoole/doc-3.7)
+- [Git For Doc](https://github.com/easy-swoole/doc-3.8)
 
 ## ab Test
 
@@ -112,38 +111,14 @@ Transfer rate:          2265.40 [Kbytes/sec] received
 
 ## Quick Start
 ```
-composer require easyswoole/easyswoole=3.7.x
+composer require easyswoole/easyswoole=3.x
 php vendor/bin/easyswoole.php install
 php easyswoole.php server start
 ```
 
-## Docker
-### Get Docker Image
-```
-docker pull easyswoolexuesi2021/easyswoole:php8.1.22-alpine3.16-swoole4.8.13
-```
-> More Docker images can be viewed：[Docker Hub](https://hub.docker.com/r/easyswoolexuesi2021/easyswoole) or [Git for Dockerfile](https://github.com/XueSiLf/easyswoole-docker)
 
-### Run
+## Others
 
-```
-docker run --name easyswoole \
--v /workspace/project:/var/www/project \
--p 9501:9501 -it \
---privileged -u root \
---entrypoint /bin/sh \
-easyswoolexuesi2021/easyswoole:php8.1.22-alpine3.16-swoole4.8.13
-```
-- WorkerDir: ***/var/www***
-- Run Easyswoole : 
-```bash
-composer require easyswoole/easyswoole=3.7.x
-php vendor/bin/easyswoole.php install
-php easyswoole.php server start
-```
-
-## Others 
-- [Git For Demo](https://github.com/easy-swoole/demo)
 - QQ交流群
     - VIP群 579434607 （本群需要付费599元）
     - EasySwoole官方一群 633921431(已满)
