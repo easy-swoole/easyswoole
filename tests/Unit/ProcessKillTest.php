@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace EasySwoole\EasySwoole\Test\Unit;
 
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\ExecStatusEnum;
-use EasySwoole\Command\Bean\Result;
-use EasySwoole\Command\Utility;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
+use EasySwoole\Command\Result\CommandResult as Result;
+use EasySwoole\Command\Application;
+use EasySwoole\Command\Input\Input;
+use EasySwoole\Command\Console\Console;
+use EasySwoole\EasySwoole\Test\Support\TestConsole;
+use EasySwoole\EasySwoole\Command\ProcessControlService as Process;
+use EasySwoole\EasySwoole\Command\DefaultCommand\ProcessKillAction;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -39,8 +41,8 @@ final class ProcessKillTest extends TestCase
                 ++$this->fetches;
                 $snapshot = array_shift($this->snapshots);
                 if ($snapshot === null) {
-                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
-                    $result->msg = 'Bridge unavailable';
+                    $result->exitCode = 1;
+                    $result->message = 'Bridge unavailable';
                 }
                 return $snapshot;
             }
@@ -60,19 +62,13 @@ final class ProcessKillTest extends TestCase
 
     private function execute(Process $command, array $options = []): array
     {
-        $caller = new Caller('process', 'kill', Utility::parseArgv($options));
-        $result = new Result();
-        $result->status = ExecStatusEnum::OK;
-        $action = $command->getActions()['kill'];
+        $app = new Application();
+        $app->addCommand(new \EasySwoole\EasySwoole\Command\DefaultCommand\ProcessCommand(['kill' => new ProcessKillAction($command)]));
         ob_start();
         try {
-            if ($action->__preCallCallback($caller, $result)) {
-                ($action->getCallback())($caller, $result);
-            }
+            $result = $app->dispatch(array_merge(['process', 'kill'], $options), new TestConsole($command));
             $output = ob_get_contents();
-        } finally {
-            ob_end_clean();
-        }
+        } finally { ob_end_clean(); }
         return [$result, $output];
     }
 
@@ -90,8 +86,8 @@ final class ProcessKillTest extends TestCase
         self::assertStringContainsString('Memory 4 MB', $output);
         self::assertStringContainsString('processUpTime ' . date('Y-m-d H:i:s', 1700000000), $output);
         self::assertStringContainsString('PID 202', end($command->prompts));
-        self::assertSame(ExecStatusEnum::OK, $result->status);
-        self::assertStringContainsString('signal sent', $result->msg);
+        self::assertSame(0, $result->exitCode);
+        self::assertStringContainsString('signal sent', $result->message);
     }
 
     public function testMultipleSelectionsAreDeduplicatedAndConfirmedTogether(): void
@@ -103,8 +99,8 @@ final class ProcessKillTest extends TestCase
         self::assertSame([[101, SIGTERM], [202, SIGTERM]], $command->signals);
         self::assertStringContainsString('PID 101', end($command->prompts));
         self::assertStringContainsString('PID 202', end($command->prompts));
-        self::assertStringNotContainsString('┌', $output . $result->msg);
-        self::assertSame(ExecStatusEnum::OK, $result->status);
+        self::assertStringNotContainsString('┌', $output . $result->message);
+        self::assertSame(0, $result->exitCode);
     }
 
     public function testChangedMultiSelectionAbortsBeforeSignallingAnyProcess(): void
@@ -116,7 +112,7 @@ final class ProcessKillTest extends TestCase
         $command->inputs = ['1,2', 'y'];
         [$result] = $this->execute($command);
         self::assertSame([], $command->signals);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
+        self::assertSame(1, $result->exitCode);
     }
 
     public static function cancellations(): iterable
@@ -139,8 +135,8 @@ final class ProcessKillTest extends TestCase
         [$result] = $this->execute($command);
         self::assertSame([], $command->signals);
         self::assertSame(1, $command->fetches);
-        self::assertSame([], $result->result);
-        self::assertSame('process selection cancelled', $result->msg);
+        self::assertSame([], $result->data);
+        self::assertSame('process selection cancelled', $result->message);
     }
 
     public static function forceOptions(): iterable
@@ -180,7 +176,7 @@ final class ProcessKillTest extends TestCase
         self::assertSame(array_map(static fn ($pid) => [$pid, SIGTERM], $pids), $command->signals);
         self::assertSame([], $command->prompts);
         self::assertSame('', $output);
-        self::assertSame(ExecStatusEnum::OK, $result->status);
+        self::assertSame(0, $result->exitCode);
     }
 
     public static function changedIdentities(): iterable
@@ -201,8 +197,8 @@ final class ProcessKillTest extends TestCase
         $command->inputs = ['1', 'y'];
         [$result] = $this->execute($command);
         self::assertSame([], $command->signals);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertStringContainsString('exited or changed', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertStringContainsString('exited or changed', $result->message);
     }
 
     public function testSelectedProcessDisappearingDoesNotSignal(): void
@@ -212,7 +208,7 @@ final class ProcessKillTest extends TestCase
         $command->inputs = ['1', 'y'];
         [$result] = $this->execute($command);
         self::assertSame([], $command->signals);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
+        self::assertSame(1, $result->exitCode);
     }
 
     public function testNonTerminalRequiresAnExplicitSelector(): void
@@ -221,10 +217,10 @@ final class ProcessKillTest extends TestCase
         $command->interactive = false;
         $command->snapshots = [$this->rows()];
         [$result] = $this->execute($command);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
+        self::assertSame(1, $result->exitCode);
         self::assertSame([], $command->signals);
         self::assertSame([], $command->prompts);
-        self::assertStringContainsString('requires a terminal', $result->msg);
+        self::assertStringContainsString('requires a terminal', $result->message);
     }
 
     public function testEmptyProcessListDoesNotPrompt(): void
@@ -232,7 +228,7 @@ final class ProcessKillTest extends TestCase
         $command = $this->command();
         $command->snapshots = [[]];
         [$result] = $this->execute($command);
-        self::assertSame('no processes available', $result->msg);
+        self::assertSame('no processes available', $result->message);
         self::assertSame([], $command->prompts);
     }
 
@@ -250,8 +246,8 @@ final class ProcessKillTest extends TestCase
         $command->inputs = $inputs;
         [$result] = $this->execute($command);
         self::assertSame([], $command->signals);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('Bridge unavailable', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('Bridge unavailable', $result->message);
     }
 
     public function testSignalFailureIsReported(): void
@@ -260,8 +256,8 @@ final class ProcessKillTest extends TestCase
         $command->snapshots = [$this->rows()];
         $command->signalResult = false;
         [$result] = $this->execute($command, ['--pid=101']);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertStringContainsString('signal failed', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertStringContainsString('signal failed', $result->message);
     }
 
     public static function invalidOptions(): iterable
@@ -278,7 +274,7 @@ final class ProcessKillTest extends TestCase
     {
         $command = $this->command();
         [$result] = $this->execute($command, $options);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_OPTION_VALIDATE_FAIL, $result->status);
+        self::assertSame(2, $result->exitCode);
         self::assertSame(0, $command->fetches);
         self::assertSame([], $command->signals);
     }

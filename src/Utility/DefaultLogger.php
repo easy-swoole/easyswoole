@@ -2,7 +2,7 @@
 
 namespace EasySwoole\EasySwoole\Utility;
 
-use EasySwoole\Command\Color;
+use EasySwoole\Command\Console\Color;
 use EasySwoole\EasySwoole\AbstractInterface\Log\LoggerInterface;
 use EasySwoole\EasySwoole\AbstractInterface\Log\LogLevelEnum;
 use EasySwoole\EasySwoole\Command\CommandManager;

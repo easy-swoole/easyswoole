@@ -1,41 +1,41 @@
 
 ![](easyswoole.png)
 
-[![Latest Stable Version](https://poser.pugx.org/easyswoole/easyswoole/v/stable)](https://packagist.org/packages/easyswoole/easyswoole)
-[![Total Downloads](https://poser.pugx.org/easyswoole/easyswoole/downloads)](https://packagist.org/packages/easyswoole/easyswoole)
-[![Latest Unstable Version](https://poser.pugx.org/easyswoole/easyswoole/v/unstable)](https://packagist.org/packages/easyswoole/easyswoole)
-[![License](https://poser.pugx.org/easyswoole/easyswoole/license)](https://packagist.org/packages/easyswoole/easyswoole)
-[![Monthly Downloads](https://poser.pugx.org/easyswoole/easyswoole/d/monthly)](https://packagist.org/packages/easyswoole/easyswoole)
+[![最新稳定版本](https://poser.pugx.org/easyswoole/easyswoole/v/stable)](https://packagist.org/packages/easyswoole/easyswoole)
+[![总下载量](https://poser.pugx.org/easyswoole/easyswoole/downloads)](https://packagist.org/packages/easyswoole/easyswoole)
+[![最新开发版本](https://poser.pugx.org/easyswoole/easyswoole/v/unstable)](https://packagist.org/packages/easyswoole/easyswoole)
+[![许可证](https://poser.pugx.org/easyswoole/easyswoole/license)](https://packagist.org/packages/easyswoole/easyswoole)
+[![月下载量](https://poser.pugx.org/easyswoole/easyswoole/d/monthly)](https://packagist.org/packages/easyswoole/easyswoole)
 
 
-# EasySwoole - A High Performance Swoole Framework
+# EasySwoole —— 高性能 Swoole 框架
 
-[EasySwoole](http://www.easyswoole.com/) is a distributed, persistent memory PHP framework based on the Swoole extension. It was created specifically for APIs to get rid of the performance penalties associated with process calls and file loading. EasySwoole highly encapsulates the Swoole Server and still maintains the original features of the Swoole server, supports simultaneous monitoring of HTTP, custom TCP, and UDP protocols, allowing developers to write multi-process, asynchronous, and highly available applications with minimal learning cost and effort.
-          
-- Base on Swoole extension
-- Built-in HTTP, TCP, WebSocket,Udp Coroutine Server
-- Global dependency injection container
-- PSR-7 based HTTP message implementation
-- HTTP,TCP, WebSocket, Udp middleware support
-- Scalable high performance RPC
-- Database ORM
-- Mysql, Redis, RPC, HTTP Coroutine Clients
-- Coroutine and asynchronous task delivery
-- Custom user processes
-- RESTful supported
-- High performance router
-- Fast and flexible parameter validator
-- Powerful log component
-- Universal connection pools
-- Remote Console support
-- Crontab Rule Timer support
+[EasySwoole](http://www.easyswoole.com/) 是基于 Swoole 扩展的分布式、常驻内存 PHP 框架，面向 API 等应用场景，减少进程调用与文件加载带来的性能开销。框架封装了 Swoole Server，并保留其原有能力，支持同时监听 HTTP、自定义 TCP 和 UDP 协议，帮助开发者构建多进程、异步和高可用应用。
 
-## Doc 
+- 基于 Swoole 扩展
+- 内置 HTTP、TCP、WebSocket 和 UDP 协程服务器
+- 全局依赖注入容器
+- 基于 PSR-7 的 HTTP 消息实现
+- 支持 HTTP、TCP、WebSocket 和 UDP 中间件
+- 可扩展的高性能 RPC
+- 数据库 ORM
+- MySQL、Redis、RPC 和 HTTP 协程客户端
+- 协程与异步任务投递
+- 自定义用户进程
+- 支持 RESTful
+- 高性能路由
+- 快速、灵活的参数校验器
+- 日志组件
+- 通用连接池
+- 支持远程控制台
+- 支持 Crontab 规则定时任务
 
-- [Doc](http://www.easyswoole.com)
-- [Git For Doc](https://github.com/easy-swoole/doc-3.8)
+## 文档
 
-## ab Test
+- [官方文档](http://www.easyswoole.com)
+- [文档源码](https://github.com/easy-swoole/doc-3.8)
+
+## ab 压力测试
 
 ```php
 <?php
@@ -46,7 +46,7 @@ use EasySwoole\Http\AbstractInterface\Controller;
 
 
 /**
- * Class Index
+ * 示例首页控制器。
  * @package App\HttpController
  */
 class Index extends Controller
@@ -58,9 +58,9 @@ class Index extends Controller
 }
 ```
 
-### 1 Core 1G RAM
+### 1 核 CPU、1 GB 内存
 
-> command : ab -c 100 -n 10000 http://192.168.0.11:9501/
+> 测试命令：ab -c 100 -n 10000 http://192.168.0.11:9501/
 
 ```
 Server Software:        EasySwoole
@@ -83,9 +83,9 @@ Time per request:       0.097 [ms] (mean, across all concurrent requests)
 Transfer rate:          2592.05 [Kbytes/sec] received
 ```
 
-### 8 Core 16G RAM
+### 8 核 CPU、16 GB 内存
 
-> command : ab -c 100 -n 10000 http://192.168.0.4:9501/
+> 测试命令：ab -c 100 -n 10000 http://192.168.0.4:9501/
 
 ```
 Server Software:        EasySwoole
@@ -108,15 +108,17 @@ Time per request:       0.015 [ms] (mean, across all concurrent requests)
 Transfer rate:          2265.40 [Kbytes/sec] received
 ```
 
-## Quick Start
+## 快速开始
 ```
 composer require easyswoole/easyswoole=3.x
 php vendor/bin/easyswoole.php install
 php easyswoole.php server start
 ```
 
+安装时会列出生成、更新、保留和跳过的文件。自动化安装可用 `php vendor/bin/easyswoole.php install --with-examples` 生成缺失的 HTTP 示例。终端中仍会询问是否覆盖已有文件，默认保留。
 
-## Others
+
+## 其他信息
 
 - QQ交流群
     - VIP群 579434607 （本群需要付费599元）
@@ -126,7 +128,7 @@ php easyswoole.php server start
     - EasySwoole官方四群 779897753(已满)
     - EasySwoole官方五群 853946743(已满)
     - EasySwoole官方六群 524475224
-    
+
 - 商业支持：
     - QQ 291323003
-    - EMAIL admin@fosuss.com
+    - 邮箱：admin@fosuss.com

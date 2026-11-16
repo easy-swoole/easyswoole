@@ -2,17 +2,11 @@
 
 namespace EasySwoole\EasySwoole\Command\Selector;
 
-use EasySwoole\EasySwoole\Command\Console\Terminal;
 use EasySwoole\EasySwoole\Command\Utility;
 
-class CrontabSelector extends AbstractSelector
+class CrontabSelector
 {
-    public function __construct(private string $verb, ?Terminal $terminal = null) { parent::__construct($terminal); }
 
-    protected function title(): string
-    {
-        return "Select crontab tasks to {$this->verb}:";
-    }
 
     public static function label(array $choice): string
     {

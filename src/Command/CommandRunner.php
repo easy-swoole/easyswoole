@@ -1,62 +1,42 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yf
- * Date: 2019-01-24
- * Time: 23:11
- */
+
+declare(strict_types=1);
 
 namespace EasySwoole\EasySwoole\Command;
 
-
-
-
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\Result;
-use EasySwoole\Command\Manager;
-use EasySwoole\Command\Color;
+use EasySwoole\Command\Application;
+use EasySwoole\Command\Definition\CommandDefinition;
+use EasySwoole\Command\Result\CommandResult;
+use EasySwoole\Command\Console\Console;
+use EasySwoole\Command\Input\Input;
 use EasySwoole\Component\Singleton;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Install;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Task;
+use EasySwoole\EasySwoole\Core;
 
-
-class CommandRunner extends Manager
+class CommandRunner extends Application
 {
     use Singleton;
 
-    protected Caller|null $caller = null;
-
     public function __construct()
     {
-        $this->addCommand(new Install());
-        $this->addCommand(new Server());
-        $this->addCommand(new Process());
-        $this->addCommand(new Crontab());
-        $this->addCommand(new Task());
+        parent::__construct('EasySwoole');
+        $this->addProvider(new DefaultCommandProvider());
+        $this->middleware(function (CommandDefinition $definition, Input $input, Console $console, callable $next): CommandResult {
+            $action = $definition->actionDefinition($input->action());
+            if ($action?->meta('runtime') ?? $definition->meta('runtime')) {
+                Utility::opCacheClear();
+                $this->initializeRuntime($input->option('mode'));
+            }
+            if (!($action?->meta('watch') ?? $definition->meta('watch')) || !$input->provided('watch')) { return $next(); }
+            $latest = CommandResult::success();
+            $console->live(function () use ($next, &$latest) {
+                $latest = $next();
+                return $latest->exitCode === 0 ? ($latest->message ?? '') : false;
+            }, $input->option('watch'));
+            // 成功的实时帧已经显示；错误消息交由 Application 输出。
+            if ($latest->exitCode === 0) { $latest->message = null; }
+            return $latest;
+        });
     }
 
-
-    public function exec(Caller $caller): Result
-    {
-        Utility::opCacheClear();
-        $this->caller = $caller;
-        return parent::exec($caller);
-    }
-
-    public function result2HelpMsg(Caller $caller, Result $result): string
-    {
-        $help = parent::result2HelpMsg($caller, $result);
-        if ($caller->command === null || $caller->command === '') {
-            return Color::green(Utility::easySwooleLog()) . "\n" . $help;
-        }
-        return $help;
-    }
-
-    public function getCaller(): Caller|null
-    {
-        return $this->caller;
-    }
+    protected function initializeRuntime(?string $mode): void { Core::getInstance()->initialize($mode); }
 }

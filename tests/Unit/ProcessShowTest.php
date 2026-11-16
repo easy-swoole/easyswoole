@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace EasySwoole\EasySwoole\Test\Unit;
 
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\CommandLine;
-use EasySwoole\Command\Bean\ExecStatusEnum;
-use EasySwoole\Command\Bean\Result;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Process;
+use EasySwoole\Command\Result\CommandResult as Result;
+use EasySwoole\Command\Application;
+use EasySwoole\Command\Input\Input;
+use EasySwoole\Command\Console\Console;
+use EasySwoole\EasySwoole\Test\Support\TestConsole;
+use EasySwoole\EasySwoole\Command\ProcessControlService as Process;
+use EasySwoole\EasySwoole\Command\DefaultCommand\ProcessKillAction;
 use PHPUnit\Framework\TestCase;
 
 final class ProcessShowTest extends TestCase
@@ -20,16 +22,13 @@ final class ProcessShowTest extends TestCase
             protected function fetchProcessList(Result $result): ?array
             {
                 if ($this->processes === null) {
-                    $result->status = ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL;
-                    $result->msg = 'Bridge unavailable';
+                    $result->exitCode = 1;
+                    $result->message = 'Bridge unavailable';
                 }
                 return $this->processes;
             }
         };
-        $result = new Result();
-        $result->status = ExecStatusEnum::OK;
-        ($command->getActions()['show']->getCallback())(new Caller('process', 'show', new CommandLine()), $result);
-        return $result;
+        return $command->listing();
     }
 
     public function testReadableGroupedListPreservesProcessDetailsAndRawData(): void
@@ -48,44 +47,44 @@ final class ProcessShowTest extends TestCase
                 'lastHeartBeat' => $heartbeat, 'customProcess' => 0],
         ];
         $result = $this->show($processes);
-        self::assertSame(ExecStatusEnum::OK, $result->status);
-        self::assertSame($processes, $result->result);
-        self::assertStringContainsString('Processes (total: 3)', $result->msg);
-        self::assertStringContainsString('App.dev.TaskWorker (2)', $result->msg);
-        self::assertStringContainsString('[1] App.dev.TaskWorker.0   PID 101', $result->msg);
-        self::assertStringContainsString('[2] App.dev.TaskWorker.1   PID 202', $result->msg);
-        self::assertStringContainsString('[3] App.dev.Worker.0   PID 303', $result->msg);
-        self::assertStringContainsString('Memory 4 MB', $result->msg);
-        self::assertStringContainsString('Memory 0 B', $result->msg);
-        self::assertStringContainsString('Memory 1.5 KB', $result->msg);
-        self::assertStringContainsString('Peak 6 MB', $result->msg);
-        self::assertStringContainsString('processUpTime ' . date('Y-m-d H:i:s', $started), $result->msg);
-        self::assertStringContainsString('lastHeartBeat ' . date('Y-m-d H:i:s', $heartbeat), $result->msg);
-        self::assertStringContainsString('Custom process', $result->msg);
-        self::assertStringContainsString('Worker process', $result->msg);
-        self::assertStringNotContainsString('┌', $result->msg);
-        self::assertStringNotContainsString('│', $result->msg);
+        self::assertSame(0, $result->exitCode);
+        self::assertSame($processes, $result->data);
+        self::assertStringContainsString('Processes (total: 3)', $result->message);
+        self::assertStringContainsString('App.dev.TaskWorker (2)', $result->message);
+        self::assertStringContainsString('[1] App.dev.TaskWorker.0   PID 101', $result->message);
+        self::assertStringContainsString('[2] App.dev.TaskWorker.1   PID 202', $result->message);
+        self::assertStringContainsString('[3] App.dev.Worker.0   PID 303', $result->message);
+        self::assertStringContainsString('Memory 4 MB', $result->message);
+        self::assertStringContainsString('Memory 0 B', $result->message);
+        self::assertStringContainsString('Memory 1.5 KB', $result->message);
+        self::assertStringContainsString('Peak 6 MB', $result->message);
+        self::assertStringContainsString('processUpTime ' . date('Y-m-d H:i:s', $started), $result->message);
+        self::assertStringContainsString('lastHeartBeat ' . date('Y-m-d H:i:s', $heartbeat), $result->message);
+        self::assertStringContainsString('Custom process', $result->message);
+        self::assertStringContainsString('Worker process', $result->message);
+        self::assertStringNotContainsString('┌', $result->message);
+        self::assertStringNotContainsString('│', $result->message);
     }
 
     public function testMissingMetricsAreShownAsUnknown(): void
     {
         $result = $this->show([['pid' => 101, 'name' => 'Worker.0']]);
-        self::assertStringContainsString('Ungrouped (1)', $result->msg);
-        self::assertStringContainsString('Memory -   processUpTime -', $result->msg);
-        self::assertStringContainsString('Peak -   lastHeartBeat -', $result->msg);
+        self::assertStringContainsString('Ungrouped (1)', $result->message);
+        self::assertStringContainsString('Memory -   processUpTime -', $result->message);
+        self::assertStringContainsString('Peak -   lastHeartBeat -', $result->message);
     }
 
     public function testEmptyListHasClearMessage(): void
     {
         $result = $this->show([]);
-        self::assertSame([], $result->result);
-        self::assertSame('No running processes.', $result->msg);
+        self::assertSame([], $result->data);
+        self::assertSame('No running processes.', $result->message);
     }
 
     public function testBridgeFailureIsNotOverwrittenByFormatting(): void
     {
         $result = $this->show(null);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('Bridge unavailable', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('Bridge unavailable', $result->message);
     }
 }

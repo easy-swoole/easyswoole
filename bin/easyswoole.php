@@ -1,8 +1,5 @@
 <?php
 
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\ExecStatusEnum;
-use EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Command\CommandRunner;
 
 $file = null;
@@ -19,8 +16,9 @@ foreach ($trys as $file) {
     }
 }
 
-if(!file_exists($file)){
-    die("include composer autoload.php fail\n");
+if (!file_exists($file)) {
+    fwrite(STDERR, "include composer autoload.php fail\n");
+    exit(1);
 }
 
 $realCwd = substr(realpath($file),0,-strlen("/vendor/autoload.php"));
@@ -34,22 +32,4 @@ if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
 }
 
 
-$commandLine = Utility::parseArgv($argv);
-array_shift($commandLine->unknows);
-$command = array_shift($commandLine->unknows);
-$action = array_shift($commandLine->unknows);
-$caller = new Caller($command,$action,$commandLine);
-$caller->extraArg = [
-    'scriptFile'=>__FILE__,
-];
-
-$ret = CommandRunner::getInstance()->exec($caller);
-
-if($ret->status == ExecStatusEnum::OK){
-    if(!empty($ret->msg)){
-        echo "{$ret->msg}\n";
-    }
-}else{
-    $ret = CommandRunner::getInstance()->result2HelpMsg($caller,$ret);
-    echo $ret;
-}
+exit(CommandRunner::getInstance()->run(array_slice($argv, 1)));

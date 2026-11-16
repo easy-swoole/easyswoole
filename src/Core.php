@@ -1,15 +1,14 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: yf
- * Date: 2018/5/28
- * Time: 下午6:07
+ * 由 PhpStorm 创建。
+ * 作者：yf
+ * 日期：2018/5/28
+ * 时间：下午6:07
  */
 
 namespace EasySwoole\EasySwoole;
 
 
-use EasySwoole\Command\Color;
 use EasySwoole\Component\Di;
 use EasySwoole\Component\Process\Manager;
 use EasySwoole\Component\Singleton;
@@ -71,7 +70,7 @@ class Core
         defined('EASYSWOOLE_WEB_SOCKET_SERVER') or define('EASYSWOOLE_WEB_SOCKET_SERVER', 3);
         $eventFile = EASYSWOOLE_ROOT . '/EasySwooleEvent.php';
         if (!file_exists($eventFile)) {
-            die(Color::red("EasySwooleEvent.php file miss ,check again or run php easyswoole.php install again \n"));
+            throw new \RuntimeException("EasySwooleEvent.php file miss, check again or run php easyswoole.php install again");
         } else {
             require_once $eventFile;
         }
@@ -339,7 +338,7 @@ class Core
     {
         $file = EASYSWOOLE_ROOT . "/{$this->runMode}.php";
         if (!file_exists($file)) {
-            die(Color::error("can not load config file {$this->runMode}.php") . "\n");
+            throw new \RuntimeException("can not load config file {$this->runMode}.php");
         }
         Config::getInstance()->loadFile($file);
     }

@@ -6,12 +6,13 @@ namespace EasySwoole\EasySwoole\Test\Unit;
 
 use EasySwoole\Bridge\Package;
 use EasySwoole\Bridge\StatusEnum;
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\ExecStatusEnum;
-use EasySwoole\Command\Bean\Result;
-use EasySwoole\Command\Utility;
+use EasySwoole\Command\Result\CommandResult as Result;
+use EasySwoole\Command\Application;
+use EasySwoole\Command\Input\Input;
+use EasySwoole\Command\Console\Console;
+use EasySwoole\EasySwoole\Test\Support\TestConsole;
 use EasySwoole\EasySwoole\Command\Selector\CrontabSelector;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Crontab;
+use EasySwoole\EasySwoole\Command\RuntimeClient as Crontab;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -46,7 +47,7 @@ final class CrontabCommandTest extends TestCase
                 $this->prompts[] = $prompt;
                 return array_shift($this->inputs);
             }
-            protected function callBridge(string $action, array $args = []): Package
+            public function call(string $action, array $args = []): Package
             {
                 $this->calls[] = [$action, $args];
                 $response = array_shift($this->responses);
@@ -58,19 +59,14 @@ final class CrontabCommandTest extends TestCase
 
     private function execute(Crontab $command, string $action, array $options = []): array
     {
-        $caller = new Caller('crontab', $action, Utility::parseArgv($options));
-        $result = new Result();
-        $result->status = ExecStatusEnum::OK;
+        $class = 'EasySwoole\\EasySwoole\\Command\\DefaultCommand\\Crontab' . ucfirst($action) . 'Action';
+        $app = new Application();
+        $app->addCommand(new \EasySwoole\EasySwoole\Command\DefaultCommand\CrontabCommand([$action => new $class($command)]));
         ob_start();
         try {
-            $handler = $command->getActions()[$action];
-            if ($handler->__preCallCallback($caller, $result)) {
-                ($handler->getCallback())($caller, $result);
-            }
+            $result = $app->dispatch(array_merge(['crontab', $action], $options), new TestConsole($command));
             $output = ob_get_contents();
-        } finally {
-            ob_end_clean();
-        }
+        } finally { ob_end_clean(); }
         return [$result, $output];
     }
 
@@ -90,13 +86,13 @@ final class CrontabCommandTest extends TestCase
         [$result, $output] = $this->execute($command, $action);
         self::assertSame([['crontabInfo', []], ['crontabInfo', []],
             [$bridgeAction, ['taskName' => 'Heartbeat']], [$bridgeAction, ['taskName' => 'Cleanup']]], $command->calls);
-        self::assertSame(ExecStatusEnum::OK, $result->status);
+        self::assertSame(0, $result->exitCode);
         self::assertStringContainsString('Select crontab tasks', $output);
         self::assertStringContainsString('Rule * * * * *', $output);
         self::assertStringContainsString('State stopped', $output);
         self::assertStringContainsString('Invalid selection', $output);
         self::assertStringContainsString('Heartbeat, Cleanup', end($command->prompts));
-        self::assertSame(['Heartbeat', 'Cleanup'], array_keys($result->result));
+        self::assertSame(['Heartbeat', 'Cleanup'], array_keys($result->data));
     }
 
     #[DataProvider('actions')]
@@ -107,7 +103,7 @@ final class CrontabCommandTest extends TestCase
         $command->responses = [$this->package()];
         [$result, $output] = $this->execute($command, $action, ['--taskName=Heartbeat']);
         self::assertSame([[$bridgeAction, ['taskName' => 'Heartbeat']]], $command->calls);
-        self::assertSame('done', $result->msg);
+        self::assertSame('done', $result->message);
         self::assertSame('', $output);
         self::assertSame([], $command->prompts);
     }
@@ -131,8 +127,8 @@ final class CrontabCommandTest extends TestCase
         $command->responses = [$this->package($this->tasks())];
         [$result] = $this->execute($command, 'stop');
         self::assertSame([['crontabInfo', []]], $command->calls);
-        self::assertSame([], $result->result);
-        self::assertSame('task selection cancelled', $result->msg);
+        self::assertSame([], $result->data);
+        self::assertSame('task selection cancelled', $result->message);
     }
 
     public function testNonTerminalRequiresName(): void
@@ -140,8 +136,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->interactive = false;
         [$result] = $this->execute($command, 'resume');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertStringContainsString('pass --taskName', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertStringContainsString('pass --taskName', $result->message);
         self::assertSame([], $command->calls);
     }
 
@@ -163,9 +159,9 @@ final class CrontabCommandTest extends TestCase
         $command->inputs = ['1,2', 'y'];
         $command->responses = [$this->package($this->tasks()), $this->package($current)];
         [$result] = $this->execute($command, 'stop');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
+        self::assertSame(1, $result->exitCode);
         self::assertCount(2, $command->calls);
-        self::assertStringContainsString('disappeared or changed', $result->msg);
+        self::assertStringContainsString('disappeared or changed', $result->message);
     }
 
     public function testEmptyListDoesNotPrompt(): void
@@ -173,7 +169,7 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package([])];
         [$result] = $this->execute($command, 'stop');
-        self::assertSame('no crontab tasks available', $result->msg);
+        self::assertSame('no crontab tasks available', $result->message);
         self::assertSame([], $command->prompts);
     }
 
@@ -182,8 +178,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package(null, StatusEnum::CONNECT_ERROR)];
         [$result] = $this->execute($command, 'stop');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('Bridge failure', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('Bridge failure', $result->message);
         self::assertSame([], $command->prompts);
     }
 
@@ -192,8 +188,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [new \RuntimeException('connection error')];
         [$result] = $this->execute($command, 'stop');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('connection error', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('connection error', $result->message);
     }
 
     public function testOneTaskFailureDoesNotHideOtherResults(): void
@@ -203,36 +199,24 @@ final class CrontabCommandTest extends TestCase
         $command->responses = [$this->package($this->tasks()), $this->package($this->tasks()),
             $this->package(null, StatusEnum::COMMAND_EXEC_ERROR), $this->package()];
         [$result] = $this->execute($command, 'runJobNow');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('COMMAND_EXEC_ERROR', $result->result['Heartbeat']['status']);
-        self::assertSame('SUCCESS', $result->result['Cleanup']['status']);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('COMMAND_EXEC_ERROR', $result->data['Heartbeat']['status']);
+        self::assertSame('SUCCESS', $result->data['Cleanup']['status']);
     }
 
     public function testExplicitEmptyNameIsRejected(): void
     {
         $command = $this->command();
         [$result] = $this->execute($command, 'stop', ['--taskName=']);
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_OPTION_VALIDATE_FAIL, $result->status);
+        self::assertSame(2, $result->exitCode);
         self::assertSame([], $command->calls);
     }
 
-    public function testArrowMenuUsesTaskNamesAndRules(): void
+    public function testChoicesUseTaskNamesAndRules(): void
     {
-        $selector = new class('stop') extends CrontabSelector {
-            public function draw(array $choices): int { return $this->render($choices, 0, [], 0); }
-        };
-        ob_start();
-        try {
-            $selector->draw([['taskName' => 'Heartbeat', 'taskRule' => '* * * * *', 'isStop' => 0]]);
-            $output = ob_get_contents();
-        } finally {
-            ob_end_clean();
-        }
-        self::assertStringContainsString('Select crontab tasks to stop:', $output);
-        self::assertStringContainsString('Heartbeat', $output);
-        self::assertStringContainsString('Rule * * * * *', $output);
-        self::assertStringNotContainsString('PID', $output);
-        self::assertStringNotContainsString('Memory', $output);
+        $task = ['taskName' => 'Heartbeat', 'taskRule' => '* * * * *', 'isStop' => 0];
+        self::assertSame('Heartbeat', CrontabSelector::label($task));
+        self::assertStringContainsString('Rule * * * * *', CrontabSelector::details($task));
     }
 
     public function testShowUsesReadableEnglishListAndRetainsRawData(): void
@@ -245,22 +229,22 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package($tasks)];
         [$result, $output] = $this->execute($command, 'show');
-        self::assertSame(ExecStatusEnum::OK, $result->status);
-        self::assertSame($tasks, $result->result);
+        self::assertSame(0, $result->exitCode);
+        self::assertSame($tasks, $result->data);
         self::assertSame([['crontabInfo', []]], $command->calls);
         self::assertSame('', $output);
         self::assertSame([], $command->prompts);
-        self::assertStringContainsString('Crontab tasks (total: 2, running: 1, stopped: 1)', $result->msg);
-        self::assertStringContainsString('[1] Heartbeat', $result->msg);
-        self::assertStringContainsString('[2] Cleanup', $result->msg);
-        self::assertStringContainsString('Rule * * * * *   State running', $result->msg);
-        self::assertStringContainsString('State stopped', $result->msg);
-        self::assertStringContainsString('Next ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
-        self::assertStringContainsString('Runs 12   Last run ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
-        self::assertStringContainsString('Runs 0   Last run -', $result->msg);
-        self::assertStringNotContainsString('Last error', $result->msg);
-        self::assertStringNotContainsString('┌', $result->msg);
-        self::assertStringNotContainsString('│', $result->msg);
+        self::assertStringContainsString('Crontab tasks (total: 2, running: 1, stopped: 1)', $result->message);
+        self::assertStringContainsString('[1] Heartbeat', $result->message);
+        self::assertStringContainsString('[2] Cleanup', $result->message);
+        self::assertStringContainsString('Rule * * * * *   State running', $result->message);
+        self::assertStringContainsString('State stopped', $result->message);
+        self::assertStringContainsString('Next ' . date('Y-m-d H:i:s', 1700000000), $result->message);
+        self::assertStringContainsString('Runs 12   Last run ' . date('Y-m-d H:i:s', 1700000000), $result->message);
+        self::assertStringContainsString('Runs 0   Last run -', $result->message);
+        self::assertStringNotContainsString('Last error', $result->message);
+        self::assertStringNotContainsString('┌', $result->message);
+        self::assertStringNotContainsString('│', $result->message);
     }
 
     public function testShowDisplaysLastErrorAndPreservesRawData(): void
@@ -272,13 +256,13 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package($tasks)];
         [$result] = $this->execute($command, 'show');
-        self::assertSame(ExecStatusEnum::OK, $result->status);
-        self::assertSame($tasks, $result->result);
-        self::assertStringContainsString('Last run ' . date('Y-m-d H:i:s', 1700000100), $result->msg);
-        self::assertStringContainsString('Last error Failed at 50%??[31m', $result->msg);
-        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
-        self::assertSame(1, substr_count($result->msg, 'Last error time'));
-        self::assertStringNotContainsString("\e", $result->msg);
+        self::assertSame(0, $result->exitCode);
+        self::assertSame($tasks, $result->data);
+        self::assertStringContainsString('Last run ' . date('Y-m-d H:i:s', 1700000100), $result->message);
+        self::assertStringContainsString('Last error Failed at 50%??[31m', $result->message);
+        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->message);
+        self::assertSame(1, substr_count($result->message, 'Last error time'));
+        self::assertStringNotContainsString("\e", $result->message);
     }
 
     public function testShowDisplaysErrorTimeEvenWhenExceptionMessageIsEmpty(): void
@@ -286,8 +270,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package(['Heartbeat' => ['lastError' => '', 'lastErrorTime' => 1700000000]])];
         [$result] = $this->execute($command, 'show');
-        self::assertStringContainsString('Last error -', $result->msg);
-        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->msg);
+        self::assertStringContainsString('Last error -', $result->message);
+        self::assertStringContainsString('Last error time ' . date('Y-m-d H:i:s', 1700000000), $result->message);
     }
 
     public function testShowEmptyList(): void
@@ -295,8 +279,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package([])];
         [$result] = $this->execute($command, 'show');
-        self::assertSame([], $result->result);
-        self::assertSame('No crontab tasks registered.', $result->msg);
+        self::assertSame([], $result->data);
+        self::assertSame('No crontab tasks registered.', $result->message);
     }
 
     public function testShowMissingMetricsUsesDashes(): void
@@ -304,9 +288,9 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package(['Heartbeat' => []])];
         [$result] = $this->execute($command, 'show');
-        self::assertStringContainsString('Rule -   State running   Next -', $result->msg);
-        self::assertStringContainsString('Runs 0   Last run -', $result->msg);
-        self::assertStringNotContainsString('Last error', $result->msg);
+        self::assertStringContainsString('Rule -   State running   Next -', $result->message);
+        self::assertStringContainsString('Runs 0   Last run -', $result->message);
+        self::assertStringNotContainsString('Last error', $result->message);
     }
 
     public function testShowPreservesBridgeError(): void
@@ -314,8 +298,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [$this->package(null, StatusEnum::CONNECT_ERROR)];
         [$result] = $this->execute($command, 'show');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('Bridge failure', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('Bridge failure', $result->message);
     }
 
     public function testShowReportsBridgeException(): void
@@ -323,8 +307,8 @@ final class CrontabCommandTest extends TestCase
         $command = $this->command();
         $command->responses = [new \RuntimeException('connection error')];
         [$result] = $this->execute($command, 'show');
-        self::assertSame(ExecStatusEnum::COMMAND_ACTION_EXEC_FAIL, $result->status);
-        self::assertSame('connection error', $result->msg);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame('connection error', $result->message);
     }
 
 }

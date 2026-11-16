@@ -1,13 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EasySwoole\EasySwoole\Command\Selector;
 
 use EasySwoole\EasySwoole\Command\Utility;
 
-class ProcessSelector extends AbstractSelector
+/** 进程列表与通用终端选择器共用的业务标签。 */
+final class ProcessSelector
 {
-    protected function title(): string { return 'Select processes to terminate:'; }
-
     public static function details(array $choice): string
     {
         $memory = Utility::formatMemory($choice['memoryUsage'] ?? null);
@@ -17,7 +18,6 @@ class ProcessSelector extends AbstractSelector
 
     public static function label(array $choice): string
     {
-        // Do not interpret control characters from a configured process name as terminal escapes.
         $name = preg_replace('/[\x00-\x1f\x7f]/', '?', $choice['name']);
         return "{$name}   PID {$choice['pid']}";
     }

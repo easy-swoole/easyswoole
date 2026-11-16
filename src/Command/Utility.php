@@ -1,19 +1,17 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: yf
- * Date: 2019-01-24
- * Time: 23:24
+ * 由 PhpStorm 创建。
+ * 作者：yf
+ * 日期：2019-01-24
+ * 时间：23:24
  */
 
 namespace EasySwoole\EasySwoole\Command;
 
 
-use EasySwoole\Command\Color;
+
 use EasySwoole\EasySwoole\Config;
-use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\SysConst;
-use EasySwoole\Utility\File;
 
 class Utility
 {
@@ -83,30 +81,6 @@ LOGO;
         $displayItem['temp dir'] = EASYSWOOLE_TEMP_DIR;
         $displayItem['log dir'] = EASYSWOOLE_LOG_DIR;
         return $displayItem;
-    }
-
-    public static function releaseResource($source, $destination,$confirm = false)
-    {
-        $filename = basename($destination);
-        clearstatcache();
-        $replace = true;
-        if (is_file($destination)) {
-            echo Color::danger("{$filename} has already existed, do you want to replace it? [ Y / N (default) ] : ");
-            $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-            if (!in_array($answer, ['y', 'yes'])) {
-                $replace = false;
-            }
-        }
-        if ($replace) {
-            if($confirm){
-                echo Color::danger("do you want to release {$filename}? [ Y / N (default) ] : ");
-                $answer = strtolower(trim(strtoupper(fgets(STDIN))));
-                if (!in_array($answer, ['y', 'yes'])) {
-                    return;
-                }
-            }
-            File::copyFile($source, $destination);
-        }
     }
 
     public static function opCacheClear()

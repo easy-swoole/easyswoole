@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace EasySwoole\EasySwoole\Test\Unit;
 
-use EasySwoole\Command\Bean\Caller;
-use EasySwoole\Command\Bean\CommandLine;
-use EasySwoole\Command\Bean\Result;
-use EasySwoole\EasySwoole\Command\DefaultCommand\Server;
+use EasySwoole\Command\Result\CommandResult as Result;
+use EasySwoole\Command\Application;
+use EasySwoole\Command\Input\Input;
+use EasySwoole\Command\Console\Console;
+use EasySwoole\EasySwoole\Test\Support\TestConsole;
+use EasySwoole\EasySwoole\Command\DefaultCommand\ServerStartAction as Server;
 use EasySwoole\EasySwoole\Command\Utility;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
@@ -44,7 +46,8 @@ final class ServerStartTest extends TestCase
         };
         ob_start();
         try {
-            ($command->getActions()['start']->getCallback())(new Caller('server', 'start', new CommandLine()), new Result());
+            $result = $command->execute(new Input(), new Console(output: fopen('php://output', 'w')));
+            self::assertSame(0, $result->exitCode, $result->message ?? '');
             $output = ob_get_contents();
         } finally {
             ob_end_clean();
