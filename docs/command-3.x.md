@@ -61,6 +61,8 @@ final class MyComponentCommandProvider implements CommandProviderInterface
 
 通用交互使用 `Console::select()`、`confirm()`、`live()`；业务标签和数据留在主框架。实时视图退出后才能进入选择或确认。原始键盘交互需要 POSIX 终端及 stty；不能使用原始模式的交互终端提供编号选择。非交互输入不会自动选择或自动确认，watch 要求支持动态绘制的终端。
 
+`crontab show` 在没有注册任务时返回空列表，`--watch` 可继续刷新。`crontab reload` 找不到对应进程组时返回退出码 1。`task reload` 的 `--timeout` 只用于 `--rolling`，按每个 Worker 的重启等待时间计算。
+
 ## 新行为
 
 - `--help` 和 `help <命令路径>` 正式支持。

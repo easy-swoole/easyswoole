@@ -58,12 +58,7 @@ class BaseService extends AbstractCommand
             unset($v['needRestJobTimer']);
             $data[$k] = $v;
         }
-        if (empty($data)) {
-            $responsePackage->setMsg("crontab info is abnormal or empty crontab register");
-            $responsePackage->setStatus(StatusEnum::COMMAND_EXEC_ERROR);
-        }else{
-            $responsePackage->setArgs($data);
-        }
+        $responsePackage->setArgs($data);
     }
 
     function stopCrontabRule(Package $request,Package $responsePackage):void

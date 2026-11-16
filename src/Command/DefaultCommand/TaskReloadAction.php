@@ -20,16 +20,17 @@ class TaskReloadAction extends TaskAction
             ->option(Option::string('mode', 'run mode, such as --mode=dev'))
             ->option(Option::flag('force', 'use SIGKILL; default SIGTERM'))
             ->option(Option::flag('rolling', 'restart one Task worker at a time'))
-            ->option(Option::number('timeout', 'per-worker restart timeout', default: 30)->validate(static fn($v) => $v > 0 ? true : 'timeout must be positive'))
+            ->option(Option::number('timeout', 'per-worker restart timeout in seconds; requires --rolling', default: 30)
+                ->validate(static fn ($value) => $value > 0 ? true : 'timeout must be positive'))
+            ->validateInput(static fn (Input $input) => !$input->optionProvided('timeout') || $input->option('rolling')
+                ? true : '--timeout requires --rolling')
             ->metadata('runtime', true);
     }
     protected function handle(Input $input): CommandResult
     {
         $result = new CommandResult();
-        $force = $input->provided('force') && ($input->option('force') === null || filter_var($input->option('force'), FILTER_VALIDATE_BOOLEAN));
-        $signal = $force ? SIGKILL : SIGTERM;
-        $rolling = $input->provided('rolling') && ($input->option('rolling') === null || filter_var($input->option('rolling'), FILTER_VALIDATE_BOOLEAN));
-        if ($rolling) {
+        $signal = $input->option('force') ? SIGKILL : SIGTERM;
+        if ($input->option('rolling')) {
             $reloader = $this->taskReloader();
             try {
                 $rows = $this->runtime->run(fn () => $reloader->reload($signal, (float) $input->option('timeout')));

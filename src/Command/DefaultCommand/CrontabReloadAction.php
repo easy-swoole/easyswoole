@@ -29,7 +29,11 @@ class CrontabReloadAction extends FrameworkAction
     {
         $group = $this->processGroup();
         $selection = new \EasySwoole\EasySwoole\Command\ProcessSelection(group: $group, force: $input->option('force'));
-        return $this->processes->terminate($selection, $this->console);
+        $result = $this->processes->terminate($selection, $this->console);
+        if ($result->exitCode === 0 && $result->data === []) {
+            return CommandResult::failure("No crontab processes found in group {$group}.", data: []);
+        }
+        return $result;
     }
     protected function processGroup(): string
     {

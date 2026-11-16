@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace EasySwoole\EasySwoole\Test\Unit;
 
+use EasySwoole\Bridge\{Package, StatusEnum};
 use EasySwoole\Crontab\Config as CrontabConfig;
+use EasySwoole\EasySwoole\Bridge\BaseService;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\Crontab\Crontab;
@@ -53,6 +55,19 @@ final class CrontabTest extends TestCase
         self::assertSame('/tmp', $config->getTempDir());
         self::assertSame('CustomApp.dev', $config->getServerName());
         self::assertIsCallable($config->getOnException());
+    }
+
+    public function testBridgeReturnsSuccessfulEmptySchedule(): void
+    {
+        $request = new Package();
+        $request->setArgs(['action' => 'crontabInfo']);
+        $response = new Package();
+        $response->setStatus(StatusEnum::SUCCESS);
+
+        (new BaseService())->exec($request, $response);
+
+        self::assertSame(StatusEnum::SUCCESS, $response->getStatus());
+        self::assertSame([], $response->getArgs());
     }
 
     public function testCrontabExceptionIsForwardedToTrigger(): void

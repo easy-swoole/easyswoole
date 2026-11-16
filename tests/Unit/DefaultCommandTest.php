@@ -50,6 +50,11 @@ final class DefaultCommandTest extends TestCase
             ['crontab', 'setCrontabRule'], ['task', 'reload', '--timeout=0'], ['server', 'typo']] as $argv) {
             self::assertSame(2, $app->dispatch($argv)->exitCode);
         }
+        foreach ([[], ['--rolling=false']] as $options) {
+            $result = $app->dispatch(['task', 'reload', '--timeout=10', ...$options]);
+            self::assertSame(2, $result->exitCode);
+            self::assertStringContainsString('--timeout requires --rolling', $result->message);
+        }
         self::assertSame(0, $app->initializations);
     }
 
@@ -64,6 +69,7 @@ final class DefaultCommandTest extends TestCase
             [['server', 'stop', '-force'], 'force', true],
             [['process', 'kill', '--pid=9501', '--force=false'], 'pid', 9501],
             [['task', 'reload', '--rolling', '--timeout=5'], 'rolling', true],
+            [['task', 'reload', '--rolling=true', '--timeout=5'], 'timeout', 5.0],
             [['crontab', 'setCrontabRule', '--taskName=demo', '--taskRule=* * * * *'], 'taskRule', '* * * * *'],
             [['server', 'status', '--watch'], 'watch', 2.0],
         ] as [$argv, $key, $expected]) {

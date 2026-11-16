@@ -145,7 +145,7 @@ class ProcessControlService
         }
         if (!$list) {
             $result->data = [];
-            $result->message = 'not any process match';
+            $result->message = 'No processes matched the specified filters.';
             return $result;
         }
         foreach ($list as $pid => &$process) {

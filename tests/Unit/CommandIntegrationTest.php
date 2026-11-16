@@ -19,6 +19,7 @@ use EasySwoole\Command\Input\Input;
 use EasySwoole\Command\Definition\Option;
 use EasySwoole\Command\Console\Terminal;
 use EasySwoole\EasySwoole\Command\{CommandRunner, RuntimeClient, ServerControlService};
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CommandIntegrationTest extends TestCase
@@ -197,6 +198,7 @@ final class CommandIntegrationTest extends TestCase
                 $this->signals[] = [$pid, $signal];
                 return $signal !== 0 || ++$this->checks < 2;
             }
+            protected function signalError(): int { return 3; }
         };
         $file = tempnam(sys_get_temp_dir(), 'es-cli-'); file_put_contents($file, '123');
         try {
@@ -204,6 +206,41 @@ final class CommandIntegrationTest extends TestCase
             self::assertSame([[123, 0], [123, SIGKILL], [123, 0]], $service->signals);
             self::assertFileDoesNotExist($file);
         } finally { if (is_file($file)) { unlink($file); } }
+    }
+
+    public static function serverPermissionDenials(): iterable
+    {
+        yield '停止前' => ['stop', false, [[123, 0]]];
+        yield '等待退出时' => ['stop', true, [[123, 0], [123, SIGTERM], [123, 0]]];
+        yield '重载前' => ['reload', false, [[123, 0]]];
+    }
+
+    #[DataProvider('serverPermissionDenials')]
+    public function testPermissionDeniedKeepsServerPidFile(string $operation, bool $initialProbeSucceeds, array $expectedSignals): void
+    {
+        $service = new class($initialProbeSucceeds) extends ServerControlService {
+            public array $signals = [];
+            public function __construct(private bool $initialProbeSucceeds) {}
+
+            protected function signal(int $pid, int $signal): bool
+            {
+                $this->signals[] = [$pid, $signal];
+                return $signal !== 0 || ($this->initialProbeSucceeds && count($this->signals) === 1);
+            }
+
+            protected function signalError(): int { return 1; }
+        };
+        $file = tempnam(sys_get_temp_dir(), 'es-cli-');
+        file_put_contents($file, '123');
+        try {
+            $this->expectExceptionMessage('cannot check server PID 123: ' . swoole_strerror(1));
+            $service->{$operation}($file);
+        } finally {
+            self::assertFileExists($file);
+            self::assertSame('123', file_get_contents($file));
+            self::assertSame($expectedSignals, $service->signals);
+            unlink($file);
+        }
     }
 
     public function testCrontabReloadUsesSharedProcessServiceWithoutDispatchingAnotherCommand(): void
@@ -224,6 +261,38 @@ final class CommandIntegrationTest extends TestCase
         self::assertSame(['pid' => 123], $result->data);
         self::assertSame('App.test.Crontab', $processes->selection->group);
         self::assertTrue($processes->selection->force);
+    }
+
+    public function testMissingCrontabGroupFailsWhileProcessKillRemainsIdempotent(): void
+    {
+        $runtime = new class extends RuntimeClient {
+            public function call(string $action, array $arguments = []): \EasySwoole\Bridge\Package
+            {
+                $package = new \EasySwoole\Bridge\Package();
+                $package->setStatus(\EasySwoole\Bridge\StatusEnum::SUCCESS);
+                $package->setArgs([]);
+                return $package;
+            }
+        };
+        $service = new \EasySwoole\EasySwoole\Command\ProcessControlService($runtime);
+        $reload = new class($service) extends \EasySwoole\EasySwoole\Command\DefaultCommand\CrontabReloadAction {
+            protected function processGroup(): string { return 'App.test.Crontab'; }
+        };
+        $app = new \EasySwoole\Command\Application();
+        $app->addCommand(new \EasySwoole\EasySwoole\Command\DefaultCommand\CrontabCommand(['reload' => $reload]));
+        $app->addCommand(new \EasySwoole\EasySwoole\Command\DefaultCommand\ProcessCommand([
+            'kill' => new \EasySwoole\EasySwoole\Command\DefaultCommand\ProcessKillAction($service),
+        ]));
+
+        $result = $app->dispatch(['crontab', 'reload']);
+        self::assertSame(1, $result->exitCode);
+        self::assertSame([], $result->data);
+        self::assertStringContainsString('App.test.Crontab', $result->message);
+
+        $result = $app->dispatch(['process', 'kill', '--pid=123']);
+        self::assertSame(0, $result->exitCode);
+        self::assertSame([], $result->data);
+        self::assertSame('No processes matched the specified filters.', $result->message);
     }
 
     public function testMalformedBridgeRowsNeverReachProcessSignalling(): void
